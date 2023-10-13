@@ -214,6 +214,11 @@ window.activate()
 pre_fish_count = 0
 fail_count = 5
 
+miss_count = 0
+hit_count = 0
+
+check_delay = 5
+
 try:
     i = 0
     while True:
@@ -228,8 +233,19 @@ try:
             pyautogui.mouseUp()
             fish_count = retrieveTackle(fish_count)
             fish_count = pullTheFish(fish_count)
+
+            if hit_count == 3:
+                hit_count = 0
+                check_delay -= 1
+                print(f'current check delay: {check_delay} seconds')
+            hit_count += 1
         else:
-            print(f'no fish on rod{i}')
+            print(f'no fish on rod {i}')
+            if miss_count == 3:
+                miss_count = 0
+                check_delay += 1
+                print(f'current check delay: {check_delay} seconds')
+            miss_count += 1
             sleep(5)
             continue
         fish_count = resetTackle(fish_count)
