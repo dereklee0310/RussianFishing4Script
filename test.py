@@ -136,16 +136,18 @@ def login(is_full=True):
 
 
 def pullTheFish(fish_count):
+    print('retrieve the rest of the line')
+    pyautogui.keyDown('shift')
+    for i in range(2):
+        pyautogui.mouseDown()
+        sleep(1.5)
+        pyautogui.mouseUp()
+        sleep(0.001)
+    pyautogui.keyUp('shift')
+
+
     if pyautogui.locateOnScreen('get.png', confidence=0.8) != None:
         print('start pulling fish')
-
-        pyautogui.keyDown('shift')
-        for i in range(2):
-            pyautogui.mouseDown()
-            sleep(1.5)
-            pyautogui.mouseUp()
-            sleep(0.001)
-        pyautogui.keyUp('shift')
         
         # offset = 0
         get_counter = 10
