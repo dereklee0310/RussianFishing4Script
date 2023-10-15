@@ -215,9 +215,8 @@ pre_fish_count = 0
 fail_count = 5
 
 miss_count = 0
-hit_count = 0
 
-check_delay = 5
+check_delay = 10
 
 try:
     i = 0
@@ -234,19 +233,31 @@ try:
             fish_count = retrieveTackle(fish_count)
             fish_count = pullTheFish(fish_count)
 
-            if hit_count == 3:
-                hit_count = 0
-                check_delay -= 1
-                print(f'current check delay: {check_delay} seconds')
-            hit_count += 1
+            check_delay = 1 if check_delay == 1 else check_delay - 1
+            print(f'current check delay: {check_delay} seconds')
         else:
             print(f'no fish on rod {i}')
-            if miss_count == 3:
+            if miss_count % 3 == 0:
                 miss_count = 0
                 check_delay += 1
                 print(f'current check delay: {check_delay} seconds')
+            if miss_count % 30 == 0:
+                for i in range(3):
+                    pyautogui.press(f'{i}')
+                    fish_count = resetTackle(fish_count)
+                    sleep(1)
+                    pyautogui.keyDown('shift')
+                    pyautogui.mouseDown()
+                    sleep(1)
+                    pyautogui.keyUp('shift')
+                    pyautogui.mouseUp()
+                    pyautogui.click()
+                    sleep(1)
+                    pyautogui.click()
+                    pyautogui.press('0')
+                    sleep(2)
             miss_count += 1
-            sleep(5)
+            sleep(check_delay)
             continue
         fish_count = resetTackle(fish_count)
         sleep(1)
@@ -259,7 +270,7 @@ try:
         sleep(1)
         pyautogui.click()
         pyautogui.press('0')
-        sleep(5)
+        sleep(check_delay)
 
         # pre_fish_count = fish_count
         # if pyautogui.locateOnScreen('broke.png', confidence=0.6):
