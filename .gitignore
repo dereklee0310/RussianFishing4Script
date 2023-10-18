@@ -1,3 +1,5 @@
 build/
 screenshots/
 __pycache__/
+config.ini
+tests/
