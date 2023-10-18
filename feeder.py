@@ -1,5 +1,4 @@
 from pyautogui import *
-
 import pyautogui
 import time
 import keyboard
@@ -214,7 +213,7 @@ window.activate()
 pre_fish_count = 0
 fail_count = 5
 
-miss_count = 0
+miss_count = 1
 
 check_delay = 10
 
@@ -238,7 +237,7 @@ try:
         else:
             print(f'no fish on rod {i}')
             if miss_count % 3 == 0:
-                miss_count = 0
+                miss_count = 1
                 check_delay += 1
                 print(f'current check delay: {check_delay} seconds')
             if miss_count % 30 == 0:
