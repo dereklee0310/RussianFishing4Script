@@ -1,6 +1,6 @@
 from fisherman import Fisherman
 from pyautogui import getWindowsWithTitle
-from inputimeout import inputimeout, TimeoutOccurred
+# from inputimeout import inputimeout, TimeoutOccurred
 import configparser
 from time import sleep
 import sys

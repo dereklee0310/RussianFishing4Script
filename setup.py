@@ -1,5 +1,6 @@
 import configparser
 import os
+from pathlib import Path
 
 def setup_config():
   config = configparser.ConfigParser()
@@ -39,4 +40,13 @@ def setup_config():
 
     config.write(file)
 
+def create_screenshot_dir():
+  screenshot_dir = Path("./screenshots")
+  if os.path.exists(screenshot_dir):
+    print('screenshots/ already exists')
+  else:
+    print('screenshots/ has been created')
+    # print(screenshot_dir.mkdir(exist_ok=True, parents=True))
+
 setup_config()
+create_screenshot_dir()

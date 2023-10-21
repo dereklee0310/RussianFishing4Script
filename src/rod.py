@@ -6,7 +6,7 @@ import sys
 class Rod():
     def __init__(self):
         self.READY_TIMEOUT = 10
-        self.RETRIEVE_BASE_TIME = 10
+        self.RETRIEVE_BASE_TIME = 32
         self.RETRIEVE_TIMEOUT = 300
         self.PULL_FISH_TIMEOUT = 10
 
@@ -36,13 +36,16 @@ class Rod():
             Mouse.hold_left_click(1)
         sleep(6) # wait for the lure to sink
     
-    def retrieve(self):
+    def retrieve(self, duration=None, delay=4):
         print('Retrieving')
-        Mouse.hold_left_click(self.RETRIEVE_BASE_TIME)
+
+        if not duration:
+            duration = self.RETRIEVE_BASE_TIME
+        Mouse.hold_left_click(duration)
         i = self.RETRIEVE_TIMEOUT
         while i > 0 and not locateOnScreen('../static/wheel.png', confidence=0.985):
             i -= 1
-        sleep(8) # wait for the line to be fully retrieved
+        sleep(delay) # wait for the line to be fully retrieved
         click()
 
     def tighten_fishline(self):

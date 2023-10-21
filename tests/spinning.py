@@ -1,4 +1,5 @@
 from pyautogui import *
+
 import pyautogui
 import time
 import keyboard
@@ -16,7 +17,7 @@ miss_count = 0
 def resetTackle(fish_count):
     counter = 10
     
-    while pyautogui.locateOnScreen('.\static\\ready.png', confidence=0.6) == None:
+    while pyautogui.locateOnScreen('ready.png', confidence=0.6) == None:
         print('tackle is not ready')
         pyautogui.keyDown('shift')
         pyautogui.mouseDown()
@@ -51,7 +52,7 @@ def castTackle():
 def retrieveTackle(fish_count):
     retrieve_limit = 600
     print('start retrieving')
-    while pyautogui.locateOnScreen('.\static\wheel.png', confidence=0.985) == None:
+    while pyautogui.locateOnScreen('wheel.png', confidence=0.985) == None:
         # if pyautogui.locateOnScreen('snag.png', confidence=0.977):
         #     print('snagged')
         #     quit(is_session=True, is_full=False)
@@ -70,9 +71,9 @@ def quit(is_session=False, is_full=True):
     pyautogui.press('esc')
     if is_session:
         pyautogui.keyDown('shift')
-    pyautogui.moveTo(pyautogui.locateOnScreen('.\static\quit.png', confidence=0.9), duration=0.2)
+    pyautogui.moveTo(pyautogui.locateOnScreen('quit.png', confidence=0.9), duration=0.2)
     pyautogui.click()
-    pyautogui.moveTo(pyautogui.locateOnScreen('.\static\yes.png', confidence=0.9), duration=0.2)
+    pyautogui.moveTo(pyautogui.locateOnScreen('yes.png', confidence=0.9), duration=0.2)
     pyautogui.click()
     if is_session:
         pyautogui.keyUp('shift')
@@ -83,7 +84,7 @@ def quit(is_session=False, is_full=True):
         sys.exit()
 
 def login(is_full=True):
-    pyautogui.moveTo(pyautogui.locateOnScreen('.\static\login_16x9.png', confidence=0.9), duration=0.2)
+    pyautogui.moveTo(pyautogui.locateOnScreen('login_16x9.png', confidence=0.9), duration=0.2)
     pyautogui.click()
     sleep(1)
     pyautogui.click()
@@ -103,24 +104,24 @@ def login(is_full=True):
     pyautogui.keyUp('e')
     sleep(0.5)
 
-    pyautogui.moveTo(pyautogui.locateOnScreen('.\static\price.png', confidence=0.9), duration=0.2)
+    pyautogui.moveTo(pyautogui.locateOnScreen('price.png', confidence=0.9), duration=0.2)
     pyautogui.click()
     sleep(0.5)
-    pyautogui.moveTo(pyautogui.locateOnScreen('.\static\\all.png', confidence=0.9), duration=0.2)
+    pyautogui.moveTo(pyautogui.locateOnScreen('all.png', confidence=0.9), duration=0.2)
     pyautogui.click()
 
     sleep(0.1)
     pyautogui.click()
 
-    while pyautogui.locateOnScreen('.\static\\trophy.png', confidence=1) != None:
-        pyautogui.moveTo(pyautogui.locateOnScreen('.\static\\trophy.png', confidence=1), duration=0.2)
+    while pyautogui.locateOnScreen('trophy.png', confidence=1) != None:
+        pyautogui.moveTo(pyautogui.locateOnScreen('trophy.png', confidence=1), duration=0.2)
         pyautogui.moveRel(0, 30, duration=0.2)
         pyautogui.keyDown('ctrl')
         pyautogui.click()
         sleep(0.1)
         pyautogui.keyUp('ctrl')
     
-    pyautogui.moveTo(pyautogui.locateOnScreen('.\static\sell.png', confidence=0.9), duration=0.2)
+    pyautogui.moveTo(pyautogui.locateOnScreen('sell.png', confidence=0.9), duration=0.2)
     pyautogui.click()
     sleep(1)
     
@@ -136,10 +137,8 @@ def login(is_full=True):
 
 def pullTheFish(fish_count):
     print('retrieve the rest of the line')
-    pyautogui.click() # reset the click lock 
     pyautogui.keyDown('shift')
     for i in range(2):
-        print(f'drag {i}')
         pyautogui.mouseDown()
         sleep(1.5)
         pyautogui.mouseUp()
@@ -147,13 +146,13 @@ def pullTheFish(fish_count):
     pyautogui.keyUp('shift')
 
 
-    if pyautogui.locateOnScreen('.\static\get.png', confidence=0.8) != None:
+    if pyautogui.locateOnScreen('get.png', confidence=0.8) != None:
         print('start pulling fish')
-    
+        
         # offset = 0
         get_counter = 10
         pyautogui.mouseDown(button="right")
-        while pyautogui.locateOnScreen('.\static\keep.png', confidence=0.9) == None:
+        while pyautogui.locateOnScreen('keep.png', confidence=0.9) == None:
             get_counter -= 1
             if get_counter < 0:
                 pyautogui.mouseDown()
@@ -213,72 +212,16 @@ window.activate()
 pre_fish_count = 0
 fail_count = 5
 
-miss_count = 1
-
-check_delay = 10
-
 try:
-    i = 0
     while True:
-        i = 1 if i == 3 else i + 1
-        pyautogui.press(f'{i}')
-        sleep(1)
-        print(f'checking if rod {i} got a fish...')
-        if pyautogui.locateOnScreen('.\static\get.png', confidence=0.8) != None:
-            print('got a fish!')
-            pyautogui.mouseDown()
-            sleep(3)
-            pyautogui.mouseUp()
-            fish_count = retrieveTackle(fish_count)
-            fish_count = pullTheFish(fish_count)
-
-            check_delay = 1 if check_delay == 1 else check_delay - 1
-            print(f'current check delay: {check_delay} seconds')
-        else:
-            print(f'no fish on rod {i}')
-            if miss_count % 3 == 0:
-                miss_count = 1
-                check_delay += 1
-                print(f'current check delay: {check_delay} seconds')
-            if miss_count % 30 == 0:
-                for i in range(3):
-                    pyautogui.press(f'{i}')
-                    fish_count = resetTackle(fish_count)
-                    sleep(1)
-                    pyautogui.keyDown('shift')
-                    pyautogui.mouseDown()
-                    sleep(1)
-                    pyautogui.keyUp('shift')
-                    pyautogui.mouseUp()
-                    pyautogui.click()
-                    sleep(1)
-                    pyautogui.click()
-                    pyautogui.press('0')
-                    sleep(2)
-            miss_count += 1
-            sleep(check_delay)
-            continue
+        pre_fish_count = fish_count
+        if pyautogui.locateOnScreen('broke.png', confidence=0.6):
+            print('broked')
+            quit(is_session=False, is_full=False)
         fish_count = resetTackle(fish_count)
-        sleep(1)
-        pyautogui.keyDown('shift')
-        pyautogui.mouseDown()
-        sleep(1)
-        pyautogui.keyUp('shift')
-        pyautogui.mouseUp()
-        pyautogui.click()
-        sleep(1)
-        pyautogui.click()
-        pyautogui.press('0')
-        sleep(check_delay)
-
-        # pre_fish_count = fish_count
-        # if pyautogui.locateOnScreen('broke.png', confidence=0.6):
-        #     print('broked')
-        #     quit(is_session=False, is_full=False)
-        # fish_count = resetTackle(fish_count)
-        # castTackle()
-        # fish_count = retrieveTackle(fish_count)
-        # fish_count = pullTheFish(fish_count)
+        castTackle()
+        fish_count = retrieveTackle(fish_count)
+        fish_count = pullTheFish(fish_count)
 
         # if fish_count == pre_fish_count:
         #     fail_count -= 1
