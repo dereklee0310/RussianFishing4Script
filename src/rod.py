@@ -23,7 +23,8 @@ class Rod():
         i = self.READY_TIMEOUT
         print('resetting')
         while i > 0 and not locateOnScreen('../static/ready.png', confidence=0.6):
-            self.slow_retrieve(duration=2, delay=0.25)
+            self.slow_retrieve(duration=4, delay=0.25)
+            click()
             i -= 1
         
         if not i:
@@ -55,10 +56,10 @@ class Rod():
     def is_fish_hooked(self):
         return locateOnScreen('../static/get.png', confidence=0.8)
 
-    def pull(self):
+    def pull(self, i=None):
         print('Pulling')
         mouseDown(button='right')
-        i = self.PULL_FISH_TIMEOUT
+        i = self.PULL_FISH_TIMEOUT if not i else i
         while i > 0 and not locateOnScreen('../static/keep.png', confidence=0.9):
             self.slow_retrieve(1, 0.25)
             i -= 1
