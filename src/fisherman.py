@@ -49,8 +49,10 @@ class Fisherman():
                         self.save_screenshot()
                         self.quit_game()
                     rod.reset()
-                    if rod.is_fish_hooked():
-                        if rod.pull(i=2):
+                    if locateOnScreen('../static/keep.png', confidence=0.9):
+                        self.keep_the_fish()
+                    elif rod.is_fish_hooked():
+                        if rod.pull(i=4):
                             self.keep_the_fish()
                         else:
                             rod.retrieve()

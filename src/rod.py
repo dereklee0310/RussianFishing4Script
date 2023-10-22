@@ -5,10 +5,10 @@ import sys
 
 class Rod():
     def __init__(self):
-        self.READY_TIMEOUT = 10
+        self.READY_TIMEOUT = 8
         self.RETRIEVE_BASE_TIME = 32
         self.RETRIEVE_TIMEOUT = 300
-        self.PULL_FISH_TIMEOUT = 10
+        self.PULL_FISH_TIMEOUT = 4
 
     def fast_retrieve(self, duration, delay):
         with hold('shift'):
@@ -61,7 +61,7 @@ class Rod():
         mouseDown(button='right')
         i = self.PULL_FISH_TIMEOUT if not i else i
         while i > 0 and not locateOnScreen('../static/keep.png', confidence=0.9):
-            self.slow_retrieve(1, 0.25)
+            self.slow_retrieve(2, 0.25)
             i -= 1
         mouseUp(button='right')
         sleep(1) # leave some time to inspect the fish
