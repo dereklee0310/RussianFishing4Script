@@ -26,12 +26,30 @@ class Controller():
         print(f'Current number of fish: {fish_count}')
         sleep(0.2)
 
-        for i in range(5, 0, -1):
+        for i in range(3, 0, -1):
             print(f'The script will start in: {i} seconds', end='\r')
             sleep(1)
         print('')
+        print('Start executing the script')
 
         return fishing_strategy, release_strategy, fish_count
+    
+    def show_save_prompt(self, strategy, release_strategy, fish_count):
+        if 'y' == input('Do you want to save the current setting?'):
+            config = configparser.ConfigParser()
+            name = input('Please enter the name of the new setting withoutt "-" or spaces: ')
+            if '-' in name or ' ' in name:
+                print('Failed to save the setting due to an invalid name')
+                return
+            config[name] = {
+                'fishing_strategy': strategy,
+                'release_strategy': release_strategy,
+                'fish_count': fish_count
+            }
+            #todo
+
+
+
 
 fishing_strategy, release_strategy, fish_count = Controller().show_prompt()
 fisherman = Fisherman(fishing_strategy, release_strategy, fish_count)

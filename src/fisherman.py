@@ -22,8 +22,6 @@ class Fisherman():
 
     def keep_the_fish(self):
         #todo: check if it's a trophy
-        #! remove this!!!
-        # self.save_screenshot()
         if not locateOnScreen('../static/mark.png', confidence=0.7): # don't modify the confidence! #todo: for ruffe
             if self.release_strategy == 'unmarked':
                 press('backspace')
@@ -86,7 +84,11 @@ class Fisherman():
                         if rod.is_fish_hooked():
                             if rod.pull():
                                 self.keep_the_fish()
+                            else:
+                                rod.reset( )
                         self.delay = 4 if self.delay == 4 else self.delay - 1
+                    elif locateOnScreen('../static/keep.png', confidence=0.9):
+                        self.keep_the_fish()
                     else:
                         self.miss_count += 1
                         if self.miss_count % 4 == 0:
@@ -130,6 +132,7 @@ class Fisherman():
         sleep(1) # wait for the menu to load
         moveTo(locateOnScreen('../static/quit.png', confidence=0.8), duration=0.4) 
         click()
+        sleep(1)
         moveTo(locateOnScreen('../static/yes.png', confidence=0.8), duration=0.4)
         click()
         self.show_quit_msg()

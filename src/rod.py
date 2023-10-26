@@ -17,6 +17,8 @@ class Rod():
 
     def slow_retrieve(self, duration, delay):
         Mouse.hold_left_click(duration)
+        if duration >= 2.2:
+            click()
         sleep(delay)
 
     def reset(self):
@@ -24,7 +26,6 @@ class Rod():
         print('resetting')
         while i > 0 and not locateOnScreen('../static/ready.png', confidence=0.6):
             self.slow_retrieve(duration=4, delay=0.25)
-            click()
             i -= 1
         
         if not i:
