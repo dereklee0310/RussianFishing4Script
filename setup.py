@@ -46,7 +46,7 @@ def create_screenshot_dir():
     print('screenshots/ already exists')
   else:
     print('screenshots/ has been created')
-    # print(screenshot_dir.mkdir(exist_ok=True, parents=True))
+    screenshot_dir.mkdir(exist_ok=True, parents=True)
 
 setup_config()
 create_screenshot_dir()
