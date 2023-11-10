@@ -13,10 +13,13 @@ class Controller():
             fishing_strategy= config['game'].get('fishing_strategy')
             release_strategy= config['game'].get('release_strategy')
             fish_count = config['game'].getint('fish_count')
+            trophy_mode = None
+            #todo: trophy mode
         else:
             fishing_strategy= 'spinning' if '1' == input('Please enter the fishing strategy (1: spinning, 2: feeder): ') else 'feeder'
             release_strategy= 'unmarked' if '1' == input('Please enter the release strategy (1: unmarked, 2: none): ') else 'none'
             fish_count = int(input('Please enter the number of fish in the keepnet: '))
+            trophy_mode = 'y' == input('Do you want to turn on the trophy mode?')
 
         sleep(0.2)
         print(f'Fishing strategy: {fishing_strategy}')
@@ -32,7 +35,7 @@ class Controller():
         print('')
         print('Start executing the script')
 
-        return fishing_strategy, release_strategy, fish_count
+        return fishing_strategy, release_strategy, fish_count, trophy_mode
     
     def show_save_prompt(self, strategy, release_strategy, fish_count):
         if 'y' == input('Do you want to save the current setting?'):
@@ -51,8 +54,8 @@ class Controller():
 
 
 
-fishing_strategy, release_strategy, fish_count = Controller().show_prompt()
-fisherman = Fisherman(fishing_strategy, release_strategy, fish_count)
+fishing_strategy, release_strategy, fish_count, trophy_mode = Controller().show_prompt()
+fisherman = Fisherman(fishing_strategy, release_strategy, fish_count, trophy_mode)
 window = getWindowsWithTitle("Russian Fishing 4")[0]
 window.activate()
 fisherman.start_fishing()

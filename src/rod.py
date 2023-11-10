@@ -7,7 +7,7 @@ class Rod():
     def __init__(self):
         self.READY_TIMEOUT = 8
         self.RETRIEVE_BASE_TIME = 32
-        self.RETRIEVE_TIMEOUT = 300
+        self.RETRIEVE_TIMEOUT = 600
         self.PULL_FISH_TIMEOUT = 4
 
     def fast_retrieve(self, duration, delay):
@@ -21,9 +21,9 @@ class Rod():
             click()
         sleep(delay)
 
-    def reset(self):
-        i = self.READY_TIMEOUT
-        print('resetting')
+    def reset(self, trophy_mode=None):
+        i = self.READY_TIMEOUT if not trophy_mode else 12
+        print('Resetting')
         while i > 0 and not locateOnScreen('../static/ready.png', confidence=0.6):
             self.slow_retrieve(duration=4, delay=0.25)
             i -= 1
@@ -45,7 +45,7 @@ class Rod():
             duration = self.RETRIEVE_BASE_TIME
         Mouse.hold_left_click(duration)
         i = self.RETRIEVE_TIMEOUT
-        while i > 0 and not locateOnScreen('../static/wheel.png', confidence=0.985):
+        while i > 0 and not locateOnScreen('../static/wheel.png', confidence=0.988):
             i -= 1
         sleep(delay) # wait for the line to be fully retrieved
         click()
