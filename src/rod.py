@@ -2,10 +2,11 @@ from pyautogui import *
 from time import sleep
 from mouse import Mouse
 import sys
+from monitor import Monitor
 
 class Rod():
     def __init__(self):
-        self.READY_TIMEOUT = 8
+        self.READY_TIMEOUT = 4
         self.RETRIEVE_BASE_TIME = 32
         self.RETRIEVE_TIMEOUT = 600
         self.PULL_FISH_TIMEOUT = 4
@@ -32,11 +33,13 @@ class Rod():
             print('! Failed to reset the tackle')
             # FailureRecord.reset_fail += 1 #todo
     
-    def cast(self):
+    def cast(self, delay=0.1):
         print('Casting')
         with hold('shift'):
             Mouse.hold_left_click(1)
         sleep(6) # wait for the lure to sink
+        click()
+        sleep(delay)
     
     def retrieve(self, duration=None, delay=4):
         print('Retrieving')
@@ -45,10 +48,56 @@ class Rod():
             duration = self.RETRIEVE_BASE_TIME
         Mouse.hold_left_click(duration)
         i = self.RETRIEVE_TIMEOUT
-        while i > 0 and not locateOnScreen('../static/wheel.png', confidence=0.988):
+        while i > 0 and not locateOnScreen('../static/wheel.png', confidence=0.985):
             i -= 1
+        print('Retrieve done')
         sleep(delay) # wait for the line to be fully retrieved
         click()
+
+    def special_retrieve(self, duration=0.25, delay=1):
+        print('Walking the dog')
+        monitor = Monitor()
+        i = self.RETRIEVE_TIMEOUT
+        while i > 0 and not monitor.is_fish_hooked() and  not monitor.is_retrieve_finished():
+            self.fast_retrieve(duration=0.25, delay=delay)
+            i -= 1
+
+        if not monitor.is_fish_hooked():
+            for i in range(12):
+                if monitor.is_fish_hooked():
+                    break
+                self.fast_retrieve(duration=0.25, delay=delay)
+
+        Mouse.hold_left_click(4)
+        while i > 0 and not monitor.is_retrieve_finished():
+            i -= 1
+
+        print('Retrieve done')
+        sleep(4) # wait for the line to be fully retrieved
+        click()
+
+    def jig_step(self, duration=0.52, delay=3):
+        print('Jig step')
+        monitor = Monitor()
+        i = self.RETRIEVE_TIMEOUT
+        while i > 0 and not monitor.is_fish_hooked() and  not monitor.is_retrieve_finished():
+            self.slow_retrieve(duration=duration, delay=delay)
+            i -= 1
+
+        # if not monitor.is_fish_hooked():
+        #     for i in range(12):
+        #         if monitor.is_fish_hooked():
+        #             break
+        #         self.slow_retrieve(duration=duration, delay=delay)
+
+        Mouse.hold_left_click(4)
+        while i > 0 and not monitor.is_retrieve_finished():
+            i -= 1
+
+        print('Retrieve done')
+        sleep(30) # wait for the line to be fully retrieved
+        click()
+    
 
     def tighten_fishline(self):
         for i in range(2):

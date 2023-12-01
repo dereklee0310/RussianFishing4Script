@@ -6,35 +6,40 @@ import sys
 from timer import Timer
 import time
 import win32api, win32con
-
+from threading import Thread
+from monitor import Monitor
 
 class Fisherman():
     KEEPNET_LIMIT = 100
 
     def __init__(self, fishing_strategy, release_strategy, fish_count, trophy_mode):
         self.rod = Rod()
+        self.monitor = Monitor()
         self.fishing_strategy = fishing_strategy
         self.release_strategy = release_strategy
         self.init_fish_count = fish_count
         self.fish_count = fish_count
         self.trophy_mode = trophy_mode
-        self.release_count = 0
+        self.unmarked_count = 0
         self.timer = Timer()
         self.miss_count = 0
+        self.cast_count = 0 #todo: edit quit msg
         self.delay = 12 # 8
-        self.debug_count = 0
 
     def keep_the_fish(self):
         #todo: check if it's a trophy
-        if not locateOnScreen('../static/mark.png', confidence=0.7): # don't modify the confidence! #todo: for ruffe
+        #todo: for ruffe
+        if not self.monitor.is_fish_marked():
+            self.unmarked_count += 1
             if self.release_strategy == 'unmarked':
                 press('backspace')
                 print('Release unmarked fish')
-                self.release_count += 1 #todo
+                self.fish_count += 1
                 return
+        
+        # if the fish is marked or the release strategy is set to none, keep the fish
         press('space')
         self.fish_count += 1
-        print(f'Fish count: {self.fish_count}')
         if self.is_keepnet_full():
             self.quit_game()
 
@@ -43,36 +48,22 @@ class Fisherman():
 
     def start_fishing(self):
         rod = self.rod
-        if self.fishing_strategy == 'spinning':
-            self.start_spin_fishing()
-            # try:
-            #     while True:
-            #         if rod.is_broked():
-            #             print('The rod is broken')
-            #             self.save_screenshot()
-            #             self.quit_game()
-            #         rod.reset()
-            #         if locateOnScreen('../static/keep.png', confidence=0.9):
-            #             self.keep_the_fish()
-            #         elif rod.is_fish_hooked():
-            #             if rod.pull(i=4):
-            #                 self.keep_the_fish()
-            #             else:
-            #                 rod.retrieve()
-            #                 continue
-            #         rod.cast()
-            #         rod.retrieve()
-            #         if rod.is_fish_hooked():
-            #             rod.tighten_fishline()
-            #             if rod.pull():
-            #                 self.keep_the_fish()
-            #         else:
-            #             self.miss_count += 1
-            # except KeyboardInterrupt:
-            #     self.show_quit_msg()
-        else:
-            # print('Feeder strategy, todo...')
-            # exit()
+        if self.fishing_strategy == 'spin':
+            try:
+                self.start_spin_fishing()
+            except KeyboardInterrupt:
+                self.show_quit_msg()
+        elif self.fishing_strategy == 'twitching' or self.fishing_strategy == 'walking_dog':
+            try:
+                self.start_special_spin_fishing(0.25, 1)
+            except KeyboardInterrupt:
+                self.show_quit_msg()
+        elif self.fishing_strategy == 'jig_step':
+            try:
+                self.start_jig_step_fishing(None, None)
+            except KeyboardInterrupt:
+                self.show_quit_msg()
+        elif self.fishing_strategy == 'bottom':
             try:
                 failed_count = 0
                 rod_key = 0
@@ -83,7 +74,7 @@ class Fisherman():
                         failed_count = 0
                     else:
                         failed_count += 1
-                        if failed_count % 1 == 0:
+                        if failed_count % 1 == 0 and self.trophy_mode:
                             self.drink_coffee()
                     sleep(1)
                     if rod.is_broked():
@@ -169,6 +160,122 @@ class Fisherman():
             except KeyboardInterrupt:
                 self.show_quit_msg()
 
+    def start_spin_fishing(self):
+        rod = self.rod
+        monitor = self.monitor
+        pull_timeout = 4
+        while True:
+            if monitor.is_rod_broked(): #todo: use another thread to monitor it
+                print('! Rod is broken')
+                self.save_screenshot()
+                self.quit_game()
+
+            rod.reset()
+
+            if monitor.is_fish_captured():
+                print('! Fish caught without pulling')
+                self.keep_the_fish()
+            elif monitor.is_fish_hooked():
+                print('! Fish hooked while resetting')
+                if rod.pull(i=pull_timeout):
+                    self.keep_the_fish()
+                else:
+                    print('! Failed to capture the fish')
+                    #todo
+            
+            rod.cast()
+            rod.retrieve()
+
+            # now, the retrieval is done
+            if monitor.is_fish_hooked():
+                if rod.pull(i=pull_timeout):
+                    self.keep_the_fish()
+                else:
+                    print('! Failed to capture the fish')
+                    #todo
+            else:
+                self.miss_count += 1
+
+    def start_special_spin_fishing(self, duration, delay):
+        rod = self.rod
+        monitor = self.monitor
+        pull_timeout = 4
+        while True:
+            if monitor.is_rod_broked(): #todo: use another thread to monitor it
+                print('! Rod is broken')
+                self.save_screenshot()
+                self.quit_game()
+
+            rod.reset()
+
+            if monitor.is_fish_captured():
+                print('! Fish caught without pulling')
+                self.keep_the_fish()
+            elif monitor.is_fish_hooked():
+                print('! Fish hooked while resetting')
+                if rod.pull(i=pull_timeout):
+                    self.keep_the_fish()
+                else:
+                    print('! Failed to capture the fish')
+                    #todo
+            
+            rod.cast()
+            # rod.retrieve()
+            rod.special_retrieve(duration, delay)
+
+            # now, the retrieval is done
+            if monitor.is_fish_hooked():
+                if rod.pull(i=pull_timeout):
+                    self.keep_the_fish()
+                else:
+                    print('! Failed to capture the fish')
+                    #todo
+            else:
+                self.miss_count += 1
+
+    def start_jig_step_fishing(self, duration, delay):
+        rod = self.rod
+        monitor = self.monitor
+        pull_timeout = 6 #todo
+        while True:
+            if monitor.is_rod_broked(): #todo: use another thread to monitor it
+                print('! Rod is broken')
+                self.save_screenshot()
+                self.quit_game()
+
+            rod.reset()
+
+            if monitor.is_fish_captured():
+                print('! Fish caught without pulling')
+                self.keep_the_fish()
+            elif monitor.is_fish_hooked():
+                print('! Fish hooked while resetting')
+                if rod.pull(i=pull_timeout):
+                    self.keep_the_fish()
+                else:
+                    print('! Failed to capture the fish')
+                    #todo
+            
+            rod.cast(delay=18)
+            # rod.retrieve()
+            rod.jig_step() #todo
+
+            # now, the retrieval is done
+            if monitor.is_fish_hooked():
+                if rod.pull(i=pull_timeout):
+                    self.keep_the_fish()
+                else:
+                    print('! Failed to capture the fish')
+                    #todo
+            else:
+                self.miss_count += 1
+
+    # def pull_and_keep(self, rod, pull_timeout):
+    #     if rod.pull(i=pull_timeout):
+    #         self.keep_the_fish()
+    #     else:
+    #         print('! failed to get the fish after pulling')
+
     def quit_game(self):
         press('esc')
         sleep(1) # wait for the menu to load
@@ -180,22 +287,24 @@ class Fisherman():
         self.show_quit_msg()
 
     def show_quit_msg(self):
+        if not self.fish_count - self.init_fish_count:
+            print(f'The script has been terminated')
+            return
         caught_fish = self.fish_count - self.init_fish_count 
-        total = caught_fish + self.release_count
-        total_cast = total + self.miss_count
+        marked_ratio = (caught_fish - self.unmarked_count) / caught_fish
+        total_cast = caught_fish + self.miss_count
         print(f'The script has been terminated')
         print('--------------------Result--------------------')
-        if total:
-            print(f'marked  : {caught_fish}') #todo mark checker
-            print(f'total   : {total}')
-            print(f'ratio   : {caught_fish / (total)}')
-            print(f'hit rate: {total}/{total_cast} {int((total / total_cast) * 100)}%')
+        if caught_fish:
+            print(f'marked  : {caught_fish - self.unmarked_count}') #todo mark checker
+            print(f'total   : {caught_fish}')
+            print(f'marked ratio   : {int((marked_ratio) * 100)}%')
+            print(f'hit rate: {caught_fish}/{total_cast} {int((caught_fish / total_cast) * 100)}%')
         else:
             print('No fish have been caught yet')
         print(f'start time    : {self.timer.get_start_datetime()}')
         print(f'finish time   : {self.timer.get_cur_datetime()}')
         print(f'execution time: {self.timer.get_duration()}')
-        print(f'debug count (a fish is caught without pulling): {self.debug_count}')
 
         sys.exit()
 
@@ -206,35 +315,6 @@ class Fisherman():
 
     def relogin(self):
         pass
-
-    def start_spin_fishing(self):
-        rod = self.rod
-        pull_timeout = 4
-        try:
-            while True:
-                if rod.is_broked():
-                    print('The rod is broken')
-                    self.save_screenshot()
-                    self.quit_game()
-                
-                rod.reset()
-
-                if locateOnScreen('../static/keep.png', confidence=0.9):
-                    print('! a fish is caught without pulling')
-                    self.debug_count += 1 #! DEBUG
-                    self.keep_the_fish()
-                elif rod.is_fish_hooked():
-                    print('! a fish is hooked while resetting')
-                    self.pull_and_keep(rod=rod, pull_timeout=pull_timeout)
-                rod.cast()
-                rod.retrieve()
-                if rod.is_fish_hooked():
-                    # rod.tighten_fishline() #todo: read this?
-                    self.pull_and_keep(rod=rod, pull_timeout=pull_timeout)
-                else:
-                    self.miss_count += 1
-        except KeyboardInterrupt:
-            self.show_quit_msg()
     
     def drink_coffee(self):
         keyDown('t')
@@ -243,9 +323,3 @@ class Fisherman():
         click()
         sleep(0.5)
         keyUp('t')
-
-    def pull_and_keep(self, rod, pull_timeout):
-        if rod.pull(i=pull_timeout):
-            self.keep_the_fish()
-        else:
-            print('! failed to get the fish after pulling')

@@ -1,4 +1,4 @@
 build/
 screenshots/
 __pycache__/
-config.ini
+# config.ini

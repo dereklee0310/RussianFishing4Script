@@ -9,9 +9,9 @@ import sys
 import datetime
 
 class Mouse():
-    def hold_left_click(timeout=1):
+    def hold_left_click(duration=1):
         mouseDown()
-        sleep(timeout)
+        sleep(duration)
         mouseUp()
 
 # class FailureRecord():
