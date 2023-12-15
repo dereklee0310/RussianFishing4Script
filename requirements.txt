@@ -4,3 +4,5 @@ pywin32==306
 configparser==6.0.0
 pynput==1.7.6
 # tqdm==4.66.1
+opencv-python==4.8.0.76
+Pillow==10.0.0

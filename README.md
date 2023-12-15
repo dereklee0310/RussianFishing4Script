@@ -15,9 +15,8 @@ git clone https://github.com/dereklee0310/RF4_fishing_bot
 ```
 ### Prerequisites
 * **Enable Mouse ClickLock in Windows**
-* **Change language in game to English**
+* **Change game language to English**
 * **The reel must be fully loaded**
-
 
 To install dependencies and initialize user configurations:  
 ```
@@ -46,11 +45,12 @@ python app.py
 - [ ] GUI
 - [ ] Marine fishing
 - [ ] Carp fishing
-- [ ] Making groundbaits, foods, and drinks
+- [x] Making groundbaits, foods, and drinks
 - [ ] snag detection
 - [ ] wakey rig
 - [ ] jig step
 - [ ] stop and go
+- [ ] reel selection
 
 ## Contributing
 Any kind of contribution and bug report is welcome.

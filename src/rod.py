@@ -5,16 +5,12 @@ import sys
 from monitor import Monitor
 
 class Rod():
-    def __init__(self):
-        self.READY_TIMEOUT = 4
+    def __init__(self, monitor):
+        self.RESET_TIMEOUT = 8
         self.RETRIEVE_BASE_TIME = 32
         self.RETRIEVE_TIMEOUT = 600
         self.PULL_FISH_TIMEOUT = 4
-
-    def fast_retrieve(self, duration, delay):
-        with hold('shift'):
-            Mouse.hold_left_click(duration)
-            sleep(delay)
+        self.monitor = monitor
 
     def slow_retrieve(self, duration, delay):
         Mouse.hold_left_click(duration)
@@ -22,21 +18,29 @@ class Rod():
             click()
         sleep(delay)
 
+    # retrieval with the shift key pressed
+    def fast_retrieve(self, duration, delay):
+        with hold('shift'):
+            self.slow_retrieve(duration, delay)
+
     def reset(self, trophy_mode=None):
-        i = self.READY_TIMEOUT if not trophy_mode else 12
+        i = self.RESET_TIMEOUT if not trophy_mode else 12
         print('Resetting')
-        while i > 0 and not locateOnScreen('../static/ready.png', confidence=0.6):
+        while i > 0 and not self.monitor.is_rod_ready():
             self.slow_retrieve(duration=4, delay=0.25)
             i -= 1
         
         if not i:
-            print('! Failed to reset the tackle')
-            # FailureRecord.reset_fail += 1 #todo
+            print('Failed to reset the tackle')
+            #todo
     
-    def cast(self, delay=0.1):
+    def cast(self, power=100, delay=0.1):
         print('Casting')
-        with hold('shift'):
-            Mouse.hold_left_click(1)
+        if power == 100:
+            with hold('shift'):
+                Mouse.hold_left_click(1)
+        else:
+            Mouse.hold_left_click(0.8) # 50~60%
         sleep(6) # wait for the lure to sink
         click()
         sleep(delay)
@@ -48,7 +52,8 @@ class Rod():
             duration = self.RETRIEVE_BASE_TIME
         Mouse.hold_left_click(duration)
         i = self.RETRIEVE_TIMEOUT
-        while i > 0 and not locateOnScreen('../static/wheel.png', confidence=0.985):
+        while i > 0 and not self.monitor.is_retrieve_finished():
+            sleep(1)
             i -= 1
         print('Retrieve done')
         sleep(delay) # wait for the line to be fully retrieved
@@ -58,7 +63,7 @@ class Rod():
         print('Walking the dog')
         monitor = Monitor()
         i = self.RETRIEVE_TIMEOUT
-        while i > 0 and not monitor.is_fish_hooked() and  not monitor.is_retrieve_finished():
+        while i > 0 and not monitor.is_fish_hooked() and not monitor.is_retrieve_finished():
             self.fast_retrieve(duration=0.25, delay=delay)
             i -= 1
 

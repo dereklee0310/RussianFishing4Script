@@ -12,8 +12,8 @@ try:
             press('space')
             break
         sleep(4)
-        while not locateOnScreen('../static/ok.png', confidence=0.8):
-            pass
+        while not locateOnScreen('../static/ok.png', confidence=0.8) and not locateOnScreen('../static/warning.png', confidence=0.8):
+            sleep(0.25)
         press('space')
         sleep(0.1)
 except KeyboardInterrupt:

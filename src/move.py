@@ -18,7 +18,7 @@ config = configparser.ConfigParser()
 config.read('../config.ini')
 
 # show prompt and count down
-if not config['misc'].getboolean('disable_count_down'):
+if config['misc'].getboolean('enable_count_down'):
     print('Press S to terminate the script')
     for i in range(3, 0, -1):
         print(f'The script will start in: {i} seconds', end='\r')
