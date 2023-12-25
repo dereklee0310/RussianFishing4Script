@@ -4,6 +4,6 @@ from time import sleep
 
 sleep(3)
 
-while not locateOnScreen('../static/wheel.png', confidence=0.988):
+while not locateOnScreen(r'..\static\wheel.png', confidence=0.988):
     pass
 click()

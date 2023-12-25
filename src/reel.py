@@ -109,7 +109,7 @@ class Rigal202s(ConventionalReel):
     ONE_ROTATION_DURATION = 0.52  # 202s
     ONE_ROTATION_INTERVAL = 1
 
-    PRE_ROTATION_DURATION = ONE_ROTATION_DURATION * 3
+    PRE_ROTATION_DURATION = ONE_ROTATION_DURATION * 2.5
 
     def walk_the_dog(self):
         pass

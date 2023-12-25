@@ -95,9 +95,6 @@ class Tackle():
         for i in range(2):
             self.slow_retrieve(2, 0.25)
 
-    def is_fish_hooked(self):
-        return locateOnScreen('../static/get.png', confidence=0.8)
-
     def pull(self, i=None):
         print('Pulling')
         mouseDown(button='right')
@@ -108,9 +105,6 @@ class Tackle():
         mouseUp(button='right')
         sleep(1) # leave some time to inspect the fish
         return i 
-
-    def is_broked(self):
-        return locateOnScreen('../static/broke.png', confidence=0.6)
         
         # if self.is_keepnet_full():
         #     self.logout()

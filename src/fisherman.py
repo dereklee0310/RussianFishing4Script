@@ -36,6 +36,7 @@ class Fisherman():
                 return
         
         # if the fish is marked or the release strategy is set to none, keep the fish
+        print('Keep the fish')
         press('space')
         self.keep_fish_count += 1
         if self.is_keepnet_full():
@@ -48,25 +49,33 @@ class Fisherman():
         tackle = self.tackle
         try:
             if self.fishing_strategy == 'spin':
-                self.start_spin_fishing()
+                self.spin_fishing()
             elif self.fishing_strategy == 'strong_pirking':
-                self.start_strong_pirking()
+                self.pirking(duration=1.75, delay=4)
             elif self.fishing_strategy == 'pirking':
-                self.start_pirking()
+                self.pirking(duration=0.5, delay=2)
             elif self.fishing_strategy == 'twitching':
-                self.start_special_spin_fishing(0.25, 1)
+                print('This feature has not been implemented yet.')
+                exit()
+                self.special_spin_fishing(0.25, 1)
             elif self.fishing_strategy == 'walking_dog':
-                self.start_special_spin_fishing(0.25, 1)
+                print('This feature has not been implemented yet.')
+                exit()
+                self.special_spin_fishing(0.25, 1)
             elif self.fishing_strategy == 'jig_step':
-                self.start_jig_step_fishing()
+                print('This feature has not been implemented yet.')
+                exit()
+                self.jig_step_fishing()
             elif self.fishing_strategy == 'jig_step_1':
-                self.start_jig_step_fishing(False, 1, 3)
+                print('This feature has not been implemented yet.')
+                exit()
+                self.jig_step_fishing(False, 1, 3)
             elif self.fishing_strategy == 'bottom':
                 #todo: improve bottom fishing
                 failed_count = 0
                 rod_key = 0
                 while True:
-                    if not tackle.is_fish_hooked():
+                    if not is_fish_hooked():
                         rod_key = 1 if rod_key == 3 else rod_key + 1
                         press(f'{rod_key}')
                         failed_count = 0
@@ -75,17 +84,17 @@ class Fisherman():
                         if failed_count % 1 == 0 and self.trophy_mode:
                             self.drink_coffee()
                     sleep(1)
-                    if tackle.is_broked():
+                    if is_tackle_broked():
                         print('The rod is broken')
                         self.save_screenshot()
                         self.quit_game()
-                    if tackle.is_fish_hooked():
+                    if is_fish_hooked():
                         if self.trophy_mode:
                             tackle.retrieve(duration=16, delay=4)
                         else:
                             tackle.retrieve(duration=4, delay=2)
                         # tackle.tighten_fishline()
-                        if tackle.is_fish_hooked():
+                        if is_fish_hooked():
                             if self.trophy_mode:
                                 win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(0), int(-200), 0, 0)
                             if tackle.pull(i=8):
@@ -120,7 +129,7 @@ class Fisherman():
                             for rod_key in range(1, 4):
                                 press(f'{rod_key}')
                                 tackle.reset()
-                                if tackle.is_fish_hooked():
+                                if is_fish_hooked():
                                     if tackle.pull():
                                         self.keep_the_fish()
                                 sleep(1)
@@ -158,48 +167,44 @@ class Fisherman():
         except KeyboardInterrupt:
                 self.show_quit_msg()
 
-    def start_spin_fishing(self):
-        pull_timeout = 4
+    def spin_fishing(self):
         while True:
             if is_tackle_broked(): #todo: use another thread to monitor it
-                print('! Tackle is broken')
                 self.save_screenshot()
-                self.quit_game()
+                self.quit_game("! Tackle is broken")
 
             self.tackle.reset()
 
             if is_fish_captured():
-                print('! Fish caught without pulling')
+                print('! Fish captured without pulling')
                 self.keep_the_fish()
             elif is_fish_hooked():
                 print('! Fish hooked while resetting')
-                if self.tackle.pull(i=pull_timeout):
+                if self.tackle.pull(i=4):
                     self.keep_the_fish()
                 else:
                     print('! Failed to capture the fish')
-                    print('! Back to normal routine')
             
-            self.tackle.cast()
+            if not is_fish_hooked():
+                self.tackle.cast()
             self.tackle.retrieve()
 
             # retrieval is done
             if is_fish_hooked():
-                if self.tackle.pull(i=pull_timeout):
+                if self.tackle.pull(i=4):
                     self.keep_the_fish()
                 else:
-                    print('! Failed to capture the fish')
-                    #todo
+                    print('! Failed to capture the fish') #todo
             else:
                 self.cast_miss_count += 1
 
-    def start_special_spin_fishing(self, duration, delay):
+    def special_spin_fishing(self, duration, delay):
         rod = self.tackle
         pull_timeout = 4
         while True:
             if is_tackle_broked(): #todo: use another thread to monitor it
-                print('! Rod is broken')
                 self.save_screenshot()
-                self.quit_game()
+                self.quit_game("! Tackle is broken")
 
             rod.reset()
 
@@ -227,14 +232,13 @@ class Fisherman():
             else:
                 self.cast_miss_count += 1
 
-    def start_jig_step_fishing(self, waiting=True, duration=0.52, delay=3):
+    def jig_step_fishing(self, waiting=True, duration=0.52, delay=3):
         rod = self.tackle
         pull_timeout = 6 #todo
         while True:
             if is_tackle_broked(): #todo: use another thread to monitor it
-                print('! Rod is broken')
                 self.save_screenshot()
-                self.quit_game()
+                self.quit_game("! Tackle is broken")
 
             rod.reset()
 
@@ -271,67 +275,48 @@ class Fisherman():
     #     else:
     #         print('! failed to get the fish after pulling')
 
-    def start_strong_pirking(self):
+    def pirking(self, duration, delay):
         while True:
             if is_tackle_broked(): #todo: use another thread to monitor it
-                print('! Rod is broken')
                 self.save_screenshot()
-                self.quit_game()
+                self.quit_game("! Tackle is broken")
 
-            click()
-            sleep(4)
-
-            print('Waiting for lure sinking to bottom layer')
-            timeout = 30
-            while timeout and not is_moving_in_bottom_layer() and not is_fish_hooked():
-                sleep(2)
-                timeout -= 2
-            print('Lure reached bottom layer, timeout:, ', timeout)
-            self.tackle.reel.do_pre_rotation()
-
-            while not is_fish_hooked():
-                hold_right_click(1.5)
+            if is_fish_captured():
+                print('! Fish captured after pulling stage')
+                self.keep_the_fish()
+            elif is_fish_hooked():
+                print('! Failed to capture the fish after pulling stage')
+                if self.tackle.pull(i=4):
+                    self.keep_the_fish()
+                else:
+                    print('! Failed to capture the fish_2')
+            if not is_fish_hooked():
+                # cast and wait
+                click()
                 sleep(4)
 
-            print('Fish is hooked, start retrieving')
-            with hold('shift'):
-                self.tackle.retrieve(duration=8)
-            click()
-
-            if is_fish_captured():
-                print('! Fish caught without pulling')
-                self.keep_the_fish()
-        
-            if is_fish_hooked():
-                if self.tackle.pull(i=8):
-                    self.keep_the_fish()
-                else:
-                    print('! Failed to capture the fish')
-                    #todo
-            else:
-                self.cast_miss_count += 1
-    
-    def start_pirking(self):
-        while True:
-            if is_tackle_broked(): #todo: use another thread to monitor it
-                print('! Rod is broken')
-                self.save_screenshot()
-                self.quit_game()
-
-            click()
-            sleep(4)
-
-            print('Waiting for lure sinking to bottom layer')
+            print('Sinking Lure')
             timeout = 30
             while timeout and not is_moving_in_bottom_layer() and not is_fish_hooked():
                 sleep(2)
                 timeout -= 2
-            print('Lure reached bottom layer, timeout:, ', timeout)
+            print('Lure reached bottom layer or a fish was hooked, timeout:', timeout)
             self.tackle.reel.do_pre_rotation()
 
+            pirking_limit = 30
             while not is_fish_hooked():
-                hold_right_click(0.5)
-                sleep(2)
+
+                # adjust the depth of the lure if no fish is hooked
+                pirking_limit -= 1
+                if pirking_limit < 0:
+                    press('enter')
+                    sleep(2)
+                    press('enter')
+                    self.tackle.reel.do_post_rotation()
+                    pirking_limit = 30
+
+                hold_right_click(duration=duration)
+                sleep(delay)
 
             print('Fish is hooked, start retrieving')
             with hold('shift'):
@@ -352,7 +337,8 @@ class Fisherman():
                 self.cast_miss_count += 1
 
         
-    def quit_game(self):
+    def quit_game(self, msg=""):
+        print(msg)
         press('esc')
         sleep(1) # wait for the menu to load
         moveTo(locateOnScreen('../static/quit.png', confidence=0.8), duration=0.4) 

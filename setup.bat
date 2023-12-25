@@ -1,2 +1,2 @@
 pip install -r requirements.txt
-@REM python setup.py
+python setup.py

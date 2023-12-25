@@ -48,5 +48,5 @@ def create_screenshot_dir():
     print('screenshots/ has been created')
     screenshot_dir.mkdir(exist_ok=True, parents=True)
 
-setup_config()
+# setup_config()
 create_screenshot_dir()

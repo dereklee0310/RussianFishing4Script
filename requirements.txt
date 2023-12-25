@@ -6,3 +6,4 @@ pynput==1.7.6
 # tqdm==4.66.1
 opencv-python==4.8.0.76
 Pillow==10.0.0
+PyScreeze==0.1.29
