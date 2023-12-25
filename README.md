@@ -2,7 +2,7 @@
 This is an experimental script for AFK fishing in Russian Fishing 4  
 
 - Currently Support Strategies
-  - Stable: Spin fishing
+  - Stable: Spin Fishing, Bottom Fishing
   - Not Stable: Marine Fishing/Carp Fishing (Might require manual intervention)
 - Useful Scripts
   - Toggle Moving
@@ -33,14 +33,23 @@ Before executing the script, you must move to the desired fishing location and s
   them nearby to let the script access them via quick selection keys (1 ~ 3).
 - Spin Fishing/Marine Fishing: Pick up the rod you want to use.
 
-pick up the rod you want to use for spin fishing.  
-### Change the current directory
+### Change the Current Directory
 ```
 cd src
 ```
-### Execute the script
+
+### Validate Spool Icon (Optional)
+- Run this to check if the spool icon can be identified.  
+![image](/static/status.png)
 ```
-python app.py
+python validate.py
+```
+
+### Execute the Fishing Script
+- If no additional command line argument is provided, it will show a list of available  
+  profiles to choose from.
+```
+python app.py <profile id>
 ```
 
 ### Useful Scripts
@@ -48,7 +57,7 @@ python app.py
 ```
 python move.py
 ```
-- Making groundbaits/foods (Select the materials before executing the script).
+- Making groundbaits/foods (The materials must be selected before the execution).
 ```
 python make.py
 ```
@@ -63,11 +72,13 @@ python calculator.py
 - Failed to exit the program:
   - The Shift key might have been pressed down by the script.
   - Press the Shift key once to release it, then press Ctrl + C as usual.  
-- Stuck at retrieving stage:  
+- Stuck at retrieving stage:
+  - Use the script mentioned above to validate the spool icon.
   - Change resolution to 2560x1440 or 1600x900.
+  - Avoid stading in front of the boat headlights in Norwegian Sea.
 - Stuck at pulling stage:
   - Make sure your tackle is powerful enough for targeting fish, otherwise,
-    you need to pull it manually.
+    you might need to pull it manually.
 
 ## Roadmap
 - [x] Marine Fishing

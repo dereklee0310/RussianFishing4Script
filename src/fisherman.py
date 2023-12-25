@@ -55,20 +55,12 @@ class Fisherman():
             elif self.fishing_strategy == 'pirking':
                 self.pirking(duration=0.5, delay=2)
             elif self.fishing_strategy == 'twitching':
-                print('This feature has not been implemented yet.')
-                exit()
                 self.special_spin_fishing(0.25, 1)
             elif self.fishing_strategy == 'walking_dog':
-                print('This feature has not been implemented yet.')
-                exit()
                 self.special_spin_fishing(0.25, 1)
             elif self.fishing_strategy == 'jig_step':
-                print('This feature has not been implemented yet.')
-                exit()
                 self.jig_step_fishing()
             elif self.fishing_strategy == 'jig_step_1':
-                print('This feature has not been implemented yet.')
-                exit()
                 self.jig_step_fishing(False, 1, 3)
             elif self.fishing_strategy == 'bottom':
                 #todo: improve bottom fishing
@@ -303,17 +295,18 @@ class Fisherman():
             print('Lure reached bottom layer or a fish was hooked, timeout:', timeout)
             self.tackle.reel.do_pre_rotation()
 
-            pirking_limit = 30
+            pirking_limit = 10
             while not is_fish_hooked():
 
                 # adjust the depth of the lure if no fish is hooked
                 pirking_limit -= 1
+                print("Pirking limit:", pirking_limit)
                 if pirking_limit < 0:
                     press('enter')
                     sleep(2)
                     press('enter')
-                    self.tackle.reel.do_post_rotation()
-                    pirking_limit = 30
+                    self.tackle.reel.do_pre_rotation()
+                    pirking_limit = 10
 
                 hold_right_click(duration=duration)
                 sleep(delay)
@@ -326,13 +319,11 @@ class Fisherman():
             if is_fish_captured():
                 print('! Fish caught without pulling')
                 self.keep_the_fish()
-        
-            if is_fish_hooked():
-                if self.tackle.pull(i=8):
-                    self.keep_the_fish()
-                else:
+            elif is_fish_hooked():
+                #todo5
+                while not self.tackle.pull(i = 8):
                     print('! Failed to capture the fish')
-                    #todo
+                self.keep_the_fish()
             else:
                 self.cast_miss_count += 1
 

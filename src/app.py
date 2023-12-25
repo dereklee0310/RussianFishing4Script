@@ -1,12 +1,12 @@
 from fisherman import Fisherman
 from pyautogui import getWindowsWithTitle
+from pyautogui import *
 import configparser
 from time import sleep
 from userprofile import UserProfile
 import sys
 # from inputimeout import inputimeout, TimeoutOccurred
 # from exceptions import InvalidNumberOfArgumentsError
-from monitor import is_reel_state_valid
 
 class App():
     def __init__(self):
@@ -15,7 +15,7 @@ class App():
         self.is_countdown_enabled = self.config['misc'].getboolean('enable_count_down')
 
         # filter a list of available profiles
-        self.profile_names = ['custom']
+        self.profile_names = ['edit custom configuration']
         for section in self.config.sections():
             if self.config.has_option(section, 'fishing_strategy'):
                 self.profile_names.append(section)
@@ -28,14 +28,12 @@ class App():
 
         n = len(sys.argv)        
         if n == 2:
-            if not self.is_profile_id_valid():
-                print('Invalid profile id, the program has been terminated.')
-                exit()
             self.profile_id = sys.argv[1]
-            return True
-        elif n > 2:
-            print('Invalid number of arguments, the program has been terminated.')
-            exit()
+            if self.is_profile_id_valid():
+                return True
+            print('Invalid profile id, Please enter the profile id manually.')
+        else:
+            print('Invalid number of arguments, Please enter the profile id manually.')
         return False
     
     def is_profile_id_valid(self) -> bool:
@@ -59,10 +57,8 @@ class App():
     def show_available_profiles(self):
         """List all available profiles from 'config.ini'."""
 
-        print('| 0. edit custom configuration          |')
-        print('+---------------------------------------+')
         for i, profile in enumerate(self.profile_names):
-            print(f'| {i + 1}. {profile:{34 - (i + 1) // 10}} |')
+            print(f'| {i}. {profile:{34 - (i) // 10}} |')
             print('+---------------------------------------+')
             i += 1
     
@@ -70,7 +66,7 @@ class App():
     def ask_for_profile_id(self):
         """Let user select a profile id and validate it."""
 
-        self.profile_id = input("Enter profile id or press 'q' to exit: ")
+        self.profile_id = input("Enter profile id or press q to exit: ")
         while not self.is_profile_id_valid():
             self.profile_id = input('Invalid profile id, please try again or press q to quit: ')
 
@@ -144,8 +140,8 @@ class App():
 
 def main():
     app = App()
-    app.show_welcome_msg()
     if not app.get_profile_id_from_argv():
+        app.show_welcome_msg()
         app.show_available_profiles()
         app.ask_for_profile_id()
     app.gen_selected_profile()
@@ -154,17 +150,13 @@ def main():
 
     if app.is_countdown_enabled:
         app.start_count_down()
+    print('The script has been started.') 
 
-    # window = getWindowsWithTitle("Russian Fishing 4")[0]
-    # window.activate()
-    if not is_reel_state_valid():
-        print('Failed to identify the spool icon.')
-        print('Please make sure your reel is at full capacity or change the game resolution and try again.')
-        exit()
+    window = getWindowsWithTitle("Russian Fishing 4")[0]
+    window.activate()
 
     fisherman = Fisherman(app.profile) #todo: trophy mode is none
     fisherman.start_fishing()
-    print('The script has been started.') 
 
 if __name__ == '__main__':
     main()

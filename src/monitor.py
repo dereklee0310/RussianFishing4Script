@@ -26,7 +26,7 @@ def is_fish_captured():
 
 def is_retrieve_finished():
     return locateOnScreen('../static/wheel.png', confidence=0.985)
-is_reel_state_valid = is_retrieve_finished
+is_spool_icon_dected = is_retrieve_finished
 
 def is_tackle_ready():
     return locateOnScreen('../static/ready.png', confidence=0.6)
