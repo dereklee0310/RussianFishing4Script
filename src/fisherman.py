@@ -7,7 +7,6 @@ import win32api, win32con
 from threading import Thread
 from monitor import *
 from mouse import hold_left_click, hold_right_click
-from datetime import datetime
 
 class Fisherman():
     keepnet_limit = 100
@@ -50,9 +49,7 @@ class Fisherman():
         tackle = self.tackle
         try:
             if self.fishing_strategy == 'spin':
-                self.spin_fishing(time_limit=False)
-            elif self.fishing_strategy == 'time_limit_spin':
-                self.spin_fishing(time_limit=True)
+                self.spin_fishing()
             elif self.fishing_strategy == 'strong_pirking':
                 self.pirking(duration=1.75, delay=4)
             elif self.fishing_strategy == 'pirking':
@@ -162,11 +159,8 @@ class Fisherman():
         except KeyboardInterrupt:
                 self.show_quit_msg()
 
-    def spin_fishing(self, time_limit=False):
+    def spin_fishing(self):
         while True:
-            if time_limit and datetime.now().hour == 7:
-                self.quit_game("it's 7 A.M.!")
-
             if is_tackle_broked(): #todo: use another thread to monitor it
                 self.save_screenshot()
                 self.quit_game("! Tackle is broken")
@@ -178,7 +172,7 @@ class Fisherman():
                 self.keep_the_fish()
             elif is_fish_hooked():
                 print('! Fish hooked while resetting')
-                if self.tackle.pull(i=8):
+                if self.tackle.pull(i=4):
                     self.keep_the_fish()
                 else:
                     print('! Failed to capture the fish')
@@ -217,9 +211,7 @@ class Fisherman():
                     print('! Failed to capture the fish')
                     #todo
             
-            if not is_fish_hooked():
-                self.tackle.cast()
-            self.tackle.retrieve()
+            rod.cast()
             rod.special_retrieve(duration, delay)
 
             # now, the retrieval is done
@@ -352,7 +344,7 @@ class Fisherman():
         if not self.keep_fish_count:
             print('No fish have been caught yet.')
             print('The script has been terminated.')
-            exit()
+            return
         total_fish_count = self.marked_fish_count + self.unmarked_fish_count
         total_cast_count = self.cast_miss_count + total_fish_count
         print('The script has been terminated.')
