@@ -6,22 +6,28 @@ from reel import *
 
 class Tackle():
     def __init__(self, profile):
-        self.RESET_TIMEOUT = 8
+        self.RESET_TIMEOUT = 16
         self.RETRIEVE_BASE_TIME = 32
         self.RETRIEVE_TIMEOUT = 600
-        self.PULL_FISH_TIMEOUT = 4
+        self.PULL_TIMEOUT = 16
         self.reel = globals()[profile.reel_name]()
 
+    def _sleep_and_decrease(self, num, delay):
+        sleep(delay)
+        return num - delay
+
     def reset(self, trophy_mode=None):
-        i = self.RESET_TIMEOUT if not trophy_mode else 12
         print('Resetting')
+
+        mouseDown()
+        i = self.RESET_TIMEOUT if not trophy_mode else 12
         while i > 0 and not is_tackle_ready():
-            self.reel.slow_retrieve(duration=4, delay=0.25)
-            i -= 1
+            i = self._sleep_and_decrease(i, 2)
+        mouseUp()
         
-        if not i:
-            print('Failed to reset the tackle')
-            #todo
+        msg = 'Tackle is ready' if i else '! Failed to reset the tackle'
+        print(msg)
+        return i
     
     def cast(self, power=100, delay=0.1):
         print('Casting')
@@ -34,7 +40,7 @@ class Tackle():
         click()
         sleep(delay)
     
-    def retrieve(self, duration=None, delay=4):
+    def retrieve(self, duration=None, delay=8):
         print('Retrieving')
 
         if not duration:
@@ -42,9 +48,8 @@ class Tackle():
         self.reel.full_retrieve(duration=duration)
         i = self.RETRIEVE_TIMEOUT
         while i > 0 and not is_retrieve_finished():
-            sleep(1)
-            i -= 1
-        print('Retrieve done')
+            i = self._sleep_and_decrease(i, 2)
+        print('Retrieval is finished')
         sleep(delay) # wait for the line to be fully retrieved
         click()
 
@@ -72,7 +77,7 @@ class Tackle():
     def jig_step(self, duration=0.52, delay=3):
         print('Jig step')
         i = self.RETRIEVE_TIMEOUT
-        while i > 0 and not is_fish_hooked() and  not is_retrieve_finished():
+        while i > 0 and not is_fish_hooked() and not is_retrieve_finished():
             self.slow_retrieve(duration=duration, delay=delay)
             i -= 1
 
@@ -89,22 +94,17 @@ class Tackle():
         print('Retrieve done')
         sleep(30) # wait for the line to be fully retrieved
         click()
-    
 
-    def tighten_fishline(self):
-        for i in range(2):
-            self.slow_retrieve(2, 0.25)
-
+    # todo: default pull timeout
     def pull(self, i=None):
         print('Pulling')
         mouseDown(button='right')
-        i = self.PULL_FISH_TIMEOUT if not i else i
-        while i > 0 and not locateOnScreen('../static/keep.png', confidence=0.9):
-            self.reel.slow_retrieve(2, 0.25)
-            i -= 1
+        mouseDown()
+        i = self.PULL_TIMEOUT if not i else i
+        while i > 0 and not is_fish_captured:
+            i = self._sleep_and_decrease(i, 2)
         mouseUp(button='right')
+        mouseDown()
+        click()
         sleep(1) # leave some time to inspect the fish
         return i 
-        
-        # if self.is_keepnet_full():
-        #     self.logout()

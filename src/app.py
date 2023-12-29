@@ -152,8 +152,8 @@ def main():
         app.start_count_down()
     print('The script has been started.') 
 
-    # window = getWindowsWithTitle("Russian Fishing 4")[0]
-    # window.activate()
+    window = getWindowsWithTitle("Russian Fishing 4")[0]
+    window.activate()
 
     fisherman = Fisherman(app.profile) #todo: trophy mode is none
     fisherman.start_fishing()

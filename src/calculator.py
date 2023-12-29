@@ -6,22 +6,22 @@ Usage: calculator.py
 Todo: use argv as input
 """
 
-def get_reel_TMD():
-    """
-    Calculate the reel's true max drag based on user input.
+def get_reel_TMD() -> float:
+    """Calculate the reel's true max drag based on user input.
 
-    :returns: reel's true max drag
+    :return: reel's true max drag
+    :rtype: float
     """
     max_drag = float(input("Reel's max drag (kg): "))
     friction_brake_wear = float(input("Reel's friction brake wear (%): "))
     return max_drag * (100 - friction_brake_wear)
 
-def get_leader_TLC():
-    """
-    Calculate the leader's true load capacity based on user input.
+def get_leader_TLC() -> float:
+    """Calculate the leader's true load capacity based on user input.
 
-    :returns: leader's true load capacity
-    """ 
+    :return: leader's true load capacity
+    :rtype: float
+    """
     leader_load_capacity = float(input("Leader's load capacity (kg): "))
     leader_wear = float(input("Leader's wear (%): "))
     return leader_load_capacity * (100 - leader_wear)

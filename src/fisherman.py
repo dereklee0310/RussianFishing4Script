@@ -88,7 +88,6 @@ class Fisherman():
                             tackle.retrieve(duration=16, delay=4)
                         else:
                             tackle.retrieve(duration=4, delay=2)
-                        # tackle.tighten_fishline()
                         if is_fish_hooked():
                             if self.trophy_mode:
                                 win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(0), int(-200), 0, 0)
@@ -183,13 +182,12 @@ class Fisherman():
                 else:
                     print('! Failed to capture the fish')
             
-            if not is_fish_hooked():
-                self.tackle.cast()
+            self.tackle.cast()
             self.tackle.retrieve()
 
             # retrieval is done
             if is_fish_hooked():
-                if self.tackle.pull(i=4):
+                if self.tackle.pull():
                     self.keep_the_fish()
                 else:
                     print('! Failed to capture the fish') #todo
