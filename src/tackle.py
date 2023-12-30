@@ -19,11 +19,14 @@ class Tackle():
     def reset(self, trophy_mode=None):
         print('Resetting')
 
+        if is_tackle_ready():
+            return True
         mouseDown()
         i = self.RESET_TIMEOUT if not trophy_mode else 12
         while i > 0 and not is_tackle_ready():
             i = self._sleep_and_decrease(i, 2)
         mouseUp()
+        click()
         
         msg = 'Tackle is ready' if i else '! Failed to reset the tackle'
         print(msg)
@@ -48,7 +51,7 @@ class Tackle():
         self.reel.full_retrieve(duration=duration)
         i = self.RETRIEVE_TIMEOUT
         while i > 0 and not is_retrieve_finished():
-            i = self._sleep_and_decrease(i, 2)
+            i = self._sleep_and_decrease(i, 4)
         print('Retrieval is finished')
         sleep(delay) # wait for the line to be fully retrieved
         click()
@@ -101,7 +104,8 @@ class Tackle():
         mouseDown(button='right')
         mouseDown()
         i = self.PULL_TIMEOUT if not i else i
-        while i > 0 and not is_fish_captured:
+        while i > 0 and not is_fish_captured():
+            print(i)
             i = self._sleep_and_decrease(i, 2)
         mouseUp(button='right')
         mouseDown()
