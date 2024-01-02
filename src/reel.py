@@ -7,16 +7,10 @@ class Reel(ABC):
     def full_retrieve(self, duration=3):
         hold_left_click(duration=duration)
 
-    def slow_retrieve(self, duration, delay):
+    def retrieve_and_sleep(self, duration, delay):
         hold_left_click(duration=duration)
         if duration >= 2.2:
             click()
-        sleep(delay)
-
-    # retrieval with the shift key pressed
-    def fast_retrieve(self, duration, delay):
-        with hold('shift'):
-            self.slow_retrieve(duration, delay)
         sleep(delay)
 
     @abstractmethod

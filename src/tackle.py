@@ -5,22 +5,36 @@ from monitor import *
 from reel import *
 
 class Tackle():
-    def __init__(self, profile):
+    def __init__(self, reel_name):
         self.RESET_TIMEOUT = 16
         self.RETRIEVE_BASE_TIME = 32
         self.RETRIEVE_TIMEOUT = 600
-        self.PULL_TIMEOUT = 16
-        self.reel = globals()[profile.reel_name]()
+        self.PULL_TIMEOUT = 32
+        self.reel = globals()[reel_name]()
 
-    def _sleep_and_decrease(self, num, delay):
+    def _sleep_and_decrease(self, num, delay) -> int:
+        """Wrapper for self-decrement and sleep function.
+
+        :param num: the variable to decrease
+        :type num: int
+        :param delay: time to sleep
+        :type delay: int
+        :return: the variable after decrement
+        :rtype: int
+        """
         sleep(delay)
         return num - delay
 
     def reset(self, trophy_mode=None):
-        print('Resetting')
+        #todo: revise docstring
+        """_summary_
 
-        if is_tackle_ready():
-            return True
+        :param trophy_mode: _description_, defaults to None
+        :type trophy_mode: _type_, optional
+        :return: _description_
+        :rtype: _type_
+        """
+        print('Resetting')
         mouseDown()
         i = self.RESET_TIMEOUT if not trophy_mode else 12
         while i > 0 and not is_tackle_ready():
@@ -32,18 +46,33 @@ class Tackle():
         print(msg)
         return i
     
-    def cast(self, power=100, delay=0.1):
+    def cast(self, power_level=3, cast_delay=6, sink_delay=0.1):
+        """Universal cast function for all types of fishing strategies.
+
+        :param power_level: casting power, 1: 0%, 2: 50%, 3: 100%+, defaults to 3
+        :type power_level: int, optional
+        :param cast_delay: time to wait until the lure/bait contact with the water, defaults to 6
+        :type cast_delay: int, optional
+        :param sink_delay: time to wait until the lure/bait sink beneath the water, defaults to 0.1
+        :type sink_delay: float, optional
+        :raises ValueError: #todo: _description_
+        """
         print('Casting')
-        if power == 100:
-            with hold('shift'):
-                hold_left_click(1)
-        else:
-            hold_left_click(0.8) # 50~60%
-        sleep(6) # wait for the lure to sink
+        match power_level:
+            case 1:
+                click()
+            case 2:
+                hold_left_click(0.8)
+            case 3:
+                with hold('shift'):
+                    hold_left_click(1)
+            case _:
+                raise ValueError('Invalid power level') #todo
+        sleep(cast_delay)
         click()
-        sleep(delay)
+        sleep(sink_delay)   
     
-    def retrieve(self, duration=None, delay=8):
+    def retrieve(self, duration=None, delay=4):
         print('Retrieving')
 
         if not duration:
@@ -98,17 +127,27 @@ class Tackle():
         sleep(30) # wait for the line to be fully retrieved
         click()
 
-    # todo: default pull timeout
-    def pull(self, i=None):
+    def pull(self) -> bool:
+        """Pull the fish until it has been captured or timeout.
+
+        :return: True if fish is successfully captured, False otherwise
+        :rtype: bool
+        """
         print('Pulling')
+
+        mouseDown() # keep retrieving until fish is captured
         mouseDown(button='right')
-        mouseDown()
-        i = self.PULL_TIMEOUT if not i else i
+        i = self.PULL_TIMEOUT
         while i > 0 and not is_fish_captured():
-            print(i)
             i = self._sleep_and_decrease(i, 2)
+            
+        # retrieve 8 more seconds
+        if not i:
+            sleep(8)
+        mouseUp()
         mouseUp(button='right')
-        mouseDown()
         click()
-        sleep(1) # leave some time to inspect the fish
-        return i 
+
+        msg = 'Fish is captured' if i else '! Failed to pull the fish up'
+        sleep(1) # wait for user to inspect the fish
+        return i

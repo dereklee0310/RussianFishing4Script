@@ -8,6 +8,7 @@ from threading import Thread
 from monitor import *
 from mouse import hold_left_click, hold_right_click
 from datetime import datetime
+from userprofile import UserProfile
 
 class Fisherman():
     keepnet_limit = 100
@@ -17,16 +18,31 @@ class Fisherman():
     cast_miss_count = 0
     delay = 12 # 8
     trophy_mode = None
+    cast_records = []
+    keep_records = []
 
-    def __init__(self, profile):
+    def __init__(self, profile: UserProfile) -> None:
+        """Initialize attributes based on the user profile.
+
+        :param profile: profile
+        :type profile: UserProfile
+        """
         self.keepnet_limit -= profile.current_fish_count
         self.fishing_strategy = profile.fishing_strategy
         self.release_strategy = profile.release_strategy
-        self.tackle = Tackle(profile)
+        self.tackle = Tackle(profile.reel_name)
         self.timer = Timer()
 
-    def keep_the_fish(self):
-        #! the trophy ruffe will break the checking mechanism
+    # todo
+    def record_routine_duration(self, cast_time, keep_time) -> None:
+        """Record cast time and keep time."""
+        self.cast_records.append(cast_time)
+        self.keep_records.append(keep_time)
+
+
+    def keep_the_fish(self) -> None:
+        """Handle the fish and record the fish count."""
+        #!fix this: the trophy ruffe will break the checking mechanism
         if is_fish_marked():
             self.marked_fish_count += 1
         else:
@@ -37,8 +53,8 @@ class Fisherman():
                 return
         
         # if the fish is marked or the release strategy is set to none, keep the fish
-        print('Keep the fish')
         press('space')
+        print('Keep the fish')
         self.keep_fish_count += 1
         if self.is_keepnet_full():
             self.quit_game()
@@ -91,7 +107,7 @@ class Fisherman():
                         if is_fish_hooked():
                             if self.trophy_mode:
                                 win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(0), int(-200), 0, 0)
-                            if tackle.pull(i=8):
+                            if tackle.pull():
                                 self.keep_the_fish()
                             else:
                                 print('! pull failed')
@@ -163,36 +179,46 @@ class Fisherman():
 
     def spin_fishing(self, time_limit=False):
         while True:
-            if time_limit and datetime.now().hour == 7:
-                self.quit_game("it's 7 A.M.!")
+
+            #todo: revise time_limit spin fishing
+            if time_limit and datetime.now().hour == 7 and datetime.now().minute >= 40:
+                self.quit_game("! It's 7 A.M")
 
             if is_tackle_broked(): #todo: use another thread to monitor it
                 self.save_screenshot()
                 self.quit_game("! Tackle is broken")
 
-            self.tackle.reset()
-
-            if is_fish_captured():
-                print('! Fish captured without pulling')
-                self.keep_the_fish()
-            elif is_fish_hooked():
+            if not is_tackle_ready():
+                self.tackle.reset()
+            
+            if is_fish_hooked():
                 print('! Fish hooked while resetting')
-                if self.tackle.pull(i=8):
+                if self.tackle.pull(): #!!!!!!!!!!!!!todo
                     self.keep_the_fish()
                 else:
-                    print('! Failed to capture the fish')
+                    print('Fish got away while pulling')
+                    # print('! Failed to capture the fish, pull again')
+            elif is_fish_captured():
+                print('! Fish captured without or after previous pulling')
+                self.keep_the_fish()
             
             self.tackle.cast()
+            sleep(6)
             self.tackle.retrieve()
 
-            # retrieval is done
-            if is_fish_hooked():
+            # retrieval is done, check if there is a fish hooked
+            if not is_fish_hooked():
+                self.cast_miss_count += 1
+                continue
+            
+            # pulling stage
+            while True:
                 if self.tackle.pull():
                     self.keep_the_fish()
-                else:
-                    print('! Failed to capture the fish') #todo
-            else:
-                self.cast_miss_count += 1
+                    break
+                if not is_fish_hooked(): # if fish is neither captured nor hooked after pulling
+                    print('Fish got away while pulling')
+                    break
 
     def special_spin_fishing(self, duration, delay):
         rod = self.tackle
@@ -209,7 +235,7 @@ class Fisherman():
                 self.keep_the_fish()
             elif is_fish_hooked():
                 print('! Fish hooked while resetting')
-                if rod.pull(i=pull_timeout):
+                if rod.pull():
                     self.keep_the_fish()
                 else:
                     print('! Failed to capture the fish')
@@ -222,7 +248,7 @@ class Fisherman():
 
             # now, the retrieval is done
             if is_fish_hooked():
-                if rod.pull(i=pull_timeout):
+                if rod.pull():
                     self.keep_the_fish()
                 else:
                     print('! Failed to capture the fish')
@@ -245,7 +271,7 @@ class Fisherman():
                 self.keep_the_fish()
             elif is_fish_hooked():
                 print('! Fish hooked while resetting')
-                if rod.pull(i=pull_timeout):
+                if rod.pull():
                     self.keep_the_fish()
                 else:
                     print('! Failed to capture the fish')
@@ -259,7 +285,7 @@ class Fisherman():
 
             # now, the retrieval is done
             if is_fish_hooked():
-                if rod.pull(i=pull_timeout):
+                if rod.pull():
                     self.keep_the_fish()
                 else:
                     print('! Failed to capture the fish')
@@ -284,7 +310,7 @@ class Fisherman():
                 self.keep_the_fish()
             elif is_fish_hooked():
                 print('! Failed to capture the fish after pulling stage')
-                if self.tackle.pull(i=4):
+                if self.tackle.pull():
                     self.keep_the_fish()
                 else:
                     print('! Failed to capture the fish_2')
@@ -327,7 +353,7 @@ class Fisherman():
                 self.keep_the_fish()
             elif is_fish_hooked():
                 #todo5
-                while not self.tackle.pull(i = 8):
+                while not self.tackle.pull():
                     print('! Failed to capture the fish')
                 self.keep_the_fish()
             else:
