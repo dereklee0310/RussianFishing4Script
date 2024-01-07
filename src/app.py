@@ -1,4 +1,13 @@
-from fisherman import Fisherman
+"""
+Main CLI
+
+Usage: app.py
+
+Todo:
+    Docstrings
+    Implement show_save_prompt()
+"""
+from player import Player
 from pyautogui import getWindowsWithTitle
 from pyautogui import *
 import configparser
@@ -13,7 +22,7 @@ class App():
         """Initalize configParser, generate a list of available profiles."""
         self.config = configparser.ConfigParser()
         self.config.read('../config.ini')
-        self.is_countdown_enabled = self.config['misc'].getboolean('enable_count_down')
+        self.is_countdown_enabled = self.config['game'].getboolean('enable_count_down')
 
         # filter a list of available profiles
         self.profile_names = ['edit custom configuration']
@@ -143,8 +152,7 @@ class App():
                 'fish_count': fish_count
             }
 
-
-def main():
+if __name__ == '__main__':
     app = App()
     if not app.get_profile_id_from_argv():
         app.show_welcome_msg()
@@ -161,8 +169,5 @@ def main():
     window = getWindowsWithTitle("Russian Fishing 4")[0]
     window.activate()
 
-    fisherman = Fisherman(app.profile) # todo: bottom fishing trophy slow mode
-    fisherman.start_fishing()
-
-if __name__ == '__main__':
-    main()
+    fisherman = Player(app.profile) # todo: bottom fishing trophy slow mode
+    fisherman.start()

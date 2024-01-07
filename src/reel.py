@@ -1,7 +1,12 @@
+"""
+Module for Classes of different types of reels
+
+Todo: docstrings
+"""
 from pyautogui import *
 from time import sleep
 from abc import ABC, abstractmethod
-from mouse import hold_left_click
+from script import hold_left_click
 
 class Reel(ABC):
     def full_retrieve(self, duration=3):
@@ -97,7 +102,36 @@ class Meteor30s(SpinningReel):
         pass
 
 class Venga10000(SpinningReel):
-    pass
+    def walk_the_dog(self):
+        pass
+    
+    def twitching(self):
+        pass
+
+    def jig_step(self):
+        pass
+
+    def stop_and_go(self):
+        pass
+
+    def retrieval_and_pause(self):
+        pass
+
+class Lacerti24000S(SpinningReel):
+    def walk_the_dog(self):
+        pass
+    
+    def twitching(self):
+        pass
+
+    def jig_step(self):
+        pass
+
+    def stop_and_go(self):
+        pass
+
+    def retrieval_and_pause(self):
+        pass
 
 class Rigal202s(ConventionalReel):
     ONE_ROTATION_DURATION = 0.52  # 202s

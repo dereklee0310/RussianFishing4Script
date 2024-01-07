@@ -1,20 +1,30 @@
-from pyautogui import *
-from pyautogui import getWindowsWithTitle
-from time import sleep
+"""
+Activate game window and start making things until running out of materials.
 
-window = getWindowsWithTitle("Russian Fishing 4")[0]
-window.activate()
-moveTo(locateOnScreen('../static/make.png', confidence=0.8))
-try:
-    while True:
-        click()
-        if locateOnScreen('../static/warning.png', confidence=0.8):
+Usage: make.py
+"""
+from pyautogui import *
+from time import sleep
+from monitor import *
+from script import activate_game_window
+    
+if __name__ == '__main__':
+    activate_game_window()
+    moveTo(get_make_position())
+    try:
+        while True:
+            click() # click make button
+
+            # recipe is not complete
+            if is_operation_failed():
+                press('space')
+                break
+            sleep(4)
+            
+            # waiting for result
+            while not get_ok_position() and not is_operation_failed():
+                sleep(0.25)
             press('space')
-            break
-        sleep(4)
-        while not locateOnScreen('../static/ok.png', confidence=0.8) and not locateOnScreen('../static/warning.png', confidence=0.8):
-            sleep(0.25)
-        press('space')
-        sleep(0.1)
-except KeyboardInterrupt:
-    exit()
+            sleep(0.1)
+    except KeyboardInterrupt:
+        exit()

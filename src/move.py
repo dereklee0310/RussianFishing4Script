@@ -1,24 +1,24 @@
 """
-    Functionality:
-        1. Activate game window (if any)
-        2. Start moving forward
-        3. press w to toggle/untoggle moving, and press s to quit
-    Todo:
-        Handle the exception for non-existing game window
-        Update setup.py to initialize config.ini properly
-"""
+Activate game window and start moving forward.
 
+Usage: move.py, press w to toggle/untoggle moving, and press s to quit
+
+Todo:
+    Handle the exception for non-existing game window
+    Update setup.py to initialize config.ini properly
+    Docstrings
+"""
 from pyautogui import *
 from time import sleep
-from windowcontroller import WindowController
 from pynput import keyboard 
+from windowcontroller import WindowController
 import configparser
 
 config = configparser.ConfigParser()
 config.read('../config.ini')
 
 # show prompt and count down
-if config['misc'].getboolean('enable_count_down'):
+if config['game'].getboolean('enable_count_down'):
     print('Press S to terminate the script')
     for i in range(3, 0, -1):
         print(f'The script will start in: {i} seconds', end='\r')
@@ -31,7 +31,7 @@ controller.activate_game_window()
 sleep(0.25)
 
 # start moving
-if not config['misc'].getboolean('running_by_default'):
+if not config['game'].getboolean('running_by_default'):
     keyDown('shift')
 keyDown('w')
 
@@ -56,7 +56,7 @@ while True:
                 keyDown('w')
 
 # stop moving
-if not config['misc'].getboolean('running_by_default'):
+if not config['game'].getboolean('running_by_default'):
     keyUp('shift')
 keyUp('w')
 
