@@ -1,9 +1,12 @@
-from pyautogui import *
-from time import sleep
-import win32api, win32con, win32gui
+"""
+Functions for window management.
 
-# sleep(3)
-# keyDown('w')
+Todo: wip
+"""
+from pyautogui import *
+import win32api, win32con, win32gui
+from time import sleep
+
 class WindowController():
     def __init__(self, title=None):
         self._title = title

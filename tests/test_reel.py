@@ -1,3 +1,8 @@
+"""
+Test reel rotation time.
+
+Todo: all
+"""
 from pyautogui import *
 from time import sleep
 import keyboard
@@ -8,11 +13,10 @@ import win32api, win32con
 from threading import Thread
 from monitor import *
 from reel import *
+from script import activate_game_window
 
-window = getWindowsWithTitle("Russian Fishing 4")[0]
-window.activate()
-
-sleep(1)
+activate_game_window()
+sleep(0.25)
 
 test_reel = Narga8000()
 for i in range(5):

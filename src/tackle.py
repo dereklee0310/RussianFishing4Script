@@ -1,66 +1,71 @@
+"""
+Module for Tackle class
+
+Todo: special retrieval for jig step, twitchiing...
+"""
 from pyautogui import *
 from time import sleep
-from mouse import hold_left_click
+from script import *
 from monitor import *
 from reel import *
 
 class Tackle():
-    def __init__(self, reel_name):
-        self.RESET_TIMEOUT = 16
-        self.RETRIEVE_BASE_TIME = 32
-        self.RETRIEVE_TIMEOUT = 600
+    """Class for all tackle depentent methods.
+    """
+    def __init__(self, reel_name: str):
+        """Constructor method.
+
+        :param reel_name: reel name
+        :type reel_name: str
+        """
+        self.RESET_TIMEOUT = 32
+        self.RETRIEVE_TIMEOUT = 300
         self.PULL_TIMEOUT = 32
         self.reel = globals()[reel_name]()
+        self.PIRKING_TIMEOUT = 8
 
-    def _sleep_and_decrease(self, num, delay) -> int:
-        """Wrapper for self-decrement and sleep function.
-
-        :param num: the variable to decrease
-        :type num: int
-        :param delay: time to sleep
-        :type delay: int
-        :return: the variable after decrement
-        :rtype: int
-        """
-        sleep(delay)
-        return num - delay
-
-    def reset(self, trophy_mode=None):
-        #todo: revise docstring
-        """_summary_
+    def reset(self, trophy_mode=None) -> bool:
+        #todo: revise trophy mode and docstring
+        """Reset the tackle with a timeout.
 
         :param trophy_mode: _description_, defaults to None
         :type trophy_mode: _type_, optional
-        :return: _description_
-        :rtype: _type_
+        :return: True if the reset is successful, False otherwise 
+        :rtype: bool
         """
         print('Resetting')
+
         mouseDown()
         i = self.RESET_TIMEOUT if not trophy_mode else 12
         while i > 0 and not is_tackle_ready():
-            i = self._sleep_and_decrease(i, 2)
+            i = sleep_and_decrease(i, 3) # > ClickLock duration (2.2)
         mouseUp()
         click()
         
-        msg = 'Tackle is ready' if i else '! Failed to reset the tackle'
+        msg = 'Resetting success' if i else '! Failed to reset the tackle'
         print(msg)
-        return i
+        return bool(i)
     
-    def cast(self, power_level=3, cast_delay=6, sink_delay=0.1):
-        """Universal cast function for all types of fishing strategies.
+    def cast(self, 
+             power_level: int | None=3, 
+             cast_delay: int | None=6,
+             sink_delay: int | None=0) -> None:
+        """Cast the rod.
 
         :param power_level: casting power, 1: 0%, 2: 50%, 3: 100%+, defaults to 3
         :type power_level: int, optional
-        :param cast_delay: time to wait until the lure/bait contact with the water, defaults to 6
+        :param cast_delay: time to wait until lure/bait contact withwater, defaults to 6
         :type cast_delay: int, optional
-        :param sink_delay: time to wait until the lure/bait sink beneath the water, defaults to 0.1
-        :type sink_delay: float, optional
+        :param sink_delay: time to wait until lure/bait sink beneath water, defaults to 0
+        :type sink_delay: int, optional
         :raises ValueError: #todo: _description_
         """
         print('Casting')
+
         match power_level:
             case 1:
                 click()
+                return # early return for marine fishing
             case 2:
                 hold_left_click(0.8)
             case 3:
@@ -68,23 +73,82 @@ class Tackle():
                     hold_left_click(1)
             case _:
                 raise ValueError('Invalid power level') #todo
+            
         sleep(cast_delay)
         click()
-        sleep(sink_delay)   
+        if sink_delay:
+            sleep(sink_delay)   
     
-    def retrieve(self, duration=None, delay=4):
+
+    def retrieve(self, duration: int, delay: int) -> bool:
+        """Retrieve the lure/bait with a timeout.
+
+        :param duration: base time of retrieval
+        :type duration: int, optional
+        :param delay: delay after retrieval
+        :type delay: int, optional
+        :return: True if the retrieval is successful, False otherwise
+        :rtype: bool
+        """
         print('Retrieving')
 
-        if not duration:
-            duration = self.RETRIEVE_BASE_TIME
         self.reel.full_retrieve(duration=duration)
         i = self.RETRIEVE_TIMEOUT
         while i > 0 and not is_retrieve_finished():
-            i = self._sleep_and_decrease(i, 4)
-        print('Retrieval is finished')
+            i = sleep_and_decrease(i, 3)
         sleep(delay) # wait for the line to be fully retrieved
         click()
 
+        msg = 'Retrieving success' if i > 0 else '! Timeout reached'
+        print(msg)
+        return bool(i)
+
+    def pirking(self, duration: float, delay: float) -> bool:
+        """Do pirking with a time out.
+
+        :param duration: rod lifting time
+        :type duration: float
+        :param delay: delay after lifting
+        :type delay: float
+        :return: True if a fish is hooked, False otherwise
+        :rtype: bool
+        """
+        print('Pirking')
+
+        i = self.PIRKING_TIMEOUT
+        while i > 0 and not is_fish_hooked():
+            i -= 1
+            hold_right_click(duration=duration)
+            sleep(delay)
+
+        msg = 'Pirking success' if i else '! Timeout reached'
+        print(msg)
+        return bool(i)
+
+    def pull(self) -> bool:
+        """Pull the fish with a timeout.
+
+        :return: True if the pulling is successful, False otherwise
+        :rtype: bool
+        """
+        print('Pulling')
+
+        mouseDown() # keep retrieving until fish is captured
+        mouseDown(button='right')
+        i = self.PULL_TIMEOUT
+        while i > 0 and not is_fish_captured():
+            i = sleep_and_decrease(i, 3) # > ClickLock duration (2.2)
+        mouseUp()
+        mouseUp(button='right')
+        click()
+
+        msg = 'Pulling success' if i else '! Failed to pull the fish up'
+        print(msg)
+        sleep(1) # wait for user to inspect the fish
+        return bool(i)
+    
+
+    #todo
     def special_retrieve(self, duration=0.25, delay=1):
         print('Walking the dog')
         i = self.RETRIEVE_TIMEOUT
@@ -126,28 +190,3 @@ class Tackle():
         print('Retrieve done')
         sleep(30) # wait for the line to be fully retrieved
         click()
-
-    def pull(self) -> bool:
-        """Pull the fish until it has been captured or timeout.
-
-        :return: True if fish is successfully captured, False otherwise
-        :rtype: bool
-        """
-        print('Pulling')
-
-        mouseDown() # keep retrieving until fish is captured
-        mouseDown(button='right')
-        i = self.PULL_TIMEOUT
-        while i > 0 and not is_fish_captured():
-            i = self._sleep_and_decrease(i, 2)
-            
-        # retrieve 8 more seconds
-        if not i:
-            sleep(8)
-        mouseUp()
-        mouseUp(button='right')
-        click()
-
-        msg = 'Fish is captured' if i else '! Failed to pull the fish up'
-        sleep(1) # wait for user to inspect the fish
-        return i
