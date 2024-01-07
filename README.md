@@ -93,6 +93,7 @@ python calculator.py
 - [ ] Revise setup.py
 
 ## License
+RussianFishing4Script is licensed under the [GNU General Public License version 3](LICENSE)
 
 ## Contributing 
 Any kind of contribution and bug report is welcome.
