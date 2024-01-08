@@ -42,9 +42,9 @@ class Tackle():
         mouseUp()
         click()
         
-        msg = 'Resetting success' if i else '! Failed to reset the tackle'
+        msg = 'Resetting success' if i > 0 else '! Failed to reset the tackle'
         print(msg)
-        return bool(i)
+        return i > 0
     
     def cast(self, 
              power_level: int | None=3, 
@@ -101,7 +101,7 @@ class Tackle():
 
         msg = 'Retrieving success' if i > 0 else '! Timeout reached'
         print(msg)
-        return bool(i)
+        return i > 0
 
     def pirking(self, duration: float, delay: float) -> bool:
         """Do pirking with a time out.
@@ -121,9 +121,9 @@ class Tackle():
             hold_right_click(duration=duration)
             sleep(delay)
 
-        msg = 'Pirking success' if i else '! Timeout reached'
+        msg = 'Pirking success' if i > 0 else '! Timeout reached'
         print(msg)
-        return bool(i)
+        return i > 0
 
     def pull(self) -> bool:
         """Pull the fish with a timeout.
@@ -142,10 +142,10 @@ class Tackle():
         mouseUp(button='right')
         click()
 
-        msg = 'Pulling success' if i else '! Failed to pull the fish up'
+        msg = 'Pulling success' if i > 0 else '! Failed to pull the fish up'
         print(msg)
         sleep(1) # wait for user to inspect the fish
-        return bool(i)
+        return i > 0
     
 
     #todo
