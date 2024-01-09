@@ -253,7 +253,7 @@ class Player():
                 self.keep_the_fish()
                 break
             elif is_fish_hooked():
-                self.tackle.retrieve()
+                self.tackle.retrieve(duration=16, delay=4) # half retrieval
             else:
                 print('! Fish got away while pulling')
                 break # leave it for the resetting stage
