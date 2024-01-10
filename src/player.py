@@ -206,7 +206,7 @@ class Player():
             else:
                 pass # reset again
 
-    def start_retrieving_stage(self, duration=32, delay=4, is_fast=False):
+    def start_retrieving_stage(self, duration=16, delay=4, is_fast=False):
         if is_fast:
             keyDown('shift')
         while True:
