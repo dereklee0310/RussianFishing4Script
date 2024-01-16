@@ -22,7 +22,8 @@ class Tackle():
         self.RETRIEVE_TIMEOUT = 300
         self.PULL_TIMEOUT = 32
         self.reel = globals()[reel_name]()
-        self.PIRKING_TIMEOUT = 8
+        self.PIRKING_TIMEOUT = 32
+        self.JIGSTEP_TIMEOUT = 128
 
     def reset(self, trophy_mode=None) -> bool:
         #todo: revise trophy mode and docstring
@@ -77,7 +78,8 @@ class Tackle():
         sleep(cast_delay)
         click()
         if sink_delay:
-            sleep(sink_delay)   
+            sleep(sink_delay)
+        print('Casting success')
     
 
     def retrieve(self, duration: int, delay: int) -> bool:
@@ -117,9 +119,8 @@ class Tackle():
 
         i = self.PIRKING_TIMEOUT
         while i > 0 and not is_fish_hooked():
-            i -= 1
             hold_right_click(duration=duration)
-            sleep(delay)
+            i = self.sleep_and_decrease(i, delay)
 
         msg = 'Pirking success' if i > 0 else '! Timeout reached'
         print(msg)
@@ -146,47 +147,17 @@ class Tackle():
         print(msg)
         sleep(1) # wait for user to inspect the fish
         return i > 0
-    
 
-    #todo
-    def special_retrieve(self, duration=0.25, delay=1):
-        print('Walking the dog')
-        i = self.RETRIEVE_TIMEOUT
-        while i > 0 and not is_fish_hooked() and not is_retrieve_finished():
-            self.fast_retrieve(duration=0.25, delay=delay)
-            i -= 1
-
-        if not is_fish_hooked():
-            for i in range(12):
-                if is_fish_hooked():
-                    break
-                self.fast_retrieve(duration=0.25, delay=delay)
-
-        hold_left_click(4)
-        while i > 0 and not is_retrieve_finished():
-            i -= 1
-
-        print('Retrieve done')
-        sleep(4) # wait for the line to be fully retrieved
-        click()
-
-    def jig_step(self, duration=0.52, delay=3):
-        print('Jig step')
-        i = self.RETRIEVE_TIMEOUT
-        while i > 0 and not is_fish_hooked() and not is_retrieve_finished():
-            self.slow_retrieve(duration=duration, delay=delay)
-            i -= 1
-
-        # if not is_fish_hooked():
-        #     for i in range(12):
-        #         if is_fish_hooked():
-        #             break
-        #         self.slow_retrieve(duration=duration, delay=delay)
-
-        hold_left_click(4)
-        while i > 0 and not is_retrieve_finished():
-            i -= 1
-
-        print('Retrieve done')
-        sleep(30) # wait for the line to be fully retrieved
-        click()
+    def retrieve_with_pause(self, duration, delay):
+        print('Retrieving with pause')
+        i = self.JIGSTEP_TIMEOUT
+            
+        while i > 0:
+            if is_fish_hooked():
+                break
+            elif is_retrieve_finished():
+                break
+            self.reel.retrieve_with_pause(duration, delay)
+            i -= delay
+        
+        print('Retrieving with pause success')

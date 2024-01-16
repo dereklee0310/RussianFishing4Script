@@ -28,8 +28,6 @@ if config['game'].getboolean('enable_count_down'):
 controller = WindowController('Russian Fishing 4')
 controller.activate_game_window()
 
-sleep(0.25)
-
 # start moving
 if not config['game'].getboolean('running_by_default'):
     keyDown('shift')

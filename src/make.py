@@ -3,8 +3,10 @@ Activate game window and start making things until running out of materials.
 
 Usage: make.py
 """
-from pyautogui import *
 from time import sleep
+
+from pyautogui import *
+
 from monitor import *
 from script import activate_game_window
     
@@ -19,9 +21,9 @@ if __name__ == '__main__':
             if is_operation_failed():
                 press('space')
                 break
-            sleep(4)
             
             # waiting for result
+            sleep(4)
             while not get_ok_position() and not is_operation_failed():
                 sleep(0.25)
             press('space')

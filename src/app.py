@@ -7,13 +7,14 @@ Todo:
     Docstrings
     Implement show_save_prompt()
 """
-from player import Player
-from pyautogui import getWindowsWithTitle
-from pyautogui import *
-import configparser
 from time import sleep
+import argparse
+import configparser
+
+from pyautogui import *
+from player import Player
 from userprofile import UserProfile
-import sys
+from script import activate_game_window
 # from inputimeout import inputimeout, TimeoutOccurred
 # from exceptions import InvalidNumberOfArgumentsError
 
@@ -30,36 +31,57 @@ class App():
             if self.config.has_option(section, 'fishing_strategy'):
                 self.profile_names.append(section)
 
+        self.args = None
         self.profile = None
-        self.profile_id = -1
+        self.fish_count = None
+        self.keep_strategy = 'all'
 
-    def get_profile_id_from_argv(self) -> bool:
-        """Set profile id using command line arguments, if any.
+    def parse_args(self):
+        parser = argparse.ArgumentParser(
+                            prog='app.py', 
+                            description='Start the script for Russian Fishing 4', 
+                            epilog='')
+        parser.add_argument('-p', '--pid', type=int, 
+                            help='the id of profile you want to use')
+        parser.add_argument('-n', '--fish-count', type=int, default=0,
+                            help='the current number of fishes in your keepnet, 0 if not specified')
+        parser.add_argument('-a', '--all', action='store_true',
+                            help="keep all captured fishes, used by default if not specified")
+        parser.add_argument('-m', '--marked', action='store_true',
+                            help="keep only the marked fishes")
+        self.args = parser.parse_args()
 
-        :return: True if profile id is successfully set, otherwise, return False
-        :rtype: bool
-        """
-        n = len(sys.argv)        
-        if n == 2:
-            self.profile_id = sys.argv[1]
-            if self.is_profile_id_valid():
-                return True
-            print('Invalid profile id, Please enter the profile id manually.')
-        else:
-            print('Invalid number of arguments, Please enter the profile id manually.')
-        return False
+    def process_args(self) -> bool:
+        args = self.args
+
+        if args.marked:
+            self.keep_strategy = 'marked'
+
+        if not self.is_fish_count_valid(args.fish_count):
+            raise ValueError('Invalid fish count')
+        self.fish_count = args.fish_count
+
+        if not args.pid:
+            return False
+        elif not self.is_profile_id_valid(str(args.pid)):
+            raise ValueError('Invalid profile id')
+        self.profile_id = args.pid
+        return True
     
-    def is_profile_id_valid(self) -> bool:
+    def is_fish_count_valid(self, fish_count: int) -> bool:
+        if fish_count < 0 or fish_count >= int(self.config['game']['keepnet_limit']):
+            return False
+        return True
+    
+    def is_profile_id_valid(self, pid: str) -> bool:
         """Validate the profile id.
-
+        #todo: pid desc.
         :return: True if profile id is valid, otherwise, return False
         :rtype: bool
         """
-
-        id = self.profile_id
-        if id == '0' or id == 'q':
+        if pid == '0' or pid == 'q':
             return True
-        elif not id.isdigit() or int(id) < 0 or int(id) > len(self.config.sections()):
+        elif not pid.isdigit() or int(pid) < 0 or int(pid) > len(self.profile_names) - 1:
             return False
         return True
 
@@ -81,35 +103,48 @@ class App():
 
     def ask_for_profile_id(self) -> None:
         """Let user select a profile id and validate it."""
-        self.profile_id = input("Enter profile id or press q to exit: ")
-        while not self.is_profile_id_valid():
-            self.profile_id = input('Invalid profile id, please try again or press q to quit: ')
+        pid = input("Enter profile id or press q to exit: ")
+        while not self.is_profile_id_valid(pid):
+            pid = input('Invalid profile id, please try again or press q to quit: ')
 
         # todo
-        if self.profile_id == 'q':
+        if pid == 'q':
             print('The script has been terminated.')
             exit()
-        elif self.profile_id == '0':
+        elif pid == '0':
             print('This feature has not been implemented yet.')
             exit()
-        self.profile_id = self.profile_id
+        self.profile_id = pid
         
 
-    def gen_selected_profile(self) -> None:
-        """Generate a UserProfile object from config.ini using the selected profile id."""
+    def gen_profile(self) -> None:
+        """Generate a UserProfile object from config.ini using the selected profile id.
+        """
         profile_name = self.profile_names[int(self.profile_id)]
         section = self.config[profile_name]
+
+        #todo: refactor this
+        try:
+            retrieval_duration_second = float(section['retrieval_duration_second'])
+        except KeyError:
+            retrieval_duration_second = 0
+        try:
+            retrieval_delay_second = float(section['retrieval_delay_second'])
+        except KeyError:
+            retrieval_delay_second = 0
+
         self.profile = UserProfile(
             profile_name,
             section['reel_name'],
             section['fishing_strategy'],
-            section['release_strategy'],
-            int(section['current_fish_count']))
-        
+            self.keep_strategy,
+            self.fish_count,
+            retrieval_duration_second,
+            retrieval_delay_second)
 
-    def display_selected_profile(self) -> None:
-        """Display the selected profile in the console."""
-
+    def display_profile_info(self) -> None:
+        """Display the selected profile in the console.
+        """
         profile = self.profile
         print('+---------------------------------------+')
         print(f'| Profile name: {profile.profile_name:23} |')
@@ -118,15 +153,14 @@ class App():
         print('+---------------------------------------+')
         print(f'| Fishing strategy: {profile.fishing_strategy:19} |')
         print('+---------------------------------------+')
-        print(f'| Release strategy: {profile.release_strategy:19} |')
+        print(f'| Keep strategy: {profile.keep_strategy:22} |')
         print('+---------------------------------------+')
         print(f'| Current number of fish: {str(profile.current_fish_count):13} |')
         print('+---------------------------------------+')
     
 
     def start_count_down(self) -> None:
-        """
-        If the 'enable_count_down' option is enabled, 
+        """If the 'enable_count_down' option is enabled, 
         start a count down before executing the script.
         """
 
@@ -154,20 +188,18 @@ class App():
 
 if __name__ == '__main__':
     app = App()
-    if not app.get_profile_id_from_argv():
+    app.parse_args()
+    if not app.process_args():
         app.show_welcome_msg()
         app.show_available_profiles()
         app.ask_for_profile_id()
-    app.gen_selected_profile()
-    
-    app.display_selected_profile()
+    app.gen_profile()
+    app.display_profile_info()
 
     if app.is_countdown_enabled:
         app.start_count_down()
     print('The script has been started.') 
 
-    window = getWindowsWithTitle("Russian Fishing 4")[0]
-    window.activate()
-
+    activate_game_window()
     fisherman = Player(app.profile) # todo: bottom fishing trophy slow mode
     fisherman.start()

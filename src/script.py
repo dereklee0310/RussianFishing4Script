@@ -2,9 +2,11 @@
 Some helper functions.
 """
 
+from time import sleep
+
 from pyautogui import *
 from pyautogui import getWindowsWithTitle
-from time import sleep
+import configparser
 
 def hold_left_click(duration: float=1) -> None:
     """Hold left mouse button.
@@ -15,6 +17,8 @@ def hold_left_click(duration: float=1) -> None:
     mouseDown()
     sleep(duration)
     mouseUp()
+    if duration >= 2.2:
+        click()
 
 def hold_right_click(duration: float=1) -> None:
     """Hold right mouse button.
@@ -44,3 +48,14 @@ def activate_game_window() -> None:
     """
     window = getWindowsWithTitle("Russian Fishing 4")[0]
     window.activate()
+    sleep(0.25)
+
+def get_image_dir_path() -> str:
+    """Build the path for static images based on language option.
+
+    :return: ../static/{language}/
+    :rtype: str
+    """
+    config = configparser.ConfigParser()
+    config.read('../config.ini')
+    return fr"../static/{config['game']['language']}/"

@@ -19,7 +19,7 @@ git clone https://github.com/dereklee0310/RussianFishing4Script
 - If your in-game language is not English, change the language option in `config.ini`.
 - Make sure that your tackles are powerful enough for the target fish species.
 - Enable Mouse ClickLock in Windows  
-- Set the time before button locking to "Long"  
+- Set the time before locking to "Long"  
 ![ClickLock](/static/readme/clicklock.png) 
 
 ### Dependencies
@@ -33,36 +33,42 @@ Before executing the script, you must move to the desired fishing location and s
 them nearby to let the script access them via quick selection keys (1 ~ 3).
 - Spin Fishing/Marine Fishing: Pick up the rod you want to use.
 
-### Change the Current Directory
+### 1. Change the Current Working Directory
 ```
 cd src
 ```
 
-### Validate Spool Icon (Optional)
+### 2. Validate Spool Icon (Optional)
 - Run this to check if the spool icon can be identified (The reel must be fully loaded).  
 ![Status](/static/readme/status.png)
 ```
 python validate.py
 ```
 
-### Execute the Fishing Script
-- If no additional command line argument is provided, it will display a list of available profiles for you to choose from.
+### 3. Execute the Main Fishing Script
+- By default (no arguments), it will display a list of available profiles, then start fishing with empty keepnet and keep all the fishes you caught.
 ```
-python app.py <profile id>
+python app.py [-h] [-p PID] [-n FISH_COUNT] [-a] [-m]
 ```
-
+- Display help information
+```
+python app.py -h
+```
 ## Other Useful Scripts
-### Toggle moving (W key)
+### Toggle moving
+- Press w to stop, press it again to continue.
+- Press s to quit.
 ```
 python move.py
 ```
 
-### Making groundbaits/foods (The materials must be selected before the execution)
+### Making groundbaits/foods 
+- The materials must be selected before the execution.
 ```
 python make.py
 ```
 
-### Calculate the maximum friction brake you can use on your tackle.
+### Calculate the maximum friction brake you can use
 ```
 python calculator.py
 ```
@@ -75,13 +81,13 @@ python calculator.py
   - Press the button to release it, then type Ctrl + C as usual.  
 - Stuck at retrieving stage?
   - Change the game resolution until the `validation.py` is pass.
-  - Keep away from light sources, e.g., boat headlights in Norwegian Sea.
+  - Keep away from light sources, e.g., boat headlights on Norwegian Sea's boat.
 
 ## Roadmap
 - [x] Marine fishing
 - [x] Making lures/baits/groundbaits/foods
-- [ ] Add command line arguments support
-- [ ] Refactor bottom fishing
+- [x] Add command line arguments support
+- [x] Refactor bottom fishing
 - [ ] Carp fishing
 - [ ] Snag detection
 - [ ] Spooling detection
@@ -93,7 +99,7 @@ python calculator.py
 - [ ] Revise setup.py
 
 ## License
-RussianFishing4Script is licensed under the [GNU General Public License version 3](LICENSE)
+RussianFishing4Script is licensed under the [GNU General Public License version 3](LICENSE).
 
 ## Contributing 
 Any kind of contribution and bug report is welcome.

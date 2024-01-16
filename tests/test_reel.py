@@ -16,7 +16,6 @@ from reel import *
 from script import activate_game_window
 
 activate_game_window()
-sleep(0.25)
 
 test_reel = Narga8000()
 for i in range(5):
