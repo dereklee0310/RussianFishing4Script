@@ -42,6 +42,7 @@ class Player():
 
         self.duration = profile.duration
         self.delay = profile.delay
+        self.check_delay_second = profile.check_delay_second
 
     # todo: complete this and add docstring
     def record_routine_duration(self, cast_time, keep_time) -> None:
@@ -215,7 +216,7 @@ class Player():
             if is_fish_hooked():
                 self.start_pulling_stage()
 
-    def do_bottom_fishing(self, retrieval_duration=4, retrieval_delay=2, check_delay=8):
+    def do_bottom_fishing(self, retrieval_duration=4, retrieval_delay=2):
         check_counts = [0, 0, 0, 0]
         rod_key = 0
         while True:
@@ -236,7 +237,7 @@ class Player():
                     self.start_resetting_stage()
                     self.tackle.cast(power_level=2, cast_delay=4)
                 press('0')
-                sleep(check_delay)
+                sleep(self.check_delay_second)
                 continue
 
             check_counts[rod_key] = 0

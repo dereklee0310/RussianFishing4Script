@@ -7,8 +7,15 @@ Todo: bottom fishing delay
 class UserProfile():
     """Class for user profile encapsulation.
     """
-    def __init__(self, profile_name: str, reel_name: str, fishing_strategy: str, 
-                 keep_strategy: str, current_fish_count: int, duration: float, delay: float):
+    def __init__(self, 
+                 profile_name: str, 
+                 reel_name: str, 
+                 fishing_strategy: str, 
+                 keep_strategy: str, 
+                 current_fish_count: int, 
+                 duration: float, 
+                 delay: float, 
+                 check_delay_second: float):
         """Constructor method.
 
         :param profile_name: title of the user profile
@@ -30,3 +37,4 @@ class UserProfile():
         self.current_fish_count = current_fish_count
         self.duration = duration
         self.delay = delay
+        self.check_delay_second = check_delay_second

@@ -120,7 +120,7 @@ class Tackle():
         i = self.PIRKING_TIMEOUT
         while i > 0 and not is_fish_hooked():
             hold_right_click(duration=duration)
-            i = self.sleep_and_decrease(i, delay)
+            i = sleep_and_decrease(i, delay)
 
         msg = 'Pirking success' if i > 0 else '! Timeout reached'
         print(msg)

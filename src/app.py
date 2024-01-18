@@ -133,6 +133,11 @@ class App():
         except KeyError:
             retrieval_delay_second = 0
 
+        try:
+            check_delay_second = float(section['check_delay_second'])
+        except KeyError:
+            check_delay_second = 0
+
         self.profile = UserProfile(
             profile_name,
             section['reel_name'],
@@ -140,7 +145,8 @@ class App():
             self.keep_strategy,
             self.fish_count,
             retrieval_duration_second,
-            retrieval_delay_second)
+            retrieval_delay_second,
+            check_delay_second)
 
     def display_profile_info(self) -> None:
         """Display the selected profile in the console.
