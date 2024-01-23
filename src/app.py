@@ -10,22 +10,24 @@ Todo:
 from time import sleep
 import argparse
 import configparser
+import threading
 
 from pyautogui import *
+
 from player import Player
 from userprofile import UserProfile
-from script import activate_game_window
+from script import activate_game_window, start_count_down
 # from inputimeout import inputimeout, TimeoutOccurred
-# from exceptions import InvalidNumberOfArgumentsError
 
 class App():
     def __init__(self):
-        """Initalize configParser, generate a list of available profiles."""
+        """Initalize configParser, generate a list of available profiles.
+        """
         self.config = configparser.ConfigParser()
         self.config.read('../config.ini')
         self.is_countdown_enabled = self.config['game'].getboolean('enable_count_down')
 
-        # filter a list of available profiles
+        # filter out a list of available user profiles
         self.profile_names = ['edit custom configuration']
         for section in self.config.sections():
             if self.config.has_option(section, 'fishing_strategy'):
@@ -41,18 +43,23 @@ class App():
                             prog='app.py', 
                             description='Start the script for Russian Fishing 4', 
                             epilog='')
-        parser.add_argument('-p', '--pid', type=int, 
-                            help='the id of profile you want to use')
-        parser.add_argument('-n', '--fish-count', type=int, default=0,
-                            help='the current number of fishes in your keepnet, 0 if not specified')
         parser.add_argument('-a', '--all', action='store_true',
                             help="keep all captured fishes, used by default if not specified")
         parser.add_argument('-m', '--marked', action='store_true',
                             help="keep only the marked fishes")
+        parser.add_argument('-n', '--fish-count', type=int, default=0,
+                            help='the current number of fishes in your keepnet, 0 if not specified')
+        parser.add_argument('-p', '--pid', type=int, 
+                            help='the id of profile you want to use')
+        # parser.add_argument('-r', '--refill', type=int, 
+        #                     help='refill power, hunger, and temperature automatically \
+        #                           using shorcut in config.ini')
         self.args = parser.parse_args()
 
     def process_args(self) -> bool:
         args = self.args
+
+        # self.is_refill_enabled = args.refill
 
         if args.marked:
             self.keep_strategy = 'marked'
@@ -94,15 +101,16 @@ class App():
 
 
     def show_available_profiles(self) -> None:
-        """List all available profiles from 'config.ini'."""
+        """List all available profiles from 'config.ini'.
+        """
         for i, profile in enumerate(self.profile_names):
             print(f'| {i}. {profile:{34 - (i) // 10}} |')
             print('+---------------------------------------+')
             i += 1
     
-
     def ask_for_profile_id(self) -> None:
-        """Let user select a profile id and validate it."""
+        """Let user select a profile id and validate it.
+        """
         pid = input("Enter profile id or press q to exit: ")
         while not self.is_profile_id_valid(pid):
             pid = input('Invalid profile id, please try again or press q to quit: ')
@@ -122,31 +130,21 @@ class App():
         """
         profile_name = self.profile_names[int(self.profile_id)]
         section = self.config[profile_name]
-
-        #todo: refactor this
-        try:
-            retrieval_duration_second = float(section['retrieval_duration_second'])
-        except KeyError:
-            retrieval_duration_second = 0
-        try:
-            retrieval_delay_second = float(section['retrieval_delay_second'])
-        except KeyError:
-            retrieval_delay_second = 0
-
-        try:
-            check_delay_second = float(section['check_delay_second'])
-        except KeyError:
-            check_delay_second = 0
+        retrieval_duration_second = float(section.get('retrieval_duration_second', fallback=0))
+        retrieval_delay_second = float(section.get('retrieval_delay_second', fallback=0))
+        check_delay_second = float(section.get('check_delay_second', fallback=0))
+        cast_power_level = int(section.get('check_delay_second', fallback=3))
 
         self.profile = UserProfile(
             profile_name,
-            section['reel_name'],
+            section['reel_type'],
             section['fishing_strategy'],
             self.keep_strategy,
             self.fish_count,
             retrieval_duration_second,
             retrieval_delay_second,
-            check_delay_second)
+            check_delay_second,
+            cast_power_level)
 
     def display_profile_info(self) -> None:
         """Display the selected profile in the console.
@@ -155,7 +153,7 @@ class App():
         print('+---------------------------------------+')
         print(f'| Profile name: {profile.profile_name:23} |')
         print('+---------------------------------------+')
-        print(f'| Reel name: {profile.reel_name:26} |')
+        print(f'| Reel type: {profile.reel_type:26} |')
         print('+---------------------------------------+')
         print(f'| Fishing strategy: {profile.fishing_strategy:19} |')
         print('+---------------------------------------+')
@@ -163,18 +161,6 @@ class App():
         print('+---------------------------------------+')
         print(f'| Current number of fish: {str(profile.current_fish_count):13} |')
         print('+---------------------------------------+')
-    
-
-    def start_count_down(self) -> None:
-        """If the 'enable_count_down' option is enabled, 
-        start a count down before executing the script.
-        """
-
-        print("Hint: Edit 'enable_count_down' option in config.ini to disable the count down")
-        for i in range(5, 0, -1):
-            print(f'The script will start in: {i} seconds', end='\r')
-            sleep(1)
-        print('')
 
     #todo
     def show_save_prompt(self, strategy, release_strategy, fish_count):
@@ -203,9 +189,9 @@ if __name__ == '__main__':
     app.display_profile_info()
 
     if app.is_countdown_enabled:
-        app.start_count_down()
+        start_count_down()
     print('The script has been started.') 
 
     activate_game_window()
     fisherman = Player(app.profile) # todo: bottom fishing trophy slow mode
-    fisherman.start()
+    fisherman.start_fishing()

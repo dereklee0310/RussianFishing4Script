@@ -53,7 +53,7 @@ class Tackle():
              sink_delay: int | None=0) -> None:
         """Cast the rod.
 
-        :param power_level: casting power, 1: 0%, 2: 50%, 3: 100%+, defaults to 3
+        :param power_level: casting power, 1: 0%, 2: ~30%, 3: ~60%, 4: ~90% 5: ~120%, defaults to 3
         :type power_level: int, optional
         :param cast_delay: time to wait until lure/bait contact withwater, defaults to 6
         :type cast_delay: int, optional
@@ -68,8 +68,12 @@ class Tackle():
                 click()
                 return # early return for marine fishing
             case 2:
-                hold_left_click(0.8)
+                hold_left_click(0.4)
             case 3:
+                hold_left_click(0.8)
+            case 4:
+                hold_left_click(1.2)
+            case 5:
                 with hold('shift'):
                     hold_left_click(1)
             case _:

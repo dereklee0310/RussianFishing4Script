@@ -2,65 +2,55 @@
 Activate game window and start moving forward.
 
 Usage: move.py, press w to toggle/untoggle moving, and press s to quit
-
-Todo:
-    Handle the exception for non-existing game window
-    Update setup.py to initialize config.ini properly
-    Docstrings
 """
-from pyautogui import *
 from time import sleep
+
+from pyautogui import *
 from pynput import keyboard 
+
 from windowcontroller import WindowController
-import configparser
+from script import is_countdown_enabled, start_count_down, is_running_enabled
 
-config = configparser.ConfigParser()
-config.read('../config.ini')
+if __name__ == '__main__':
+    if is_countdown_enabled():
+        print('Press W to toggle/untoggle moving, S to terminate the script')
+        start_count_down()
 
-# show prompt and count down
-if config['game'].getboolean('enable_count_down'):
-    print('Press S to terminate the script')
-    for i in range(3, 0, -1):
-        print(f'The script will start in: {i} seconds', end='\r')
-        sleep(1)
+    controller = WindowController()
+    controller.activate_game_window()
 
-# activate the game window
-controller = WindowController('Russian Fishing 4')
-controller.activate_game_window()
+    # start moving
+    if not is_running_enabled():
+        keyDown('shift')
+    keyDown('w')
 
-# start moving
-if not config['game'].getboolean('running_by_default'):
-    keyDown('shift')
-keyDown('w')
+    # keyboard listener loop
+    stop_flag = False
+    while True:
+        with keyboard.Events() as events:
+            event = events.get(1.0) # block at most one second
+            if not event or type(event) == keyboard.Events.Release:
+                continue
 
-# main keyboard listener loop
-stop_flag = False
-while True:
-    with keyboard.Events() as events:
-        event = events.get(1.0) # block at most one second
-        if not event or type(event) == keyboard.Events.Release:
-            continue
+            key = str(event.key).lower()
+            if key == "'s'":
+                break
+            elif key == "'w'": # \'w\'
+                if not stop_flag:
+                    stop_flag = True
+                    keyUp('w')
+                else:
+                    stop_flag = False
+                    sleep(0.25) # this must be added to function correctly
+                    keyDown('w')
 
-        key = str(event.key).lower()
-        if key == "'s'":
-            break
-        elif key == "'w'": # \'w\'
-            if not stop_flag:
-                stop_flag = True
-                keyUp('w')
-            else:
-                stop_flag = False
-                sleep(0.25) # this must be added to function correctly
-                keyDown('w')
+    # stop moving
+    if not is_running_enabled():
+        keyUp('shift')
+    keyUp('w')
 
-# stop moving
-if not config['game'].getboolean('running_by_default'):
-    keyUp('shift')
-keyUp('w')
-
-# controller.activate_script_window() # reactivate the terminal
-print(end='\x1b[2K')
-print('The script has been terminated', end='')
+    print(end='\x1b[2K')
+    print('The script has been terminated', end='')
 
 # ANSI erase reference: https://itnext.io/overwrite-previously-printed-lines-4218a9563527
 # pynput reference: https://pynput.readthedocs.io/en/latest/keyboard.html

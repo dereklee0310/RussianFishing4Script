@@ -8,6 +8,9 @@ from pyautogui import *
 from pyautogui import getWindowsWithTitle
 import configparser
 
+config = configparser.ConfigParser()
+config.read('../config.ini')
+
 def hold_left_click(duration: float=1) -> None:
     """Hold left mouse button.
 
@@ -59,3 +62,29 @@ def get_image_dir_path() -> str:
     config = configparser.ConfigParser()
     config.read('../config.ini')
     return fr"../static/{config['game']['language']}/"
+
+def is_countdown_enabled() -> bool:
+    """Get the value of 'enable_count_down' in config.ini
+
+    :return: True if countdown is enabled, False otherwise
+    :rtype: bool
+    """
+    return config['game'].getboolean('enable_count_down')
+
+def is_running_enabled() -> bool:
+    """Get the value of 'running_by_default' in config.ini
+
+    :return: True if accelerated running is enabled, False otherwise
+    :rtype: bool
+    """
+    return config['game'].getboolean('running_by_default')
+
+def start_count_down() -> None:
+    """If the 'enable_count_down' option is enabled, 
+    start a count down before executing the script.
+    """
+    print("Hint: Edit 'enable_count_down' option in config.ini to disable the count down")
+    for i in range(5, 0, -1):
+        print(f'The script will start in: {i} seconds', end='\r')
+        sleep(1)
+    print('')
