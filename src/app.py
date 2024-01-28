@@ -16,7 +16,8 @@ from pyautogui import *
 
 from player import Player
 from userprofile import UserProfile
-from script import activate_game_window, start_count_down
+from script import start_count_down
+from windowcontroller import WindowController
 # from inputimeout import inputimeout, TimeoutOccurred
 
 class App():
@@ -25,7 +26,9 @@ class App():
         """
         self.config = configparser.ConfigParser()
         self.config.read('../config.ini')
-        self.is_countdown_enabled = self.config['game'].getboolean('enable_count_down')
+        self.enable_countdown = self.config['game'].getboolean('enable_count_down')
+        self.enable_drink_coffee = self.config['game'].getboolean('enable_drink_coffee')
+        self.coffee_shortcut = self.config['shortcut']['coffee']
 
         # filter out a list of available user profiles
         self.profile_names = ['edit custom configuration']
@@ -117,10 +120,10 @@ class App():
 
         # todo
         if pid == 'q':
-            print('The script has been terminated.')
+            print('The script has been terminated')
             exit()
         elif pid == '0':
-            print('This feature has not been implemented yet.')
+            print('Follow the guides in config.ini to configure your settings and create your own profiles')
             exit()
         self.profile_id = pid
         
@@ -130,10 +133,12 @@ class App():
         """
         profile_name = self.profile_names[int(self.profile_id)]
         section = self.config[profile_name]
+
         retrieval_duration_second = float(section.get('retrieval_duration_second', fallback=0))
         retrieval_delay_second = float(section.get('retrieval_delay_second', fallback=0))
         check_delay_second = float(section.get('check_delay_second', fallback=0))
-        cast_power_level = int(section.get('check_delay_second', fallback=3))
+        cast_power_level = int(section.get('cast_power_level', fallback=3))
+        base_iteration = int(section.get('base_iteration', fallback=0))
 
         self.profile = UserProfile(
             profile_name,
@@ -144,7 +149,10 @@ class App():
             retrieval_duration_second,
             retrieval_delay_second,
             check_delay_second,
-            cast_power_level)
+            cast_power_level,
+            base_iteration,
+            self.enable_drink_coffee,
+            self.coffee_shortcut)
 
     def display_profile_info(self) -> None:
         """Display the selected profile in the console.
@@ -153,18 +161,20 @@ class App():
         print('+---------------------------------------+')
         print(f'| Profile name: {profile.profile_name:23} |')
         print('+---------------------------------------+')
-        print(f'| Reel type: {profile.reel_type:26} |')
-        print('+---------------------------------------+')
         print(f'| Fishing strategy: {profile.fishing_strategy:19} |')
         print('+---------------------------------------+')
         print(f'| Keep strategy: {profile.keep_strategy:22} |')
+        print('+---------------------------------------+')
+        print(f'| Reel type: {profile.reel_type:26} |')
+        print('+---------------------------------------+')
+        print(f'| Enable drink coffee: {str(profile.enable_drink_coffee):16} |')
         print('+---------------------------------------+')
         print(f'| Current number of fish: {str(profile.current_fish_count):13} |')
         print('+---------------------------------------+')
 
     #todo
     def show_save_prompt(self, strategy, release_strategy, fish_count):
-        print('This feature has not been implemented yet.')
+        # print('Follow the guides in config.ini to configure your settings and create your own profiles')
         exit()
         if 'y' == input('Do you want to save the current setting?'):
             config = configparser.ConfigParser()
@@ -188,10 +198,11 @@ if __name__ == '__main__':
     app.gen_profile()
     app.display_profile_info()
 
-    if app.is_countdown_enabled:
+    if app.enable_countdown:
         start_count_down()
-    print('The script has been started.') 
+    print('The script has been started') 
 
-    activate_game_window()
-    fisherman = Player(app.profile) # todo: bottom fishing trophy slow mode
+    controller = WindowController()
+    controller.activate_game_window()
+    fisherman = Player(app.profile)
     fisherman.start_fishing()

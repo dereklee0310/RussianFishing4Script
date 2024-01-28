@@ -16,9 +16,9 @@ def setup_config():
     if 'y' != input('Do you want to restore the default configuration? [Y/n] ').lower():
       return False
     else:
-      print('config.ini has been reset.')
+      print('config.ini has been reset')
   else:
-    print('config.ini has been created.')
+    print('config.ini has been created')
 
   with open('config.ini', 'w') as file:
     config['script'] = {'relogin': 'False',

@@ -33,13 +33,21 @@ class Reel():
         hold_left_click(duration)
         sleep(delay)
 
+    def tighten_up(self, duration: float=1.04) -> None:
+        """Tighten the line for bottom layer pirking
+
+        :param duration: 2 rotations for 202s (0.52 * 2), defaults to 1.04
+        :type duration: float, optional
+        """
+        hold_left_click(duration)
+
 class ConventionalReel(Reel):
     """Class for reels that support gear ratio switching.
 
     :param Reel: base reel class
     :type Reel: Reel
     """
-    def switch_gear_ratio(self):
+    def switch_gear_ratio(self) -> None:
         """Switch gear ratio
         """
         with keyDown('ctrl'):

@@ -1,7 +1,7 @@
 """
 Module for UserProfile class.
 
-Todo: bottom fishing delay
+Todo: bottom fishing delay, revise docstring
 """
 class UserProfile():
     """Class for user profile encapsulation.
@@ -15,7 +15,10 @@ class UserProfile():
                  duration: float, 
                  delay: float, 
                  check_delay_second: float,
-                 cast_power_level: int):
+                 cast_power_level: int,
+                 base_iteration: int,
+                 enable_drink_coffee: bool,
+                 coffee_shortcut: str):
         """Constructor method.
 
         :param profile_name: title of the user profile
@@ -28,7 +31,7 @@ class UserProfile():
         :type keep_strategy: str
         :param current_fish_count: int
         :type current_fish_count: str
-        #todo: duration and delay
+        #todo: duration and delay, ..., etc.
         """
         self.profile_name = profile_name
         self.reel_type = reel_type
@@ -39,3 +42,6 @@ class UserProfile():
         self.delay = delay
         self.check_delay_second = check_delay_second
         self.cast_power_level = cast_power_level
+        self.base_iteration = base_iteration
+        self.enable_drink_coffee = enable_drink_coffee
+        self.coffee_shortcut = coffee_shortcut

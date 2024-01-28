@@ -9,6 +9,7 @@ A simple script for AFKing Russian Fishing 4
 
 ## Built With
 * Python 3.11 
+* PyAutoGuI
   
 ## Getting Started
 ### Install
@@ -48,7 +49,7 @@ python validate.py
 ### 3. Execute the Main Fishing Script
 - By default (no arguments), it will display a list of available profiles, then start fishing with empty keepnet and keep all the fishes you caught.
 ```
-python app.py [-h] [-p PID] [-n FISH_COUNT] [-a] [-m]
+python app.py [-a] [-m] [-n FISH_COUNT] [-p PID]
 ```
 - Display help information
 ```
@@ -77,25 +78,26 @@ python calculator.py
 - How to exit the program?
   - Use Ctrl + C to send a KeyboardInterrupt signal.
 - Failed to exit the program?
-  - The Shift key or a mouse button might have been pressed down by the script.
-  - Press the button to release it, then type Ctrl + C as usual.  
+  - The Shift key might have been pressed down.
+  - Press again to release it, then type Ctrl + C as usual.  
 - Stuck at retrieving stage?
   - Change the game resolution until the `validation.py` is pass.
   - Keep away from light sources, e.g., boat headlights on Norwegian Sea's boat.
+
+## Configuration
+Edit `config.ini` to tweak the parameters.
 
 ## Roadmap
 - [x] Marine fishing
 - [x] Making lures/baits/groundbaits/foods
 - [x] Add command line arguments support
 - [x] Refactor bottom fishing
+- [x] Jig step/Twitching/Stop and go/Retrieval and pause/Walk the dog
 - [ ] Carp fishing
+- [ ] Wakey rig
 - [ ] Snag detection
 - [ ] Spooling detection
-- [ ] Wakey rig
-- [ ] Jig step/Twitching/Stop and go/Retrieval and pause/Walk the dog
-- [ ] Reel parameters customization
 - [ ] GUI
-- [ ] Refactor code using FSM
 - [ ] Revise setup.py
 
 ## License

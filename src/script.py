@@ -46,13 +46,6 @@ def sleep_and_decrease(num: int , delay: int) -> int:
     sleep(delay)
     return num - delay
 
-def activate_game_window() -> None:
-    """Activate game window with English title.
-    """
-    window = getWindowsWithTitle("Russian Fishing 4")[0]
-    window.activate()
-    sleep(0.25)
-
 def get_image_dir_path() -> str:
     """Build the path for static images based on language option.
 

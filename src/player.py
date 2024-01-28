@@ -23,7 +23,6 @@ class Player():
     marked_fish_count = 0
     unmarked_fish_count = 0
     cast_miss_count = 0
-    # delay = 8
     trophy_mode = None
     cast_records = []
     keep_records = []
@@ -37,13 +36,16 @@ class Player():
         self.keepnet_limit -= profile.current_fish_count
         self.fishing_strategy = profile.fishing_strategy
         self.keep_strategy = profile.keep_strategy
-        self.tackle = Tackle(profile.reel_name)
+        self.tackle = Tackle(profile.reel_type)
         self.timer = Timer()
 
         self.duration = profile.duration
         self.delay = profile.delay
         self.check_delay_second = profile.check_delay_second
         self.cast_power_level = profile.cast_power_level
+        self.base_iteration = profile.base_iteration
+        self.enable_drink_coffee = profile.enable_drink_coffee
+        self.coffee_shortcut = profile.coffee_shortcut
 
     # todo: complete this and add docstring
     def record_routine_duration(self, cast_time, keep_time) -> None:
@@ -121,9 +123,10 @@ class Player():
             if self.tackle.retrieve(duration=duration, delay=delay):
                 break
             elif is_fish_hooked():
-                #todo: refill the energy
                 if is_fast:
                     keyUp('shift') # large fish, back to slow mode
+                if self.enable_drink_coffee:
+                    press(self.coffee_shortcut)
                 self.tackle.retrieve(duration=duration, delay=delay)
             elif is_fish_captured():
                 print('! Fish captured without pulling')
@@ -161,13 +164,6 @@ class Player():
                 self.keep_fish()
                 break
             elif is_fish_hooked():
-                press('space') # use landing net
-                sleep(6)
-                if is_fish_captured():
-                    self.keep_fish()
-                    break
-                else:
-                    press('space') # hide landing net if failed
                 self.tackle.retrieve(duration=8, delay=4) # half retrieval
             else:
                 print('! Fish got away while pulling')
@@ -181,7 +177,7 @@ class Player():
                 self.quit_game('! Tackle is broken')
 
             self.resetting_stage()
-            self.tackle.cast()
+            self.tackle.cast(power_level=5)
             self.retrieving_stage()
             # skip pulling if there is no fish
             if not is_fish_hooked():
@@ -197,9 +193,9 @@ class Player():
                 self.quit_game('! Tackle is broken')
 
             self.resetting_stage()
-            self.tackle.cast() # default
-            self.tackle.retrieve_with_pause(duration, delay)
-            self.retrieving_stage(duration=8) # default
+            self.tackle.cast(power_level=5)
+            self.tackle.retrieve_with_pause(duration, delay, self.base_iteration)
+            self.retrieving_stage(duration=4, delay=2)
             # skip pulling if there is no fish
             if not is_fish_hooked():
                 self.cast_miss_count += 1
@@ -295,14 +291,14 @@ class Player():
     def relogin(self):
         pass
     
-    # todo
-    def drink_coffee(self):
-        keyDown('t')
-        sleep(1)
-        moveTo(locateOnScreen('../static/coffee.png', confidence=0.98), duration=0.5)
-        click()
-        sleep(0.5)
-        keyUp('t')
+    # deprecated
+    # def drink_coffee(self):
+    #     keyDown('t')
+    #     sleep(1)
+    #     moveTo(locateOnScreen('../static/coffee.png', confidence=0.98), duration=0.5)
+    #     click()
+    #     sleep(0.5)
+    #     keyUp('t')
 
 
 # bottom backup
