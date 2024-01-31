@@ -79,7 +79,6 @@ class Tackle():
                 raise ValueError('Invalid power level')
             
         sleep(cast_delay)
-        click()
         if sink_delay:
             sleep(sink_delay)
         print('Casting success')

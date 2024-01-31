@@ -14,8 +14,11 @@ parent_dir = get_image_dir_path()
 def is_fish_hooked():
     return locateOnScreen(fr'{parent_dir}get.png', confidence=0.8)
 
-def is_tackle_broked():
+def is_tackle_broke():
     return locateOnScreen(fr'{parent_dir}broke.png', confidence=0.6)
+
+def is_disconnected():
+    return locateOnScreen(fr'{parent_dir}disconnected.png', confidence=0.9)
 
 def is_fish_captured():
     return locateOnScreen(fr'{parent_dir}keep.png', confidence=0.9)
@@ -33,6 +36,7 @@ def is_fish_marked():
 def is_moving_in_bottom_layer():
     return locateOnScreen(fr'{parent_dir}movement.png', confidence=0.7)
 
+# quit through ese menu
 def get_quit_position():
     return locateOnScreen(fr'{parent_dir}quit.png', confidence=0.8)
 
@@ -47,3 +51,13 @@ def is_operation_failed():
 
 def get_ok_position():
     return locateOnScreen(fr'{parent_dir}ok.png', confidence=0.8)
+
+# quit through main menu
+def get_exit_icon_position():
+    return locateOnScreen(fr'{parent_dir}exit.png', confidence=0.8)
+
+def get_confirm_exit_icon_position():
+    return locateOnScreen(fr'{parent_dir}confirm_exit.png', confidence=0.8)
+
+def is_harvest_success():
+    return locateOnScreen(fr'{parent_dir}dig_pcs.png', confidence=0.8)

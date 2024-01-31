@@ -33,7 +33,7 @@ class Reel():
         hold_left_click(duration)
         sleep(delay)
 
-    def tighten_up(self, duration: float=1.04) -> None:
+    def tighten_line(self, duration: float=1.04) -> None:
         """Tighten the line for bottom layer pirking
 
         :param duration: 2 rotations for 202s (0.52 * 2), defaults to 1.04

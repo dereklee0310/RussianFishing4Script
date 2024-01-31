@@ -18,11 +18,11 @@ from script import *
 from userprofile import UserProfile
 
 class Player():
-    keepnet_limit = 100
     keep_fish_count = 0
     marked_fish_count = 0
     unmarked_fish_count = 0
     cast_miss_count = 0
+    coffee_count = 0
     trophy_mode = None
     cast_records = []
     keep_records = []
@@ -33,19 +33,11 @@ class Player():
         :param profile: profile
         :type profile: UserProfile
         """
-        self.keepnet_limit -= profile.current_fish_count
-        self.fishing_strategy = profile.fishing_strategy
-        self.keep_strategy = profile.keep_strategy
-        self.tackle = Tackle(profile.reel_type)
         self.timer = Timer()
 
-        self.duration = profile.duration
-        self.delay = profile.delay
-        self.check_delay_second = profile.check_delay_second
-        self.cast_power_level = profile.cast_power_level
-        self.base_iteration = profile.base_iteration
-        self.enable_drink_coffee = profile.enable_drink_coffee
-        self.coffee_shortcut = profile.coffee_shortcut
+        self.profile = profile
+        self.fishes_to_catch = profile.keepnet_limit - profile.fishes_in_keepnet
+        self.tackle = Tackle(profile.reel_type)
 
     # todo: complete this and add docstring
     def record_routine_duration(self, cast_time, keep_time) -> None:
@@ -62,7 +54,7 @@ class Player():
             self.marked_fish_count += 1
         else:
             self.unmarked_fish_count += 1
-            if self.keep_strategy == 'marked':
+            if self.profile.enable_release_unmarked:
                 press('backspace')
                 print('Release unmarked fish')
                 return
@@ -72,7 +64,7 @@ class Player():
         print('Keep the fish')
         self.keep_fish_count += 1
         if self.is_keepnet_full():
-            self.quit_game()
+            self.normal_quit('Keepnet limit reached')
 
     def is_keepnet_full(self) -> bool:
         """Check if the keepnet is full
@@ -80,23 +72,23 @@ class Player():
         :return: True if the keepnet limit is reached, False otherwise
         :rtype: bool
         """
-        return self.keep_fish_count == self.keepnet_limit
+        return self.keep_fish_count == self.fishes_to_catch
 
     # todo: revise and add docstring
     def start_fishing(self):
         try:
-            match self.fishing_strategy:
+            match self.profile.fishing_strategy:
                 case 'spin':
                     self.spin_fishing()
+                case 'spin_with_pause':
+                    self.spin_fishing_with_pause()
                 case 'bottom':
                     self.bottom_fishing()
-                case 'strong_pirking':
-                    self.pirking_fishing(duration=1.75, delay=4)
-                case 'pirking':
-                    self.pirking_fishing(duration=0.5, delay=2)
-                case 'spin_with_pause':
-                    self.spin_fishing_with_pause(duration=self.duration, delay=self.delay)
-                #todo: default
+                case 'marine':
+                    self.marine_fishing()
+                case _:
+                    raise ValueError('Invalid fishing strategy')
+
         except KeyboardInterrupt:
                 self.show_quit_msg()
 
@@ -106,33 +98,41 @@ class Player():
                 break
             elif is_fish_hooked():
                 print('! Fish hooked while resetting')
-                # a single pull should do the job
-                if self.tackle.pull():
+                if self.tackle.pull(): # a single pull should do the job
                     self.keep_fish()
-                break # whether success or not, back to normal program flow 
+                break # whether success or not, back to main fishing loop
             elif is_fish_captured():
                 print('! Fish captured without pulling')
                 self.keep_fish()
                 break
+            elif is_tackle_broke():
+                self.save_screenshot()
+                self.normal_quit('! Tackle is broken')
+            elif is_disconnected():
+                self.disconnected_quit()
             # reset again if no fish is hoooked or captured
 
     def retrieving_stage(self, duration=16, delay=4, is_fast=False):
         if is_fast:
             keyDown('shift')
+
         while True:
-            if self.tackle.retrieve(duration=duration, delay=delay):
+            if self.tackle.retrieve(duration, delay):
                 break
             elif is_fish_hooked():
+                # if fish is still hoooked, refill energy and toggle accelerated retrieval
                 if is_fast:
-                    keyUp('shift') # large fish, back to slow mode
-                if self.enable_drink_coffee:
-                    press(self.coffee_shortcut)
-                self.tackle.retrieve(duration=duration, delay=delay)
+                    keyUp('shift')
+                if self.profile.enable_drink_coffee:
+                    press(self.profile.coffee_shortcut)
+                    self.coffee_count += 1
+                continue # retrive again
             elif is_fish_captured():
                 print('! Fish captured without pulling')
                 break # defer to pulling stage
             else:
-                pass # retrieve again
+                break # unexpected failure, return to main fishing loop
+
         if is_fast:
             keyUp('shift')
 
@@ -145,16 +145,20 @@ class Player():
             elif is_fish_hooked():
                 return # start retrieving immediately
             i = sleep_and_decrease(i, 2)
-        self.tackle.reel.do_pre_rotation()
+        self.tackle.reel.tighten_line()
 
 
-    def pirking_stage(self, duration, delay):
-        while not self.tackle.pirking(duration, delay):
+    def pirking_stage(self):
+        pirk_duration = self.profile.pirk_duration
+        pirk_delay = self.profile.pirk_delay
+        tighten_duration = self.profile.tighten_duration
+
+        while not self.tackle.pirking(pirk_duration, pirk_delay):
             # adjust the depth of the lure if no fish is hooked
             print('Adjust lure depth')
             press('enter') # open reel
             sleep(4)
-            self.tackle.reel.do_pre_rotation()
+            self.tackle.reel.tighten_line(tighten_duration)
             self.cast_miss_count += 1 # add a miss count if pirking is failed
             # todo: improve dedicated miss count for marine fishing
 
@@ -171,11 +175,6 @@ class Player():
 
     def spin_fishing(self):
         while True:
-            #todo: use another thread to monitor it
-            if is_tackle_broked():
-                self.save_screenshot()
-                self.quit_game('! Tackle is broken')
-
             self.resetting_stage()
             self.tackle.cast(power_level=5)
             self.retrieving_stage()
@@ -185,16 +184,14 @@ class Player():
                 continue
             self.pulling_stage()
 
-    def spin_fishing_with_pause(self, duration, delay):
+    def spin_fishing_with_pause(self):
+        duration = self.profile.retrieval_duration
+        delay = self.profile.retrieval_delay
+        base_iteration = self.profile.base_iteration
         while True:
-            #todo: use another thread to monitor it
-            if is_tackle_broked():
-                self.save_screenshot()
-                self.quit_game('! Tackle is broken')
-
             self.resetting_stage()
             self.tackle.cast(power_level=5)
-            self.tackle.retrieve_with_pause(duration, delay, self.base_iteration)
+            self.tackle.retrieve_with_pause(duration, delay, base_iteration)
             self.retrieving_stage(duration=4, delay=2)
             # skip pulling if there is no fish
             if not is_fish_hooked():
@@ -202,15 +199,14 @@ class Player():
                 continue
             self.pulling_stage()
 
-    def bottom_fishing(self, retrieval_duration=4, retrieval_delay=2):
+    def bottom_fishing(self):
+        #? add retrieval duration and delay
+        check_delay = self.profile.check_delay
+        cast_power_level = self.profile.cast_power_level
         check_counts = [0, 0, 0, 0]
         rod_key = 0
+
         while True:
-            if is_tackle_broked():
-                print('! Tackle is broken')
-                self.save_screenshot()
-                self.quit_game()
-            
             rod_key = 1 if rod_key == 3 else rod_key + 1
             print(f'Checking rod {rod_key}')
             press(f'{rod_key}')
@@ -223,43 +219,57 @@ class Player():
                 if check_counts[rod_key] > 16:
                     check_counts[rod_key] = 0
                     self.resetting_stage()
-                    self.tackle.cast(power_level=self.cast_power_level, cast_delay=4)
+                    self.tackle.cast(cast_power_level, cast_delay=4)
                 press('0')
-                sleep(self.check_delay_second)
+                sleep(check_delay)
                 continue
 
             check_counts[rod_key] = 0
 
-            self.retrieving_stage(duration=retrieval_duration, delay=retrieval_delay)
+            self.retrieving_stage(duration=4, delay=2)
             if is_fish_hooked():
                 self.pulling_stage()
             self.resetting_stage()
-            self.tackle.cast(power_level=self.cast_power_level, cast_delay=4)
+            self.tackle.cast(cast_power_level, cast_delay=4)
 
-    def pirking_fishing(self, duration, delay):
-        while True:
-            if is_tackle_broked(): #todo: use another thread to monitor it
-                self.save_screenshot()
-                self.quit_game('! Tackle is broken')
-                
+    def marine_fishing(self):
+        while True:   
             self.resetting_stage()
             self.tackle.cast(power_level=1)
             self.sinking_stage()
-            self.pirking_stage(duration, delay)
+            self.pirking_stage()
             # for small fishes at 34m and 41m, use accelerated retrieval
             self.retrieving_stage(duration=8, is_fast=True)
             # there is a high chance that fish get away while retrieving from bottom layer
             if is_fish_hooked():
                 self.pulling_stage()
         
-    def quit_game(self, msg=""):
+    def normal_quit(self, msg=""):
         print(msg)
+
+        # add sleep() to wait for the menu to load
         press('esc')
-        sleep(1) # wait for the menu to load
-        moveTo(get_quit_position(), duration=0.4) 
+        sleep(0.25)
+        moveTo(get_quit_position()) 
         click()
-        sleep(1)
-        moveTo(get_yes_position(), duration=0.4)
+        sleep(0.25)
+        moveTo(get_yes_position())
+        click()
+        self.show_quit_msg()
+
+    def disconnected_quit(self):
+        print('! No connection with the game server')
+
+        # add sleep() to wait for the menu to load
+        press('space')
+        sleep(0.25)
+        press('space')
+        sleep(0.25)
+
+        moveTo(get_exit_icon_position())
+        click()
+        sleep(0.25)
+        moveTo(get_confirm_exit_icon_position())
         click()
         self.show_quit_msg()
 
@@ -272,12 +282,13 @@ class Player():
         total_cast_count = self.cast_miss_count + total_fish_count
         print('--------------------Result--------------------')
         print(f'Caught fishes  : {self.keep_fish_count}')
-        print(f'Marked rate    : {self.marked_fish_count}/{total_fish_count} {int((self.marked_fish_count) / total_fish_count * 100)}%')
-        print(f'Bite rate      : {total_fish_count}/{total_cast_count} {int(total_fish_count / total_cast_count * 100)}%')
-            
+        print(f'Marked ratio   : {self.marked_fish_count}/{total_fish_count} {int((self.marked_fish_count) / total_fish_count * 100)}%')
+        print(f'Bite rate      : {total_fish_count}/{total_cast_count} {int(total_fish_count / total_cast_count * 100)}%')   
         print(f'Start time     : {self.timer.get_start_datetime()}')
         print(f'Finish time    : {self.timer.get_cur_datetime()}')
         print(f'Execution time : {self.timer.get_duration()}')
+        if self.profile.enable_drink_coffee:
+            print(f'Coffee Drank   : {self.coffee_count}')
         exit()
 
     def save_screenshot(self):
@@ -286,6 +297,20 @@ class Player():
         with open(fr'../screenshots/{self.timer.get_cur_timestamp()}.png', 'wb') as file: 
             screenshot().save(file, 'png')
         press('esc')
+
+    # todo: edit shortcut key
+    def harvest_baits(self):
+        press('5')
+        sleep(2)
+        click()
+        sleep(5) # 4 is enough, + 1 for inspection
+
+        i = 64
+        while i > 0 and not is_harvest_success():
+            i = sleep_and_decrease(i, 4)
+        press('space')
+        sleep(0.25)
+        press('backspace')
 
     # todo
     def relogin(self):

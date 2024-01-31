@@ -1,11 +1,13 @@
 ## About the Project
-A simple script for AFKing Russian Fishing 4  
-- Spin fishing
-- Bottom fishing
-- Marine fishing
-- Toggle moving
-- Making lures/baits/groundbaits/foods
-- Calculate maximum friction brake
+A simple script for AFKing Russian Fishing 4 
+
+## Patchnotes
+- Improve UI
+- Fix marine fishing bug and casting bug
+- Add new user profiles
+- Add checking mechanism for disconnection
+- Add command line arguments support and counter for coffee drinking
+
 
 ## Built With
 * Python 3.11 
@@ -85,20 +87,18 @@ python calculator.py
   - Keep away from light sources, e.g., boat headlights on Norwegian Sea's boat.
 
 ## Configuration
-Edit `config.ini` to tweak the parameters.
+Edit `config.ini` to tweak the parameters.  
+At the current state, the constantly changing configuration file might lead to a conflicted `git pull`.    
+Please use `git clone` to get the latest version and paste your user settings and profiles into `config.ini`.
 
 ## Roadmap
-- [x] Marine fishing
-- [x] Making lures/baits/groundbaits/foods
-- [x] Add command line arguments support
-- [x] Refactor bottom fishing
-- [x] Jig step/Twitching/Stop and go/Retrieval and pause/Walk the dog
+- [ ] Line chart of fish captured time
+- [ ] Email notification
+- [ ] Refine configuration file 
 - [ ] Carp fishing
 - [ ] Wakey rig
 - [ ] Snag detection
 - [ ] Spooling detection
-- [ ] GUI
-- [ ] Revise setup.py
 
 ## License
 RussianFishing4Script is licensed under the [GNU General Public License version 3](LICENSE).
