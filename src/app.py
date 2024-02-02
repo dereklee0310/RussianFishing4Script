@@ -141,7 +141,7 @@ class App():
             profile_section.getfloat('retrieval_delay', fallback=1.5),
             profile_section.getint('base_iteration', fallback=0),
             profile_section.getfloat('check_delay', fallback=8),
-            profile_section.getint('cast_power_level', fallback=3),
+            profile_section.getfloat('cast_power_level', fallback=3),
             profile_section.getfloat('pirk_duration', fallback=1.75),
             profile_section.getfloat('pirk_delay', fallback=4),
             profile_section.getfloat('tighten_duration', fallback=1))
@@ -207,7 +207,7 @@ if __name__ == '__main__':
     controller = WindowController()
     controller.activate_game_window()
     fisherman = Player(app.profile)
-    
+
     # test area
     # fisherman.harvest_baits()
 

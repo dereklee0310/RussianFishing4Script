@@ -220,6 +220,7 @@ class Player():
                     check_counts[rod_key] = 0
                     self.resetting_stage()
                     self.tackle.cast(cast_power_level, cast_delay=4)
+                    click() # close the reel
                 press('0')
                 sleep(check_delay)
                 continue
@@ -231,6 +232,7 @@ class Player():
                 self.pulling_stage()
             self.resetting_stage()
             self.tackle.cast(cast_power_level, cast_delay=4)
+            click() # close the reel
 
     def marine_fishing(self):
         while True:   

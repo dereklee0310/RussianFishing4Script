@@ -2,11 +2,8 @@
 A simple script for AFKing Russian Fishing 4 
 
 ## Patchnotes
-- Improve UI
-- Fix marine fishing bug and casting bug
-- Add new user profiles
-- Add checking mechanism for disconnection
-- Add command line arguments support and counter for coffee drinking
+- Fix recasting bug in bottom fishing
+- Add floating point support for casting power level
 
 
 ## Built With
@@ -51,7 +48,7 @@ python validate.py
 ### 3. Execute the Main Fishing Script
 - By default (no arguments), it will display a list of available profiles, then start fishing with empty keepnet and keep all the fishes you caught.
 ```
-python app.py [-a] [-m] [-n FISH_COUNT] [-p PID]
+python app.py [-a] [-m] [-c] [-n FISHES_IN_KEEPNET] [-p PID]
 ```
 - Display help information
 ```

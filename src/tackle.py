@@ -47,13 +47,13 @@ class Tackle():
         return i > 0
     
     def cast(self, 
-             power_level: int | None=3, 
+             power_level: float | None=3, 
              cast_delay: int | None=6,
              sink_delay: int | None=0) -> None:
         """Cast the rod.
 
         :param power_level: casting power, 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+, defaults to 3
-        :type power_level: int, optional
+        :type power_level: float, optional
         :param cast_delay: time to wait until lure/bait contact with water, defaults to 6
         :type cast_delay: int, optional
         :param sink_delay: time to wait until lure/bait sink below water, defaults to 0
@@ -62,21 +62,18 @@ class Tackle():
         """
         print('Casting')
 
-        match power_level:
-            case 1:
-                click()
-                return # early return for marine fishing
-            case 2:
-                hold_left_click(0.4)
-            case 3:
-                hold_left_click(0.8)
-            case 4:
-                hold_left_click(1.2)
-            case 5:
-                with hold('shift'):
-                    hold_left_click(1)
-            case _:
-                raise ValueError('Invalid power level')
+        if power_level < 0 or power_level > 5:
+            print('! Invalid power level')
+            exit()
+        elif power_level == 1:
+            click()
+        elif power_level == 5:
+            with hold('shift'):
+                hold_left_click(1)
+        else:
+            duration = 1.6 * (power_level - 1) / 4 # -1 to keep consistent with old settings
+            hold_left_click(duration)
+            
             
         sleep(cast_delay)
         if sink_delay:

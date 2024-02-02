@@ -22,7 +22,7 @@ class UserProfile():
                  base_iteration: int,
                  # bottom
                  check_delay: float,
-                 cast_power_level: int,
+                 cast_power_level: float,
                  # marine
                  pirk_duration: float,
                  pirk_delay: float,
