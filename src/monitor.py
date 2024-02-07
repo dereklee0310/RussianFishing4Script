@@ -3,9 +3,9 @@ Module for pyautogui.locateOnScreen wrappers.
 
 Todo:
     Validate language option
-    Implement is_tackle_snagged()
+    Implement snage detection
 """
-from pyautogui import locateOnScreen
+from pyautogui import locateOnScreen, locateCenterOnScreen
 
 from script import get_image_dir_path
 
@@ -60,4 +60,22 @@ def get_confirm_exit_icon_position():
     return locateOnScreen(fr'{parent_dir}confirm_exit.png', confidence=0.8)
 
 def is_harvest_success():
-    return locateOnScreen(fr'{parent_dir}dig_pcs.png', confidence=0.8)
+    return locateOnScreen(fr'{parent_dir}harvest_confirm.png', confidence=0.8)
+
+def get_energy_icon_position():
+    return locateCenterOnScreen(fr'{parent_dir}energy.png', confidence=0.8)
+
+def get_food_icon_position():
+    return locateCenterOnScreen(fr'{parent_dir}food.png', confidence=0.8)
+
+def get_comfort_icon_position():
+    return locateCenterOnScreen(fr'{parent_dir}comfort.png', confidence=0.8)
+
+def get_carrot_icon_position():
+    return locateOnScreen(fr'{parent_dir}carrot.png', confidence=0.8)
+
+def get_tea_icon_position():
+    return locateOnScreen(fr'{parent_dir}tea.png', confidence=0.9)
+
+def get_coffee_icon_position():
+    return locateOnScreen(fr'{parent_dir}coffee.png', confidence=0.9)

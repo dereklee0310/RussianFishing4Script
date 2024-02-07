@@ -3,7 +3,7 @@ Module for Player class
 
 Todo: docstrings
 """
-from time import sleep
+from time import sleep, time
 from datetime import datetime
 from threading import Thread
 
@@ -13,6 +13,7 @@ import keyboard
 
 from tackle import Tackle
 from timer import Timer
+import monitor
 from monitor import *
 from script import *
 from userprofile import UserProfile
@@ -27,17 +28,30 @@ class Player():
     cast_records = []
     keep_records = []
 
-    def __init__(self, profile: UserProfile) -> None:
+    def __init__(self, profile: UserProfile, config: configparser.ConfigParser) -> None:
         """Initialize attributes based on the user profile.
 
         :param profile: profile
         :type profile: UserProfile
+        # todo
         """
         self.timer = Timer()
 
+        # general settings
+        self.keepnet_limit = config['game'].getint('keepnet_limit')
+        self.harvest_baits_threshold = config['game'].getfloat('harvest_baits_threshold')
+
+        # shortcuts
+        self.coffee_shortcut = config['shortcut']['coffee']
+        self.shovel_spoon_shortcut = config['shortcut']['shovel_spoon']
+
+        # user profile and command line arguments
         self.profile = profile
-        self.fishes_to_catch = profile.keepnet_limit - profile.fishes_in_keepnet
-        self.tackle = Tackle(profile.reel_type)
+
+        self.fishes_to_catch = self.keepnet_limit - profile.fishes_in_keepnet
+        self.tackle = Tackle()
+        self.pre_refill_time = 0
+        
 
     # todo: complete this and add docstring
     def record_routine_duration(self, cast_time, keep_time) -> None:
@@ -92,6 +106,25 @@ class Player():
         except KeyboardInterrupt:
                 self.show_quit_msg()
 
+    def refilling_stage(self):
+        if not self.profile.enable_food_comfort_refill:
+            return
+
+        # affected by weather, need a threshold
+        if self.is_comfort_low() and time.time() - self.pre_refill_time > 300:
+            self.pre_refill_time = time.time()
+            self.consume_food('tea')
+        sleep(0.25)
+        if self.is_hunger_low():
+            self.consume_food('carrot')
+        sleep(0.25)
+
+    def consume_food(self, food):
+        with hold('t'):
+            sleep(0.25)
+            moveTo(getattr(monitor, f'get_{food}_icon_position')())
+            click()
+
     def resetting_stage(self):
         while not is_tackle_ready():
             if self.tackle.reset():
@@ -123,8 +156,8 @@ class Player():
                 # if fish is still hoooked, refill energy and toggle accelerated retrieval
                 if is_fast:
                     keyUp('shift')
-                if self.profile.enable_drink_coffee:
-                    press(self.profile.coffee_shortcut)
+                if self.profile.enable_coffee_drinking:
+                    press(self.coffee_shortcut)
                     self.coffee_count += 1
                 continue # retrive again
             elif is_fish_captured():
@@ -175,6 +208,7 @@ class Player():
 
     def spin_fishing(self):
         while True:
+            self.refilling_stage()
             self.resetting_stage()
             self.tackle.cast(power_level=5)
             self.retrieving_stage()
@@ -189,6 +223,7 @@ class Player():
         delay = self.profile.retrieval_delay
         base_iteration = self.profile.base_iteration
         while True:
+            self.refilling_stage()
             self.resetting_stage()
             self.tackle.cast(power_level=5)
             self.tackle.retrieve_with_pause(duration, delay, base_iteration)
@@ -207,6 +242,9 @@ class Player():
         rod_key = 0
 
         while True:
+            self.refilling_stage()
+            self.harvesting_stage()
+
             rod_key = 1 if rod_key == 3 else rod_key + 1
             print(f'Checking rod {rod_key}')
             press(f'{rod_key}')
@@ -235,7 +273,8 @@ class Player():
             click() # close the reel
 
     def marine_fishing(self):
-        while True:   
+        while True:    
+            self.refilling_stage()
             self.resetting_stage()
             self.tackle.cast(power_level=1)
             self.sinking_stage()
@@ -267,6 +306,10 @@ class Player():
         sleep(0.25)
         press('space')
         sleep(0.25)
+  
+        # another space might be required when server down
+        press('space')
+        sleep(0.25)
 
         moveTo(get_exit_icon_position())
         click()
@@ -289,7 +332,7 @@ class Player():
         print(f'Start time     : {self.timer.get_start_datetime()}')
         print(f'Finish time    : {self.timer.get_cur_datetime()}')
         print(f'Execution time : {self.timer.get_duration()}')
-        if self.profile.enable_drink_coffee:
+        if self.profile.enable_coffee_drinking:
             print(f'Coffee Drank   : {self.coffee_count}')
         exit()
 
@@ -300,35 +343,62 @@ class Player():
             screenshot().save(file, 'png')
         press('esc')
 
-    # todo: edit shortcut key
-    def harvest_baits(self):
-        press('5')
-        sleep(2)
-        click()
-        sleep(5) # 4 is enough, + 1 for inspection
+    def is_energy_high(self):
+        pos = get_energy_icon_position()
+        if not pos:
+            return False
+        x, y = int(pos.x), int(pos.y)
+        # default threshold: 0.74,  well done FishSoft
+        last_point = int(19 + 152 * self.harvest_baits_threshold) - 1
+        return pixel(x + 19, y) == pixel(x + last_point, y)
+    
+    def is_hunger_low(self):
+        # 17 pre end 18 start
+        pos = get_food_icon_position()
+        if not pos:
+            return False
+        x, y = int(pos.x), int(pos.y)
+        last_point = int(18 + 152 * 0.5) - 1
+        return not pixel(x + 18, y) == pixel(x + last_point, y)
 
+    def is_comfort_low(self):
+        pos = get_comfort_icon_position()
+        if not pos:
+            return False
+        x, y = int(pos.x), int(pos.y)
+        last_point = int(18 + 152 * 0.51) - 1
+        return not pixel(x + 18, y) == pixel(x + last_point, y)
+    
+    def harvesting_stage(self):
+        if not self.profile.enable_baits_harvesting:
+            return
+        elif self.is_energy_high():
+            self.harvest_baits()
+
+    def harvest_baits(self):
+        # digging
+        press(self.shovel_spoon_shortcut)
+        sleep(3)
+        click()
+
+        # wait for result
+        sleep(5) # 4 is enough, + 1 for inspection
         i = 64
         while i > 0 and not is_harvest_success():
             i = sleep_and_decrease(i, 4)
+
+        # accept result and hide the tool
         press('space')
         sleep(0.25)
         press('backspace')
+        sleep(0.5) # wait for hide animation
 
     # todo
     def relogin(self):
         pass
+
+# bottom fishing backup
     
-    # deprecated
-    # def drink_coffee(self):
-    #     keyDown('t')
-    #     sleep(1)
-    #     moveTo(locateOnScreen('../static/coffee.png', confidence=0.98), duration=0.5)
-    #     click()
-    #     sleep(0.5)
-    #     keyUp('t')
-
-
-# bottom backup
 # failed_count = 0
 # rod_key = 0
 # while True:

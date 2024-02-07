@@ -12,20 +12,17 @@ from monitor import *
 from reel import *
 
 class Tackle():
-    """Class for all tackle depentent methods.
+    """Class for all tackle dependent methods.
     """
-    def __init__(self, reel_type: str):
+    def __init__(self):
         """Constructor method.
-
-        :param reel_type: reel type, conventional or spinning
-        :type reel_type: str
         """
         self.RESET_TIMEOUT = 16
         self.RETRIEVE_TIMEOUT = 120
         self.PULL_TIMEOUT = 32
         self.PIRKING_TIMEOUT = 32
         self.RETRIEVE_WITH_PAUSE_TIMEOUT = 128
-        self.reel = globals()[f'{reel_type.capitalize()}Reel']()
+        self.reel = Reel()
 
     def reset(self) -> bool:
         """Reset the tackle with a timeout.

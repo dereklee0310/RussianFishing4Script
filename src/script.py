@@ -81,3 +81,14 @@ def start_count_down() -> None:
         print(f'The script will start in: {i} seconds', end='\r')
         sleep(1)
     print('')
+
+def msg_exit(msg: str, is_error=False) -> None:
+    """Print message, then exit the program
+
+    :param msg: error message
+    :type msg: str
+    """
+    if is_error:
+        msg = f'Error: {msg}'
+    print(msg)
+    exit()

@@ -1,5 +1,5 @@
 """
-Module for Classes of different types of reels
+Module for Reel class
 """
 from time import sleep
 # from abc import ABC, abstractmethod
@@ -9,7 +9,7 @@ from pyautogui import *
 from script import hold_left_click
 
 class Reel():
-    """Base reel class
+    """General reel class.
     """
     def full_retrieve(self, duration=3) -> None:
         """Press down left mouse button longer than 2.2 seconds to lock it.
@@ -41,22 +41,8 @@ class Reel():
         """
         hold_left_click(duration)
 
-class ConventionalReel(Reel):
-    """Class for reels that support gear ratio switching.
-
-    :param Reel: base reel class
-    :type Reel: Reel
-    """
     def switch_gear_ratio(self) -> None:
-        """Switch gear ratio
+        """Switch gear ratio, designed for conventional reel.
         """
         with keyDown('ctrl'):
             press('space')
-
-class SpinningReel(Reel):
-    """Class for reels that don't support gear ratio switching.
-
-    :param Reel: base reel class
-    :type Reel: Reel
-    """
-    pass
