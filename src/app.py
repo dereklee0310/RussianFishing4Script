@@ -2,30 +2,28 @@
 Main CLI
 
 Usage: app.py
-
-Todo:
-    Docstrings
-    Implement show_save_prompt()
 """
 from time import sleep
-import argparse
-import configparser
+from argparse import ArgumentParser
+from configparser import ConfigParser
 import threading
 import os
 
 from pyautogui import *
+from prettytable import PrettyTable
 
 from player import Player
 from userprofile import UserProfile
-from script import start_count_down, msg_exit
+from script import start_count_down
 from windowcontroller import WindowController
 
 class App():
     def __init__(self):
         """Initalize parsers and generate a list of available user profiles.
         """
-        self.config = configparser.ConfigParser()
+        self.config = ConfigParser()
         self.config.read('../config.ini')
+
         # filter user profiles
         self.profile_names = ['edit configuration file']
         for section in self.config.sections():
@@ -35,28 +33,28 @@ class App():
         self.initialize_argparser()
 
     def initialize_argparser(self) -> None:
-        """Configure the parser and parse the command line arguments.
+        """Configure argparser and parse the command line arguments.
         """
-        parser = argparse.ArgumentParser(
+        parser = ArgumentParser(
                             prog='app.py', 
                             description='Start the script for Russian Fishing 4', 
                             epilog='')
-        # fish keeping strategy
+        # boolean flags
         parser.add_argument('-a', '--all', action='store_true',
                             help="keep all captured fishes, used by default if not specified")
         parser.add_argument('-m', '--marked', action='store_true',
                             help="keep only the marked fishes")
-        
-        # energy, food, and comfort refill options
         parser.add_argument('-c', '--coffee', action='store_true',
                             help='drink coffee if the retrieval time is greater than 2mins, \
                                 the shortcut of coffee can be modified in config.ini')
         parser.add_argument('-r', '--refill', action='store_true', 
                             help='refill food and comfort bar by consuming tea and carrot automatically')
-        parser.add_argument('-H', '--harvest_baits', action='store_true',
+        parser.add_argument('-H', '--harvest-baits', action='store_true',
                             help='harvest baits automatically, must be used with bottom fishing strategy')
+        parser.add_argument('-s', '--send-email', action='store_true',
+                            help='send email to the email address specified in .env when the program is terminated')
         
-        # misc
+        # options with arguments
         parser.add_argument('-n', '--fishes-in-keepnet', type=int, default=0,
                             help='the current number of fishes in your keepnet, 0 if not specified')
         parser.add_argument('-p', '--pid', type=int, 
@@ -70,19 +68,20 @@ class App():
         :rtype: bool
         """
         args = self.parser.parse_args()
-        self.enable_release_unmarked = args.marked 
+        self.enable_unmarked_release = args.marked 
         self.enable_coffee_drinking = args.coffee
         self.enable_food_comfort_refill = args.refill
         self.enable_baits_harvesting = args.harvest_baits
+        self.enable_email_sending = args.send_email
 
         if not self.is_fish_count_valid(args.fishes_in_keepnet):
-            msg_exit('Invalid fish count', is_error=True)
+            self.show_msg_and_quit('Invalid fish count', enable_error_prefix=True)
         self.fishes_in_keepnet = args.fishes_in_keepnet
 
-        if not args.pid:
+        if args.pid is None:
             return False
         elif not self.is_pid_valid(str(args.pid)):
-            msg_exit('Invalid profile id', is_error=True)
+            self.show_msg_and_quit('Invalid profile id', enable_error_prefix=True)
             exit()
         self.pid = args.pid
         return True
@@ -95,9 +94,7 @@ class App():
         :return: True if valid, False otherwise
         :rtype: bool
         """
-        if fish_count < 0 or fish_count >= int(self.config['game']['keepnet_limit']):
-            return False
-        return True
+        return fish_count >= 0 and fish_count < int(self.config['game']['keepnet_limit'])
     
     def is_pid_valid(self, pid: str) -> bool:
         """Validate the profile id.
@@ -107,11 +104,9 @@ class App():
         :return: True if valid, False otherwise
         :rtype: bool
         """
-        if pid == '0' or pid == 'q':
+        if pid =='q':
             return True
-        elif not pid.isdigit() or int(pid) < 0 or int(pid) > len(self.profile_names) - 1:
-            return False
-        return True
+        return pid.isdigit() and int(pid) >= 0 and int(pid) <= len(self.profile_names) - 1 
 
     def show_welcome_msg(self) -> None:
         """Display welcome message.
@@ -120,7 +115,6 @@ class App():
         print('|       Welcome to use RF4 fishing script       |')
         print('|    Please select an user profile using pid    |')
         print('+-----------------------------------------------+')
-
 
     def show_available_profiles(self) -> None:
         """List available user profiles.
@@ -131,19 +125,20 @@ class App():
             i += 1
     
     def get_pid_from_user(self) -> None:
-        """Validate user profile id from user input.
+        """Get and validate user profile id from user input.
         """
         pid = input("Enter profile id or press q to exit: ")
         while not self.is_pid_valid(pid):
             pid = input('Invalid profile id, please try again or press q to quit: ')
 
         if pid == 'q':
-            msg_exit('The script has been terminated')
+            self.show_msg_and_quit('The script has been terminated')
         elif pid == '0':
             os.startfile(r'..\config.ini') #? must be backslash
-            msg_exit('Save configuration and restart the script to apply changes')
+            self.show_msg_and_quit('Save to apply changes before restarting the script')
         self.pid = pid
 
+    # todo: decapsulate the profile object
     def gen_player(self) -> None:
         """Generate a player object according to args and configuration file.
         """
@@ -151,10 +146,11 @@ class App():
         profile_section = self.config[self.profile_name]
         profile = UserProfile(
             self.fishes_in_keepnet,
-            self.enable_release_unmarked,
+            self.enable_unmarked_release,
             self.enable_coffee_drinking,
             self.enable_food_comfort_refill,
             self.enable_baits_harvesting,
+            self.enable_email_sending,
             profile_section['fishing_strategy'],
             profile_section.getfloat('retrieval_duration', fallback=0.5),
             profile_section.getfloat('retrieval_delay', fallback=1.5),
@@ -164,57 +160,67 @@ class App():
             profile_section.getfloat('pirk_duration', fallback=1.75),
             profile_section.getfloat('pirk_delay', fallback=4),
             profile_section.getfloat('tighten_duration', fallback=1))
-        self.player = Player(profile, self.config) # todo
+        self.player = Player(profile, self.config)
 
-    def display_general_player_info(self) -> None:
-        """Display general game settings shared by all profiles.
-        """
-        # static game settings are handled in Player class constructor
-        profile = self.player.profile
-        print('+-----------------------------------------------+')
-        print(f'| Profile name: {self.profile_name:31} |')
-        print('+-----------------------------------------------+')
-        print(f'| Fishing strategy: {profile.fishing_strategy:27} |')
-        print('+-----------------------------------------------+')
-        print(f'| Enable release unmarked: {str(profile.enable_release_unmarked):20} |')
-        print('+-----------------------------------------------+')
-        print(f'| Enable coffee drinking: {str(profile.enable_coffee_drinking):21} |')
-        print('+-----------------------------------------------+')
-        print(f'| Enable food and comfort refill: {str(profile.enable_food_comfort_refill):13} |')
-        print('+-----------------------------------------------+')
-        print(f'| Enable baits harvesting: {str(profile.enable_baits_harvesting):20} |')
-        print('+-----------------------------------------------+')
-        print(f'| Fishes in keepnet: {str(profile.fishes_in_keepnet):26} |')
-        print('+-----------------------------------------------+')
-
-    def display_advanced_player_info(self):
-        """Display strategy-specific settings.
-
-        :raises ValueError: _description_
+    def show_user_settings(self) -> None:
+        """Display user settings.
         """
         profile = self.player.profile
+        table = PrettyTable(header=False, align='l')
+        table.title = 'User Settings'
+
+        # general settings
+        table.add_rows(
+            [
+                ['Profile name', self.profile_name],
+                ['Fishing strategy', profile.fishing_strategy],
+                ['Enable unmarked release', profile.enable_unmarked_release],
+                ['Enable coffee drinking', profile.enable_coffee_drinking],
+                ['Enable food and comfort refill', profile.enable_food_comfort_refill],
+                ['Enable baits harvesting', profile.enable_baits_harvesting],
+                ['Enable email sending', profile.enable_email_sending],
+                ['Fishes in keepnet', profile.fishes_in_keepnet]
+            ])
+        
+        # strategy-specific settings
         match profile.fishing_strategy:
             case 'spin':
                 pass
             case 'spin_with_pause':
-                print(f'| Retrieval duration: {str(profile.retrieval_duration):25} |')
-                print('+-----------------------------------------------+')
-                print(f'| Retrieval delay: {str(profile.retrieval_delay):28} |')
-                print('+-----------------------------------------------+')
+                table.add_rows(
+                    [
+                        ['Retrieval duration', profile.retrieval_duration],
+                        ['Retrieval delay', profile.retrieval_delay]
+                    ])
             case 'bottom':
-                print(f'| Check delay: {str(profile.check_delay):32} |')
-                print('+-----------------------------------------------+')
-                print(f'| Cast power level: {str(profile.cast_power_level):27} |')
-                print('+-----------------------------------------------+')
+                table.add_rows(
+                    [
+                        ['Check delay', profile.check_delay],
+                        ['Cast power level', profile.cast_power_level]
+                    ])
             case 'marine':
-                print(f'| Pirk duration: {str(profile.pirk_duration):30} |')
-                print('+-----------------------------------------------+')
-                print(f'| Pirk delay: {str(profile.pirk_delay):33} |')
-                print('+-----------------------------------------------+')
-                print(f'| Tighten duration: {str(profile.tighten_duration):27} |')
-                print('+-----------------------------------------------+')
+                table.add_rows(
+                    [
+                        ['Pirk duration', profile.pirk_duration],
+                        ['Pirk delay', profile.pirk_delay],
+                        ['Tighten duration', profile.tighten_duration]
+                    ])
             case _:
-                msg_exit('Invalid fishing strategy', is_error=True)
+                self.show_msg_and_quit('Invalid fishing strategy', enable_error_prefix=True)
+        print(table)
+
+    def show_msg_and_quit(msg: str, enable_error_prefix: bool=False) -> None:
+        """Print message, then exit the program
+
+        :param msg: quit info
+        :type msg: str
+        :param enable_error_prefix: Toggle prefix in front of msg, defaults to False
+        :type enable_error_prefix: bool, optional
+        """
+        if enable_error_prefix:
+            msg = f'Error: {msg}'
+        print(msg)
+        exit()
 
 if __name__ == '__main__':
     app = App()
@@ -223,20 +229,19 @@ if __name__ == '__main__':
         app.show_available_profiles()
         app.get_pid_from_user()
     app.gen_player()
-    app.display_general_player_info()
-    app.display_advanced_player_info()
+    app.show_user_settings()
 
     if app.config['game'].getboolean('enable_count_down'):
         start_count_down()
     print('The script has been started') 
 
+    # test zone
+    app.player.marked_fish_count = 1
+    app.player.keep_fish_count = 1
+    app.player.general_quit('test')
+    exit()
+
     controller = WindowController()
     controller.activate_game_window()
-
-    from monitor import is_disconnected
-    if is_disconnected():
-        print('hehe')
-        app.player.disconnected_quit()
-    exit()
 
     app.player.start_fishing()

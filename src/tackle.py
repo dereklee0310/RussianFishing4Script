@@ -18,7 +18,7 @@ class Tackle():
         """Constructor method.
         """
         self.RESET_TIMEOUT = 16
-        self.RETRIEVE_TIMEOUT = 120
+        self.RETRIEVE_TIMEOUT = 90
         self.PULL_TIMEOUT = 32
         self.PIRKING_TIMEOUT = 32
         self.RETRIEVE_WITH_PAUSE_TIMEOUT = 128
@@ -31,6 +31,9 @@ class Tackle():
         :rtype: bool
         """
         print('Resetting')
+
+        if is_tackle_ready():
+            return True
 
         mouseDown()
         i = self.RESET_TIMEOUT
