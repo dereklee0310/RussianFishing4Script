@@ -94,15 +94,15 @@ class App():
             if gmail is None or app_password is None:
                 exit()
 
-        try:
-            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
-                smtp_server.login(gmail, app_password)
-        except smtplib.SMTPAuthenticationError:
-            print('Error: Username and password not accepted')
-            print('Please configure your username and password in .env file')
-            print('Follow the guides on https://support.google.com/accounts/answer/185833', 
-                  '\nto get more information about app password authentication')
-            exit()
+            try:
+                with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+                    smtp_server.login(gmail, app_password)
+            except smtplib.SMTPAuthenticationError:
+                print('Error: Username and password not accepted')
+                print('Please configure your username and password in .env file')
+                print('Follow the guides on https://support.google.com/accounts/answer/185833', 
+                    '\nto get more information about app password authentication')
+                exit()
                 
         if args.pid is None:
             return False

@@ -79,6 +79,11 @@ python make.py
 python calculator.py
 ```
 
+### Harvest baits and refill food/comfort automatically while AFKing
+```
+python harvest.py
+```
+
 ## Troubleshooting
 - How to exit the program?
   - Use Ctrl + C to send a KeyboardInterrupt signal.

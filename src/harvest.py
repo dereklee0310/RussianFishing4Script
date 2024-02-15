@@ -14,8 +14,6 @@ def harvest_baits(shovel_spoon_shortcut):
     :type shovel_spoon_shortcut: _type_
     """
     # digging
-    press(shovel_spoon_shortcut)
-    sleep(3)
     click()
 
     # wait for result
@@ -46,16 +44,18 @@ if __name__ == '__main__':
     threshold = config['game'].getfloat('harvest_baits_threshold')
     shovel_spoon_shortcut = config['shortcut']['shovel_spoon']
 
-    controller = WindowController()
-    controller.activate_game_window()
-
     tea_count = 0
     pre_refill_time = 0
     carrot_count = 0
     harvest_count = 0
+    
+    controller = WindowController()
+    controller.activate_game_window()
 
+    print('The script has been started')
+    press(shovel_spoon_shortcut)
+    sleep(3)
     try:
-        print('The script has been started')
         while True:
             if is_comfort_low() and time.time() - pre_refill_time > 300:
                 pre_refill_time = time.time()
@@ -74,7 +74,10 @@ if __name__ == '__main__':
                 harvest_count += 1
             else:
                 print('Low energy level')
+            press('esc')
             sleep(30)
+            press('esc')
+            sleep(0.25)
     except KeyboardInterrupt:
         print('Terminated by user')
         table = PrettyTable(header=False, align='l')
