@@ -2,7 +2,9 @@
 A simple script for AFKing Russian Fishing 4 
 
 ## Patchnotes
+**Please read the README before executing the latest version of the script**
 - Add baits harvesting option for bottom fishing
+- Add independent baits harvesting script with automatic food/comfort refill
 - Add energy refill option
 - Add email sending option
 - Improve UI
@@ -20,9 +22,11 @@ git clone https://github.com/dereklee0310/RussianFishing4Script
 ### Prerequisites
 - If your in-game language is not English, change the language option in `config.ini`.
 - Make sure that your tackles are powerful enough for the target fish species.
-- Enable Mouse ClickLock in Windows  
-- Set the time before locking to "Long"  
-![ClickLock](/static/readme/clicklock.png) 
+- Enable Mouse ClickLock in Windows and tet the time before locking to "Long"  
+![ClickLock](/static/readme/clicklock.png)
+- To let the food/comfort refill functionality work, add the tea and carrot to your  
+  favorite items so that it can be selected through quick food selection menu.
+![Favorites](/static/readme/favorites.png)
 
 ### Dependencies
 ```
@@ -30,7 +34,7 @@ git clone https://github.com/dereklee0310/RussianFishing4Script
 ```
 
 ## Usage
-Before executing the script, you must move to the desired fishing location and set up the tackles.
+You must move to the desired fishing location before executing the script.
 - Bottom Fishing: Add the tackles you want to use to the quick selection slots and place  
 them nearby to let the script access them via quick selection keys (1 ~ 3).
 - Spin Fishing/Marine Fishing: Pick up the rod you want to use.
@@ -64,7 +68,7 @@ python app.py -h
 python move.py
 ```
 
-### Making groundbaits/foods 
+### Making groundbaits/foods until materials run out
 - The materials must be selected before the execution.
 ```
 python make.py
@@ -92,8 +96,8 @@ Please use `git clone` to get the latest version and paste your user settings an
 
 ## Roadmap
 - [ ] Line chart of fish captured time
-- [ ] Email notification
-- [ ] Refine configuration file 
+- [x] Email notification
+- [x] Refine configuration file 
 - [ ] Carp fishing
 - [ ] Wakey rig
 - [ ] Snag detection

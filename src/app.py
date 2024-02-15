@@ -54,7 +54,7 @@ class App():
         parser.add_argument('-H', '--harvest-baits', action='store_true',
                             help='harvest baits automatically, must be used with bottom fishing strategy')
         parser.add_argument('-s', '--send-email', action='store_true',
-                            help='send email to the email address specified in .env when the program is terminated')
+                            help='send email to yourself when the program is terminated without user interrupt')
         
         # options with arguments
         parser.add_argument('-n', '--fishes-in-keepnet', type=int, default=0,

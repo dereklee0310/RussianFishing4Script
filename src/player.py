@@ -36,6 +36,7 @@ class Player():
     tea_count = 0
     pre_refill_time = 0 # for tea drinking
     carrot_count = 0
+    harvest_count = 0
     
     cast_records = []
     keep_records = []
@@ -175,14 +176,22 @@ class Player():
     # ---------------------------------------------------------------------------- #
     #            stages and their helper functions in main fishing loops           #
     # ---------------------------------------------------------------------------- #
-    def harvesting_stage(self):
+    def harvesting_stage(self) -> None:
+        """If enable_baits_harvesting is True and the energy level 
+            is greater than the threshold, harvest baits. 
+        """
         if not self.profile.enable_baits_harvesting:
             return
         elif is_energy_high(self.harvest_baits_threshold):
+            print('Harvest baits')
             self.harvest_baits()
+            self.harvest_count += 1
 
-    def harvest_baits(self):
-        # digging
+    def harvest_baits(self) -> None:
+        """Use shortcut defined in config.ini to use shovel/spoon, 
+            then hide the tool after the harvest success or the timeout is reached.
+        """
+        # pull out the shovel/spoon and harvest baits
         press(self.shovel_spoon_shortcut)
         sleep(3)
         click()
@@ -425,6 +434,9 @@ class Player():
                     ['Tea consumed', self.tea_count],
                     ['Carrot consumed', self.carrot_count]
                 ])
+            
+        if self.profile.enable_baits_harvesting:
+            table.add_row(['Harvest baits count', self.harvest_count])
         return table
 
     def send_email(self, table: PrettyTable) -> None:
