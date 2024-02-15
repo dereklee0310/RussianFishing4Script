@@ -2,8 +2,10 @@
 A simple script for AFKing Russian Fishing 4 
 
 ## Patchnotes
-- Fix recasting bug in bottom fishing
-- Add floating point support for casting power level
+- Add baits harvesting option for bottom fishing
+- Add energy refill option
+- Add email sending option
+- Improve UI
 
 
 ## Built With
@@ -84,8 +86,8 @@ python calculator.py
   - Keep away from light sources, e.g., boat headlights on Norwegian Sea's boat.
 
 ## Configuration
-Edit `config.ini` to tweak the parameters.  
-At the current state, the constantly changing configuration file might lead to a conflicted `git pull`.    
+- Edit settings in `config.ini` and `.env`.  
+At the current state, the constantly changing `.env` file might lead to a conflicted `git pull`.    
 Please use `git clone` to get the latest version and paste your user settings and profiles into `config.ini`.
 
 ## Roadmap

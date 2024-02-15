@@ -8,6 +8,7 @@ from argparse import ArgumentParser
 from configparser import ConfigParser
 import threading
 import os
+import smtplib
 
 from pyautogui import *
 from prettytable import PrettyTable
@@ -16,6 +17,7 @@ from player import Player
 from userprofile import UserProfile
 from script import start_count_down
 from windowcontroller import WindowController
+from dotenv import load_dotenv
 
 class App():
     def __init__(self):
@@ -75,13 +77,37 @@ class App():
         self.enable_email_sending = args.send_email
 
         if not self.is_fish_count_valid(args.fishes_in_keepnet):
-            self.show_msg_and_quit('Invalid fish count', enable_error_prefix=True)
+            print('Error: Invalid fish count')
+            exit()
         self.fishes_in_keepnet = args.fishes_in_keepnet
 
+        # validate email address and app password
+        if self.enable_email_sending:
+            load_dotenv()
+            gmail = os.getenv('GMAIL')
+            app_password = os.getenv('APP_PASSWORD')
+
+            if gmail is None:
+                print('Error: Failed to load environment variable "GMAIL" from .env')
+            if app_password is None:
+                print('Error: Failed to load environment variable "APP_PASSWORD" from .env')
+            if gmail is None or app_password is None:
+                exit()
+
+        try:
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+                smtp_server.login(gmail, app_password)
+        except smtplib.SMTPAuthenticationError:
+            print('Error: Username and password not accepted')
+            print('Please configure your username and password in .env file')
+            print('Follow the guides on https://support.google.com/accounts/answer/185833', 
+                  '\nto get more information about app password authentication')
+            exit()
+                
         if args.pid is None:
             return False
         elif not self.is_pid_valid(str(args.pid)):
-            self.show_msg_and_quit('Invalid profile id', enable_error_prefix=True)
+            print('Error: Invalid profile id')
             exit()
         self.pid = args.pid
         return True
@@ -132,10 +158,12 @@ class App():
             pid = input('Invalid profile id, please try again or press q to quit: ')
 
         if pid == 'q':
-            self.show_msg_and_quit('The script has been terminated')
+            print('The script has been terminated')
+            exit()
         elif pid == '0':
             os.startfile(r'..\config.ini') #? must be backslash
-            self.show_msg_and_quit('Save to apply changes before restarting the script')
+            print('Save to apply changes before restarting the script')
+            exit()
         self.pid = pid
 
     # todo: decapsulate the profile object
@@ -206,21 +234,9 @@ class App():
                         ['Tighten duration', profile.tighten_duration]
                     ])
             case _:
-                self.show_msg_and_quit('Invalid fishing strategy', enable_error_prefix=True)
+                print('Error: Invalid fishing strategy')
+                exit()
         print(table)
-
-    def show_msg_and_quit(msg: str, enable_error_prefix: bool=False) -> None:
-        """Print message, then exit the program
-
-        :param msg: quit info
-        :type msg: str
-        :param enable_error_prefix: Toggle prefix in front of msg, defaults to False
-        :type enable_error_prefix: bool, optional
-        """
-        if enable_error_prefix:
-            msg = f'Error: {msg}'
-        print(msg)
-        exit()
 
 if __name__ == '__main__':
     app = App()
@@ -233,13 +249,7 @@ if __name__ == '__main__':
 
     if app.config['game'].getboolean('enable_count_down'):
         start_count_down()
-    print('The script has been started') 
-
-    # test zone
-    app.player.marked_fish_count = 1
-    app.player.keep_fish_count = 1
-    app.player.general_quit('test')
-    exit()
+    print('The script has been started')
 
     controller = WindowController()
     controller.activate_game_window()

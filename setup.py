@@ -50,4 +50,4 @@ def create_screenshot_dir():
 
 # todo: revise this function
 # setup_config() 
-create_screenshot_dir()
+# create_screenshot_dir()

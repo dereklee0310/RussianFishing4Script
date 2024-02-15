@@ -83,7 +83,8 @@ class Player():
                     self.marine_fishing()
                 # default: already checked in app.show_user_settings()
         except KeyboardInterrupt:
-                self.general_quit('Terminated by user')
+                print(self.gen_result('Terminated by user'))
+                exit()
 
     # ---------------------------------------------------------------------------- #
     #                              main fishing loops                              #
@@ -435,11 +436,11 @@ class Player():
         # get environment variables
         load_dotenv()
         sender = os.getenv('GMAIL')
-        password = os.getenv('GOOGLE_APP_PASSWORD')
+        password = os.getenv('APP_PASSWORD')
         
         # configure mail info
         msg = MIMEMultipart()
-        msg['Subject'] = "RussianFishing4Script: Notice of program termination"
+        msg['Subject'] = "RussianFishing4Script: Notice of Program Termination"
         msg['From'] = sender
         recipients = [sender]
         msg['To'] = ', '.join(recipients)
