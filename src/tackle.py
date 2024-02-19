@@ -158,7 +158,11 @@ class Tackle():
         return i > 0
 
     #todo: refactor iteration
-    def retrieve_with_pause(self, duration: float, delay: float, base_iteration: int):
+    def retrieve_with_pause(self, 
+                            duration: float, 
+                            delay: float, 
+                            base_iteration: int, 
+                            enable_acceleration: bool):
         """Repeat retrieval with pause until timeout.
 
         :param duration: retrieval duration
@@ -167,8 +171,12 @@ class Tackle():
         :type delay: float
         :param base_iteration: minimum number of iterations
         :type base_iteration: int
+        :param enable_acceleration: determine if the shift key should be pressed
+        :type base_iteration: bool
         """
         print('Retrieving with pause')
+        if enable_acceleration:
+            keyDown('shift')
         
         i = self.RETRIEVE_WITH_PAUSE_TIMEOUT
         iteration = 0
@@ -180,5 +188,7 @@ class Tackle():
             self.reel.retrieve_with_pause(duration, delay)
             i -= delay
             iteration += 1
-        
+
+        if enable_acceleration:
+            keyUp('shift')
         print('Retrieving with pause success')

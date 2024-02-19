@@ -13,13 +13,14 @@ class UserProfile():
                  enable_baits_harvesting: bool,
                  enable_email_sending: bool,
                  fishing_strategy: str, 
+                 cast_power_level: float,
                  # spin with pause
                  retrieval_duration: float, 
                  retrieval_delay: float, 
                  base_iteration: int,
+                 enable_acceleration: bool,
                  # bottom
                  check_delay: float,
-                 cast_power_level: float,
                  # marine
                  pirk_duration: float,
                  pirk_delay: float,
@@ -34,13 +35,14 @@ class UserProfile():
         self.enable_baits_harvesting = enable_baits_harvesting
         self.enable_email_sending = enable_email_sending
         self.fishing_strategy = fishing_strategy
+        self.cast_power_level = cast_power_level
 
         self.retrieval_duration = retrieval_duration
         self.retrieval_delay = retrieval_delay
         self.base_iteration = base_iteration
+        self.enable_acceleration = enable_acceleration
 
         self.check_delay = check_delay
-        self.cast_power_level = cast_power_level
         
         self.pirk_duration = pirk_duration
         self.pirk_delay = pirk_delay

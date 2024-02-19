@@ -47,12 +47,11 @@ class App():
         parser.add_argument('-m', '--marked', action='store_true',
                             help="keep only the marked fishes")
         parser.add_argument('-c', '--coffee', action='store_true',
-                            help='drink coffee if the retrieval time is greater than 2mins, \
-                                the shortcut of coffee can be modified in config.ini')
+                            help='drink coffee if the retrieval time is greater than 2mins')
         parser.add_argument('-r', '--refill', action='store_true', 
                             help='refill food and comfort bar by consuming tea and carrot automatically')
         parser.add_argument('-H', '--harvest-baits', action='store_true',
-                            help='harvest baits automatically, must be used with bottom fishing strategy')
+                            help='harvest baits automatically, only applicable for bottom fishing')
         parser.add_argument('-s', '--send-email', action='store_true',
                             help='send email to yourself when the program is terminated without user interrupt')
         
@@ -130,47 +129,38 @@ class App():
         :return: True if valid, False otherwise
         :rtype: bool
         """
-        if pid =='q':
-            return True
         return pid.isdigit() and int(pid) >= 0 and int(pid) <= len(self.profile_names) - 1 
-
-    def show_welcome_msg(self) -> None:
-        """Display welcome message.
-        """
-        print('+-----------------------------------------------+')
-        print('|       Welcome to use RF4 fishing script       |')
-        print('|    Please select an user profile using pid    |')
-        print('+-----------------------------------------------+')
 
     def show_available_profiles(self) -> None:
         """List available user profiles.
         """
+        table = PrettyTable(header=False, align='l')
+        table.title = 'Welcome! Please select a profile id to use it'
         for i, profile in enumerate(self.profile_names):
-            print(f'| {i}. {profile:{42 - (i) // 10}} |')
-            print('+-----------------------------------------------+')
-            i += 1
+            table.add_row([f'{i:>2}. {profile}'])
+        print(table)
     
     def get_pid_from_user(self) -> None:
         """Get and validate user profile id from user input.
         """
         pid = input("Enter profile id or press q to exit: ")
         while not self.is_pid_valid(pid):
+            if pid == 'q':
+                print('The script has been terminated')
+                exit()
             pid = input('Invalid profile id, please try again or press q to quit: ')
-
-        if pid == 'q':
-            print('The script has been terminated')
-            exit()
-        elif pid == '0':
-            os.startfile(r'..\config.ini') #? must be backslash
-            print('Save to apply changes before restarting the script')
-            exit()
-        self.pid = pid
+        self.pid = int(pid)
 
     # todo: decapsulate the profile object
     def gen_player(self) -> None:
         """Generate a player object according to args and configuration file.
         """
-        self.profile_name = self.profile_names[int(self.pid)]
+        if self.pid == 0:
+            os.startfile(r'..\config.ini') #? must be backslash
+            print('Save to apply changes before restarting the script')
+            exit()
+
+        self.profile_name = self.profile_names[self.pid]
         profile_section = self.config[self.profile_name]
         profile = UserProfile(
             self.fishes_in_keepnet,
@@ -180,11 +170,12 @@ class App():
             self.enable_baits_harvesting,
             self.enable_email_sending,
             profile_section['fishing_strategy'],
+            profile_section.getfloat('cast_power_level', fallback=5),
             profile_section.getfloat('retrieval_duration', fallback=0.5),
             profile_section.getfloat('retrieval_delay', fallback=1.5),
             profile_section.getint('base_iteration', fallback=0),
+            profile_section.getboolean('enable_acceleration', fallback=False),
             profile_section.getfloat('check_delay', fallback=8),
-            profile_section.getfloat('cast_power_level', fallback=3),
             profile_section.getfloat('pirk_duration', fallback=1.75),
             profile_section.getfloat('pirk_delay', fallback=4),
             profile_section.getfloat('tighten_duration', fallback=1))
@@ -204,10 +195,11 @@ class App():
                 ['Fishing strategy', profile.fishing_strategy],
                 ['Enable unmarked release', profile.enable_unmarked_release],
                 ['Enable coffee drinking', profile.enable_coffee_drinking],
-                ['Enable food and comfort refill', profile.enable_food_comfort_refill],
+                ['Enable food/comfort refill', profile.enable_food_comfort_refill],
                 ['Enable baits harvesting', profile.enable_baits_harvesting],
                 ['Enable email sending', profile.enable_email_sending],
-                ['Fishes in keepnet', profile.fishes_in_keepnet]
+                ['Fishes in keepnet', profile.fishes_in_keepnet],
+                ['Cast power level', profile.cast_power_level]
             ])
         
         # strategy-specific settings
@@ -218,14 +210,11 @@ class App():
                 table.add_rows(
                     [
                         ['Retrieval duration', profile.retrieval_duration],
-                        ['Retrieval delay', profile.retrieval_delay]
+                        ['Retrieval delay', profile.retrieval_delay],
+                        ['Enable acceleration', profile.enable_acceleration]
                     ])
             case 'bottom':
-                table.add_rows(
-                    [
-                        ['Check delay', profile.check_delay],
-                        ['Cast power level', profile.cast_power_level]
-                    ])
+                table.add_row(['Check delay', profile.check_delay])
             case 'marine':
                 table.add_rows(
                     [
@@ -241,7 +230,6 @@ class App():
 if __name__ == '__main__':
     app = App()
     if not app.validate_args():
-        app.show_welcome_msg()
         app.show_available_profiles()
         app.get_pid_from_user()
     app.gen_player()
@@ -250,8 +238,6 @@ if __name__ == '__main__':
     if app.config['game'].getboolean('enable_count_down'):
         start_count_down()
     print('The script has been started')
-
     controller = WindowController()
     controller.activate_game_window()
-
     app.player.start_fishing()

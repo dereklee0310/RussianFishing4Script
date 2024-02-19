@@ -3,11 +3,10 @@ A simple script for AFKing Russian Fishing 4
 
 ## Patchnotes
 **Please read the README before executing the latest version of the script**
-- Add baits harvesting option for bottom fishing
-- Add independent baits harvesting script with automatic food/comfort refill
-- Add energy refill option
-- Add email sending option
 - Improve UI
+- Fix bottom fishing bug
+- Casting power level has become a universal setting
+- Add acceleration option for spin_with_pause strategy
 
 
 ## Built With
@@ -54,7 +53,7 @@ python validate.py
 ### 3. Execute the Main Fishing Script
 - By default (no arguments), it will display a list of available profiles, then start fishing with empty keepnet and keep all the fishes you caught.
 ```
-python app.py [-a] [-m] [-c] [-n FISHES_IN_KEEPNET] [-p PID]
+python app.py [-a] [-m] [-c] [-r] [-H] [-s] [-n FISHES_IN_KEEPNET] [-p PID]
 ```
 - Display help information
 ```

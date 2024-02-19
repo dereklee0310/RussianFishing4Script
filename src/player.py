@@ -84,6 +84,9 @@ class Player():
                     self.marine_fishing()
                 # default: already checked in app.show_user_settings()
         except KeyboardInterrupt:
+                # avoid shift key stuck
+                if self.profile.enable_acceleration:
+                    keyUp('shift')
                 print(self.gen_result('Terminated by user'))
                 exit()
 
@@ -96,7 +99,7 @@ class Player():
         while True:
             self.refilling_stage()
             self.resetting_stage()
-            self.tackle.cast(power_level=5)
+            self.tackle.cast(self.profile.cast_power_level)
             self.retrieving_stage()
             if not is_fish_hooked():
                 self.cast_miss_count += 1
@@ -110,10 +113,11 @@ class Player():
         while True:
             self.refilling_stage()
             self.resetting_stage()
-            self.tackle.cast(power_level=5)
+            self.tackle.cast(self.profile.cast_power_level)
             self.tackle.retrieve_with_pause(self.profile.retrieval_duration, 
                                             self.profile.retrieval_delay, 
-                                            self.profile.base_iteration)
+                                            self.profile.base_iteration,
+                                            self.profile.enable_acceleration)
             self.retrieving_stage(duration=4, delay=2)
             if not is_fish_hooked():
                 self.cast_miss_count += 1
@@ -165,7 +169,7 @@ class Player():
         while True:    
             self.refilling_stage()
             self.resetting_stage()
-            self.tackle.cast(power_level=1)
+            self.tackle.cast(self.profile.cast_power_level)
             self.sinking_stage()
             self.pirking_stage()
             # for small fishes at 34m and 41m, use accelerated retrieval
