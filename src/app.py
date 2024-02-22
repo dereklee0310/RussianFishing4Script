@@ -16,8 +16,8 @@ from prettytable import PrettyTable
 from player import Player
 from userprofile import UserProfile
 from script import start_count_down
-from windowcontroller import WindowController
 from dotenv import load_dotenv
+from windowcontroller import WindowController
 
 class App():
     def __init__(self):
@@ -50,10 +50,12 @@ class App():
                             help='drink coffee if the retrieval time is greater than 2mins')
         parser.add_argument('-r', '--refill', action='store_true', 
                             help='refill food and comfort bar by consuming tea and carrot automatically')
-        parser.add_argument('-H', '--harvest-baits', action='store_true',
+        parser.add_argument('-H', '--harvest', action='store_true',
                             help='harvest baits automatically, only applicable for bottom fishing')
-        parser.add_argument('-s', '--send-email', action='store_true',
-                            help='send email to yourself when the program is terminated without user interrupt')
+        parser.add_argument('-e', '--email', action='store_true',
+                            help='send email to yourself when the program is terminated without user interruption')
+        parser.add_argument('-P', '--plot', action='store_true',
+                            help='plot a chart of catch per real/game hour and save it in log directory')
         
         # options with arguments
         parser.add_argument('-n', '--fishes-in-keepnet', type=int, default=0,
@@ -68,20 +70,14 @@ class App():
         :return: True if profile id is given, False otherwise
         :rtype: bool
         """
-        args = self.parser.parse_args()
-        self.enable_unmarked_release = args.marked 
-        self.enable_coffee_drinking = args.coffee
-        self.enable_food_comfort_refill = args.refill
-        self.enable_baits_harvesting = args.harvest_baits
-        self.enable_email_sending = args.send_email
-
-        if not self.is_fish_count_valid(args.fishes_in_keepnet):
+        self.args = self.parser.parse_args()
+        if not self.is_fish_count_valid(self.args.fishes_in_keepnet):
             print('Error: Invalid fish count')
             exit()
-        self.fishes_in_keepnet = args.fishes_in_keepnet
+        self.fishes_in_keepnet = self.args.fishes_in_keepnet
 
         # validate email address and app password
-        if self.enable_email_sending:
+        if self.args.email:
             load_dotenv()
             gmail = os.getenv('GMAIL')
             app_password = os.getenv('APP_PASSWORD')
@@ -103,12 +99,12 @@ class App():
                     '\nto get more information about app password authentication')
                 exit()
                 
-        if args.pid is None:
+        if self.args.pid is None:
             return False
-        elif not self.is_pid_valid(str(args.pid)):
+        elif not self.is_pid_valid(str(self.args.pid)):
             print('Error: Invalid profile id')
             exit()
-        self.pid = args.pid
+        self.pid = self.args.pid
         return True
     
     def is_fish_count_valid(self, fish_count: int) -> bool:
@@ -163,12 +159,13 @@ class App():
         self.profile_name = self.profile_names[self.pid]
         profile_section = self.config[self.profile_name]
         profile = UserProfile(
-            self.fishes_in_keepnet,
-            self.enable_unmarked_release,
-            self.enable_coffee_drinking,
-            self.enable_food_comfort_refill,
-            self.enable_baits_harvesting,
-            self.enable_email_sending,
+            self.args.fishes_in_keepnet,
+            self.args.marked,
+            self.args.coffee,
+            self.args.refill,
+            self.args.harvest,
+            self.args.email,
+            self.args.plot,
             profile_section['fishing_strategy'],
             profile_section.getfloat('cast_power_level', fallback=5),
             profile_section.getfloat('retrieval_duration', fallback=0.5),
@@ -198,6 +195,7 @@ class App():
                 ['Enable food/comfort refill', profile.enable_food_comfort_refill],
                 ['Enable baits harvesting', profile.enable_baits_harvesting],
                 ['Enable email sending', profile.enable_email_sending],
+                ['Enable plotting', profile.enable_plotting],
                 ['Fishes in keepnet', profile.fishes_in_keepnet],
                 ['Cast power level', profile.cast_power_level]
             ])
@@ -238,6 +236,7 @@ if __name__ == '__main__':
     if app.config['game'].getboolean('enable_count_down'):
         start_count_down()
     print('The script has been started')
+
     controller = WindowController()
     controller.activate_game_window()
     app.player.start_fishing()

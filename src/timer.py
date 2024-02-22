@@ -7,6 +7,13 @@ import datetime
 class Timer():
     """Class for calculating and generatiing timestamps for logs.
     """
+    cast_rhour = None
+    cast_rhour_list = []
+
+    cast_ghour = None
+    cast_ghour_list = []
+
+
     def __init__(self):
         """Constructor method.
         """
@@ -45,3 +52,14 @@ class Timer():
         """
         return time.strftime("%m/%d %H:%M:%S", time.localtime())
     
+    def update_cast_hour(self) -> None:
+        dt = datetime.datetime.now()
+        self.cast_rhour = int((time.time() - self.start_time) // 3600)
+        self.cast_ghour = int(dt.minute / 60 * 24 % 12 + dt.second / 3600 * 24 % 12)
+    
+    def add_cast_hour(self) -> None:
+        self.cast_rhour_list.append(self.cast_rhour)
+        self.cast_ghour_list.append(self.cast_ghour)
+
+    def get_cast_hour_list(self) -> tuple[list[int]]:
+        return self.cast_rhour_list, self.cast_ghour_list

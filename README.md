@@ -1,17 +1,18 @@
 ## About the Project
-A simple script for AFKing Russian Fishing 4 
+A simple script for AFKing Russian Fishing 4  
 
 ## Patchnotes
-**Please read the README before executing the latest version of the script**
-- Improve UI
-- Fix bottom fishing bug
-- Casting power level has become a universal setting
-- Add acceleration option for spin_with_pause strategy
-
+**Please read the README before running the latest version**  
+- Improve: coffee drinking mechanism
+- Improve: README and configuration guide
+- Fix: Incorrect display of marked ratio
+- Add: Plotting option for catch per running/in-game hour
+- Add: Maximum number of coffee in a single battle against fish
+- Change: The flag for email sending has been renamed as `-e`
 
 ## Built With
 * Python 3.11 
-* PyAutoGuI
+* PyAutoGUI
   
 ## Getting Started
 ### Install
@@ -21,7 +22,7 @@ git clone https://github.com/dereklee0310/RussianFishing4Script
 ### Prerequisites
 - If your in-game language is not English, change the language option in `config.ini`.
 - Make sure that your tackles are powerful enough for the target fish species.
-- Enable Mouse ClickLock in Windows and tet the time before locking to "Long"  
+- Enable Mouse ClickLock in Windows and set the time before locking to "Long"  
 ![ClickLock](/static/readme/clicklock.png)
 - To let the food/comfort refill functionality work, add the tea and carrot to your  
   favorite items so that it can be selected through quick food selection menu.
@@ -38,36 +39,36 @@ You must move to the desired fishing location before executing the script.
 them nearby to let the script access them via quick selection keys (1 ~ 3).
 - Spin Fishing/Marine Fishing: Pick up the rod you want to use.
 
-### 1. Change the Current Working Directory
+### 1. Change the current working directory
 ```
 cd src
 ```
 
-### 2. Validate Spool Icon (Optional)
+### 2. Validate spool Icon (optional)
 - Run this to check if the spool icon can be identified (The reel must be fully loaded).  
 ![Status](/static/readme/status.png)
 ```
 python validate.py
 ```
 
-### 3. Execute the Main Fishing Script
+### 3. Execute the main script
 - By default (no arguments), it will display a list of available profiles, then start fishing with empty keepnet and keep all the fishes you caught.
 ```
-python app.py [-a] [-m] [-c] [-r] [-H] [-s] [-n FISHES_IN_KEEPNET] [-p PID]
+python app.py [-a] [-m] [-c] [-r] [-H] [-e] [-P] [-n FISHES_IN_KEEPNET] [-p PID]
 ```
 - Display help information
 ```
 python app.py -h
 ```
 ## Other Useful Scripts
-### Toggle moving
+### Toggle moving forward
 - Press w to stop, press it again to continue.
 - Press s to quit.
 ```
 python move.py
 ```
 
-### Making groundbaits/foods until materials run out
+### Crafting groundbaits/baits/foods until materials run out
 - The materials must be selected before the execution.
 ```
 python make.py

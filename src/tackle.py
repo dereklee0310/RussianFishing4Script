@@ -14,11 +14,15 @@ from reel import *
 class Tackle():
     """Class for all tackle dependent methods.
     """
-    def __init__(self):
+    def __init__(self, timer):
         """Constructor method.
+
+        :param timer: timer initialized in Player class
+        :type timer: Timer
         """
+        self.timer = timer
         self.RESET_TIMEOUT = 16
-        self.RETRIEVE_TIMEOUT = 90
+        self.RETRIEVE_TIMEOUT = 60
         self.PULL_TIMEOUT = 32
         self.PIRKING_TIMEOUT = 32
         self.RETRIEVE_WITH_PAUSE_TIMEOUT = 128
@@ -74,12 +78,12 @@ class Tackle():
             duration = 1.6 * (power_level - 1) / 4 # -1 to keep consistent with old settings
             hold_left_click(duration)
             
-            
         sleep(cast_delay)
         if sink_delay:
             sleep(sink_delay)
+        
+        self.timer.update_cast_hour()
         print('Casting success')
-    
 
     def retrieve(self, duration: int, delay: int) -> bool:
         """Retrieve the lure/bait with a timeout.

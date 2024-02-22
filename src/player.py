@@ -18,6 +18,8 @@ from configparser import ConfigParser
 import keyboard
 from prettytable import PrettyTable
 from dotenv import load_dotenv
+from matplotlib import pyplot as plt
+from matplotlib.ticker import MaxNLocator
 
 from tackle import Tackle
 from timer import Timer
@@ -32,14 +34,12 @@ class Player():
     unmarked_fish_count = 0
     cast_miss_count = 0
 
-    coffee_count = 0
+    total_coffee_count = 0 
+    cur_coffee_count = 0
     tea_count = 0
     pre_refill_time = 0 # for tea drinking
     carrot_count = 0
     harvest_count = 0
-    
-    cast_records = []
-    keep_records = []
 
     def __init__(self, profile: UserProfile, config: ConfigParser) -> None:
         """Configure static game settings.
@@ -51,23 +51,17 @@ class Player():
         """
         self.profile = profile
         self.timer = Timer()
-        self.tackle = Tackle()
+        self.tackle = Tackle(self.timer)
 
         # general settings
         self.keepnet_limit = config['game'].getint('keepnet_limit')
         self.fishes_to_catch = self.keepnet_limit - profile.fishes_in_keepnet
         self.harvest_baits_threshold = config['game'].getfloat('harvest_baits_threshold')
+        self.coffee_limit = config['game'].getint('coffee_limit')
 
         # shortcuts
         self.coffee_shortcut = config['shortcut']['coffee']
         self.shovel_spoon_shortcut = config['shortcut']['shovel_spoon']
-
-    # todo
-    def record_routine_duration(self, cast_time, keep_time) -> None:
-        """Record cast time and keep time.
-        """
-        self.cast_records.append(cast_time)
-        self.keep_records.append(keep_time)
 
     def start_fishing(self) -> None:
         """Start main fishing loop with specified fishing strategt.
@@ -88,6 +82,8 @@ class Player():
                 if self.profile.enable_acceleration:
                     keyUp('shift')
                 print(self.gen_result('Terminated by user'))
+                if self.profile.enable_plotting:
+                    self.save_chart()
                 exit()
 
     # ---------------------------------------------------------------------------- #
@@ -277,21 +273,29 @@ class Player():
             keyDown('shift')
 
         while not self.tackle.retrieve(duration, delay):
+            # no fish, return to main loop
+            # captured, defer to pulling stage
             if not is_fish_hooked() or is_fish_captured():
-                # no fish, return to main loop
-                # captured, defer to pulling stage
                 break
 
             # toggle accelerated retrieval and refill energy
             if accelerated:
                 keyUp('shift')
-            if self.profile.enable_coffee_drinking:
+
+            # drink coffee if energy is low
+            if not is_energy_high(threshold=0.9) and self.profile.enable_coffee_drinking:
+                self.cur_coffee_count += 1
+                if self.cur_coffee_count > self.coffee_limit:
+                    press('esc') # back to control panel to reduce power usage
+                    print(self.gen_result('Coffee limit reached'))
+                    exit()
                 print('Consume coffee')
                 press(self.coffee_shortcut)
-                self.coffee_count += 1
+                self.total_coffee_count += 1
 
         if accelerated:
             keyUp('shift')
+        self.cur_coffee_count = 0
 
     def sinking_stage(self) -> None:
         """Sink the lure until it reaches the bottom layer or a fish is hooked.
@@ -341,13 +345,20 @@ class Player():
                 print('Release unmarked fish')
                 press('backspace')
                 return
-        self.marked_fish_count += 1
+        else:
+            self.marked_fish_count += 1
 
         # fish is marked or enable_unmarked_release is set to False
         print('Keep the fish')
         press('space')
-        self.keep_fish_count += 1
 
+        # avoid wrong cast hour
+        if self.profile.fishing_strategy == 'bottom':
+            self.update_cast_hour()
+        
+        self.timer.add_cast_hour()
+
+        self.keep_fish_count += 1
         if self.keep_fish_count == self.fishes_to_catch:
             self.general_quit('Keepnet limit reached')
 
@@ -373,6 +384,8 @@ class Player():
         print(result)
         if self.profile.enable_email_sending:
             self.send_email(result)
+        if self.profile.enable_plotting:
+            self.save_chart()
         exit()
 
     def disconnected_quit(self) -> None:
@@ -431,7 +444,7 @@ class Player():
             bite_rate = int(total_fish_count / total_cast_count * 100)
             table.add_row(['Bite rate', f'{total_fish_count}/{total_cast_count} {bite_rate}%'])
         if self.profile.enable_coffee_drinking:
-            table.add_row(['Coffee consumed', self.coffee_count])
+            table.add_row(['Coffee consumed', self.total_coffee_count])
         if self.profile.enable_food_comfort_refill:
             table.add_rows(
                 [
@@ -480,6 +493,35 @@ class Player():
         with open(fr'../screenshots/{self.timer.get_cur_timestamp()}.png', 'wb') as file: 
             screenshot().save(file, 'png')
         press('esc')
+
+    def plot_and_save(self):
+        cast_rhour_list, cast_ghour_list = self.timer.get_cast_hour_list()
+
+        fig, ax = plt.subplots(nrows=1, ncols=2)
+        # fig.canvas.manager.set_window_title('Record')
+        ax[0].set_ylabel('Fish')
+        
+        fish_per_rhour = [0] * 12
+        for hour in cast_rhour_list:
+            fish_per_rhour[hour] += 1
+        ax[0].plot(range(12), fish_per_rhour)
+        ax[0].set_title('Fish Caughted per Real Hour')
+        ax[0].set_xticks(range(12))
+        ax[0].set_xlabel('Hour (real running time)')
+        ax[0].yaxis.set_major_locator(MaxNLocator(integer=True))
+
+        fish_per_ghour = [0] * 12
+        for hour in cast_ghour_list:
+            fish_per_ghour[hour] += 1
+        ax[1].bar(range(12), fish_per_ghour)
+        ax[1].set_title('Fish Caughted per Game Hour')
+        ax[1].set_xticks(range(12))
+        ax[1].set_xlabel('Hour (game time)')
+        ax[1].yaxis.set_major_locator(MaxNLocator(integer=True))
+
+        # plt.tight_layout()
+        plt.savefig(f'../logs/{self.timer.get_cur_timestamp()}.png')
+        print('An image of the Plot has been saved under logs/')
 
 # head up backup
 # win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(0), int(-200), 0, 0)

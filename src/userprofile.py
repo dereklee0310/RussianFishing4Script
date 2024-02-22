@@ -12,6 +12,7 @@ class UserProfile():
                  enable_food_comfort_refill: bool,
                  enable_baits_harvesting: bool,
                  enable_email_sending: bool,
+                 enable_plotting: bool,
                  fishing_strategy: str, 
                  cast_power_level: float,
                  # spin with pause
@@ -34,6 +35,7 @@ class UserProfile():
         self.enable_food_comfort_refill = enable_food_comfort_refill
         self.enable_baits_harvesting = enable_baits_harvesting
         self.enable_email_sending = enable_email_sending
+        self.enable_plotting = enable_plotting
         self.fishing_strategy = fishing_strategy
         self.cast_power_level = cast_power_level
 
