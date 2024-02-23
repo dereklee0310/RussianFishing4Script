@@ -1,16 +1,19 @@
 ## About the Project
-A simple script for AFKing Russian Fishing 4  
+A simple script for AFKing Russian Fishing 4
 
 ## Patchnotes
 **Please read the README before running the latest version**  
+### 2/23
 - Improve: coffee drinking mechanism
 - Improve: README and configuration guide
 - Fix: Incorrect display of marked ratio
-- Fix: plotting bug
 - Add: Plotting option for catch per running/in-game hour
 - Add: Maximum number of coffee to drink in a single battle against fish
 - Add: spooling detection for retrieving stage
 - Change: The flag for email sending has been renamed as `-e`
+### 2/24
+- Fix: Decrease the sensitivity of spooling detection
+- Fix: Plotting bug
 
 ## Built With
 * Python 3.11 
@@ -62,7 +65,7 @@ python app.py
 ```
 python app.py -n 32
 ```
-- Select profile 3, drink the coffee while battling with the fish, and send an email to yourself after it's terminated
+- Select profile 3, drink the coffee while battling against fish, and send an email to yourself after it's terminated
 ```
 python app.py -p 3 -c -e
 ```
@@ -99,11 +102,12 @@ python harvest.py
 ```
 
 ## Troubleshooting
+- The latest update is buggy, how to roll it back to previous version?
+  - type `git reset HEAD^` in your terminal
 - How to exit the program?
   - Use Ctrl + C to send a KeyboardInterrupt signal
 - Failed to exit the program?
-  - The Shift key might have been pressed down
-  - Press again to release it, then type Ctrl + C as usual
+  - The Shift key might have been pressed down, press again to release it, then type Ctrl + C as usual
 - Stuck at retrieving stage?
   - Change the game resolution until the `validation.py` is pass
   - Keep away from light sources, e.g., boat headlights in Norwegian Sea

@@ -220,6 +220,8 @@ class App():
                         ['Pirk delay', profile.pirk_delay],
                         ['Tighten duration', profile.tighten_duration]
                     ])
+            case 'wakey_rig':
+                pass # todo
             case _:
                 print('Error: Invalid fishing strategy')
                 exit()
@@ -236,7 +238,6 @@ if __name__ == '__main__':
     if app.config['game'].getboolean('enable_count_down'):
         start_count_down()
     print('The script has been started')
-
     controller = WindowController()
     controller.activate_game_window()
     app.player.start_fishing()

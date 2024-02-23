@@ -76,6 +76,8 @@ class Player():
                     self.bottom_fishing()
                 case 'marine':
                     self.marine_fishing()
+                case 'wakey_rig':
+                    self.wakey_rig_fishing()
                 # default: already checked in app.show_user_settings()
         except KeyboardInterrupt:
                 # avoid shift key stuck
@@ -166,10 +168,23 @@ class Player():
             self.refilling_stage()
             self.resetting_stage()
             self.tackle.cast(self.profile.cast_power_level)
-            self.sinking_stage()
+            self.marine_sinking_stage()
             self.pirking_stage()
             # for small fishes at 34m and 41m, use accelerated retrieval
             self.retrieving_stage(duration=8, accelerated=True)
+            if is_fish_hooked():
+                self.pulling_stage()
+
+    def wakey_rig_fishing(self) -> None:
+        """Main wakey rig fishing loop.
+        """
+        while True:    
+            self.refilling_stage()
+            self.resetting_stage()
+            self.tackle.cast(self.profile.cast_power_level)
+            self.wakey_sinking_stage()
+            # self.pirking_stage()
+            self.retrieving_stage(duration=4, delay=2)
             if is_fish_hooked():
                 self.pulling_stage()
 
@@ -300,8 +315,9 @@ class Player():
             keyUp('shift')
         self.cur_coffee_count = 0
 
-    def sinking_stage(self) -> None:
-        """Sink the lure until it reaches the bottom layer or a fish is hooked.
+    def marine_sinking_stage(self) -> None:
+        """Sink the lure until it reaches the bottom layer, 
+            a fish is hooked, or timeout reached.
         """
         print('Sinking Lure')
         i = 30
@@ -314,6 +330,19 @@ class Player():
                 print('Fish is hooked')
                 break # start retrieving immediately
             i = sleep_and_decrease(i, 2)
+
+    def wakey_sinking_stage(self) -> None:
+        """Sink the lure until a fish is hooked or timeout reached.
+        """
+        print('Sinking Lure')
+        # todo: dynamic timeout
+        i = 60
+        while i > 0:
+            if is_fish_hooked():
+                print('Fish is hooked')
+                break
+            i = sleep_and_decrease(i, 2)
+
 
     def pirking_stage(self) -> None:
         """Perform pirking until a fish is hooked, adjust the lure if timeout is reached.
@@ -357,7 +386,7 @@ class Player():
 
         # avoid wrong cast hour
         if self.profile.fishing_strategy == 'bottom':
-            self.update_cast_hour()
+            self.timer.update_cast_hour()
         
         self.timer.add_cast_hour()
 

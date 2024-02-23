@@ -84,7 +84,7 @@ def get_coffee_icon_position():
     return locateOnScreen(fr'{parent_dir}coffee.png', confidence=0.9)
 
 def is_line_at_end():
-    return locateOnScreen(fr'{parent_dir}spooling.png', confidence=0.96)
+    return locateOnScreen(fr'{parent_dir}spooling.png', confidence=0.98)
 
 # ---------------------------------------------------------------------------- #
 #                         player status bar analyzation                        #

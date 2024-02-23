@@ -134,6 +134,23 @@ class Tackle():
         msg = 'Pirking success' if i > 0 else '! Timeout reached'
         print(msg)
         return i > 0
+    
+    def wakey_pirking(self, delay: float) -> bool:
+        """todo
+
+        :param delay: _description_
+        :type delay: float
+        :return: _description_
+        :rtype: bool
+        """
+        print('Pirking')
+
+        i = self.PIRKING_TIMEOUT
+        while i > 0 and not is_fish_hooked():
+            with hold('ctrl'):
+                click(button='right')
+            i = sleep_and_decrease(i, delay)
+
 
     def pull(self) -> bool:
         """Pull the fish with a timeout.
