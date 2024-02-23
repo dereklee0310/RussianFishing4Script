@@ -83,7 +83,7 @@ class Player():
                     keyUp('shift')
                 print(self.gen_result('Terminated by user'))
                 if self.profile.enable_plotting:
-                    self.save_chart()
+                    self.plot_and_save()
                 exit()
 
     # ---------------------------------------------------------------------------- #
@@ -275,6 +275,9 @@ class Player():
         while not self.tackle.retrieve(duration, delay):
             # no fish, return to main loop
             # captured, defer to pulling stage
+            if is_line_at_end():
+                self.general_quit('Fishing line is at its end')
+
             if not is_fish_hooked() or is_fish_captured():
                 break
 
@@ -385,7 +388,7 @@ class Player():
         if self.profile.enable_email_sending:
             self.send_email(result)
         if self.profile.enable_plotting:
-            self.save_chart()
+            self.plot_and_save()
         exit()
 
     def disconnected_quit(self) -> None:
@@ -521,7 +524,7 @@ class Player():
 
         # plt.tight_layout()
         plt.savefig(f'../logs/{self.timer.get_cur_timestamp()}.png')
-        print('An image of the Plot has been saved under logs/')
+        print('The Plot has been saved under logs/')
 
 # head up backup
 # win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(0), int(-200), 0, 0)

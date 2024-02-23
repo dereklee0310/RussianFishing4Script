@@ -99,8 +99,14 @@ class Tackle():
 
         self.reel.full_retrieve(duration=duration)
         i = self.RETRIEVE_TIMEOUT
-        while i > 0 and not is_retrieve_finished():
+        while i > 0:
+            if is_line_at_end():
+                print('! Fishing line is at its end')
+                return False
+            elif is_retrieve_finished():
+                break
             i = sleep_and_decrease(i, 3)
+
         sleep(delay) # wait for the line to be fully retrieved
         click()
 
