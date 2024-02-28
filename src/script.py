@@ -64,14 +64,6 @@ def is_countdown_enabled() -> bool:
     """
     return config['game'].getboolean('enable_count_down')
 
-def is_running_enabled() -> bool:
-    """Get the value of 'running_by_default' in config.ini
-
-    :return: True if accelerated running is enabled, False otherwise
-    :rtype: bool
-    """
-    return config['game'].getboolean('running_by_default')
-
 def start_count_down() -> None:
     """If the 'enable_count_down' option is enabled, 
     start a count down before executing the script.

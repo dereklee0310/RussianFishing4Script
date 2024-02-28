@@ -1,26 +1,44 @@
 """
 Activate game window and start moving forward.
 
-Usage: move.py, press w to toggle/untoggle moving, and press s to quit
+Usage: move.py, press W to toggle/untoggle moving, S to quit
 """
 from time import sleep
 
-from pyautogui import *
-from pynput import keyboard 
+import argparse
+from pyautogui import keyDown, keyUp
+from pynput import keyboard
 
 from windowcontroller import WindowController
-from script import is_countdown_enabled, start_count_down, is_running_enabled
+from script import is_countdown_enabled, start_count_down
+
+def parse_args() -> argparse.Namespace:
+    """Cofigure argparser and parse the command line arguments.
+
+    :return dict-like object of parsed arguments
+    :rtype: argparse.Namespace
+    """
+    parser = argparse.ArgumentParser(
+                        prog='move.py', 
+                        description='Activate game window and start moving forward', 
+                        epilog='')
+    parser.add_argument('-s', '--shift', action='store_true',
+                        help="Hold Shift key while moving forward")
+    return parser.parse_args()
 
 if __name__ == '__main__':
+    # must be parsed first to display help information
+    enable_shift_holding = parse_args().shift
+
     if is_countdown_enabled():
         print('Press W to toggle/untoggle moving, S to terminate the script')
         start_count_down()
 
     controller = WindowController()
     controller.activate_game_window()
+    print('The script has been started')
 
-    # start moving
-    if not is_running_enabled():
+    if enable_shift_holding:
         keyDown('shift')
     keyDown('w')
 
@@ -41,13 +59,12 @@ if __name__ == '__main__':
                     keyUp('w')
                 else:
                     stop_flag = False
-                    sleep(0.25) # this must be added to function correctly
+                    sleep(0.25) # this must be added wtf?
                     keyDown('w')
 
-    # stop moving
-    if not is_running_enabled():
-        keyUp('shift')
     keyUp('w')
+    if enable_shift_holding:
+        keyUp('shift')
 
     print(end='\x1b[2K')
     print('The script has been terminated', end='')

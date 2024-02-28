@@ -3,5 +3,5 @@ build/
 screenshots/
 src/__pycache__/
 logs/
-# config.ini
+config.ini
 .env
