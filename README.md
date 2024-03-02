@@ -1,10 +1,13 @@
 ## About the Project
 A simple bot for AFKing Russian Fishing 4, supporting spin, bottom and marine fishing.
 
-## 2/29 Patchnotes
-- Change: Add `template.ini` and remove `config.ini` to avoid possible merge conflict in `git pull`
-- Change: Replace `running_by_default` setting with `-s` option for `Toggle/untoggle moving forward`
-- Add: Crafting limit option `-n` for `Crafting items`
+## 3/1 Patchnotes
+**Checkout `template.ini` to see the newly added settings**
+- Add: Chinese version user guide
+- Add: Setting for spool icon recognition's confidence value
+- Add: Setting for sinking stage timeout in marine fishing
+- Change: Rename `make.py` as `craft.py`
+- Change: Rename `calculator.py` as `calculate.py`
 
 ## Built With
 - Python 3.11 

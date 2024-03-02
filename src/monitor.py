@@ -5,11 +5,16 @@ Todo:
     Validate language option
     Implement snag detection
 """
+from configparser import ConfigParser
+
 from pyautogui import locateOnScreen, locateCenterOnScreen, pixel
 
 from script import get_image_dir_path
 
 parent_dir = get_image_dir_path()
+config = ConfigParser()
+config.read('../config.ini')
+spool_icon_confidence = config['game'].getfloat('spool_icon_confidence', fallback=0.985)
 
 # ---------------------------------------------------------------------------- #
 #                           icon and text recognition                          #
@@ -27,7 +32,7 @@ def is_fish_captured():
     return locateOnScreen(fr'{parent_dir}keep.png', confidence=0.9)
 
 def is_retrieve_finished():
-    return locateOnScreen(fr'{parent_dir}wheel.png', confidence=0.988) # original: 0.985
+    return locateOnScreen(fr'{parent_dir}wheel.png', confidence=spool_icon_confidence) # original: 0.985
 is_spool_icon_valid = is_retrieve_finished # for validate.py
 
 def is_tackle_ready():

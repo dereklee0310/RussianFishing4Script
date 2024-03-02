@@ -9,6 +9,7 @@ from configparser import ConfigParser
 import threading
 import os
 import smtplib
+import logging
 
 from pyautogui import *
 from prettytable import PrettyTable
@@ -18,6 +19,8 @@ from userprofile import UserProfile
 from script import start_count_down
 from dotenv import load_dotenv
 from windowcontroller import WindowController
+
+logger = logging.getLogger(__name__)
 
 class App():
     def __init__(self):
@@ -72,7 +75,7 @@ class App():
         """
         self.args = self.parser.parse_args()
         if not self.is_fish_count_valid(self.args.fishes_in_keepnet):
-            print('Error: Invalid fish count')
+            logger.error('Invalid fish count')
             exit()
         self.fishes_in_keepnet = self.args.fishes_in_keepnet
 
@@ -83,9 +86,9 @@ class App():
             app_password = os.getenv('APP_PASSWORD')
 
             if gmail is None:
-                print('Error: Failed to load environment variable "GMAIL" from .env')
+                logger.error('Failed to load environment variable "GMAIL" from .env')
             if app_password is None:
-                print('Error: Failed to load environment variable "APP_PASSWORD" from .env')
+                logger.error('Failed to load environment variable "APP_PASSWORD" from .env')
             if gmail is None or app_password is None:
                 exit()
 
@@ -93,7 +96,7 @@ class App():
                 with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
                     smtp_server.login(gmail, app_password)
             except smtplib.SMTPAuthenticationError:
-                print('Error: Username and password not accepted')
+                logger.error('Username and password not accepted')
                 print('Please configure your username and password in .env file')
                 print('Follow the guides on https://support.google.com/accounts/answer/185833', 
                     '\nto get more information about app password authentication')
@@ -102,7 +105,7 @@ class App():
         if self.args.pid is None:
             return False
         elif not self.is_pid_valid(str(self.args.pid)):
-            print('Error: Invalid profile id')
+            logger.error('Invalid profile id')
             exit()
         self.pid = self.args.pid
         return True
@@ -142,7 +145,7 @@ class App():
         pid = input("Enter profile id or press q to exit: ")
         while not self.is_pid_valid(pid):
             if pid == 'q':
-                print('The script has been terminated')
+                logger.info('The script has been terminated')
                 exit()
             pid = input('Invalid profile id, please try again or press q to quit: ')
         self.pid = int(pid)
@@ -175,7 +178,8 @@ class App():
             profile_section.getfloat('check_delay', fallback=8),
             profile_section.getfloat('pirk_duration', fallback=1.75),
             profile_section.getfloat('pirk_delay', fallback=4),
-            profile_section.getfloat('tighten_duration', fallback=1))
+            profile_section.getfloat('tighten_duration', fallback=1),
+            profile_section.getfloat('sink_timeout', fallback=60))
         self.player = Player(profile, self.config)
 
     def show_user_settings(self) -> None:
@@ -218,12 +222,13 @@ class App():
                     [
                         ['Pirk duration', profile.pirk_duration],
                         ['Pirk delay', profile.pirk_delay],
-                        ['Tighten duration', profile.tighten_duration]
+                        ['Tighten duration', profile.tighten_duration],
+                        ['Sink timeout', profile.sink_timeout]
                     ])
             case 'wakey_rig':
                 pass # todo
             case _:
-                print('Error: Invalid fishing strategy')
+                logger.error('Invalid fishing strategy')
                 exit()
         print(table)
 
@@ -237,7 +242,7 @@ if __name__ == '__main__':
 
     if app.config['game'].getboolean('enable_count_down'):
         start_count_down()
-    print('The script has been started')
+    logger.info('The script has been started')
     controller = WindowController()
     controller.activate_game_window()
     app.player.start_fishing()

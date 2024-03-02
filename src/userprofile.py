@@ -25,7 +25,8 @@ class UserProfile():
                  # marine
                  pirk_duration: float,
                  pirk_delay: float,
-                 tighten_duration: float):
+                 tighten_duration: float,
+                 sink_timeout: float):
         """Constructor method.
         """
         
@@ -49,3 +50,4 @@ class UserProfile():
         self.pirk_duration = pirk_duration
         self.pirk_delay = pirk_delay
         self.tighten_duration = tighten_duration
+        self.sink_timeout = sink_timeout

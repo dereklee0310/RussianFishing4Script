@@ -188,6 +188,32 @@ class Player():
             if is_fish_hooked():
                 self.pulling_stage()
 
+    def trolling_fishing(self) -> None:
+        # temp
+        rods = range(1, 4)
+        base_waiting_time = 30
+
+        while True:
+            sleep(base_waiting_time)
+            self.retrieving_stage()
+            if is_fish_hooked():
+                self.pulling_stage()
+            else:
+                # reset thrid rod to check other rods
+                self.resetting_stage()
+
+            for rod in [1, 3]:
+                press(str(rod))
+                if is_fish_hooked():
+                    self.retrieving_stage()
+                    if is_fish_hooked():
+                        self.pulling_stage()
+                        self.tackle.cast(self.profile.cast_power_level)
+                    else:
+                        self.cast_miss_count += 1
+            self.tackle.cast(self.profile.cast_power_level)
+
+
     # ---------------------------------------------------------------------------- #
     #            stages and their helper functions in main fishing loops           #
     # ---------------------------------------------------------------------------- #
@@ -320,7 +346,7 @@ class Player():
             a fish is hooked, or timeout reached.
         """
         print('Sinking Lure')
-        i = 30
+        i = self.profile.sink_timeout
         while i > 0:
             if is_moving_in_bottom_layer():
                 print('Lure reached bottom layer')
