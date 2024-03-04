@@ -1,13 +1,9 @@
 ## About the Project
 A simple bot for AFKing Russian Fishing 4, supporting spin, bottom and marine fishing.
 
-## 3/1 Patchnotes
-**Checkout `template.ini` to see the newly added settings**
-- Add: Chinese version user guide
-- Add: Setting for spool icon recognition's confidence value
-- Add: Setting for sinking stage timeout in marine fishing
-- Change: Rename `make.py` as `craft.py`
-- Change: Rename `calculator.py` as `calculate.py`
+## 3/3 Patchnotes
+- Change: Improve user guide
+- Fix: Bug that the reel is not closed after the sinking timeout is reached in marine fishing.
 
 ## Built With
 - Python 3.11 
@@ -106,8 +102,8 @@ python calculator.py
 ```
 
 ### Harvest baits and refill food/comfort automatically
-Start a harvesting loop without moving or fishing
-The control panel will be opened constantly to save the power usage 
+- Start a harvesting loop without moving or fishing
+- The control panel will be opened constantly to save the power usage 
 ```
 python harvest.py
 ```

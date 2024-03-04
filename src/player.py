@@ -350,12 +350,12 @@ class Player():
         while i > 0:
             if is_moving_in_bottom_layer():
                 print('Lure reached bottom layer')
-                self.tackle.reel.tighten_line(self.profile.tighten_duration)
                 break
             elif is_fish_hooked():
                 print('Fish is hooked')
-                break # start retrieving immediately
+                return
             i = sleep_and_decrease(i, 2)
+        self.tackle.reel.tighten_line(self.profile.tighten_duration)
 
     def wakey_sinking_stage(self) -> None:
         """Sink the lure until a fish is hooked or timeout reached.
