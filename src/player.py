@@ -568,12 +568,12 @@ class Player():
         ax[0].set_xlabel('Hour (real running time)')
         ax[0].yaxis.set_major_locator(MaxNLocator(integer=True))
 
-        fish_per_ghour = [0] * 12
+        fish_per_ghour = [0] * 24
         for hour in cast_ghour_list:
             fish_per_ghour[hour] += 1
-        ax[1].bar(range(12), fish_per_ghour)
+        ax[1].bar(range(0, 24), fish_per_ghour)
         ax[1].set_title('Fish Caughted per Game Hour')
-        ax[1].set_xticks(range(12))
+        ax[1].set_xticks(range(0, 24, 2))
         ax[1].set_xlabel('Hour (game time)')
         ax[1].yaxis.set_major_locator(MaxNLocator(integer=True))
 

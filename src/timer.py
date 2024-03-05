@@ -55,7 +55,7 @@ class Timer():
     def update_cast_hour(self) -> None:
         dt = datetime.datetime.now()
         self.cast_rhour = int((time.time() - self.start_time) // 3600)
-        self.cast_ghour = int(dt.minute / 60 * 24 % 12 + dt.second / 3600 * 24 % 12)
+        self.cast_ghour = int((dt.minute / 60 + dt.second / 3600) * 24 % 24)
     
     def add_cast_hour(self) -> None:
         self.cast_rhour_list.append(self.cast_rhour)

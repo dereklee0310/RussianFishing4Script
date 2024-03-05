@@ -1,9 +1,11 @@
 ## About the Project
-A simple bot for AFKing Russian Fishing 4, supporting spin, bottom and marine fishing.
+A simple bot for AFKing Russian Fishing 4, supporting spin, bottom and marine fishing.  
+[文字教程](中文版教程.md)  
+[視頻教程](https://www.youtube.com/watch?v=znLBYoXHxkw)
 
-## 3/3 Patchnotes
-- Change: Improve user guide
-- Fix: Bug that the reel is not closed after the sinking timeout is reached in marine fishing.
+## 3/5 Patchnotes
+- Improve fish catch plotting functionality
+- Improve user guide
 
 ## Built With
 - Python 3.11 
