@@ -9,8 +9,7 @@ from pyautogui import *
 # import src.script
 from windowcontroller import WindowController
 
-controller = WindowController()
-controller.activate_game_window()
+WindowController().activate_game_window()
 from monitor import is_disconnected
 
 from time import sleep

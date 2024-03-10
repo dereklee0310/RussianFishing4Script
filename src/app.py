@@ -16,7 +16,7 @@ from prettytable import PrettyTable
 
 from player import Player
 from userprofile import UserProfile
-from script import start_count_down
+from script import ask_for_confirmation
 from dotenv import load_dotenv
 from windowcontroller import WindowController
 
@@ -139,13 +139,13 @@ class App():
             table.add_row([f'{i:>2}. {profile}'])
         print(table)
     
-    def get_pid_from_user(self) -> None:
+    def ask_for_pid(self) -> None:
         """Get and validate user profile id from user input.
         """
         pid = input("Enter profile id or press q to exit: ")
         while not self.is_pid_valid(pid):
-            if pid == 'q':
-                logger.info('The script has been terminated')
+            if pid.strip() == 'q':
+                logger.info('The bot has been terminated')
                 exit()
             pid = input('Invalid profile id, please try again or press q to quit: ')
         self.pid = int(pid)
@@ -178,6 +178,7 @@ class App():
             profile_section.getfloat('check_delay', fallback=8),
             profile_section.getfloat('pirk_duration', fallback=1.75),
             profile_section.getfloat('pirk_delay', fallback=4),
+            profile_section.getfloat('pirk_timeout', fallback=32),
             profile_section.getfloat('tighten_duration', fallback=1),
             profile_section.getfloat('sink_timeout', fallback=60))
         self.player = Player(profile, self.config)
@@ -222,6 +223,7 @@ class App():
                     [
                         ['Pirk duration', profile.pirk_duration],
                         ['Pirk delay', profile.pirk_delay],
+                        ['Pirk timeout', profile.pirk_timeout],
                         ['Tighten duration', profile.tighten_duration],
                         ['Sink timeout', profile.sink_timeout]
                     ])
@@ -236,13 +238,11 @@ if __name__ == '__main__':
     app = App()
     if not app.validate_args():
         app.show_available_profiles()
-        app.get_pid_from_user()
+        app.ask_for_pid()
     app.gen_player()
     app.show_user_settings()
 
-    if app.config['game'].getboolean('enable_count_down'):
-        start_count_down()
-    logger.info('The script has been started')
-    controller = WindowController()
-    controller.activate_game_window()
+    ask_for_confirmation('Do you want to continue with the settings above')
+    WindowController().activate_game_window()
+    
     app.player.start_fishing()

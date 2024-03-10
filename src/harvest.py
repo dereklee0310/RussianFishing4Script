@@ -1,7 +1,7 @@
 from pyautogui import *
 from monitor import *
 import monitor
-from script import *
+from script import sleep_and_decrease, ask_for_confirmation
 from configparser import ConfigParser
 from windowcontroller import WindowController
 import time
@@ -49,10 +49,9 @@ if __name__ == '__main__':
     carrot_count = 0
     harvest_count = 0
     
-    controller = WindowController()
-    controller.activate_game_window()
+    ask_for_confirmation('Are you ready to start harvesting baits')
+    WindowController().activate_game_window()
 
-    print('The script has been started')
     press(shovel_spoon_shortcut)
     sleep(3)
     try:
@@ -79,7 +78,7 @@ if __name__ == '__main__':
             press('esc')
             sleep(0.25)
     except KeyboardInterrupt:
-        print('Terminated by user')
+        print('The bot has been terminated')
         table = PrettyTable(header=False, align='l')
         table.title = 'Running Results'
         table.add_rows(

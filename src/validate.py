@@ -5,10 +5,11 @@ Usage: validate.py
 """
 from windowcontroller import WindowController
 from monitor import is_spool_icon_valid
+from script import ask_for_confirmation
 
 if __name__ == '__main__':
-    controller = WindowController()
-    controller.activate_game_window()
+    ask_for_confirmation('Are you ready to start validation')
+    WindowController().activate_game_window()
     
     if not is_spool_icon_valid():
         print('TEST FAILED')

@@ -24,7 +24,7 @@ class Tackle():
         self.RESET_TIMEOUT = 16
         self.RETRIEVE_TIMEOUT = 60
         self.PULL_TIMEOUT = 32
-        self.PIRKING_TIMEOUT = 32
+        # self.PIRKING_TIMEOUT = 32
         self.RETRIEVE_WITH_PAUSE_TIMEOUT = 128
         self.reel = Reel()
 
@@ -114,19 +114,21 @@ class Tackle():
         print(msg)
         return i > 0
 
-    def pirking(self, duration: float, delay: float) -> bool:
+    def pirk(self, duration: float, delay: float, timeout: float) -> bool:
         """Perform pirking with a time out.
 
         :param duration: rod lifting time
         :type duration: float
         :param delay: delay after lifting
         :type delay: float
+        :param timeout: timeout for a single pirking routine
+        :type timeout: float
         :return: True if a fish is hooked, False otherwise
         :rtype: bool
         """
         print('Pirking')
 
-        i = self.PIRKING_TIMEOUT
+        i = timeout
         while i > 0 and not is_fish_hooked():
             hold_right_click(duration=duration)
             i = sleep_and_decrease(i, delay)
@@ -181,7 +183,6 @@ class Tackle():
 
         msg = 'Pulling success' if i > 0 else '! Failed to pull the fish up'
         print(msg)
-        sleep(1) # wait for user to inspect the fish
         return i > 0
 
     #todo: refactor iteration

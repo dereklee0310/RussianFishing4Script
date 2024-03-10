@@ -58,6 +58,7 @@ class Player():
         self.fishes_to_catch = self.keepnet_limit - profile.fishes_in_keepnet
         self.harvest_baits_threshold = config['game'].getfloat('harvest_baits_threshold')
         self.coffee_limit = config['game'].getint('coffee_limit')
+        self.keep_fish_delay = config['game'].getint('keep_fish_delay')
 
         # shortcuts
         self.coffee_shortcut = config['shortcut']['coffee']
@@ -373,7 +374,7 @@ class Player():
     def pirking_stage(self) -> None:
         """Perform pirking until a fish is hooked, adjust the lure if timeout is reached.
         """
-        while not self.tackle.pirking(self.profile.pirk_duration, self.profile.pirk_delay):
+        while not self.tackle.pirk(self.profile.pirk_duration, self.profile.pirk_delay, self.profile.pirk_timeout):
             # adjust the depth of the lure if no fish is hooked
             print('Adjust lure depth')
             press('enter') # open reel
@@ -396,6 +397,8 @@ class Player():
     def handle_fish(self) -> None:
         """Keep or release the fish and record the fish count.
         """
+
+        sleep(self.keep_fish_delay)
         #! a trophy ruffe will break the checking mechanism            
         if not is_fish_marked():
             self.unmarked_fish_count += 1
@@ -407,6 +410,7 @@ class Player():
             self.marked_fish_count += 1
 
         # fish is marked or enable_unmarked_release is set to False
+        sleep(self.profile)
         print('Keep the fish')
         press('space')
 

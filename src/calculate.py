@@ -2,8 +2,6 @@
 Calculate the maximum friction brake you can use without breaking the tackle.
 
 Usage: calculator.py 
-
-Todo: add args support
 """
 def get_reel_TMD() -> float:
     """Calculate the reel's true max drag based on user input.
@@ -27,4 +25,4 @@ def get_leader_TLC() -> float:
 
 if __name__ == '__main__':
     tmd, tlc = get_reel_TMD(), get_leader_TLC()
-    print(f'Max friction brake: {int(min(tlc * 30 / tmd, 29))}')
+    print(f'Maximum friction brake you can use: {int(min(tlc * 30 / tmd, 29))}')

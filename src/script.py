@@ -56,20 +56,34 @@ def get_image_dir_path() -> str:
     config.read('../config.ini')
     return fr"../static/{config['game']['language']}/"
 
-def is_countdown_enabled() -> bool:
-    """Get the value of 'enable_count_down' in config.ini
+def ask_for_confirmation(msg: str) -> None:
+    """Ask for confirmation of user settings if it's enabled.
 
-    :return: True if countdown is enabled, False otherwise
-    :rtype: bool
+    :param msg: confirmation message
+    :type msg: str
     """
-    return config['game'].getboolean('enable_count_down')
+    if not config['game'].getboolean('enable_confirmation'):
+        return
 
-def start_count_down() -> None:
-    """If the 'enable_count_down' option is enabled, 
-    start a count down before executing the script.
-    """
-    print("Hint: Edit 'enable_count_down' option in config.ini to disable the count down")
-    for i in range(5, 0, -1):
-        print(f'The script will start in: {i} seconds', end='\r')
-        sleep(1)
-    print('')
+    while True:
+        ans = input(f'{msg}? [Y/n] ').strip().lower()
+        if ans == 'y':
+            print('The bot has been started')
+            return 
+        elif ans == 'n': # quit only when the input is 'n'
+            print('The bot has been terminated')
+            exit() 
+
+if __name__ == '__main__':
+    ask_for_confirmation()
+
+# ! archived
+# def start_count_down() -> None:
+#     """If the 'enable_count_down' option is enabled, 
+#     start a count down before executing the script.
+#     """
+#     print("Hint: Edit 'enable_count_down' option in config.ini to disable the count down")
+#     for i in range(5, 0, -1):
+#         print(f'The script will start in: {i} seconds', end='\r')
+#         sleep(1)
+#     print('')

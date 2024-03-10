@@ -52,7 +52,7 @@ def get_yes_position():
     return locateOnScreen(fr'{parent_dir}yes.png', confidence=0.8)
 
 def get_make_position():
-    return locateOnScreen(fr'{parent_dir}make.png', confidence=0.8)
+    return locateOnScreen(fr'{parent_dir}make.png', confidence=0.9)
 
 def is_operation_failed():
     return locateOnScreen(fr'{parent_dir}warning.png', confidence=0.8)
