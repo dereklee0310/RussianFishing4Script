@@ -1,29 +1,27 @@
-from pyautogui import *
-from monitor import *
-import monitor
-from script import sleep_and_decrease, ask_for_confirmation
 from configparser import ConfigParser
-from windowcontroller import WindowController
-import time
+from time import time, sleep
+
+import pyautogui as pag
 from prettytable import PrettyTable
 
-def harvest_baits(shovel_spoon_shortcut):
-    """An modified version of player.harvest_baits().
+import monitor
+from windowcontroller import WindowController
+from script import sleep_and_decrease, ask_for_confirmation
 
-    :param shovel_spoon_shortcut: _description_
-    :type shovel_spoon_shortcut: _type_
+def harvest_baits() -> None:
+    """Harvest baits and accept the result.
     """
     # digging
-    click()
+    pag.click()
 
     # wait for result
     sleep(5) # 4 is enough, + 1 for inspection
     i = 64
-    while i > 0 and not is_harvest_success():
+    while i > 0 and not monitor.is_harvest_success():
         i = sleep_and_decrease(i, 4)
 
     # accept result
-    press('space')
+    pag.press('space')
     sleep(0.25)
 
 def consume_food(food: str) -> None:
@@ -33,14 +31,14 @@ def consume_food(food: str) -> None:
     :type food: str
     """
     print(f'Consume {food}')
-    with hold('t'):
+    with pag.hold('t'):
         sleep(0.25)
-        moveTo(getattr(monitor, f'get_{food}_icon_position')())
-        click()
+        pag.moveTo(getattr(monitor, f'get_{food}_icon_position')())
+        pag.click()
 
 if __name__ == '__main__':
     config = ConfigParser()
-    config.read('../config.ini')
+    config.read(r'../config.ini')
     threshold = config['game'].getfloat('harvest_baits_threshold')
     shovel_spoon_shortcut = config['shortcut']['shovel_spoon']
 
@@ -52,30 +50,31 @@ if __name__ == '__main__':
     ask_for_confirmation('Are you ready to start harvesting baits')
     WindowController().activate_game_window()
 
-    press(shovel_spoon_shortcut)
+    pag.press(shovel_spoon_shortcut)
     sleep(3)
     try:
         while True:
-            if is_comfort_low() and time.time() - pre_refill_time > 300:
-                pre_refill_time = time.time()
+            if monitor.is_comfort_low() and time() - pre_refill_time > 300:
+                pre_refill_time = time()
                 consume_food('tea')
                 tea_count += 1
             sleep(0.25)
 
-            if is_food_level_low():
+            if monitor.is_food_level_low():
                 consume_food('carrot')
                 carrot_count += 1
             sleep(0.25)
 
-            if is_energy_high(threshold):
+            if monitor.is_energy_high(threshold):
                 print('Harvest baits')
                 harvest_baits(shovel_spoon_shortcut)
                 harvest_count += 1
             else:
                 print('Low energy level')
-            press('esc')
+
+            pag.press('esc')
             sleep(30)
-            press('esc')
+            pag.press('esc')
             sleep(0.25)
     except KeyboardInterrupt:
         print('The bot has been terminated')

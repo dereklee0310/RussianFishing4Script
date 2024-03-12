@@ -5,11 +5,15 @@ Todo: special retrieval for jig step, twitchiing...
 """
 from time import sleep
 
-from pyautogui import *
+# from pyautogui import *
+import pyautogui as pag
+import logging
 
-from script import *
-from monitor import *
+import monitor
+from script import sleep_and_decrease, hold_right_click
 from reel import *
+
+logger = logging.getLogger(__name__)
 
 class Tackle():
     """Class for all tackle dependent methods.
@@ -34,20 +38,20 @@ class Tackle():
         :return: True if the reset is successful, False otherwise 
         :rtype: bool
         """
-        print('Resetting')
+        logger.info('Resetting')
 
-        if is_tackle_ready():
+        if monitor.is_tackle_ready():
             return True
 
-        mouseDown()
+        pag.mouseDown()
         i = self.RESET_TIMEOUT
-        while i > 0 and not is_tackle_ready():
+        while i > 0 and not monitor.is_tackle_ready():
             i = sleep_and_decrease(i, 3) # > ClickLock duration (2.2)
-        mouseUp()
-        click()
+        pag.mouseUp()
+        pag.click()
         
         msg = 'Resetting success' if i > 0 else '! Failed to reset the tackle'
-        print(msg)
+        logger.info(msg)
         return i > 0
     
     def cast(self, 
@@ -64,15 +68,15 @@ class Tackle():
         :type sink_delay: int, optional
         :raises ValueError: raise if the cast power level is invalid
         """
-        print('Casting')
+        logger.info('Casting')
 
         if power_level < 0 or power_level > 5:
-            print('! Invalid power level')
+            logger.error('Invalid power level')
             exit()
         elif power_level == 1:
-            click()
+            pag.click()
         elif power_level == 5:
-            with hold('shift'):
+            with pag.hold('shift'):
                 hold_left_click(1)
         else:
             duration = 1.6 * (power_level - 1) / 4 # -1 to keep consistent with old settings
@@ -83,7 +87,7 @@ class Tackle():
             sleep(sink_delay)
         
         self.timer.update_cast_hour()
-        print('Casting success')
+        logger.info('Casting success')
 
     def retrieve(self, duration: int, delay: int) -> bool:
         """Retrieve the lure/bait with a timeout.
@@ -95,23 +99,23 @@ class Tackle():
         :return: True if the retrieval is successful, False otherwise
         :rtype: bool
         """
-        print('Retrieving')
+        logger.info('Retrieving')
 
         self.reel.full_retrieve(duration=duration)
         i = self.RETRIEVE_TIMEOUT
         while i > 0:
-            if is_line_at_end():
-                print('! Fishing line is at its end')
+            if monitor.is_line_at_end():
+                logger.warning('Fishing line is at its end')
                 return False
-            elif is_retrieve_finished():
+            elif monitor.is_retrieve_finished():
                 break
             i = sleep_and_decrease(i, 3)
 
         sleep(delay) # wait for the line to be fully retrieved
-        click()
+        pag.click()
 
         msg = 'Retrieving success' if i > 0 else '! Timeout reached'
-        print(msg)
+        logger.info(msg)
         return i > 0
 
     def pirk(self, duration: float, delay: float, timeout: float) -> bool:
@@ -126,15 +130,15 @@ class Tackle():
         :return: True if a fish is hooked, False otherwise
         :rtype: bool
         """
-        print('Pirking')
+        logger.info('Pirking')
 
         i = timeout
-        while i > 0 and not is_fish_hooked():
+        while i > 0 and not monitor.is_fish_hooked():
             hold_right_click(duration=duration)
             i = sleep_and_decrease(i, delay)
 
         msg = 'Pirking success' if i > 0 else '! Timeout reached'
-        print(msg)
+        logger.info(msg)
         return i > 0
     
     def wakey_pirking(self, delay: float) -> bool:
@@ -145,12 +149,12 @@ class Tackle():
         :return: _description_
         :rtype: bool
         """
-        print('Pirking')
+        logger.info('Pirking')
 
         i = self.PIRKING_TIMEOUT
-        while i > 0 and not is_fish_hooked():
-            with hold('ctrl'):
-                click(button='right')
+        while i > 0 and not monitor.is_fish_hooked():
+            with pag.hold('ctrl'):
+                pag.click(button='right')
             i = sleep_and_decrease(i, delay)
 
 
@@ -160,29 +164,29 @@ class Tackle():
         :return: True if the pulling is successful, False otherwise
         :rtype: bool
         """
-        print('Pulling')
+        logger.info('Pulling')
 
-        mouseDown() # keep retrieving until fish is captured
-        mouseDown(button='right')
+        pag.mouseDown() # keep retrieving until fish is captured
+        pag.mouseDown(button='right')
         i = self.PULL_TIMEOUT
-        while i > 0 and not is_fish_captured():
+        while i > 0 and not monitor.is_fish_captured():
             i = sleep_and_decrease(i, 3) # > ClickLock duration (2.2)
 
         if i <= 0:
-            press('space') # use landing net
+            pag.press('space') # use landing net
             sleep(6)
-            if is_fish_captured():
+            if monitor.is_fish_captured():
                 i = 1 # small trick to indicate success
             else:
                 # hide landing net if failed
-                press('space') 
+                pag.press('space') 
                 sleep(0.5)
-        mouseUp()
-        mouseUp(button='right')
-        click()
+        pag.mouseUp()
+        pag.mouseUp(button='right')
+        pag.click()
 
         msg = 'Pulling success' if i > 0 else '! Failed to pull the fish up'
-        print(msg)
+        logger.info(msg)
         return i > 0
 
     #todo: refactor iteration
@@ -202,21 +206,21 @@ class Tackle():
         :param enable_acceleration: determine if the shift key should be pressed
         :type base_iteration: bool
         """
-        print('Retrieving with pause')
+        logger.info('Retrieving with pause')
         if enable_acceleration:
-            keyDown('shift')
+            pag.keyDown('shift')
         
         i = self.RETRIEVE_WITH_PAUSE_TIMEOUT
         iteration = 0
         while i > 0:
-            if is_fish_hooked():
+            if monitor.is_fish_hooked():
                 break
-            elif iteration >= base_iteration and is_retrieve_finished():
+            elif iteration >= base_iteration and monitor.is_retrieve_finished():
                 break
             self.reel.retrieve_with_pause(duration, delay)
             i -= delay
             iteration += 1
 
         if enable_acceleration:
-            keyUp('shift')
-        print('Retrieving with pause success')
+            pag.keyUp('shift')
+        logger.info('Retrieving with pause success')

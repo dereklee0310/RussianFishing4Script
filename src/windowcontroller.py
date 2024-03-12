@@ -3,7 +3,6 @@ Module for window controller.
 """
 from time import sleep
 
-from pyautogui import *
 import win32api, win32con, win32gui
 
 class WindowController():

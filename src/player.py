@@ -20,6 +20,7 @@ from prettytable import PrettyTable
 from dotenv import load_dotenv
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
+import logging
 
 from tackle import Tackle
 from timer import Timer
@@ -27,6 +28,8 @@ import monitor
 from monitor import *
 from script import *
 from userprofile import UserProfile
+
+logger = logging.getLogger(__name__)
 
 class Player():
     keep_fish_count = 0
@@ -63,6 +66,7 @@ class Player():
         # shortcuts
         self.coffee_shortcut = config['shortcut']['coffee']
         self.shovel_spoon_shortcut = config['shortcut']['shovel_spoon']
+        self.bottom_rods_shortcuts = config['shortcut']['bottom_rods'].split(', ')
 
     def start_fishing(self) -> None:
         """Start main fishing loop with specified fishing strategt.
@@ -128,24 +132,25 @@ class Player():
         """
         # todo: add retrieval duration and delay
         check_counts = [-1, 0, 0, 0]
-        rod_key = 0
+        rod_idx = -1
+        rod_count = len(self.bottom_rods_shortcuts)
 
         while True:
             self.refilling_stage()
             self.harvesting_stage()
-
-            rod_key = 1 if rod_key == 3 else rod_key + 1
-            print(f'Checking rod {rod_key}')
+            rod_idx = 0 if rod_idx == rod_count - 1 else rod_idx + 1
+            rod_key = self.bottom_rods_shortcuts[rod_idx]
+            logger.info(f'Checking rod {rod_key}')
             press(f'{rod_key}')
             sleep(1) # wait for pick up animation
 
             # check the next rod if no fish is hooked
             if not is_fish_hooked():
-                check_counts[rod_key] += 1
+                check_counts[rod_idx] += 1
                 self.cast_miss_count += 1
                 # recast if check failed more than 16 times
-                if check_counts[rod_key] > 16:
-                    check_counts[rod_key] = 0
+                if check_counts[rod_idx] > 16:
+                    check_counts[rod_idx] = 0
                     self.resetting_stage()
                     self.tackle.cast(self.profile.cast_power_level, cast_delay=4)
                     click()
@@ -154,7 +159,7 @@ class Player():
                 sleep(self.profile.check_delay)
                 continue
 
-            check_counts[rod_key] = 0
+            check_counts[rod_idx] = 0
             self.retrieving_stage(duration=4, delay=2)
             if is_fish_hooked():
                 self.pulling_stage()
@@ -191,20 +196,25 @@ class Player():
 
     def trolling_fishing(self) -> None:
         # temp
-        rods = range(1, 4)
-        base_waiting_time = 30
+        rod_idx = -1
+        rod_count = len(self.bottom_rods_shortcuts) #! todo
+        base_waiting_time = 16
 
         while True:
-            sleep(base_waiting_time)
-            self.retrieving_stage()
-            if is_fish_hooked():
-                self.pulling_stage()
-            else:
-                # reset thrid rod to check other rods
-                self.resetting_stage()
+            self.refilling_stage()
+            self.harvesting_stage()
+            # if there is a rod on hand
+            if rod_count == 3:
+                sleep(base_waiting_time)
+                logger.info(f'Checking rod {3}')
+                self.retrieving_stage()
+                if is_fish_hooked():
+                    self.pulling_stage()
+                else:
+                    self.resetting_stage()
 
-            for rod in [1, 3]:
-                press(str(rod))
+            for rod_key in self.bottom_rods_shortcuts[:-1]:
+                press(rod_key)
                 if is_fish_hooked():
                     self.retrieving_stage()
                     if is_fish_hooked():
@@ -212,6 +222,8 @@ class Player():
                         self.tackle.cast(self.profile.cast_power_level)
                     else:
                         self.cast_miss_count += 1
+
+            # if both missed, recast the third rod
             self.tackle.cast(self.profile.cast_power_level)
 
 
@@ -225,7 +237,6 @@ class Player():
         if not self.profile.enable_baits_harvesting:
             return
         elif is_energy_high(self.harvest_baits_threshold):
-            print('Harvest baits')
             self.harvest_baits()
             self.harvest_count += 1
 
@@ -233,6 +244,7 @@ class Player():
         """Use shortcut defined in config.ini to use shovel/spoon, 
             then hide the tool after the harvest success or the timeout is reached.
         """
+        logger.info('Harvesting baits')
         # pull out the shovel/spoon and harvest baits
         press(self.shovel_spoon_shortcut)
         sleep(3)
@@ -259,8 +271,9 @@ class Player():
 
         # refill comfort
         # comfort is affected by weather, add a time threshold to prevent over drinking
-        if is_comfort_low() and time.time() - self.pre_refill_time > 300:
-            self.pre_refill_time = time.time()
+        cur_time = time.time()
+        if is_comfort_low() and cur_time - self.pre_refill_time > 300:
+            self.pre_refill_time = cur_time
             self.consume_food('tea')
             self.tea_count += 1
         sleep(0.25)
@@ -270,6 +283,18 @@ class Player():
             self.consume_food('carrot')
             self.carrot_count += 1
         sleep(0.25)
+
+    # todo
+    # def drinking_stage(self):
+    #     if not self.profile.enable_alcohol_drinking:
+    #         return
+        
+    #     cur_time = time.time()
+    #     if cur_time - self.pre_refill_time > 900:
+    #         self.pre_refill_tim = cur_time
+    #         self.consume_food('alcohol')
+    #         self.alcohol_count += 1
+    #     sleep(0.25)
 
     def consume_food(self, food: str) -> None:
         """Open food menu, then click on food icon to consume it.
@@ -282,6 +307,24 @@ class Player():
             sleep(0.25)
             moveTo(getattr(monitor, f'get_{food}_icon_position')())
             click()
+
+    def access_item(self, item: str) -> None:
+        key = config['shortcut'].getint(item)
+
+        if key < -1 or key > 7:
+            logger.error(f'Invalid {item} key: {key}')
+            exit()
+        elif key != -1:
+            press(str(key))
+            return
+        
+        key = 'u' if item == 'shovel_spoon' else 't'
+        with hold(key):
+            sleep(0.25)
+            moveTo(getattr(monitor, f'get_{item}_icon_position')())
+            click()
+
+
 
     def resetting_stage(self) -> None:
         """Reset the tackle until the it's ready or an exceptional event occurs.
@@ -334,7 +377,7 @@ class Player():
                     press('esc') # back to control panel to reduce power usage
                     print(self.gen_result('Coffee limit reached'))
                     exit()
-                print('Consume coffee')
+                logger.info('Consume coffee')
                 press(self.coffee_shortcut)
                 self.total_coffee_count += 1
 
@@ -346,14 +389,14 @@ class Player():
         """Sink the lure until it reaches the bottom layer, 
             a fish is hooked, or timeout reached.
         """
-        print('Sinking Lure')
+        logger.info('Sinking Lure')
         i = self.profile.sink_timeout
         while i > 0:
             if is_moving_in_bottom_layer():
-                print('Lure reached bottom layer')
+                logger.info('Lure reached bottom layer')
                 break
             elif is_fish_hooked():
-                print('Fish is hooked')
+                logger.info('Fish is hooked')
                 return
             i = sleep_and_decrease(i, 2)
         self.tackle.reel.tighten_line(self.profile.tighten_duration)
@@ -361,12 +404,12 @@ class Player():
     def wakey_sinking_stage(self) -> None:
         """Sink the lure until a fish is hooked or timeout reached.
         """
-        print('Sinking Lure')
+        logger.info('Sinking Lure')
         # todo: dynamic timeout
         i = 60
         while i > 0:
             if is_fish_hooked():
-                print('Fish is hooked')
+                logger.info('Fish is hooked')
                 break
             i = sleep_and_decrease(i, 2)
 
@@ -376,7 +419,7 @@ class Player():
         """
         while not self.tackle.pirk(self.profile.pirk_duration, self.profile.pirk_delay, self.profile.pirk_timeout):
             # adjust the depth of the lure if no fish is hooked
-            print('Adjust lure depth')
+            logger.info('Adjusting lure depth')
             press('enter') # open reel
             sleep(4)
             self.tackle.reel.tighten_line(self.profile.tighten_duration)
@@ -398,24 +441,24 @@ class Player():
         """Keep or release the fish and record the fish count.
         """
 
-        sleep(self.keep_fish_delay)
         #! a trophy ruffe will break the checking mechanism            
         if not is_fish_marked():
             self.unmarked_fish_count += 1
             if self.profile.enable_unmarked_release:
-                print('Release unmarked fish')
+                logger.info('Release unmarked fish')
                 press('backspace')
                 return
         else:
             self.marked_fish_count += 1
 
         # fish is marked or enable_unmarked_release is set to False
-        sleep(self.profile)
-        print('Keep the fish')
+        sleep(self.keep_fish_delay)
+        logger.info('Keep the fish')
         press('space')
 
         # avoid wrong cast hour
-        if self.profile.fishing_strategy == 'bottom':
+        if (self.profile.fishing_strategy == 'bottom' or 
+            self.profile.fishing_strategy == 'marine'):
             self.timer.update_cast_hour()
         
         self.timer.add_cast_hour()

@@ -2,13 +2,12 @@
 Some helper functions.
 """
 
+from configparser import ConfigParser
 from time import sleep
 
-from pyautogui import *
-from pyautogui import getWindowsWithTitle
-import configparser
+import pyautogui as pag
 
-config = configparser.ConfigParser()
+config = ConfigParser()
 config.read('../config.ini')
 
 def hold_left_click(duration: float=1) -> None:
@@ -17,11 +16,11 @@ def hold_left_click(duration: float=1) -> None:
     :param duration: hold time, defaults to 1
     :type duration: float, optional
     """
-    mouseDown()
+    pag.mouseDown()
     sleep(duration)
-    mouseUp()
+    pag.mouseUp()
     if duration >= 2.2:
-        click()
+        pag.click()
 
 def hold_right_click(duration: float=1) -> None:
     """Hold right mouse button.
@@ -29,9 +28,9 @@ def hold_right_click(duration: float=1) -> None:
     :param duration: hold time, defaults to 1
     :type duration: float, optional
     """
-    mouseDown(button="right")
+    pag.mouseDown(button="right")
     sleep(duration)
-    mouseUp(button="right")
+    pag.mouseUp(button="right")
 
 def sleep_and_decrease(num: int , delay: int) -> int:
     """Self-decrement with a delay.
@@ -45,16 +44,6 @@ def sleep_and_decrease(num: int , delay: int) -> int:
     """
     sleep(delay)
     return num - delay
-
-def get_image_dir_path() -> str:
-    """Build the path for static images based on language option.
-
-    :return: ../static/{language}/
-    :rtype: str
-    """
-    config = configparser.ConfigParser()
-    config.read('../config.ini')
-    return fr"../static/{config['game']['language']}/"
 
 def ask_for_confirmation(msg: str) -> None:
     """Ask for confirmation of user settings if it's enabled.

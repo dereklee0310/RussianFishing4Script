@@ -4,7 +4,7 @@ Module for Reel class
 from time import sleep
 # from abc import ABC, abstractmethod
 
-from pyautogui import *
+import pyautogui as pag
 
 from script import hold_left_click
 
@@ -18,9 +18,9 @@ class Reel():
         :type duration: int, optional
         """
         # use this instead of hold_left_click to lock the mouse button
-        mouseDown()
+        pag.mouseDown()
         sleep(duration)
-        mouseUp()
+        pag.mouseUp()
 
     def retrieve_with_pause(self, duration: float, delay: float) -> None:
         """Wrapper for retrieval and delay
@@ -44,5 +44,5 @@ class Reel():
     def switch_gear_ratio(self) -> None:
         """Switch gear ratio, designed for conventional reel.
         """
-        with keyDown('ctrl'):
-            press('space')
+        with pag.hold('ctrl'):
+            pag.press('space')

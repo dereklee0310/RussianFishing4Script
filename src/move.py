@@ -1,7 +1,7 @@
 """
 Activate game window and start moving forward.
 
-Usage: move.py, press W to toggle/untoggle moving, S to quit
+Usage: move.py, press W to toggle moving, S to quit
 """
 import argparse
 import pyautogui as pag
@@ -27,8 +27,6 @@ def on_release(key: keyboard.KeyCode) -> None:
     :param key: key code used by OS
     :type key: keyboard.KeyCode
     """
-    print('Key %s released' %key)
-
     global holding_w 
     if str(key) != "'w'":
         return
@@ -50,7 +48,7 @@ def parse_args() -> argparse.Namespace:
                         description='Activate game window and start moving forward', 
                         epilog='')
     parser.add_argument('-s', '--shift', action='store_true',
-                        help="Hold Shift key while moving forward")
+                        help="Hold Shift key while moving")
     return parser.parse_args()
     
 if __name__ == '__main__':
@@ -71,9 +69,7 @@ if __name__ == '__main__':
     pag.keyUp('w')
     if enable_shift_holding:
         pag.keyUp('shift')
-
-    print(end='\x1b[2K')
-    print('The bot has been terminated', end='')
+    print('The bot has been terminated')
 
 # press/release detection: https://stackoverflow.com/questions/65890326/keyboard-press-detection-with-pynput
 # listner loop : https://stackoverflow.com/questions/75784939/pynput-difference-between-listener-join-and-listener-start

@@ -1,15 +1,16 @@
 """
 Activate game window and start crafting things until running out of materials.
 
-Usage: make.py
+Usage: craft.py
 """
-from time import sleep
 import argparse
+from time import sleep
 
+from prettytable import PrettyTable
 import pyautogui as pag
 
+import monitor
 from windowcontroller import WindowController
-from monitor import get_make_position, is_operation_failed, get_ok_position
 from script import ask_for_confirmation
 
 def parse_args() -> argparse.Namespace:
@@ -32,35 +33,48 @@ if __name__ == '__main__':
     args = parse_args()
     limit = args.quantity
     enable_discard = args.discard
-    count = 0
+    success_count = 0
+    fail_count = 0
 
     ask_for_confirmation('Are you ready to start crafting')
     WindowController().activate_game_window()
 
-    pag.moveTo(get_make_position())
+    pag.moveTo(monitor.get_make_position())
     try:
         while True:
             pag.click() # click make button
 
             # recipe not complete
-            if is_operation_failed():
+            if monitor.is_operation_failed():
                 pag.press('space')
                 break
 
             # crafting, wait for result
             sleep(4)
-            while (not get_ok_position() and 
-                   not is_operation_failed()):
+            while True:
+                if monitor.s_operation_success():
+                    success_count += 1
+                    break
+                elif monitor.is_operation_failed():
+                    fail_count += 1
+                    break
                 sleep(0.25)
 
             # handle result
             key = 'backspace' if enable_discard else 'space'
             pag.press(key)
-            sleep(0.1)
-            count += 1
-            if count == limit:
+            if success_count + fail_count == limit:
                 break
+            sleep(0.1) # wait for animation
     except KeyboardInterrupt:
         pass
     print('The bot has been terminated')
-    print('Number of crafted items:', count)
+    table = PrettyTable(header=False, align='l')
+    table.title = 'Running Results'
+    table.add_rows(
+        [   
+            ['Item crafted', success_count],
+            ['Number of failures', fail_count],
+            ['Materials used', success_count + fail_count]
+        ])
+    print(table)

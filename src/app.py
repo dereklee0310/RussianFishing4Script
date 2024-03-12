@@ -3,23 +3,24 @@ Main CLI
 
 Usage: app.py
 """
-from time import sleep
-from argparse import ArgumentParser
-from configparser import ConfigParser
 import threading
 import os
 import smtplib
 import logging
+from argparse import ArgumentParser
+from configparser import ConfigParser
 
-from pyautogui import *
 from prettytable import PrettyTable
-
-from player import Player
-from userprofile import UserProfile
-from script import ask_for_confirmation
 from dotenv import load_dotenv
-from windowcontroller import WindowController
 
+from windowcontroller import WindowController
+from userprofile import UserProfile
+from player import Player
+from script import ask_for_confirmation
+
+# logging.BASIC_FORMAT: %(levelname)s:%(name)s:%(message)s
+# timestamp: %(asctime)s, datefmt='%Y-%m-%d %H:%M:%S',
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 class App():
@@ -75,7 +76,7 @@ class App():
         """
         self.args = self.parser.parse_args()
         if not self.is_fish_count_valid(self.args.fishes_in_keepnet):
-            logger.error('Invalid fish count')
+            logger.error('Invalid number of fishes in keepnet')
             exit()
         self.fishes_in_keepnet = self.args.fishes_in_keepnet
 
@@ -98,7 +99,7 @@ class App():
             except smtplib.SMTPAuthenticationError:
                 logger.error('Username and password not accepted')
                 print('Please configure your username and password in .env file')
-                print('Follow the guides on https://support.google.com/accounts/answer/185833', 
+                print('Refer to the guides on https://support.google.com/accounts/answer/185833', 
                     '\nto get more information about app password authentication')
                 exit()
                 
@@ -128,7 +129,7 @@ class App():
         :return: True if valid, False otherwise
         :rtype: bool
         """
-        return pid.isdigit() and int(pid) >= 0 and int(pid) <= len(self.profile_names) - 1 
+        return pid.isdigit() and int(pid) >= 0 and int(pid) < len(self.profile_names) 
 
     def show_available_profiles(self) -> None:
         """List available user profiles.
@@ -145,18 +146,17 @@ class App():
         pid = input("Enter profile id or press q to exit: ")
         while not self.is_pid_valid(pid):
             if pid.strip() == 'q':
-                logger.info('The bot has been terminated')
                 exit()
             pid = input('Invalid profile id, please try again or press q to quit: ')
         self.pid = int(pid)
 
-    # todo: decapsulate the profile object
+    # todo: decapsulate the user profile object
     def gen_player(self) -> None:
         """Generate a player object according to args and configuration file.
         """
         if self.pid == 0:
             os.startfile(r'..\config.ini') #? must be backslash
-            print('Save to apply changes before restarting the script')
+            print('Save the file before restarting the script to apply changes')
             exit()
 
         self.profile_name = self.profile_names[self.pid]

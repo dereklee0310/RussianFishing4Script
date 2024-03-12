@@ -9,11 +9,9 @@ from configparser import ConfigParser
 
 from pyautogui import locateOnScreen, locateCenterOnScreen, pixel
 
-from script import get_image_dir_path
-
-parent_dir = get_image_dir_path()
 config = ConfigParser()
 config.read('../config.ini')
+parent_dir = fr"../static/{config['game']['language']}/"
 spool_icon_confidence = config['game'].getfloat('spool_icon_confidence', fallback=0.985)
 
 # ---------------------------------------------------------------------------- #
@@ -57,7 +55,7 @@ def get_make_position():
 def is_operation_failed():
     return locateOnScreen(fr'{parent_dir}warning.png', confidence=0.8)
 
-def get_ok_position():
+def is_operation_success():
     return locateOnScreen(fr'{parent_dir}ok.png', confidence=0.8)
 
 # quit through main menu
