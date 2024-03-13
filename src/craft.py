@@ -52,7 +52,7 @@ if __name__ == '__main__':
             # crafting, wait for result
             sleep(4)
             while True:
-                if monitor.s_operation_success():
+                if monitor.is_operation_success():
                     success_count += 1
                     break
                 elif monitor.is_operation_failed():

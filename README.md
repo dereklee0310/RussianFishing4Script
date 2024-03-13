@@ -1,11 +1,24 @@
 ## About the Project
 A simple bot for AFKing Russian Fishing 4, supporting spin, bottom and marine fishing.  
-[文字教程](中文版教程.md)  
-[視頻教程](https://www.youtube.com/watch?v=znLBYoXHxkw)
+Star the repo to support this project, and "watch" it to get the latest news :)
+- [文字教程](中文版教程.md)
+- [視頻教程](https://www.youtube.com/watch?v=znLBYoXHxkw)
 
-## 3/5 Patchnotes
-- Improve fish catch plotting functionality
-- Improve user guide
+## 3/13 Patchnotes
+**Please refer to `template.ini` to configure newly added settings.**
+- Change: Replace countdown before execution with user confirmation
+- Change: Improve logging messages
+- Change: Improve module import style, add docstrings
+- Change: Refactor and improve `Toggle moving forward`
+- Fix: `Item crafting` bug for groundbaits making
+- Fix: Eliminate the delay before pulling when fishing for Atlantic saury 
+- Add: Table of results for `Item crafting`
+- Add: Discard option for `Item crafting`
+- Add: Pirking timeout option for marine fishing
+- Add: Option for delay time before keeping captured fish
+- Add: Alcohol drinking option and settings
+- Add: Quick selection menu support for carrot, tea and coffee
+- Add: Option for hook checking delay for marine fishing
 
 ## Built With
 - Python 3.11 
@@ -13,11 +26,12 @@ A simple bot for AFKing Russian Fishing 4, supporting spin, bottom and marine fi
 
 ## Getting Started  
 ### Prerequisites
-- If your in-game language is not English, change the language option in `config.ini`
+- Set your in-game language in `config.ini`
 - Enable Mouse ClickLock in Windows mouse settings and set the time before locking to "Long"  
 ![ClickLock](/static/readme/clicklock.png)
-- To let food/comfort auto refill works, add the tea and carrot to your  
-  favorite items so that they can be selected through quick food selection menu  
+- To refill player's stats automatically, add tea and carrot, and coffee to your  
+  favorite items so that they can be selected through quick food selection menu.  
+  Otherwise, they can only be accessed by quick selection shortcuts (e.g., 1 ~ 7)  
 ![Favorites](/static/readme/favorites.png)
 
 ### Install
@@ -26,26 +40,20 @@ git clone https://github.com/dereklee0310/RussianFishing4Script
 ```
 Or, download the repository and unzip it.
 
-### Update to latest version
-```
-git pull
-```
-
 ### Dependencies
 ```
 .\setup.bat
 ```
 
 ### Configuration
-To edit user profiles, refer to the guides and examples in `config.ini` that generated from `template.ini` automatically.  
+To edit user profiles, refer to the guides and examples in `template.ini` and edit `config.ini`.  
 To enable email notification, set your Gmail address and Google app password in `.env`
-
 
 ## Usage
 - Move your character to the fishing spot before executing the script.
 - Spin Fishing/Marine Fishing: Pick up the rod you want to use
 - Bottom Fishing: Add the tackles you want to use to the quick selection slots and place  
-them nearby to let the script access them via quick selection keys (1 ~ 3)
+them nearby to let the script access them via quick selection shortcuts (1 ~ 3)
 
 ### 1. Change the current working directory
 ```
@@ -53,8 +61,8 @@ cd src
 ```
 
 ### 2. Validate spool Icon (optional)
-- If you are using this script for the first time, 
-  run this to check if the spool icon can be identified (The reel must be fully loaded)  
+- If you are using this script for the first time,
+  run this to check if the spool icon can be recognized (The reel must be fully loaded)  
 ![Status](/static/readme/status.png)
 ```
 python validate.py
@@ -78,12 +86,16 @@ python app.py -p 3 -c -e
 ```
 python app.py -m -r -P
 ```
+- Drink alcohol regularly
+```
+python app.py -A
+```
 - Display help information
 ```
 python app.py -h
 ```
 ## Other Useful Scripts
-### Toggle/untoggle moving forward
+### Toggle moving forward
 - Press w to stop, press it again to continue.
 - Press s to quit.
 - Use `-s` flag to hold the Shift key
@@ -91,16 +103,17 @@ python app.py -h
 python move.py [-s]
 ```
 
-### Crafting items
+### Item crafting
 - The materials must be selected before the execution
 - Specify the limit with `-n` flag
+- Use `-d` flag to discard all the crafted items
 ```
 python make.py [-n QUANTITY]
 ```
 
 ### Calculate the maximum friction brake you can use on your tackle
 ```
-python calculator.py
+python calculate.py
 ```
 
 ### Harvest baits and refill food/comfort automatically
@@ -117,15 +130,20 @@ python harvest.py
   - Use `Ctrl + C` to send a KeyboardInterrupt signal
 - Failed to exit the program?
   - The Shift key might have been pressed down, press again to release it, then type `Ctrl + C` as usual
-- Stuck at retrieving stage?
+- Rod not getting lifted after the retrieval is finished?
   - Change the game resolution until the `validation.py` is pass
+  - Lower the value of `spool_icon_confidence` in `config.ini`
   - Keep away from light sources, e.g., boat headlights in Norwegian Sea
 
 ## Roadmap
-- [ ] Improve logging messages
+- [x] Improve logging messages
+- [x] Customizable keybinds and number of bottom fishing rods
+- [ ] Boat ticket auto-renewal
+- [ ] Spool Recognition for rainbow line
+- [ ] Retrieval with lifting
+- [ ] Switch water layer automatically
 - [ ] Semi-automatic trolling
 - [ ] Spod rod recast
-- [ ] Customizable keybinds and number of bottom fishing rods
 - [ ] Wakey rig
 - [ ] Carp fishing
 - [ ] Snag detection
@@ -134,8 +152,7 @@ python harvest.py
 RussianFishing4Script is licensed under the [GNU General Public License version 3](LICENSE).
 
 ## Contributing 
-Any contribution, bug report, or idea about new features is welcome.  
-You can also share your own profiles by creating a pull request on `template.ini`. 
+Any contribution, bug report, or idea about new features is welcome.
 
 ## Contact me
 Email: dereklee0310@gmail.com 

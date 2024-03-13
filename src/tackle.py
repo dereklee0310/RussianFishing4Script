@@ -50,8 +50,8 @@ class Tackle():
         pag.mouseUp()
         pag.click()
         
-        msg = 'Resetting success' if i > 0 else '! Failed to reset the tackle'
-        logger.info(msg)
+        if i <= 0:
+            logger.warning('Failed to reset tackle')
         return i > 0
     
     def cast(self, 
@@ -87,7 +87,6 @@ class Tackle():
             sleep(sink_delay)
         
         self.timer.update_cast_hour()
-        logger.info('Casting success')
 
     def retrieve(self, duration: int, delay: int) -> bool:
         """Retrieve the lure/bait with a timeout.
@@ -114,11 +113,11 @@ class Tackle():
         sleep(delay) # wait for the line to be fully retrieved
         pag.click()
 
-        msg = 'Retrieving success' if i > 0 else '! Timeout reached'
-        logger.info(msg)
+        if i <= 0:
+            logger.warning('Retrieval timeout reached')
         return i > 0
 
-    def pirk(self, duration: float, delay: float, timeout: float) -> bool:
+    def pirk(self, duration: float, delay: float, timeout: float, check_again_delay: float) -> bool:
         """Perform pirking with a time out.
 
         :param duration: rod lifting time
@@ -127,36 +126,46 @@ class Tackle():
         :type delay: float
         :param timeout: timeout for a single pirking routine
         :type timeout: float
+        :param timeout: timeout for a single pirking routine
+        :type timeout: float
         :return: True if a fish is hooked, False otherwise
         :rtype: bool
         """
         logger.info('Pirking')
 
         i = timeout
-        while i > 0 and not monitor.is_fish_hooked():
+        while i > 0:
+            if monitor.is_fish_hooked():
+                if check_again_delay == 0:
+                    break
+                    
+                sleep(check_again_delay)    
+                if monitor.is_fish_hooked():
+                    logger.info('Fish is hooked')
+                    break
+                
             hold_right_click(duration=duration)
             i = sleep_and_decrease(i, delay)
 
-        msg = 'Pirking success' if i > 0 else '! Timeout reached'
-        logger.info(msg)
+        if i <= 0:
+            logger.warning('Pirking timeout reached')
         return i > 0
     
-    def wakey_pirking(self, delay: float) -> bool:
-        """todo
+    # def wakey_pirking(self, delay: float) -> bool:
+    #     """todo
 
-        :param delay: _description_
-        :type delay: float
-        :return: _description_
-        :rtype: bool
-        """
-        logger.info('Pirking')
+    #     :param delay: _description_
+    #     :type delay: float
+    #     :return: _description_
+    #     :rtype: bool
+    #     """
+    #     logger.info('Pirking')
 
-        i = self.PIRKING_TIMEOUT
-        while i > 0 and not monitor.is_fish_hooked():
-            with pag.hold('ctrl'):
-                pag.click(button='right')
-            i = sleep_and_decrease(i, delay)
-
+    #     i = self.PIRKING_TIMEOUT
+    #     while i > 0 and not monitor.is_fish_hooked():
+    #         with pag.hold('ctrl'):
+    #             pag.click(button='right')
+    #         i = sleep_and_decrease(i, delay)
 
     def pull(self) -> bool:
         """Pull the fish with a timeout.
@@ -183,10 +192,11 @@ class Tackle():
                 sleep(0.5)
         pag.mouseUp()
         pag.mouseUp(button='right')
-        pag.click()
+        if self.PULL_TIMEOUT - i > 2.2:
+            pag.click()
 
-        msg = 'Pulling success' if i > 0 else '! Failed to pull the fish up'
-        logger.info(msg)
+        if i <= 0:
+            logger.warning('Failed to pull the fish up')
         return i > 0
 
     #todo: refactor iteration
@@ -223,4 +233,3 @@ class Tackle():
 
         if enable_acceleration:
             pag.keyUp('shift')
-        logger.info('Retrieving with pause success')

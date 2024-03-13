@@ -4,30 +4,25 @@ Module for Player class
 Todo: docstrings
 """
 import os
-from time import sleep, time
-from datetime import datetime
-from threading import Thread
 import smtplib
+from time import sleep, time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 
-from pyautogui import *
-import win32api, win32con
+import logging
+import pyautogui as pag
 from configparser import ConfigParser
-import keyboard
 from prettytable import PrettyTable
-from dotenv import load_dotenv
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
-import logging
+from dotenv import load_dotenv
 
+import monitor
+from userprofile import UserProfile
 from tackle import Tackle
 from timer import Timer
-import monitor
-from monitor import *
-from script import *
-from userprofile import UserProfile
+from script import sleep_and_decrease
 
 logger = logging.getLogger(__name__)
 
@@ -39,8 +34,10 @@ class Player():
 
     total_coffee_count = 0 
     cur_coffee_count = 0
+    alcohol_count = 0
     tea_count = 0
-    pre_refill_time = 0 # for tea drinking
+    pre_tea_drink_time = 0 # tea
+    pre_alcohol_drink_time = 0 # alcohol
     carrot_count = 0
     harvest_count = 0
 
@@ -62,11 +59,10 @@ class Player():
         self.harvest_baits_threshold = config['game'].getfloat('harvest_baits_threshold')
         self.coffee_limit = config['game'].getint('coffee_limit')
         self.keep_fish_delay = config['game'].getint('keep_fish_delay')
+        self.alcohol_drinking_delay = config['game'].getint('alcohol_drinking_delay')
+        self.alcohol_quantity = config['game'].getint('alcohol_quantity')
 
-        # shortcuts
-        self.coffee_shortcut = config['shortcut']['coffee']
-        self.shovel_spoon_shortcut = config['shortcut']['shovel_spoon']
-        self.bottom_rods_shortcuts = config['shortcut']['bottom_rods'].split(', ')
+        self.shortcut_dict = dict(config['shortcut'])
 
     def start_fishing(self) -> None:
         """Start main fishing loop with specified fishing strategt.
@@ -87,7 +83,7 @@ class Player():
         except KeyboardInterrupt:
                 # avoid shift key stuck
                 if self.profile.enable_acceleration:
-                    keyUp('shift')
+                    pag.keyUp('shift')
                 print(self.gen_result('Terminated by user'))
                 if self.profile.enable_plotting:
                     self.plot_and_save()
@@ -104,9 +100,10 @@ class Player():
             self.resetting_stage()
             self.tackle.cast(self.profile.cast_power_level)
             self.retrieving_stage()
-            if not is_fish_hooked():
+            if not monitor.is_fish_hooked():
                 self.cast_miss_count += 1
                 continue
+            self.drinking_stage()
             self.pulling_stage()
 
     # todo: combine this with spin_fishing()
@@ -122,9 +119,10 @@ class Player():
                                             self.profile.base_iteration,
                                             self.profile.enable_acceleration)
             self.retrieving_stage(duration=4, delay=2)
-            if not is_fish_hooked():
+            if not monitor.is_fish_hooked():
                 self.cast_miss_count += 1
                 continue
+            self.drinking_stage()
             self.pulling_stage()
 
     def bottom_fishing(self) -> None:
@@ -133,19 +131,20 @@ class Player():
         # todo: add retrieval duration and delay
         check_counts = [-1, 0, 0, 0]
         rod_idx = -1
-        rod_count = len(self.bottom_rods_shortcuts)
+        bottom_rods = [key.strip() for key in self.shortcut_dict['bottom_rods'].split(',')]
+        rod_count = len(bottom_rods)
 
         while True:
             self.refilling_stage()
             self.harvesting_stage()
             rod_idx = 0 if rod_idx == rod_count - 1 else rod_idx + 1
-            rod_key = self.bottom_rods_shortcuts[rod_idx]
-            logger.info(f'Checking rod {rod_key}')
-            press(f'{rod_key}')
+            rod_key = bottom_rods[rod_idx]
+            logger.info(f'Checking rod {rod_idx + 1}')
+            pag.press(f'{rod_key}')
             sleep(1) # wait for pick up animation
 
             # check the next rod if no fish is hooked
-            if not is_fish_hooked():
+            if not monitor.is_fish_hooked():
                 check_counts[rod_idx] += 1
                 self.cast_miss_count += 1
                 # recast if check failed more than 16 times
@@ -153,19 +152,20 @@ class Player():
                     check_counts[rod_idx] = 0
                     self.resetting_stage()
                     self.tackle.cast(self.profile.cast_power_level, cast_delay=4)
-                    click()
+                    pag.click()
                 
-                press('0')
+                pag.press('0')
                 sleep(self.profile.check_delay)
                 continue
 
             check_counts[rod_idx] = 0
             self.retrieving_stage(duration=4, delay=2)
-            if is_fish_hooked():
+            if monitor.is_fish_hooked():
+                self.drinking_stage()
                 self.pulling_stage()
             self.resetting_stage()
             self.tackle.cast(self.profile.cast_power_level, cast_delay=4)
-            click()
+            pag.click()
 
     def marine_fishing(self) -> None:
         """Main marine fishing loop.
@@ -177,8 +177,11 @@ class Player():
             self.marine_sinking_stage()
             self.pirking_stage()
             # for small fishes at 34m and 41m, use accelerated retrieval
-            self.retrieving_stage(duration=8, accelerated=True)
-            if is_fish_hooked():
+            # self.retrieving_stage(duration=8, accelerated=True)
+            # todo, temp fix for Atalantic saury
+            self.retrieving_stage(duration=2, delay=0, accelerated=True)
+            if monitor.is_fish_hooked():
+                self.drinking_stage()
                 self.pulling_stage()
 
     def wakey_rig_fishing(self) -> None:
@@ -191,40 +194,42 @@ class Player():
             self.wakey_sinking_stage()
             # self.pirking_stage()
             self.retrieving_stage(duration=4, delay=2)
-            if is_fish_hooked():
+            if monitor.is_fish_hooked():
+                self.drinking_stage()
                 self.pulling_stage()
 
-    def trolling_fishing(self) -> None:
-        # temp
-        rod_idx = -1
-        rod_count = len(self.bottom_rods_shortcuts) #! todo
-        base_waiting_time = 16
+    # this is not done yet :(
+    # def trolling_fishing(self) -> None:
+    #     # temp
+    #     rod_idx = -1
+    #     rod_count = len(self.bottom_rods_shortcuts) #! todo
+    #     base_waiting_time = 16
 
-        while True:
-            self.refilling_stage()
-            self.harvesting_stage()
-            # if there is a rod on hand
-            if rod_count == 3:
-                sleep(base_waiting_time)
-                logger.info(f'Checking rod {3}')
-                self.retrieving_stage()
-                if is_fish_hooked():
-                    self.pulling_stage()
-                else:
-                    self.resetting_stage()
+    #     while True:
+    #         self.refilling_stage()
+    #         self.harvesting_stage()
+    #         # if there is a rod on hand
+    #         if rod_count == 3:
+    #             sleep(base_waiting_time)
+    #             logger.info(f'Checking rod {3}')
+    #             self.retrieving_stage()
+    #             if monitor.is_fish_hooked():
+    #                 self.pulling_stage()
+    #             else:
+    #                 self.resetting_stage()
 
-            for rod_key in self.bottom_rods_shortcuts[:-1]:
-                press(rod_key)
-                if is_fish_hooked():
-                    self.retrieving_stage()
-                    if is_fish_hooked():
-                        self.pulling_stage()
-                        self.tackle.cast(self.profile.cast_power_level)
-                    else:
-                        self.cast_miss_count += 1
+    #         for rod_key in self.bottom_rods_shortcuts[:-1]:
+    #             pag.press(rod_key)
+    #             if monitor.is_fish_hooked():
+    #                 self.retrieving_stage()
+    #                 if monitor.is_fish_hooked():
+    #                     self.pulling_stage()
+    #                     self.tackle.cast(self.profile.cast_power_level)
+    #                 else:
+    #                     self.cast_miss_count += 1
 
-            # if both missed, recast the third rod
-            self.tackle.cast(self.profile.cast_power_level)
+    #         # if both missed, recast the third rod
+    #         self.tackle.cast(self.profile.cast_power_level)
 
 
     # ---------------------------------------------------------------------------- #
@@ -236,7 +241,7 @@ class Player():
         """
         if not self.profile.enable_baits_harvesting:
             return
-        elif is_energy_high(self.harvest_baits_threshold):
+        elif monitor.is_energy_high(self.harvest_baits_threshold):
             self.harvest_baits()
             self.harvest_count += 1
 
@@ -246,20 +251,20 @@ class Player():
         """
         logger.info('Harvesting baits')
         # pull out the shovel/spoon and harvest baits
-        press(self.shovel_spoon_shortcut)
+        self.access_item('shovel_spoon')
         sleep(3)
-        click()
+        pag.click()
 
         # wait for result
         sleep(5) # 4 is enough, + 1 for inspection
         i = 64
-        while i > 0 and not is_harvest_success():
+        while i > 0 and not monitor.is_harvest_success():
             i = sleep_and_decrease(i, 4)
 
         # accept result and hide the tool
-        press('space')
+        pag.press('space')
         sleep(0.25)
-        press('backspace')
+        pag.press('backspace')
         sleep(0.5) # wait for hide animation
 
     def refilling_stage(self) -> None:
@@ -271,76 +276,81 @@ class Player():
 
         # refill comfort
         # comfort is affected by weather, add a time threshold to prevent over drinking
-        cur_time = time.time()
-        if is_comfort_low() and cur_time - self.pre_refill_time > 300:
-            self.pre_refill_time = cur_time
-            self.consume_food('tea')
+        cur_time = time()
+        if monitor.is_comfort_low() and cur_time - self.pre_tea_drink_time > 300:
+            self.pre_tea_drink_time = cur_time
+            self.access_item('tea')
             self.tea_count += 1
         sleep(0.25)
 
         # refill food level
-        if is_food_level_low():
-            self.consume_food('carrot')
+        if monitor.is_food_level_low():
+            self.access_item('carrot')
             self.carrot_count += 1
         sleep(0.25)
+    
+    def drinking_stage(self) -> None:
+        """Drink alcohol and update drinking time.
+        """
+        cur_time = time()
+        if (not self.profile.enable_alcohol_drinking or 
+            cur_time - self.pre_alcohol_drink_time < self.alcohol_drinking_delay):
+            return
 
-    # todo
-    # def drinking_stage(self):
-    #     if not self.profile.enable_alcohol_drinking:
-    #         return
+        self.pre_alcohol_drink_time = cur_time
+        self.pre_tea_drink_time = cur_time
+        for _ in range(self.alcohol_quantity):
+            self.access_item('alcohol')
+            self.alcohol_count += 1
+            sleep(0.25)
+
+    def access_item(self, item: str) -> None:
+        """Access item by name using quick selection shortcut or menu.
+
+        :param item: the name of the item
+        :type item: str
+        """
+        key = self.shortcut_dict[item]
+        if int(key) < -1 or int(key) > 7:
+            logger.error(f'Invalid {item} key: {key}')
+            exit()
+        elif int(key) != -1:
+            pag.press(key)
+            return
         
-    #     cur_time = time.time()
-    #     if cur_time - self.pre_refill_time > 900:
-    #         self.pre_refill_tim = cur_time
-    #         self.consume_food('alcohol')
-    #         self.alcohol_count += 1
-    #     sleep(0.25)
+        # key = 'u' if item == 'shovel_spoon' else 't'
+        with pag.hold('t'):
+            sleep(0.25)
+            pag.moveTo(getattr(monitor, f'get_{item}_icon_position')())
+            pag.click()
 
-    def consume_food(self, food: str) -> None:
-        """Open food menu, then click on food icon to consume it.
+    def consume_food_deprecated(self, food: str) -> None:
+        """Open food menu, then pag.click on food icon to consume it.
 
         :param food: food's name
         :type food: str
         """
         print(f'Consume {food}')
-        with hold('t'):
+        with pag.hold('t'):
             sleep(0.25)
-            moveTo(getattr(monitor, f'get_{food}_icon_position')())
-            click()
-
-    def access_item(self, item: str) -> None:
-        key = config['shortcut'].getint(item)
-
-        if key < -1 or key > 7:
-            logger.error(f'Invalid {item} key: {key}')
-            exit()
-        elif key != -1:
-            press(str(key))
-            return
-        
-        key = 'u' if item == 'shovel_spoon' else 't'
-        with hold(key):
-            sleep(0.25)
-            moveTo(getattr(monitor, f'get_{item}_icon_position')())
-            click()
-
-
+            pag.moveTo(getattr(monitor, f'get_{food}_icon_position')())
+            pag.click()
 
     def resetting_stage(self) -> None:
         """Reset the tackle until the it's ready or an exceptional event occurs.
         """
         while not self.tackle.reset():
-            if is_fish_hooked():
+            if monitor.is_fish_hooked():
                 if self.tackle.pull(): # a single pull should do the job
                     self.handle_fish()
                 break # whether success or not, back to main fishing loop
-            elif is_fish_captured():
+            elif monitor.is_fish_captured():
                 self.handle_fish()
                 break
-            elif is_tackle_broke():
+            elif monitor.is_tackle_broke():
                 self.save_screenshot()
                 self.general_quit('Tackle is broken')
-            elif is_disconnected():
+            elif monitor.is_disconnected():
                 self.disconnected_quit()
             # reset again if no fish is hoooked or captured
 
@@ -355,34 +365,34 @@ class Player():
         :type accelerated: bool, optional
         """
         if accelerated:
-            keyDown('shift')
+            pag.keyDown('shift')
 
         while not self.tackle.retrieve(duration, delay):
             # no fish, return to main loop
             # captured, defer to pulling stage
-            if is_line_at_end():
+            if monitor.is_line_at_end():
                 self.general_quit('Fishing line is at its end')
 
-            if not is_fish_hooked() or is_fish_captured():
+            if not monitor.is_fish_hooked() or monitor.is_fish_captured():
                 break
 
             # toggle accelerated retrieval and refill energy
             if accelerated:
-                keyUp('shift')
+                pag.keyUp('shift')
 
             # drink coffee if energy is low
-            if not is_energy_high(threshold=0.9) and self.profile.enable_coffee_drinking:
+            if not monitor.is_energy_high(threshold=0.9) and self.profile.enable_coffee_drinking:
                 self.cur_coffee_count += 1
                 if self.cur_coffee_count > self.coffee_limit:
-                    press('esc') # back to control panel to reduce power usage
+                    pag.press('esc') # back to control panel to reduce power usage
                     print(self.gen_result('Coffee limit reached'))
                     exit()
                 logger.info('Consume coffee')
-                press(self.coffee_shortcut)
+                self.access_item('coffee')
                 self.total_coffee_count += 1
 
         if accelerated:
-            keyUp('shift')
+            pag.keyUp('shift')
         self.cur_coffee_count = 0
 
     def marine_sinking_stage(self) -> None:
@@ -392,12 +402,18 @@ class Player():
         logger.info('Sinking Lure')
         i = self.profile.sink_timeout
         while i > 0:
-            if is_moving_in_bottom_layer():
+            if monitor.is_moving_in_bottom_layer():
                 logger.info('Lure reached bottom layer')
                 break
-            elif is_fish_hooked():
-                logger.info('Fish is hooked')
-                return
+            elif monitor.is_fish_hooked():
+                if self.profile.check_again_delay == 0:
+                    return
+                
+                # check if the fish got away after biting
+                sleep(self.profile.check_again_delay)    
+                if monitor.is_fish_hooked():
+                    logger.info('Fish is hooked')
+                    return
             i = sleep_and_decrease(i, 2)
         self.tackle.reel.tighten_line(self.profile.tighten_duration)
 
@@ -408,7 +424,7 @@ class Player():
         # todo: dynamic timeout
         i = 60
         while i > 0:
-            if is_fish_hooked():
+            if monitor.is_fish_hooked():
                 logger.info('Fish is hooked')
                 break
             i = sleep_and_decrease(i, 2)
@@ -417,10 +433,13 @@ class Player():
     def pirking_stage(self) -> None:
         """Perform pirking until a fish is hooked, adjust the lure if timeout is reached.
         """
-        while not self.tackle.pirk(self.profile.pirk_duration, self.profile.pirk_delay, self.profile.pirk_timeout):
+        while not self.tackle.pirk(self.profile.pirk_duration, 
+                                   self.profile.pirk_delay, 
+                                   self.profile.pirk_timeout,
+                                   self.profile.check_again_delay):
             # adjust the depth of the lure if no fish is hooked
             logger.info('Adjusting lure depth')
-            press('enter') # open reel
+            pag.press('enter') # open reel
             sleep(4)
             self.tackle.reel.tighten_line(self.profile.tighten_duration)
             self.cast_miss_count += 1
@@ -433,7 +452,7 @@ class Player():
             if self.tackle.pull():
                 self.handle_fish()
                 break
-            elif not is_fish_hooked():
+            elif not monitor.is_fish_hooked():
                 break
             self.tackle.retrieve(duration=8, delay=4) # half retrieval
     
@@ -442,11 +461,11 @@ class Player():
         """
 
         #! a trophy ruffe will break the checking mechanism            
-        if not is_fish_marked():
+        if not monitor.is_fish_marked():
             self.unmarked_fish_count += 1
             if self.profile.enable_unmarked_release:
                 logger.info('Release unmarked fish')
-                press('backspace')
+                pag.press('backspace')
                 return
         else:
             self.marked_fish_count += 1
@@ -454,7 +473,7 @@ class Player():
         # fish is marked or enable_unmarked_release is set to False
         sleep(self.keep_fish_delay)
         logger.info('Keep the fish')
-        press('space')
+        pag.press('space')
 
         # avoid wrong cast hour
         if (self.profile.fishing_strategy == 'bottom' or 
@@ -477,13 +496,13 @@ class Player():
         :param termination_cause: the cause of the termination
         :type termination_cause: str
         """
-        press('esc')
+        pag.press('esc')
         sleep(0.25)
-        moveTo(get_quit_position()) 
-        click()
+        pag.moveTo(monitor.get_quit_position()) 
+        pag.click()
         sleep(0.25)
-        moveTo(get_yes_position())
-        click()
+        pag.moveTo(monitor.get_yes_position())
+        pag.click()
 
         result = self.gen_result(termination_cause)
         print(result)
@@ -497,20 +516,20 @@ class Player():
         """show the running result with disconnected status,
             then quit the game through main menu.
         """
-        press('space')
+        pag.press('space')
         sleep(0.25)
 
         # sleep to bypass the black screen (experimental)
         sleep(10)
 
-        press('space')
+        pag.press('space')
         sleep(0.25)
   
-        moveTo(get_exit_icon_position())
-        click()
+        pag.moveTo(monitor.get_exit_icon_position())
+        pag.click()
         sleep(0.25)
-        moveTo(get_confirm_exit_icon_position())
-        click()
+        pag.moveTo(monitor.get_confirm_exit_icon_position())
+        pag.click()
 
         result = self.gen_result('Disconnection')
         print(result)
@@ -550,6 +569,8 @@ class Player():
             table.add_row(['Bite rate', f'{total_fish_count}/{total_cast_count} {bite_rate}%'])
         if self.profile.enable_coffee_drinking:
             table.add_row(['Coffee consumed', self.total_coffee_count])
+        if self.profile.enable_alcohol_drinking:
+            table.add_row(['Alcohol consumed', self.alcohol_count])
         if self.profile.enable_food_comfort_refill:
             table.add_rows(
                 [
@@ -594,14 +615,16 @@ class Player():
         """Save screenshot to screenshot/, only be invoked when the tackle is broke.
         """
         # datetime.now().strftime("%H:%M:%S")
-        press('q')
+        pag.press('q')
         with open(fr'../screenshots/{self.timer.get_cur_timestamp()}.png', 'wb') as file: 
-            screenshot().save(file, 'png')
-        press('esc')
+            pag.screenshot().save(file, 'png')
+        pag.press('esc')
 
     def plot_and_save(self):
-        cast_rhour_list, cast_ghour_list = self.timer.get_cast_hour_list()
+        if self.marked_fish_count + self.unmarked_fish_count == 0:
+            return
 
+        cast_rhour_list, cast_ghour_list = self.timer.get_cast_hour_list()
         fig, ax = plt.subplots(nrows=1, ncols=2)
         # fig.canvas.manager.set_window_title('Record')
         ax[0].set_ylabel('Fish')

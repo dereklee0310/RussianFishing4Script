@@ -9,6 +9,7 @@ class UserProfile():
                  fishes_in_keepnet: int, 
                  enable_unmarked_release: bool, 
                  enable_coffee_drinking: bool,
+                 enable_alcohol_drinking: bool,
                  enable_food_comfort_refill: bool,
                  enable_baits_harvesting: bool,
                  enable_email_sending: bool,
@@ -27,13 +28,15 @@ class UserProfile():
                  pirk_delay: float,
                  pirk_timeout: float,
                  tighten_duration: float,
-                 sink_timeout: float):
+                 sink_timeout: float,
+                 check_again_delay: float):
         """Constructor method.
         """
         
         self.fishes_in_keepnet = fishes_in_keepnet
         self.enable_unmarked_release = enable_unmarked_release
         self.enable_coffee_drinking = enable_coffee_drinking
+        self.enable_alcohol_drinking = enable_alcohol_drinking
         self.enable_food_comfort_refill = enable_food_comfort_refill
         self.enable_baits_harvesting = enable_baits_harvesting
         self.enable_email_sending = enable_email_sending
@@ -53,3 +56,4 @@ class UserProfile():
         self.pirk_timeout = pirk_timeout
         self.tighten_duration = tighten_duration
         self.sink_timeout = sink_timeout
+        self.check_again_delay = check_again_delay

@@ -20,7 +20,7 @@ from script import ask_for_confirmation
 
 # logging.BASIC_FORMAT: %(levelname)s:%(name)s:%(message)s
 # timestamp: %(asctime)s, datefmt='%Y-%m-%d %H:%M:%S',
-logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class App():
@@ -52,6 +52,8 @@ class App():
                             help="keep only the marked fishes")
         parser.add_argument('-c', '--coffee', action='store_true',
                             help='drink coffee if the retrieval time is greater than 2mins')
+        parser.add_argument('-A', '--alcohol', action='store_true',
+                            help='drink alcohol before keeping thee fish regularly, the frequency can be set in config.ini')
         parser.add_argument('-r', '--refill', action='store_true', 
                             help='refill food and comfort bar by consuming tea and carrot automatically')
         parser.add_argument('-H', '--harvest', action='store_true',
@@ -165,6 +167,7 @@ class App():
             self.args.fishes_in_keepnet,
             self.args.marked,
             self.args.coffee,
+            self.args.alcohol,
             self.args.refill,
             self.args.harvest,
             self.args.email,
@@ -180,7 +183,8 @@ class App():
             profile_section.getfloat('pirk_delay', fallback=4),
             profile_section.getfloat('pirk_timeout', fallback=32),
             profile_section.getfloat('tighten_duration', fallback=1),
-            profile_section.getfloat('sink_timeout', fallback=60))
+            profile_section.getfloat('sink_timeout', fallback=60),
+            profile_section.getfloat('check_again_delay', fallback=0),)
         self.player = Player(profile, self.config)
 
     def show_user_settings(self) -> None:
@@ -197,6 +201,7 @@ class App():
                 ['Fishing strategy', profile.fishing_strategy],
                 ['Enable unmarked release', profile.enable_unmarked_release],
                 ['Enable coffee drinking', profile.enable_coffee_drinking],
+                ['Enable alcohol drinking', profile.enable_alcohol_drinking],
                 ['Enable food/comfort refill', profile.enable_food_comfort_refill],
                 ['Enable baits harvesting', profile.enable_baits_harvesting],
                 ['Enable email sending', profile.enable_email_sending],
@@ -225,7 +230,8 @@ class App():
                         ['Pirk delay', profile.pirk_delay],
                         ['Pirk timeout', profile.pirk_timeout],
                         ['Tighten duration', profile.tighten_duration],
-                        ['Sink timeout', profile.sink_timeout]
+                        ['Sink timeout', profile.sink_timeout],
+                        ['Check again delay', profile.check_again_delay]
                     ])
             case 'wakey_rig':
                 pass # todo
