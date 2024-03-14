@@ -4,7 +4,8 @@ Star the repo to support this project, and "watch" it to get the latest news :)
 - [文字教程](中文版教程.md)
 - [視頻教程](https://www.youtube.com/watch?v=znLBYoXHxkw)
 
-## 3/13 Patchnotes
+## Patchnotes
+### 3/13
 **Please refer to `template.ini` to configure newly added settings.**
 - Change: Replace countdown before execution with user confirmation
 - Change: Improve logging messages
@@ -20,6 +21,10 @@ Star the repo to support this project, and "watch" it to get the latest news :)
 - Add: Quick selection menu support for carrot, tea and coffee
 - Add: Option for hook checking delay for marine fishing
 
+### 3/14
+- Fix: Retrieval get stuck while performing marine fishing
+- Fix: Pulling bug caused by mouse locking
+
 ## Built With
 - Python 3.11 
 - PyAutoGUI
@@ -27,6 +32,7 @@ Star the repo to support this project, and "watch" it to get the latest news :)
 ## Getting Started  
 ### Prerequisites
 - Set your in-game language in `config.ini`
+- Set your in-game interface scale as "1x"
 - Enable Mouse ClickLock in Windows mouse settings and set the time before locking to "Long"  
 ![ClickLock](/static/readme/clicklock.png)
 - To refill player's stats automatically, add tea and carrot, and coffee to your  

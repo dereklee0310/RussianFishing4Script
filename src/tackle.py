@@ -5,13 +5,12 @@ Todo: special retrieval for jig step, twitchiing...
 """
 from time import sleep
 
-# from pyautogui import *
 import pyautogui as pag
 import logging
 
 import monitor
-from script import sleep_and_decrease, hold_right_click
-from reel import *
+from script import sleep_and_decrease, hold_right_click, hold_left_click
+from reel import Reel
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +30,9 @@ class Tackle():
         # self.PIRKING_TIMEOUT = 32
         self.RETRIEVE_WITH_PAUSE_TIMEOUT = 128
         self.reel = Reel()
+
+
+
 
     def reset(self) -> bool:
         """Reset the tackle with a timeout.
@@ -192,8 +194,7 @@ class Tackle():
                 sleep(0.5)
         pag.mouseUp()
         pag.mouseUp(button='right')
-        if self.PULL_TIMEOUT - i > 2.2:
-            pag.click()
+        pag.click()
 
         if i <= 0:
             logger.warning('Failed to pull the fish up')

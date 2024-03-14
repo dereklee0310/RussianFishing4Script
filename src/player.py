@@ -179,7 +179,7 @@ class Player():
             # for small fishes at 34m and 41m, use accelerated retrieval
             # self.retrieving_stage(duration=8, accelerated=True)
             # todo, temp fix for Atalantic saury
-            self.retrieving_stage(duration=2, delay=0, accelerated=True)
+            self.retrieving_stage(duration=2.2, delay=0, accelerated=True) # at least 2.2
             if monitor.is_fish_hooked():
                 self.drinking_stage()
                 self.pulling_stage()

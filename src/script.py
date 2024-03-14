@@ -19,7 +19,7 @@ def hold_left_click(duration: float=1) -> None:
     pag.mouseDown()
     sleep(duration)
     pag.mouseUp()
-    if duration >= 2.2:
+    if duration >= 2.1: # + 0.1 due to pag.mouseDown() delay  
         pag.click()
 
 def hold_right_click(duration: float=1) -> None:
