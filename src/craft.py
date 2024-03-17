@@ -68,7 +68,6 @@ if __name__ == '__main__':
             sleep(0.1) # wait for animation
     except KeyboardInterrupt:
         pass
-    print('The bot has been terminated')
     table = PrettyTable(header=False, align='l')
     table.title = 'Running Results'
     table.add_rows(

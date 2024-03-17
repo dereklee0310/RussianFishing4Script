@@ -69,7 +69,6 @@ if __name__ == '__main__':
     pag.keyUp('w')
     if enable_shift_holding:
         pag.keyUp('shift')
-    print('The bot has been terminated')
 
 # press/release detection: https://stackoverflow.com/questions/65890326/keyboard-press-detection-with-pynput
 # listner loop : https://stackoverflow.com/questions/75784939/pynput-difference-between-listener-join-and-listener-start

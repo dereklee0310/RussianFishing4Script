@@ -14,7 +14,6 @@ from prettytable import PrettyTable
 from dotenv import load_dotenv
 
 from windowcontroller import WindowController
-from userprofile import UserProfile
 from player import Player
 from script import ask_for_confirmation
 
@@ -162,82 +161,64 @@ class App():
             exit()
 
         self.profile_name = self.profile_names[self.pid]
-        profile_section = self.config[self.profile_name]
-        profile = UserProfile(
-            self.args.fishes_in_keepnet,
-            self.args.marked,
-            self.args.coffee,
-            self.args.alcohol,
-            self.args.refill,
-            self.args.harvest,
-            self.args.email,
-            self.args.plot,
-            profile_section['fishing_strategy'],
-            profile_section.getfloat('cast_power_level', fallback=5),
-            profile_section.getfloat('retrieval_duration', fallback=0.5),
-            profile_section.getfloat('retrieval_delay', fallback=1.5),
-            profile_section.getint('base_iteration', fallback=0),
-            profile_section.getboolean('enable_acceleration', fallback=False),
-            profile_section.getfloat('check_delay', fallback=8),
-            profile_section.getfloat('pirk_duration', fallback=1.75),
-            profile_section.getfloat('pirk_delay', fallback=4),
-            profile_section.getfloat('pirk_timeout', fallback=32),
-            profile_section.getfloat('tighten_duration', fallback=1),
-            profile_section.getfloat('sink_timeout', fallback=60),
-            profile_section.getfloat('check_again_delay', fallback=0),)
-        self.player = Player(profile, self.config)
+        # profile_section = self.config[self.profile_name]
+        self.player = Player(self.args, self.profile_name)
 
     def show_user_settings(self) -> None:
         """Display user settings.
         """
-        profile = self.player.profile
+        player = self.player
         table = PrettyTable(header=False, align='l')
         table.title = 'User Settings'
 
-        # general settings
-        table.add_rows(
-            [
-                ['Profile name', self.profile_name],
-                ['Fishing strategy', profile.fishing_strategy],
-                ['Enable unmarked release', profile.enable_unmarked_release],
-                ['Enable coffee drinking', profile.enable_coffee_drinking],
-                ['Enable alcohol drinking', profile.enable_alcohol_drinking],
-                ['Enable food/comfort refill', profile.enable_food_comfort_refill],
-                ['Enable baits harvesting', profile.enable_baits_harvesting],
-                ['Enable email sending', profile.enable_email_sending],
-                ['Enable plotting', profile.enable_plotting],
-                ['Fishes in keepnet', profile.fishes_in_keepnet],
-                ['Cast power level', profile.cast_power_level]
-            ])
+        arg_list = [
+            'Fishing strategy',
+            'Enable unmarked release',
+            'Enable coffee drinking',
+            'Enable alcohol drinking',
+            'Enable food and comfort refill',
+            'Enable baits harvesting',
+            'Enable email sending',
+            'Enable plotting',
+            'Fishes in keepnet',
+            'Cast power level']
+        
+        for arg in arg_list:
+            table.add_row([arg, getattr(player, arg.lower().replace(' ', '_'))])
         
         # strategy-specific settings
-        match profile.fishing_strategy:
+        config_list = []
+        match player.fishing_strategy:
             case 'spin':
                 pass
             case 'spin_with_pause':
-                table.add_rows(
+                config_list.extend(
                     [
-                        ['Retrieval duration', profile.retrieval_duration],
-                        ['Retrieval delay', profile.retrieval_delay],
-                        ['Enable acceleration', profile.enable_acceleration]
+                        'Retrieval duration', 
+                        'Retrieval delay', 
+                        'Enable acceleration'
                     ])
             case 'bottom':
-                table.add_row(['Check delay', profile.check_delay])
+                config_list.extend(['Check delay'])
             case 'marine':
-                table.add_rows(
+                config_list.extend(
                     [
-                        ['Pirk duration', profile.pirk_duration],
-                        ['Pirk delay', profile.pirk_delay],
-                        ['Pirk timeout', profile.pirk_timeout],
-                        ['Tighten duration', profile.tighten_duration],
-                        ['Sink timeout', profile.sink_timeout],
-                        ['Check again delay', profile.check_again_delay]
+                        'Pirk duration',
+                        'Pirk delay',
+                        'Pirk timeout',
+                        'Tighten duration',
+                        'Sink timeout',
+                        'Check again delay',
                     ])
-            case 'wakey_rig':
-                pass # todo
+            case 'wakey_rig': # todo
+                pass 
             case _:
                 logger.error('Invalid fishing strategy')
                 exit()
+
+        for config in config_list:
+            table.add_row([config, getattr(player, config.lower().replace(' ', '_'))])
+
         print(table)
 
 if __name__ == '__main__':

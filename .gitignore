@@ -3,5 +3,6 @@ build/
 screenshots/
 src/__pycache__/
 logs/
+static/mark_test
 config.ini
 .env

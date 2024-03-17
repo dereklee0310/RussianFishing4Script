@@ -10,7 +10,6 @@ import logging
 
 import monitor
 from script import sleep_and_decrease, hold_right_click, hold_left_click
-from reel import Reel
 
 logger = logging.getLogger(__name__)
 
@@ -29,10 +28,6 @@ class Tackle():
         self.PULL_TIMEOUT = 32
         # self.PIRKING_TIMEOUT = 32
         self.RETRIEVE_WITH_PAUSE_TIMEOUT = 128
-        self.reel = Reel()
-
-
-
 
     def reset(self) -> bool:
         """Reset the tackle with a timeout.
@@ -102,7 +97,11 @@ class Tackle():
         """
         logger.info('Retrieving')
 
-        self.reel.full_retrieve(duration=duration)
+        # full retrieval to lock the reel, duration must >= 2.2
+        pag.mouseDown()
+        sleep(duration)
+        pag.mouseUp()
+
         i = self.RETRIEVE_TIMEOUT
         while i > 0:
             if monitor.is_line_at_end():
@@ -228,9 +227,16 @@ class Tackle():
                 break
             elif iteration >= base_iteration and monitor.is_retrieve_finished():
                 break
-            self.reel.retrieve_with_pause(duration, delay)
+            hold_left_click(duration)
+            sleep(delay)
             i -= delay
             iteration += 1
 
         if enable_acceleration:
             pag.keyUp('shift')
+
+    def switch_gear_ratio(self) -> None:
+        """Switch gear ratio, designed for conventional reel.
+        """
+        with pag.hold('ctrl'):
+            pag.press('space')

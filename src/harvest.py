@@ -11,7 +11,6 @@ from script import sleep_and_decrease, ask_for_confirmation
 def harvest_baits() -> None:
     """Harvest baits and accept the result.
     """
-    # digging
     pag.click()
 
     # wait for result
@@ -25,7 +24,7 @@ def harvest_baits() -> None:
     sleep(0.25)
 
 def consume_food(food: str) -> None:
-    """Open food menu, then click on food icon to consume it.
+    """Open food menu, then click on the food icon to consume it.
 
     :param food: food's name
     :type food: str
@@ -67,17 +66,17 @@ if __name__ == '__main__':
 
             if monitor.is_energy_high(threshold):
                 print('Harvest baits')
-                harvest_baits(shovel_spoon_shortcut)
+                harvest_baits()
                 harvest_count += 1
             else:
                 print('Low energy level')
 
+            # toggle control panel
             pag.press('esc')
             sleep(30)
             pag.press('esc')
             sleep(0.25)
     except KeyboardInterrupt:
-        print('The bot has been terminated')
         table = PrettyTable(header=False, align='l')
         table.title = 'Running Results'
         table.add_rows(

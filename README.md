@@ -114,7 +114,7 @@ python move.py [-s]
 - Specify the limit with `-n` flag
 - Use `-d` flag to discard all the crafted items
 ```
-python make.py [-n QUANTITY]
+python craft.py [-n QUANTITY]
 ```
 
 ### Calculate the maximum friction brake you can use on your tackle
