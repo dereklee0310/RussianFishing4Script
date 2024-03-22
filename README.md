@@ -53,7 +53,9 @@ Or, download the repository and unzip it.
 
 ### Configuration
 To edit user profiles, refer to the guides and examples in `template.ini` and edit `config.ini`.  
-To enable email notification, set your Gmail address and Google app password in `.env`
+To enable email notification, set your Gmail address and Google app password in `.env`  
+Edit `SMTP_SERVER` in `.env` if you want to use SMTP server other than GMAIL SMTP (default).
+E.g., Change it to `smtp.qq.com` if QQ mail is used.
 
 ## Usage
 - Move your character to the fishing spot before executing the script.

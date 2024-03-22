@@ -10,3 +10,6 @@ python-dotenv==1.0.1
 prettytable==3.9.0 # for add_rows() support
 PTable==0.9.2
 matplotlib==3.8.0
+playsound=1.2.2 # downgrade to avoid bug
+
+# reference: https://stackoverflow.com/questions/68704443/python-playsound-error-261-for-command-the-driver-cannot-recognize-the-specifie

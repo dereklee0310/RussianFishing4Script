@@ -3,6 +3,7 @@ from time import time, sleep
 
 import pyautogui as pag
 from prettytable import PrettyTable
+from argparse import ArgumentParser
 
 import monitor
 from windowcontroller import WindowController
@@ -36,6 +37,16 @@ def consume_food(food: str) -> None:
         pag.click()
 
 if __name__ == '__main__':
+    parser = ArgumentParser(
+                        prog='harvest.py', 
+                        description='Harvest baits automatically, refill food and comfort if needed', 
+                        epilog='')
+    parser.add_argument('-s', '--power-saving', action='store_true',
+                        help='Open control panel to save power usage between each checks')
+    parser.add_argument('-n', '--check-delay-second', type=int, default=32,
+                        help='The time interval between each checks (in seconds)')
+    args = parser.parse_args()
+
     config = ConfigParser()
     config.read(r'../config.ini')
     threshold = config['game'].getfloat('harvest_baits_threshold')
@@ -59,7 +70,7 @@ if __name__ == '__main__':
                 tea_count += 1
             sleep(0.25)
 
-            if monitor.is_food_level_low():
+            if monitor.is_hunger_low():
                 consume_food('carrot')
                 carrot_count += 1
             sleep(0.25)
@@ -71,9 +82,11 @@ if __name__ == '__main__':
             else:
                 print('Low energy level')
 
-            # toggle control panel
-            pag.press('esc')
-            sleep(30)
+            if args.power_saving:
+                pag.press('esc')
+            sleep(args.check_delay_second)
+            if args.power_saving:
+                pag.press('esc')
             pag.press('esc')
             sleep(0.25)
     except KeyboardInterrupt:

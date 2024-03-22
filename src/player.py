@@ -12,6 +12,8 @@ from email.mime.image import MIMEImage
 
 import logging
 import pyautogui as pag
+from playsound import playsound
+from argparse import Namespace
 from configparser import ConfigParser
 from prettytable import PrettyTable
 from matplotlib import pyplot as plt
@@ -35,60 +37,78 @@ class Player():
     cur_coffee_count = 0
     alcohol_count = 0
     tea_count = 0
-    pre_tea_drink_time = 0 # tea
-    pre_alcohol_drink_time = 0 # alcohol
+    pre_tea_drink_time = 0
+    pre_alcohol_drink_time = 0
     carrot_count = 0
     harvest_count = 0
 
-    def __init__(self, args, profile_name: str) -> None:
+    def __init__(self, args: Namespace, config: ConfigParser, profile_name: str) -> None:
         """Configure game settings, Variables are already validated in app.py.
-        # todo: args, profile_name docstring
+
+        :param args: parsed command line arguments
+        :type args: Namespace
+        :param config: parsed config file
+        :type config: ConfigParser
+        :param profile_name: title of profile with respect to pid
+        :type profile_name: str
         """
-
-        config = ConfigParser()
-        config.read('../config.ini')
-
-        profile_section = config[profile_name]
-
-        # todo: revise this shit
-        self.fishes_in_keepnet = args.fishes_in_keepnet
-        self.enable_unmarked_release = args.marked
-        self.enable_coffee_drinking = args.coffee
-        self.enable_alcohol_drinking = args.alcohol
-        self.enable_food_and_comfort_refill = args.refill
-        self.enable_baits_harvesting = args.harvest
-        self.enable_email_sending = args.email
-        self.enable_plotting = args.plot
-        self.fishing_strategy = profile_section.get('fishing_strategy')
-        self.cast_power_level = profile_section.getfloat('cast_power_level')
-
-        self.retrieval_duration = profile_section.getfloat('retrieval_duration')
-        self.retrieval_delay = profile_section.getfloat('retrieval_delay')
-        self.base_iteration = profile_section.getint('base_iteration')
-        self.enable_acceleration = profile_section.getboolean('enable_acceleration')
-
-        self.check_delay = profile_section.getfloat('check_delay')
-        
-        self.sink_timeout = profile_section.getfloat('sink_timeout')
-        self.pirk_duration = profile_section.getfloat('pirk_duration')
-        self.pirk_delay = profile_section.getfloat('pirk_delay')
-        self.pirk_timeout = profile_section.getfloat('pirk_timeout')
-        self.tighten_duration = profile_section.getfloat('tighten_duration')
-        self.check_again_delay = profile_section.getfloat('check_again_delay')
-        
         self.timer = Timer()
         self.tackle = Tackle(self.timer)
-
-        # general settings
-        self.keepnet_limit = config['game'].getint('keepnet_limit')
-        self.fishes_to_catch = self.keepnet_limit - self.fishes_in_keepnet
-        self.harvest_baits_threshold = config['game'].getfloat('harvest_baits_threshold')
-        self.coffee_limit = config['game'].getint('coffee_limit')
-        self.keep_fish_delay = config['game'].getint('keep_fish_delay')
-        self.alcohol_drinking_delay = config['game'].getint('alcohol_drinking_delay')
-        self.alcohol_quantity = config['game'].getint('alcohol_quantity')
-
         self.shortcut_dict = dict(config['shortcut'])
+        self._build_args(args)
+        self._build_game_config(config)
+        self._build_profile_config(config, profile_name)
+
+    def _build_args(self, args: Namespace) -> None:
+        self.unmarked_release_enabled = args.marked
+        self.coffee_drinking_enabled = args.coffee
+        self.alcohol_drinking_enabled = args.alcohol
+        self.food_and_comfort_refill_enabled = args.refill
+        self.baits_harvesting_enabled = args.harvest
+        self.email_sending_enabled = args.email
+        self.plotting_enabled = args.plot
+        self.fishes_in_keepnet = args.fishes_in_keepnet
+
+    def _build_game_config(self, config: ConfigParser) -> None:
+        game_section = config['game']
+        self.keepnet_limit = game_section.getint('keepnet_limit')
+        self.fishes_to_catch = self.keepnet_limit - self.fishes_in_keepnet
+        self.harvest_baits_threshold = game_section.getfloat('harvest_baits_threshold')
+        self.coffee_limit = game_section.getint('coffee_limit')
+        self.keep_fish_delay = game_section.getint('keep_fish_delay')
+        self.alcohol_drinking_delay = game_section.getint('alcohol_drinking_delay')
+        self.alcohol_quantity = game_section.getint('alcohol_quantity')
+        self.lure_broken_action = game_section.get('lure_broken_action')
+        self.keepnet_full_action = game_section.getint('keepnet_full_action')
+        self.alarm_sound_file_path = game_section.get('alarm_sound_file_path')
+
+    def _build_profile_config(self, config: ConfigParser, profile_name: str) -> None:
+        profile_section = config[profile_name]
+        self.fishing_strategy = profile_section.get('fishing_strategy')
+        self.gear_ratio_switching_enabled = profile_section.getboolean('gear_ratio_switching_enabled')
+        self.cast_power_level = profile_section.getfloat('cast_power_level')
+        match self.fishing_strategy:
+            case 'spin':
+                pass
+            case 'spin_with_pause':
+                self.retrieval_duration = profile_section.getfloat('retrieval_duration')
+                self.retrieval_delay = profile_section.getfloat('retrieval_delay')
+                self.base_iteration = profile_section.getint('base_iteration')
+                self.acceleration_enabled = profile_section.getboolean('acceleration_enabled')
+            case 'bottom':
+                self.check_delay = profile_section.getfloat('check_delay')
+            case 'marine':
+                self.sink_timeout = profile_section.getfloat('sink_timeout')
+                self.pirk_duration = profile_section.getfloat('pirk_duration')
+                self.pirk_delay = profile_section.getfloat('pirk_delay')
+                self.pirk_timeout = profile_section.getfloat('pirk_timeout')
+                self.tighten_duration = profile_section.getfloat('tighten_duration')
+                self.fish_hooked_check_delay = profile_section.getfloat('fish_hooked_check_delay')
+            case 'wakey_rig':
+                pass
+            case _:
+                logger.error('Invalid fishing strategy')
+                exit()
 
     def start_fishing(self) -> None:
         """Start main fishing loop with specified fishing strategt.
@@ -108,10 +128,10 @@ class Player():
                 # default: already checked in app.show_user_settings()
         except KeyboardInterrupt:
                 # avoid shift key stuck
-                if self.enable_acceleration:
+                if self.acceleration_enabled:
                     pag.keyUp('shift')
                 print(self.gen_result('Terminated by user'))
-                if self.enable_plotting:
+                if self.plotting_enabled:
                     self.plot_and_save()
                 exit()
 
@@ -143,7 +163,7 @@ class Player():
             self.tackle.retrieve_with_pause(self.retrieval_duration, 
                                             self.retrieval_delay, 
                                             self.base_iteration,
-                                            self.enable_acceleration)
+                                            self.acceleration_enabled)
             self.retrieving_stage(duration=4, delay=2)
             if not monitor.is_fish_hooked():
                 self.cast_miss_count += 1
@@ -265,7 +285,7 @@ class Player():
         """If enable_baits_harvesting is True and the energy level 
             is greater than the threshold, harvest baits. 
         """
-        if not self.enable_baits_harvesting:
+        if not self.baits_harvesting_enabled:
             return
         elif monitor.is_energy_high(self.harvest_baits_threshold):
             self.harvest_baits()
@@ -297,7 +317,7 @@ class Player():
         """If enable_food_comfort_refill is enabled, 
             consume tea or carrot to refill comfort and food level.
         """
-        if not self.enable_food_and_comfort_refill:
+        if not self.food_and_comfort_refill_enabled:
             return
 
         # refill comfort
@@ -310,7 +330,7 @@ class Player():
         sleep(0.25)
 
         # refill food level
-        if monitor.is_food_level_low():
+        if monitor.is_hunger_low():
             self.access_item('carrot')
             self.carrot_count += 1
         sleep(0.25)
@@ -319,7 +339,7 @@ class Player():
         """Drink alcohol and update drinking time.
         """
         cur_time = time()
-        if (not self.enable_alcohol_drinking or 
+        if (not self.alcohol_drinking_enabled or 
             cur_time - self.pre_alcohol_drink_time < self.alcohol_drinking_delay):
             return
 
@@ -373,7 +393,14 @@ class Player():
             elif monitor.is_fish_captured():
                 self.handle_fish()
                 break
-            elif monitor.is_tackle_broke():
+            elif monitor.is_lure_broken():
+                msg = 'Lure is broken'
+                if self.lure_broken_action == 'alarm':
+                    logger.warning(msg)
+                    playsound(self.alarm_sound_file_path)
+                elif self.lure_broken_action == 'quit':
+                    self.general_quit(msg)
+            elif monitor.is_tackle_broken():
                 self.save_screenshot()
                 self.general_quit('Tackle is broken')
             elif monitor.is_disconnected():
@@ -393,6 +420,8 @@ class Player():
         if accelerated:
             pag.keyDown('shift')
 
+        gear_ratio_switched = False
+
         while not self.tackle.retrieve(duration, delay):
             # no fish, return to main loop
             # captured, defer to pulling stage
@@ -402,16 +431,25 @@ class Player():
             if not monitor.is_fish_hooked() or monitor.is_fish_captured():
                 break
 
-            # toggle accelerated retrieval and refill energy
+            if not gear_ratio_switched and self.gear_ratio_switching_enabled:
+                self.tackle.switch_gear_ratio()
+                gear_ratio_switched = True
+
+            # toggle accelerated retrieval
             if accelerated:
                 pag.keyUp('shift')
 
             # drink coffee if energy is low
-            if not monitor.is_energy_high(threshold=0.9) and self.enable_coffee_drinking:
+            if not monitor.is_energy_high(threshold=0.9) and self.coffee_drinking_enabled:
                 self.cur_coffee_count += 1
                 if self.cur_coffee_count > self.coffee_limit:
                     pag.press('esc') # back to control panel to reduce power usage
-                    print(self.gen_result('Coffee limit reached'))
+                    result = self.gen_result('Coffee limit reached')
+                    print(result)
+                    if self.email_sending_enabled:
+                        self.send_email(result)
+                    if self.plotting_enabled:
+                        self.plot_and_save()
                     exit()
                 logger.info('Consume coffee')
                 self.access_item('coffee')
@@ -419,6 +457,9 @@ class Player():
 
         if accelerated:
             pag.keyUp('shift')
+
+        if gear_ratio_switched:
+            self.tackle.switch_gear_ratio()
         self.cur_coffee_count = 0
 
     def marine_sinking_stage(self) -> None:
@@ -432,11 +473,11 @@ class Player():
                 logger.info('Lure reached bottom layer')
                 break
             elif monitor.is_fish_hooked():
-                if self.check_again_delay == 0:
+                if self.fish_hooked_check_delay == 0:
                     return
                 
                 # check if the fish got away after biting
-                sleep(self.check_again_delay)    
+                sleep(self.fish_hooked_check_delay)
                 if monitor.is_fish_hooked():
                     logger.info('Fish is hooked')
                     return
@@ -459,10 +500,10 @@ class Player():
     def pirking_stage(self) -> None:
         """Perform pirking until a fish is hooked, adjust the lure if timeout is reached.
         """
-        while not self.tackle.pirk(self.pirk_duration, 
-                                   self.pirk_delay, 
+        while not self.tackle.pirk(self.pirk_duration,
+                                   self.pirk_delay,
                                    self.pirk_timeout,
-                                   self.check_again_delay):
+                                   self.fish_hooked_check_delay):
             # adjust the depth of the lure if no fish is hooked
             logger.info('Adjusting lure depth')
             pag.press('enter') # open reel
@@ -480,16 +521,17 @@ class Player():
                 break
             elif not monitor.is_fish_hooked():
                 break
-            self.tackle.retrieve(duration=8, delay=4) # half retrieval
+            elif not monitor.is_retrieve_finished():
+                self.tackle.retrieve(duration=8, delay=4) # half retrieval
     
     def handle_fish(self) -> None:
         """Keep or release the fish and record the fish count.
         """
 
         #! a trophy ruffe will break the checking mechanism            
-        if not monitor.is_fish_marked():
+        if not monitor.is_fish_green_marked():
             self.unmarked_fish_count += 1
-            if self.enable_unmarked_release:
+            if self.unmarked_release_enabled:
                 logger.info('Release unmarked fish')
                 pag.press('backspace')
                 return
@@ -502,7 +544,7 @@ class Player():
         pag.press('space')
 
         # avoid wrong cast hour
-        if (self.fishing_strategy == 'bottom' or 
+        if (self.fishing_strategy == 'bottom' or
             self.fishing_strategy == 'marine'):
             self.timer.update_cast_hour()
         
@@ -510,7 +552,12 @@ class Player():
 
         self.keep_fish_count += 1
         if self.keep_fish_count == self.fishes_to_catch:
-            self.general_quit('Keepnet limit reached')
+            msg = 'Keepnet is full'
+            if self.keepnet_full_action == 'alarm':
+                logger.warning(msg)
+                playsound(self.alarm_sound_file_path)
+            elif self.keepnet_full_action == 'quit':
+                self.general_quit(msg)
 
     # ---------------------------------------------------------------------------- #
     #                                     misc                                     #
@@ -523,18 +570,18 @@ class Player():
         :type termination_cause: str
         """
         pag.press('esc')
-        sleep(0.25)
+        sleep(2)
         pag.moveTo(monitor.get_quit_position()) 
         pag.click()
-        sleep(0.25)
+        sleep(2)
         pag.moveTo(monitor.get_yes_position())
         pag.click()
 
         result = self.gen_result(termination_cause)
         print(result)
-        if self.enable_email_sending:
+        if self.email_sending_enabled:
             self.send_email(result)
-        if self.enable_plotting:
+        if self.plotting_enabled:
             self.plot_and_save()
         exit()
 
@@ -543,23 +590,23 @@ class Player():
             then quit the game through main menu.
         """
         pag.press('space')
-        sleep(0.25)
+        sleep(2)
 
         # sleep to bypass the black screen (experimental)
         sleep(10)
 
         pag.press('space')
-        sleep(0.25)
+        sleep(2)
   
         pag.moveTo(monitor.get_exit_icon_position())
         pag.click()
-        sleep(0.25)
+        sleep(2)
         pag.moveTo(monitor.get_confirm_exit_icon_position())
         pag.click()
 
         result = self.gen_result('Disconnection')
         print(result)
-        if self.enable_email_sending:
+        if self.email_sending_enabled:
             self.send_email(result)
         exit()
 
@@ -593,18 +640,18 @@ class Player():
         if total_cast_count > 0:
             bite_rate = int(total_fish_count / total_cast_count * 100)
             table.add_row(['Bite rate', f'{total_fish_count}/{total_cast_count} {bite_rate}%'])
-        if self.enable_coffee_drinking:
+        if self.coffee_drinking_enabled:
             table.add_row(['Coffee consumed', self.total_coffee_count])
-        if self.enable_alcohol_drinking:
+        if self.alcohol_drinking_enabled:
             table.add_row(['Alcohol consumed', self.alcohol_count])
-        if self.enable_food_and_comfort_refill:
+        if self.food_and_comfort_refill_enabled:
             table.add_rows(
                 [
                     ['Tea consumed', self.tea_count],
                     ['Carrot consumed', self.carrot_count]
                 ])
             
-        if self.enable_baits_harvesting:
+        if self.baits_harvesting_enabled:
             table.add_row(['Harvest baits count', self.harvest_count])
         return table
 
@@ -616,8 +663,9 @@ class Player():
         """
         # get environment variables
         load_dotenv()
-        sender = os.getenv('GMAIL')
-        password = os.getenv('APP_PASSWORD')
+        sender = os.getenv('EMAIL')
+        password = os.getenv('PASSWORD')
+        smtp_server_name = os.getenv('SMTP_SERVER')
         
         # configure mail info
         msg = MIMEMultipart()
@@ -631,7 +679,7 @@ class Player():
         msg.attach(html)
 
         # send email with SMTP
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+        with smtplib.SMTP_SSL(smtp_server_name, 465) as smtp_server:
             # smtp_server.ehlo()
             smtp_server.login(sender, password)
             smtp_server.sendmail(sender, recipients, msg.as_string())
@@ -676,6 +724,26 @@ class Player():
         # plt.tight_layout()
         plt.savefig(f'../logs/{self.timer.get_cur_timestamp()}.png')
         print('The Plot has been saved under logs/')
+
+    def renew_ticket(self):
+        # sleep(3)
+        print(monitor.is_ticket_expired())
+        pag.moveTo(monitor.get_ticket_position())
+
+        pag.click(clicks=2, interval=0.1) # interval is required, doubleClick() not implemented
+        exit()
+
+        # tbd
+        loc = monitor.get_ticket_position(self.ticket_renewal_days)
+        pag.moveTo(loc)
+        pag.click()
+        pag.click()
+        sleep(1)
+        exit()
+
+    def shutdown_computer(self):
+        os.system('shutdown /s /t 5')
+        exit()
 
 # head up backup
 # win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(0), int(-200), 0, 0)

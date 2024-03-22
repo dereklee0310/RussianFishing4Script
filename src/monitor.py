@@ -20,7 +20,7 @@ spool_icon_confidence = config['game'].getfloat('spool_icon_confidence', fallbac
 def is_fish_hooked():
     return locateOnScreen(fr'{parent_dir}get.png', confidence=0.8)
 
-def is_tackle_broke():
+def is_tackle_broken():
     return locateOnScreen(fr'{parent_dir}broke.png', confidence=0.6)
 
 def is_disconnected():
@@ -36,8 +36,11 @@ is_spool_icon_valid = is_retrieve_finished # for validate.py
 def is_tackle_ready():
     return locateOnScreen(fr'{parent_dir}ready.png', confidence=0.6)
 
-def is_fish_marked():
+def is_fish_green_marked():
     return locateOnScreen(fr'{parent_dir}mark.png', confidence=0.7)
+
+def is_fish_yellow_marked():
+    return locateOnScreen(fr'{parent_dir}trophy.png', confidence=0.7)
 
 def is_moving_in_bottom_layer():
     return locateOnScreen(fr'{parent_dir}movement.png', confidence=0.7)
@@ -89,6 +92,15 @@ def get_coffee_icon_position():
 def is_line_at_end():
     return locateOnScreen(fr'{parent_dir}spooling.png', confidence=0.98)
 
+def is_lure_broken():
+    return locateOnScreen(fr'{parent_dir}lure_is_broken.png', confidence=0.7)
+
+def is_ticket_expired():
+    return locateOnScreen(fr'{parent_dir}ticket.png', confidence=0.9)
+
+def get_ticket_position(ticket_renewal_days=None): # todo
+    return locateOnScreen(fr'{parent_dir}rental.png', confidence=0.9)
+
 # ---------------------------------------------------------------------------- #
 #                         player status bar analyzation                        #
 # ---------------------------------------------------------------------------- #
@@ -108,7 +120,7 @@ def is_energy_high(threshold: float) -> bool:
     last_point = int(19 + 152 * threshold) - 1
     return pixel(x + 19, y) == pixel(x + last_point, y)
     
-def is_food_level_low() -> bool:
+def is_hunger_low() -> bool:
     """Check if food level is low.
 
     :return: True if lower than 50%, False otherwise
