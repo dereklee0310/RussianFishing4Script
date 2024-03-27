@@ -85,8 +85,9 @@ class Tackle():
         
         self.timer.update_cast_hour()
 
-    def retrieve(self, duration: int, delay: int) -> bool:
+    def retrieve(self, duration: int, delay: int, lift_enabled: bool) -> bool:
         """Retrieve the lure/bait with a timeout.
+        #todo: docstring
 
         :param duration: base time of retrieval
         :type duration: int, optional
@@ -104,12 +105,16 @@ class Tackle():
 
         i = self.RETRIEVE_TIMEOUT
         while i > 0:
+            if lift_enabled and monitor.is_fish_hooked():
+                hold_right_click()  
             if monitor.is_line_at_end():
                 logger.warning('Fishing line is at its end')
                 return False
             elif monitor.is_retrieve_finished():
                 break
-            i = sleep_and_decrease(i, 3)
+            elif monitor.is_fish_captured():
+                break
+            i = sleep_and_decrease(i, 2) #todo: revise this
 
         sleep(delay) # wait for the line to be fully retrieved
         pag.click()

@@ -49,14 +49,15 @@ class App():
                             description='Start the script for Russian Fishing 4', 
                             epilog='')
         # boolean flags
-        parser.add_argument('-a', '--all', action='store_true',
-                            help='keep all captured fishes, used by default if not specified')
-        parser.add_argument('-m', '--marked', action='store_true',
+        relase_group = parser.add_mutually_exclusive_group()
+        relase_group.add_argument('-a', '--all', action='store_true',
+                            help='keep all captured fishes, used by default')
+        relase_group.add_argument('-m', '--marked', action='store_true',
                             help='keep only the marked fishes')
         parser.add_argument('-c', '--coffee', action='store_true',
                             help='drink coffee if the retrieval time is greater than 2mins')
         parser.add_argument('-A', '--alcohol', action='store_true',
-                            help='drink alcohol before keeping thee fish regularly, the frequency can be set in config.ini')
+                            help='drink alcohol before keeping thee fish regularly')
         parser.add_argument('-r', '--refill', action='store_true', 
                             help='refill food and comfort bar by consuming tea and carrot automatically')
         parser.add_argument('-H', '--harvest', action='store_true',
@@ -65,12 +66,25 @@ class App():
                             help='send email to yourself when the program is terminated without user interruption')
         parser.add_argument('-P', '--plot', action='store_true',
                             help='plot a chart of catch per real/game hour and save it in log directory')
+        parser.add_argument('-s', '--shutdown', action='store_true',
+                            help='Shutdown computer after the program is terminated without user interruption')
+        parser.add_argument('-l', '--lift', action='store_true',
+                            help='Lift the tackle constantly while retrieving to speed up retrieval')
+        
+        spool_group = parser.add_mutually_exclusive_group()
+        spool_group.add_argument('-d', '--default-spool-icon', action='store_true',
+                            help='Use default spool icon to check if the retrieval is finished, used by default')
+        spool_group.add_argument('-R', '--rainbow-line', action='store_true',
+                            help='Use rainbow line icon to check if the retrieval is finished')
+        
         
         # options with arguments
         parser.add_argument('-n', '--fishes-in-keepnet', type=int, default=0,
                             help='the current number of fishes in your keepnet, 0 if not specified')
         parser.add_argument('-p', '--pid', type=int, 
                             help='the id of profile you want to use')
+        parser.add_argument('-t', '--boat-ticket-duration', type=int,
+                            help='Enable boat ticket auto renewal, use 1, 2, 3, or 5 to speicfy the duration of the ticket')
         self.args = parser.parse_args()
 
     def validate_args(self) -> None:
@@ -80,12 +94,19 @@ class App():
             logger.error('Invalid number of fishes in keepnet')
             exit()
             
-        
         # pid has no fallback value, check if it's None
         if self.args.pid and not self._is_pid_valid(str(self.args.pid)):
             logger.error('Invalid profile id')
             exit()
         self.pid = self.args.pid # unify pid location in case ask_for_pid() is called afterwards
+
+        if self.args.boat_ticket_duration is not None:
+            if (self.args.boat_ticket_duration != 1 and 
+                self.args.boat_ticket_duration != 2 and
+                self.args.boat_ticket_duration != 3 and
+                self.args.boat_ticket_duration != 5):
+                logger.error('Invalid ticket duration')
+                exit()
 
 
     def validate_email(self) -> None:
@@ -98,20 +119,22 @@ class App():
             logger.error('Failed to load environment variable "EMAIL" from .env')
         if password is None:
             logger.error('Failed to load environment variable "PASSWORD" from .env')
-        if email is None or password is None:
+        if smtp_server_name is None:
+            logger.error('Failed to load environment variable "SMTP_SERVER" from .env')
+        if email is None or password is None or smtp_server_name is None:
             exit()
 
         try:
             with smtplib.SMTP_SSL(smtp_server_name, 465) as smtp_server:
                 smtp_server.login(email, password)
         except smtplib.SMTPAuthenticationError:
-            logger.error('Username or password not accepted')
+            logger.error('Username, password or SMTP server name not accepted')
             print('Please configure your username and password in .env file')
-            print('Refer to the guides on https://support.google.com/accounts/answer/185833', 
+            print('If you are using Gmail, refer to https://support.google.com/accounts/answer/185833', 
                 '\nto get more information about app password authentication')
             exit()
         except gaierror:
-            logger.error("Invalid SMTP Server, try 'smtp.gmail.com' or 'smtp.qq.com'")
+            logger.error("Invalid SMTP Server, try 'smtp.gmail.com', 'smtp.qq.com' or other SMTP servers")
             exit()
 
     
@@ -189,8 +212,12 @@ class App():
             'Baits harvesting',
             'Email sending',
             'Plotting',
+            'Shutdown',
+            'Rainbow line',
+            'Lift',
             'Fishes in keepnet',
-            'Cast power level'
+            'Cast power level',
+            'Boat ticket duration'
             ]
     
     def _get_config_names(self) -> list:
@@ -249,6 +276,4 @@ if __name__ == '__main__':
 
     ask_for_confirmation('Do you want to continue with the settings above')
     WindowController().activate_game_window()
-    app.player.renew_ticket()
-    
     app.player.start_fishing()

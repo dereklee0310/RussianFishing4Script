@@ -1,5 +1,6 @@
 from configparser import ConfigParser
 from time import time, sleep
+import logging
 
 import pyautogui as pag
 from prettytable import PrettyTable
@@ -9,9 +10,13 @@ import monitor
 from windowcontroller import WindowController
 from script import sleep_and_decrease, ask_for_confirmation
 
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
+logger = logging.getLogger(__name__) 
+
 def harvest_baits() -> None:
     """Harvest baits and accept the result.
     """
+    logger.info("Harvesting baits")
     pag.click()
 
     # wait for result
@@ -30,9 +35,9 @@ def consume_food(food: str) -> None:
     :param food: food's name
     :type food: str
     """
-    print(f'Consume {food}')
+    logger.info(f'Consuming {food}')
     with pag.hold('t'):
-        sleep(0.25)
+        sleep(0.25) 
         pag.moveTo(getattr(monitor, f'get_{food}_icon_position')())
         pag.click()
 
@@ -42,9 +47,9 @@ if __name__ == '__main__':
                         description='Harvest baits automatically, refill food and comfort if needed', 
                         epilog='')
     parser.add_argument('-s', '--power-saving', action='store_true',
-                        help='Open control panel to save power usage between each checks')
+                        help='Open control panel between each checks to save power consumption')
     parser.add_argument('-n', '--check-delay-second', type=int, default=32,
-                        help='The time interval between each checks (in seconds)')
+                        help='The time interval between each checks, default to 32 seconds')
     args = parser.parse_args()
 
     config = ConfigParser()
@@ -60,8 +65,10 @@ if __name__ == '__main__':
     ask_for_confirmation('Are you ready to start harvesting baits')
     WindowController().activate_game_window()
 
+    # pull out shovel/spoon
     pag.press(shovel_spoon_shortcut)
     sleep(3)
+
     try:
         while True:
             if monitor.is_comfort_low() and time() - pre_refill_time > 300:
@@ -76,18 +83,17 @@ if __name__ == '__main__':
             sleep(0.25)
 
             if monitor.is_energy_high(threshold):
-                print('Harvest baits')
                 harvest_baits()
                 harvest_count += 1
             else:
-                print('Low energy level')
+                logger.info('Low energy level')
 
             if args.power_saving:
                 pag.press('esc')
-            sleep(args.check_delay_second)
-            if args.power_saving:
+                sleep(args.check_delay_second)
                 pag.press('esc')
-            pag.press('esc')
+            else:
+                sleep(args.check_delay_second)
             sleep(0.25)
     except KeyboardInterrupt:
         table = PrettyTable(header=False, align='l')

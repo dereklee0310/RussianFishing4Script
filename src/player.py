@@ -59,6 +59,10 @@ class Player():
         self._build_game_config(config)
         self._build_profile_config(config, profile_name)
 
+        #todo: revise this shit
+        if self.rainbow_line_enabled:
+            monitor.set_rainbow_line_retrieval()
+
     def _build_args(self, args: Namespace) -> None:
         self.unmarked_release_enabled = args.marked
         self.coffee_drinking_enabled = args.coffee
@@ -67,7 +71,11 @@ class Player():
         self.baits_harvesting_enabled = args.harvest
         self.email_sending_enabled = args.email
         self.plotting_enabled = args.plot
+        self.shutdown_enabled = args.shutdown
+        self.rainbow_line_enabled = args.rainbow_line
+        self.lift_enabled = args.lift
         self.fishes_in_keepnet = args.fishes_in_keepnet
+        self.boat_ticket_duration = args.boat_ticket_duration
 
     def _build_game_config(self, config: ConfigParser) -> None:
         game_section = config['game']
@@ -128,7 +136,7 @@ class Player():
                 # default: already checked in app.show_user_settings()
         except KeyboardInterrupt:
                 # avoid shift key stuck
-                if self.acceleration_enabled:
+                if self.fishing_strategy == 'spin_with_pause' and self.acceleration_enabled:
                     pag.keyUp('shift')
                 print(self.gen_result('Terminated by user'))
                 if self.plotting_enabled:
@@ -400,6 +408,8 @@ class Player():
                     playsound(self.alarm_sound_file_path)
                 elif self.lure_broken_action == 'quit':
                     self.general_quit(msg)
+            elif monitor.is_ticket_expired() and self.boat_ticket_duration is not None:
+                self.renew_boat_ticket()
             elif monitor.is_tackle_broken():
                 self.save_screenshot()
                 self.general_quit('Tackle is broken')
@@ -422,7 +432,7 @@ class Player():
 
         gear_ratio_switched = False
 
-        while not self.tackle.retrieve(duration, delay):
+        while not self.tackle.retrieve(duration, delay, lift_enabled=self.lift_enabled):
             # no fish, return to main loop
             # captured, defer to pulling stage
             if monitor.is_line_at_end():
@@ -431,7 +441,7 @@ class Player():
             if not monitor.is_fish_hooked() or monitor.is_fish_captured():
                 break
 
-            if not gear_ratio_switched and self.gear_ratio_switching_enabled:
+            if self.gear_ratio_switching_enabled and not gear_ratio_switched:
                 self.tackle.switch_gear_ratio()
                 gear_ratio_switched = True
 
@@ -451,7 +461,7 @@ class Player():
                     if self.plotting_enabled:
                         self.plot_and_save()
                     exit()
-                logger.info('Consume coffee')
+                logger.info('Coffee consumed')
                 self.access_item('coffee')
                 self.total_coffee_count += 1
 
@@ -522,7 +532,7 @@ class Player():
             elif not monitor.is_fish_hooked():
                 break
             elif not monitor.is_retrieve_finished():
-                self.tackle.retrieve(duration=8, delay=4) # half retrieval
+                self.tackle.retrieve(duration=8, delay=4, lift_enabled=self.lift_enabled) # half retrieval
     
     def handle_fish(self) -> None:
         """Keep or release the fish and record the fish count.
@@ -583,6 +593,10 @@ class Player():
             self.send_email(result)
         if self.plotting_enabled:
             self.plot_and_save()
+
+        if self.shutdown_enabled:
+            self.shutdown_computer()
+
         exit()
 
     def disconnected_quit(self) -> None:
@@ -725,21 +739,16 @@ class Player():
         plt.savefig(f'../logs/{self.timer.get_cur_timestamp()}.png')
         print('The Plot has been saved under logs/')
 
-    def renew_ticket(self):
-        # sleep(3)
-        print(monitor.is_ticket_expired())
-        pag.moveTo(monitor.get_ticket_position())
-
+    def renew_boat_ticket(self):
+        logger.info('Renewing boat ticket')
+        ticket_loc = monitor.get_boat_ticket_position(self.boat_ticket_duration)
+        if ticket_loc is None:
+            pag.press('esc') # quit ticket menu
+            sleep(2)
+            self.general_quit('Boat ticket expired')
+        pag.moveTo(ticket_loc)
         pag.click(clicks=2, interval=0.1) # interval is required, doubleClick() not implemented
-        exit()
-
-        # tbd
-        loc = monitor.get_ticket_position(self.ticket_renewal_days)
-        pag.moveTo(loc)
-        pag.click()
-        pag.click()
-        sleep(1)
-        exit()
+        sleep(4) # wait for animation
 
     def shutdown_computer(self):
         os.system('shutdown /s /t 5')

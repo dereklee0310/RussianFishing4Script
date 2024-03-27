@@ -14,6 +14,11 @@ config.read('../config.ini')
 parent_dir = fr"../static/{config['game']['language']}/"
 spool_icon_confidence = config['game'].getfloat('spool_icon_confidence', fallback=0.985)
 
+#todo: revise this shit
+def set_rainbow_line_retrieval():
+    global is_retrieve_finished
+    is_retrieve_finished = is_retrieve_finished_v2
+
 # ---------------------------------------------------------------------------- #
 #                           icon and text recognition                          #
 # ---------------------------------------------------------------------------- #
@@ -31,6 +36,11 @@ def is_fish_captured():
 
 def is_retrieve_finished():
     return locateOnScreen(fr'{parent_dir}wheel.png', confidence=spool_icon_confidence) # original: 0.985
+
+def is_retrieve_finished_v2():
+    return (locateOnScreen(fr'{parent_dir}5m.png', confidence=spool_icon_confidence) or 
+            locateOnScreen(fr'{parent_dir}0m.png', confidence=spool_icon_confidence))
+
 is_spool_icon_valid = is_retrieve_finished # for validate.py
 
 def is_tackle_ready():
@@ -98,8 +108,8 @@ def is_lure_broken():
 def is_ticket_expired():
     return locateOnScreen(fr'{parent_dir}ticket.png', confidence=0.9)
 
-def get_ticket_position(ticket_renewal_days=None): # todo
-    return locateOnScreen(fr'{parent_dir}rental.png', confidence=0.9)
+def get_boat_ticket_position(ticket_time=None): # todo
+    return locateOnScreen(fr'{parent_dir}ticket_{ticket_time}.png', confidence=0.95)
 
 # ---------------------------------------------------------------------------- #
 #                         player status bar analyzation                        #
