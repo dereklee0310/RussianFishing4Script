@@ -11,7 +11,7 @@ from windowcontroller import WindowController
 from script import sleep_and_decrease, ask_for_confirmation
 
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
-logger = logging.getLogger(__name__) 
+logger = logging.getLogger(__name__)
 
 def harvest_baits() -> None:
     """Harvest baits and accept the result.
@@ -35,16 +35,16 @@ def consume_food(food: str) -> None:
     :param food: food's name
     :type food: str
     """
-    logger.info(f'Consuming {food}')
+    logger.info(f'Consume {food}')
     with pag.hold('t'):
-        sleep(0.25) 
+        sleep(0.25)
         pag.moveTo(getattr(monitor, f'get_{food}_icon_position')())
         pag.click()
 
 if __name__ == '__main__':
     parser = ArgumentParser(
-                        prog='harvest.py', 
-                        description='Harvest baits automatically, refill food and comfort if needed', 
+                        prog='harvest.py',
+                        description='Harvest baits automatically, refill food and comfort if needed',
                         epilog='')
     parser.add_argument('-s', '--power-saving', action='store_true',
                         help='Open control panel between each checks to save power consumption')

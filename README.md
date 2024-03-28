@@ -1,29 +1,22 @@
 ## About the Project
-A simple bot for AFKing Russian Fishing 4, supporting spin, bottom and marine fishing.  
-Star the repo to support this project, and "watch" it to get the latest news :)
+A simple fishing bot for Russian Fishing 4, supporting spin, bottom and marine fishing.  
 - [文字教程](中文版教程.md)
 - [視頻教程](https://www.youtube.com/watch?v=znLBYoXHxkw)
 
-## Patchnotes
-### 3/13
+## 3/28 Patchnotes
 **Please refer to `template.ini` to configure newly added settings.**
-- Change: Replace countdown before execution with user confirmation
-- Change: Improve logging messages
-- Change: Improve module import style, add docstrings
-- Change: Refactor and improve `Toggle moving forward`
-- Fix: `Item crafting` bug for groundbaits making
-- Fix: Eliminate the delay before pulling when fishing for Atlantic saury 
-- Add: Table of results for `Item crafting`
-- Add: Discard option for `Item crafting`
-- Add: Pirking timeout option for marine fishing
-- Add: Option for delay time before keeping captured fish
-- Add: Alcohol drinking option and settings
-- Add: Quick selection menu support for carrot, tea and coffee
-- Add: Option for hook checking delay for marine fishing
-
-### 3/14
-- Fix: Retrieval get stuck while performing marine fishing
-- Fix: Pulling bug caused by mouse locking
+**Set your SMTP server in `.env` before enabling email notification functionality.**
+- Improve user guide
+- Add issue templates for bug reports and feature requests
+- Add SMTP server option for sending email notification
+- Add an option to turn off computer after the program terimnate without user interrupt
+- Add an option to retrieve the line with constant lift after the fish is hooked
+- Add an option to enable auto gear ratio switching
+- Add an option to use the rainbow-line meter icon instead of the normal spool icon for retrieval detection
+- Add an option to enable boat ticket auto-renewal and specify the ticket's duration
+- Add power saving and check delay option to `craft.py`
+- Fix bait harvesting bug
+- Improve retrieval with an additional capture check
 
 ## Built With
 - Python 3.11 
@@ -31,7 +24,7 @@ Star the repo to support this project, and "watch" it to get the latest news :)
 
 ## Getting Started  
 ### Prerequisites
-- Set your in-game language in `config.ini`
+- Set the language in `config.ini` and change your in-game language
 - Set your in-game interface scale as "1x"
 - Enable Mouse ClickLock in Windows mouse settings and set the time before locking to "Long"  
 ![ClickLock](/static/readme/clicklock.png)
@@ -77,12 +70,17 @@ python validate.py
 ```
 
 ### 3. Execute the main script
-Here are some examples of how to execute the script with different options:
-- Display a list of available user profiles and run with the default settings
+Here are some examples of how to execute the script with different arguments (not all of them are listed):
+- Display help information
+```
+python app.py -h
+```
+
+- Run with default settings
 ```
 python app.py
 ```
-- Display a list of available user profiles and set the number of fishes in keepnet to 32 (68 fishes to catch)
+- Display a list of available user profiles and set the number of fishes in the keepnet to 32 (68 fishes to catch)
 ```
 python app.py -n 32
 ```
@@ -90,33 +88,24 @@ python app.py -n 32
 ```
 python app.py -p 3 -c -e
 ```
-- Release unmarked fishes, enable food/comfort refill, and plot a catch per running/in-game hour chart after it's terminated.
+- Release unmarked fish, enable hunger and comfort refill, and plot a catch/hour chart after it's terminated
 ```
 python app.py -m -r -P
 ```
-- Drink alcohol regularly
-```
-python app.py -A
-```
-- Display help information
-```
-python app.py -h
-```
 ## Other Useful Scripts
 ### Toggle moving forward
-- Press w to stop, press it again to continue.
-- Press s to quit.
-- Use `-s` flag to hold the Shift key
+- Press w to stop/continue, press s to quit.
+- Use `-s` to hold the Shift key
 ```
 python move.py [-s]
 ```
 
 ### Item crafting
 - The materials must be selected before the execution
-- Specify the limit with `-n` flag
-- Use `-d` flag to discard all the crafted items
+- Specify the number of items to craft with `-n QUANTITY` 
+- Use `-d` to discard all the crafted items
 ```
-python craft.py [-n QUANTITY]
+python craft.py [-d] [-n QUANTITY]
 ```
 
 ### Calculate the maximum friction brake you can use on your tackle
@@ -124,16 +113,17 @@ python craft.py [-n QUANTITY]
 python calculate.py
 ```
 
-### Harvest baits and refill food/comfort automatically
+### Harvest baits and refill hunger and comfort automatically
 - Start a harvesting loop without moving or fishing
-- The control panel will be opened constantly to save the power usage 
+- Use `-s` to open control panel while waiting for energy to regenerate
+- Use `-n CHECK_DELAY_SECOND` to specify the delay between two checks
 ```
-python harvest.py
+python harvest.py [-s] [-n CHECK_DELAY_SECOND]
 ```
 
 ## Troubleshooting
 - The latest update is buggy, how to roll it back to previous version?
-  - type `git reset HEAD^` in your terminal
+  - `git reset HEAD^`
 - How to exit the program?
   - Use `Ctrl + C` to send a KeyboardInterrupt signal
 - Failed to exit the program?
@@ -141,25 +131,12 @@ python harvest.py
 - Rod not getting lifted after the retrieval is finished?
   - Change the game resolution until the `validation.py` is pass
   - Lower the value of `spool_icon_confidence` in `config.ini`
-  - Keep away from light sources, e.g., boat headlights in Norwegian Sea
-
-## Roadmap
-- [x] Improve logging messages
-- [x] Customizable keybinds and number of bottom fishing rods
-- [ ] Boat ticket auto-renewal
-- [ ] Spool Recognition for rainbow line
-- [ ] Retrieval with lifting
-- [ ] Switch water layer automatically
-- [ ] Semi-automatic trolling
-- [ ] Spod rod recast
-- [ ] Wakey rig
-- [ ] Carp fishing
-- [ ] Snag detection
+  - Keep away from light sources or turn off the boat light
 
 ## License
-RussianFishing4Script is licensed under the [GNU General Public License version 3](LICENSE).
+[GNU General Public License version 3](LICENSE)
 
-## Contributing 
+## Contributing
 Any contribution, bug report, or idea about new features is welcome.
 
 ## Contact me

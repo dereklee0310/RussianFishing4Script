@@ -20,7 +20,7 @@ def parse_args() -> argparse.Namespace:
     :rtype: argparse.Namespace
     """
     parser = argparse.ArgumentParser(
-                        prog='make.py', 
+                        prog='craft.py', 
                         description='Activate game window and start making things until running out of materials', 
                         epilog='')
     parser.add_argument('-d', '--discard', action='store_true',

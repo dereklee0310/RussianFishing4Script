@@ -59,7 +59,7 @@ class App():
         parser.add_argument('-A', '--alcohol', action='store_true',
                             help='drink alcohol before keeping thee fish regularly')
         parser.add_argument('-r', '--refill', action='store_true', 
-                            help='refill food and comfort bar by consuming tea and carrot automatically')
+                            help='refill hunger and comfort bar by consuming tea and carrot automatically')
         parser.add_argument('-H', '--harvest', action='store_true',
                             help='harvest baits automatically, only applicable for bottom fishing')
         parser.add_argument('-e', '--email', action='store_true',
@@ -70,6 +70,8 @@ class App():
                             help='Shutdown computer after the program is terminated without user interruption')
         parser.add_argument('-l', '--lift', action='store_true',
                             help='Lift the tackle constantly while retrieving to speed up retrieval')
+        parser.add_argument('-g', '--gear-ratio-switching', action='store_true',
+                            help='When the retrieval timeout, switch the gear ratio automatically')
         
         spool_group = parser.add_mutually_exclusive_group()
         spool_group.add_argument('-d', '--default-spool-icon', action='store_true',
@@ -208,13 +210,14 @@ class App():
             'Unmarked release',
             'Coffee drinking',
             'Alcohol drinking',
-            'Food and comfort refill',
+            'Hunger and comfort refill',
             'Baits harvesting',
             'Email sending',
             'Plotting',
             'Shutdown',
             'Rainbow line',
             'Lift',
+            'Gear ratio switching',
             'Fishes in keepnet',
             'Cast power level',
             'Boat ticket duration'
@@ -273,6 +276,7 @@ if __name__ == '__main__':
         app.ask_for_pid()
     app.gen_player_from_settings()
     app.show_user_settings()
+    
 
     ask_for_confirmation('Do you want to continue with the settings above')
     WindowController().activate_game_window()

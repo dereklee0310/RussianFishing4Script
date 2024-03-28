@@ -106,7 +106,7 @@ class Tackle():
         i = self.RETRIEVE_TIMEOUT
         while i > 0:
             if lift_enabled and monitor.is_fish_hooked():
-                hold_right_click()  
+                hold_right_click()
             if monitor.is_line_at_end():
                 logger.warning('Fishing line is at its end')
                 return False

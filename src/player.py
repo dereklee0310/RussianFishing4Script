@@ -9,6 +9,7 @@ from time import sleep, time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
+from pathlib import Path
 
 import logging
 import pyautogui as pag
@@ -67,13 +68,14 @@ class Player():
         self.unmarked_release_enabled = args.marked
         self.coffee_drinking_enabled = args.coffee
         self.alcohol_drinking_enabled = args.alcohol
-        self.food_and_comfort_refill_enabled = args.refill
+        self.hunger_and_comfort_refill_enabled = args.refill
         self.baits_harvesting_enabled = args.harvest
         self.email_sending_enabled = args.email
         self.plotting_enabled = args.plot
         self.shutdown_enabled = args.shutdown
         self.rainbow_line_enabled = args.rainbow_line
         self.lift_enabled = args.lift
+        self.gear_ratio_switching_enabled = args.gear_ratio_switching
         self.fishes_in_keepnet = args.fishes_in_keepnet
         self.boat_ticket_duration = args.boat_ticket_duration
 
@@ -93,7 +95,6 @@ class Player():
     def _build_profile_config(self, config: ConfigParser, profile_name: str) -> None:
         profile_section = config[profile_name]
         self.fishing_strategy = profile_section.get('fishing_strategy')
-        self.gear_ratio_switching_enabled = profile_section.getboolean('gear_ratio_switching_enabled')
         self.cast_power_level = profile_section.getfloat('cast_power_level')
         match self.fishing_strategy:
             case 'spin':
@@ -168,8 +169,8 @@ class Player():
             self.refilling_stage()
             self.resetting_stage()
             self.tackle.cast(self.cast_power_level)
-            self.tackle.retrieve_with_pause(self.retrieval_duration, 
-                                            self.retrieval_delay, 
+            self.tackle.retrieve_with_pause(self.retrieval_duration,
+                                            self.retrieval_delay,
                                             self.base_iteration,
                                             self.acceleration_enabled)
             self.retrieving_stage(duration=4, delay=2)
@@ -325,7 +326,7 @@ class Player():
         """If enable_food_comfort_refill is enabled, 
             consume tea or carrot to refill comfort and food level.
         """
-        if not self.food_and_comfort_refill_enabled:
+        if not self.hunger_and_comfort_refill_enabled:
             return
 
         # refill comfort
@@ -405,7 +406,7 @@ class Player():
                 msg = 'Lure is broken'
                 if self.lure_broken_action == 'alarm':
                     logger.warning(msg)
-                    playsound(self.alarm_sound_file_path)
+                    playsound(str(Path(self.alarm_sound_file_path).resolve()))
                 elif self.lure_broken_action == 'quit':
                     self.general_quit(msg)
             elif monitor.is_ticket_expired() and self.boat_ticket_duration is not None:
@@ -461,7 +462,7 @@ class Player():
                     if self.plotting_enabled:
                         self.plot_and_save()
                     exit()
-                logger.info('Coffee consumed')
+                logger.info('Consume coffee')
                 self.access_item('coffee')
                 self.total_coffee_count += 1
 
@@ -565,7 +566,7 @@ class Player():
             msg = 'Keepnet is full'
             if self.keepnet_full_action == 'alarm':
                 logger.warning(msg)
-                playsound(self.alarm_sound_file_path)
+                playsound(str(Path(self.alarm_sound_file_path).resolve()))
             elif self.keepnet_full_action == 'quit':
                 self.general_quit(msg)
 
@@ -658,7 +659,7 @@ class Player():
             table.add_row(['Coffee consumed', self.total_coffee_count])
         if self.alcohol_drinking_enabled:
             table.add_row(['Alcohol consumed', self.alcohol_count])
-        if self.food_and_comfort_refill_enabled:
+        if self.hunger_and_comfort_refill_enabled:
             table.add_rows(
                 [
                     ['Tea consumed', self.tea_count],
