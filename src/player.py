@@ -89,7 +89,7 @@ class Player():
         self.alcohol_drinking_delay = game_section.getint('alcohol_drinking_delay')
         self.alcohol_quantity = game_section.getint('alcohol_quantity')
         self.lure_broken_action = game_section.get('lure_broken_action')
-        self.keepnet_full_action = game_section.getint('keepnet_full_action')
+        self.keepnet_full_action = game_section.get('keepnet_full_action')
         self.alarm_sound_file_path = game_section.get('alarm_sound_file_path')
 
     def _build_profile_config(self, config: ConfigParser, profile_name: str) -> None:
