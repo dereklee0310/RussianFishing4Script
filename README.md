@@ -15,6 +15,8 @@ A simple fishing bot for Russian Fishing 4, supporting spin, bottom and marine f
 - Add an option to use the rainbow-line meter icon instead of the normal spool icon for retrieval detection
 - Add an option to enable boat ticket auto-renewal and specify the ticket's duration
 - Add power saving and check delay option to `craft.py`
+- Add alarm/quit action options for the situation that the keep net is full 
+- Add alarm/quit action options for the situation that the lure is broken
 - Fix bait harvesting bug
 - Improve retrieval with an additional capture check
 
