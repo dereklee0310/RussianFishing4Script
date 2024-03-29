@@ -411,8 +411,11 @@ class Player():
                     playsound(str(Path(self.alarm_sound_file_path).resolve()))
                 elif self.lure_broken_action == 'quit':
                     self.general_quit(msg)
-            elif monitor.is_ticket_expired() and self.boat_ticket_duration is not None:
-                self.renew_boat_ticket()
+            elif monitor.is_ticket_expired():
+                if self.boat_ticket_duration is None:
+                    self.general_quit('Boat ticket expired')
+                else:
+                    self.renew_boat_ticket()
             elif monitor.is_tackle_broken():
                 self.save_screenshot()
                 self.general_quit('Tackle is broken')
@@ -443,8 +446,10 @@ class Player():
             elif not monitor.is_fish_hooked() or monitor.is_fish_captured():
                 break
             elif monitor.is_ticket_expired():
-                self.renew_boat_ticket()
-                continue
+                if self.boat_ticket_duration is None:
+                    self.general_quit('Boat ticket expired')
+                else:
+                    self.renew_boat_ticket()
 
             if self.gear_ratio_switching_enabled and not gear_ratio_switched:
                 self.tackle.switch_gear_ratio()
@@ -516,7 +521,10 @@ class Player():
         """Perform pirking until a fish is hooked, adjust the lure if timeout is reached.
         """
         if monitor.is_ticket_expired():
-            self.renew_boat_ticket()
+            if self.boat_ticket_duration is None:
+                self.general_quit('Boat ticket expired')
+            else:
+                self.renew_boat_ticket()
 
         while not self.tackle.pirk(self.pirk_duration,
                                    self.pirk_delay,
@@ -524,7 +532,10 @@ class Player():
                                    self.fish_hooked_check_delay):
             
             if monitor.is_ticket_expired():
-                self.renew_boat_ticket()
+                if self.boat_ticket_duration is None:
+                    self.general_quit('Boat ticket expired')
+                else:
+                    self.renew_boat_ticket()
 
             # adjust the depth of the lure if no fish is hooked
             logger.info('Adjusting lure depth')
@@ -757,7 +768,7 @@ class Player():
         if ticket_loc is None:
             pag.press('esc') # quit ticket menu
             sleep(2)
-            self.general_quit('Boat ticket expired')
+            self.general_quit('Boat ticket not found')
         pag.moveTo(ticket_loc)
         pag.click(clicks=2, interval=0.1) # interval is required, doubleClick() not implemented
         sleep(4) # wait for animation
