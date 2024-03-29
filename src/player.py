@@ -228,6 +228,8 @@ class Player():
         while True:    
             self.refilling_stage()
             self.resetting_stage()
+            if monitor.is_fish_captured():
+                self.handle_fish()
             self.tackle.cast(self.cast_power_level)
             self.marine_sinking_stage()
             self.pirking_stage()
@@ -438,9 +440,11 @@ class Player():
             # captured, defer to pulling stage
             if monitor.is_line_at_end():
                 self.general_quit('Fishing line is at its end')
-
-            if not monitor.is_fish_hooked() or monitor.is_fish_captured():
+            elif not monitor.is_fish_hooked() or monitor.is_fish_captured():
                 break
+            elif monitor.is_ticket_expired():
+                self.renew_boat_ticket()
+                continue
 
             if self.gear_ratio_switching_enabled and not gear_ratio_switched:
                 self.tackle.switch_gear_ratio()
@@ -511,10 +515,17 @@ class Player():
     def pirking_stage(self) -> None:
         """Perform pirking until a fish is hooked, adjust the lure if timeout is reached.
         """
+        if monitor.is_ticket_expired():
+            self.renew_boat_ticket()
+
         while not self.tackle.pirk(self.pirk_duration,
                                    self.pirk_delay,
                                    self.pirk_timeout,
                                    self.fish_hooked_check_delay):
+            
+            if monitor.is_ticket_expired():
+                self.renew_boat_ticket()
+
             # adjust the depth of the lure if no fish is hooked
             logger.info('Adjusting lure depth')
             pag.press('enter') # open reel
