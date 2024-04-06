@@ -413,6 +413,8 @@ class Player():
                     self.general_quit(msg)
             elif monitor.is_ticket_expired():
                 if self.boat_ticket_duration is None:
+                    pag.press('esc')
+                    sleep(2)
                     self.general_quit('Boat ticket expired')
                 else:
                     self.renew_boat_ticket()
@@ -447,6 +449,8 @@ class Player():
                 break
             elif monitor.is_ticket_expired():
                 if self.boat_ticket_duration is None:
+                    pag.press('esc')
+                    sleep(2)
                     self.general_quit('Boat ticket expired')
                 else:
                     self.renew_boat_ticket()
@@ -500,6 +504,7 @@ class Player():
                 sleep(self.fish_hooked_check_delay)
                 if monitor.is_fish_hooked():
                     logger.info('Fish is hooked')
+                    pag.click() #todo: tmp fix
                     return
             i = sleep_and_decrease(i, 2)
         hold_left_click(self.tighten_duration)
@@ -522,6 +527,8 @@ class Player():
         """
         if monitor.is_ticket_expired():
             if self.boat_ticket_duration is None:
+                pag.press('esc')
+                sleep(2)
                 self.general_quit('Boat ticket expired')
             else:
                 self.renew_boat_ticket()
@@ -532,6 +539,8 @@ class Player():
                                    self.fish_hooked_check_delay):
             
             if monitor.is_ticket_expired():
+                pag.press('esc')
+                sleep(2)
                 if self.boat_ticket_duration is None:
                     self.general_quit('Boat ticket expired')
                 else:
@@ -611,7 +620,6 @@ class Player():
         pag.click()
 
         result = self.gen_result(termination_cause)
-        print(result)
         if self.email_sending_enabled:
             self.send_email(result)
         if self.plotting_enabled:
@@ -619,7 +627,7 @@ class Player():
 
         if self.shutdown_enabled:
             self.shutdown_computer()
-
+        print(result)
         exit()
 
     def disconnected_quit(self) -> None:
@@ -642,9 +650,12 @@ class Player():
         pag.click()
 
         result = self.gen_result('Disconnection')
-        print(result)
         if self.email_sending_enabled:
             self.send_email(result)
+
+        if self.shutdown_enabled:
+            self.shutdown_computer()
+        print(result)
         exit()
 
     def gen_result(self, termination_cause: str) -> PrettyTable:
@@ -740,12 +751,13 @@ class Player():
         # fig.canvas.manager.set_window_title('Record')
         ax[0].set_ylabel('Fish')
         
-        fish_per_rhour = [0] * 12
+        last_rhour = cast_rhour_list[-1] # hour: 0, 1, 2, 3, 4, "5"
+        fish_per_rhour = [0] * last_rhour + 1 # idx: #(0, 1, 2, 3, 4, 5) = 6
         for hour in cast_rhour_list:
             fish_per_rhour[hour] += 1
-        ax[0].plot(range(12), fish_per_rhour)
+        ax[0].plot(range(last_rhour + 2), fish_per_rhour) # range need + 1
         ax[0].set_title('Fish Caughted per Real Hour')
-        ax[0].set_xticks(range(12))
+        ax[0].set_xticks(range(last_rhour + 2))
         ax[0].set_xlabel('Hour (real running time)')
         ax[0].yaxis.set_major_locator(MaxNLocator(integer=True))
 

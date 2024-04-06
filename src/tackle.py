@@ -44,6 +44,7 @@ class Tackle():
         i = self.RESET_TIMEOUT
         while i > 0 and not monitor.is_tackle_ready():
             if monitor.is_fish_hooked() or monitor.is_fish_captured():
+                i = -1 # fail trick
                 break
             i = sleep_and_decrease(i, 3) # > ClickLock duration (2.2)
         pag.mouseUp()

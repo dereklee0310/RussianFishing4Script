@@ -277,7 +277,7 @@ if __name__ == '__main__':
     app.gen_player_from_settings()
     app.show_user_settings()
     
-
+    
     ask_for_confirmation('Do you want to continue with the settings above')
     WindowController().activate_game_window()
     app.player.start_fishing()

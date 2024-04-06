@@ -1,24 +1,14 @@
 ## About the Project
 A simple fishing bot for Russian Fishing 4, supporting spin, bottom and marine fishing.  
+- [Discord](https://discord.gg/BZQWQnAMbY)
 - [文字教程](中文版教程.md)
-- [視頻教程](https://www.youtube.com/watch?v=znLBYoXHxkw)
 
-## 3/28 Patchnotes
-**Please refer to `template.ini` to configure newly added settings.**
-**Set your SMTP server in `.env` before enabling email notification functionality.**
-- Improve user guide
-- Add issue templates for bug reports and feature requests
-- Add SMTP server option for sending email notification
-- Add an option to turn off computer after the program terimnate without user interrupt
-- Add an option to retrieve the line with constant lift after the fish is hooked
-- Add an option to enable auto gear ratio switching
-- Add an option to use the rainbow-line meter icon instead of the normal spool icon for retrieval detection
-- Add an option to enable boat ticket auto-renewal and specify the ticket's duration
-- Add power saving and check delay option to `craft.py`
-- Add alarm/quit action options for the situation that the keep net is full 
-- Add alarm/quit action options for the situation that the lure is broken
-- Fix bait harvesting bug
-- Improve retrieval with an additional capture check
+## 4/6 Patchnotes
+- Added new language options: zh-TW and zh-CN
+- Fixed [#issue16](https://github.com/dereklee0310/RussianFishing4Script/issues/16) 
+- Fixed a potential perma-stuck bug in tackle resetting plase
+- Fixed bug where the script would start pirking without closing the reel if the fish  
+  was hooked and immediately escaped during sinking phase
 
 ## Built With
 - Python 3.11 
@@ -124,8 +114,6 @@ python harvest.py [-s] [-n CHECK_DELAY_SECOND]
 ```
 
 ## Troubleshooting
-- The latest update is buggy, how to roll it back to previous version?
-  - `git reset HEAD^`
 - How to exit the program?
   - Use `Ctrl + C` to send a KeyboardInterrupt signal
 - Failed to exit the program?
