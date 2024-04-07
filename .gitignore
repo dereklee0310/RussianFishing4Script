@@ -6,8 +6,4 @@ logs/
 static/mark_test
 config.ini
 .env
-
-# disable temporarily
-static/zh-CN/
-static/zh-TW/
 todo_backup.txt
