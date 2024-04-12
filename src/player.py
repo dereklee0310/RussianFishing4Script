@@ -752,10 +752,10 @@ class Player():
         ax[0].set_ylabel('Fish')
         
         last_rhour = cast_rhour_list[-1] # hour: 0, 1, 2, 3, 4, "5"
-        fish_per_rhour = [0] * last_rhour + 1 # idx: #(0, 1, 2, 3, 4, 5) = 6
+        fish_per_rhour = [0] * (last_rhour + 1) # idx: #(0, 1, 2, 3, 4, 5) = 6
         for hour in cast_rhour_list:
             fish_per_rhour[hour] += 1
-        ax[0].plot(range(last_rhour + 2), fish_per_rhour) # range need + 1
+        ax[0].plot(range(last_rhour + 1), fish_per_rhour)
         ax[0].set_title('Fish Caughted per Real Hour')
         ax[0].set_xticks(range(last_rhour + 2))
         ax[0].set_xlabel('Hour (real running time)')
@@ -788,6 +788,78 @@ class Player():
     def shutdown_computer(self):
         os.system('shutdown /s /t 5')
         exit()
+
+
+    def change_broken_lure(self):
+        from monitor import get_item_info_position, get_broken_item_position, get_favorite_item_positions
+        from time import sleep
+
+        pag.press('v')
+        sleep(0.25)
+        pag.moveTo(get_item_info_position())
+        for _ in range(5):
+            sleep(1)
+            # loc = get_item_info_position()
+            # x, y = self.get_box_center(loc)
+            # pag.moveTo(x + 10, y)
+            # pag.drag(xOffset=0, yOffset=125, duration=0.5, button='left')
+            pag.drag(xOffset=0, yOffset=125, duration=0.5, button='left')
+            replaced = False
+            while True:
+                sleep(2) # wait for wear to update
+                broken_item_position = get_broken_item_position()
+                if broken_item_position is None:
+                    logger.info('Broken lure not found')
+                    break # continue scrolling
+                
+                # click item to open selection menu
+                logger.info('Broken lure found')
+                pag.moveTo(broken_item_position)
+                sleep(0.25)
+                pag.click()
+                sleep(0.25)
+
+                # get all positions
+                favorite_item_positions = get_favorite_item_positions()
+                while True:
+                    favorite_item_position = next(favorite_item_positions, None)
+                    if favorite_item_position is None:
+                        msg = 'Lure for replacement not found'
+                        logger.warning(msg)
+                        pag.press('esc')
+                        sleep(0.25)
+                        pag.press('esc')    
+                        sleep(0.25)
+                        pag.press('esc')    
+                        exit()
+                        # self.general_quit(msg)
+                    x, y = self.get_box_center(favorite_item_position)
+                    if pag.pixel(x - 75, y + 190) == (178, 59, 30): # magic value
+                        logger.info('Skip a broken lure for replacement')
+                        continue
+                    logger.info('The broken lure has been replaced')
+                    pag.moveTo(x - 75, y + 200)
+                    pag.click(clicks=2, interval=0.1)
+                    replaced = True
+                    break
+                if not replaced:
+                    msg = 'Lure for replacement not found'
+                    logger.warning(msg)
+                    pag.press('esc')
+                    sleep(0.25)
+                    pag.press('esc')   
+                    sleep(0.25)
+                    pag.press('esc')    
+                    exit()
+                    # self.general_quit(msg)
+            if replaced:
+                pag.moveTo(get_item_info_position())
+        pag.press('v')
+
+    import pyscreeze
+    def get_box_center(self, box: pyscreeze.Box) -> tuple[int, int]:
+        # convert np.int64 to int
+        return int(box.left + box.width // 2), int(box.top + box.height // 2) 
 
 # head up backup
 # win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(0), int(-200), 0, 0)

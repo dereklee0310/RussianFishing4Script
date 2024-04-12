@@ -7,7 +7,7 @@ Todo:
 """
 from configparser import ConfigParser
 
-from pyautogui import locateOnScreen, locateCenterOnScreen, pixel
+from pyautogui import locateOnScreen, locateCenterOnScreen, pixel, locateAllOnScreen
 
 config = ConfigParser()
 config.read('../config.ini')
@@ -110,6 +110,33 @@ def is_ticket_expired():
 
 def get_boat_ticket_position(ticket_time=None): # todo
     return locateOnScreen(fr'{parent_dir}ticket_{ticket_time}.png', confidence=0.95)
+
+def get_item_info_position():
+    return locateOnScreen(fr'{parent_dir}item_info.png', confidence=0.97)
+
+def get_broken_item_position(): #todo
+    return locateOnScreen(fr'{parent_dir}broken.png', confidence=0.98)
+
+def get_favorite_item_positions():
+    return locateAllOnScreen(fr'{parent_dir}favorite.png', confidence=0.95)
+
+def is_fish_mackerel():
+    return locateOnScreen(fr'{parent_dir}mackerel.png', confidence=0.9)
+
+def is_fish_saithe():
+    return locateOnScreen(fr'{parent_dir}saithe.png', confidence=0.9)
+
+def is_fish_herring():
+    return locateOnScreen(fr'{parent_dir}herring.png', confidence=0.9)
+
+def is_fish_squid():
+    return locateOnScreen(fr'{parent_dir}squid.png', confidence=0.9)
+
+def is_fish_scallop():
+    return locateOnScreen(fr'{parent_dir}scallop.png', confidence=0.9)
+
+def is_fish_mussel():
+    return locateOnScreen(fr'{parent_dir}mussel.png', confidence=0.9)
 
 # ---------------------------------------------------------------------------- #
 #                         player status bar analyzation                        #

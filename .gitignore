@@ -5,5 +5,6 @@ src/__pycache__/
 logs/
 static/mark_test
 config.ini
-.env
 todo_backup.txt
+tests/
+.env

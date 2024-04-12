@@ -7,6 +7,8 @@ import threading
 import os
 import smtplib
 import logging
+import sys
+import shlex
 from pathlib import Path
 from argparse import ArgumentParser
 from configparser import ConfigParser
@@ -38,11 +40,8 @@ class App():
             if self.config.has_option(section, 'fishing_strategy'):
                 self.profile_names.append(section)
 
-    def get_args(self) -> ArgumentParser:
+    def get_args(self) -> None:
         """Configure argparser and parse the args.
-
-        :return: parsed command line arguments
-        :rtype: ArgumentParser
         """
         parser = ArgumentParser(
                             prog='app.py', 
@@ -72,6 +71,8 @@ class App():
                             help='Lift the tackle constantly while retrieving to speed up retrieval')
         parser.add_argument('-g', '--gear-ratio-switching', action='store_true',
                             help='When the retrieval timeout, switch the gear ratio automatically')
+        parser.add_argument('-D', '--DEBUG', action='store_true',
+                            help='This is only for testing and should not be used')
         
         spool_group = parser.add_mutually_exclusive_group()
         spool_group.add_argument('-d', '--default-spool-icon', action='store_true',
@@ -87,19 +88,20 @@ class App():
                             help='the id of profile you want to use')
         parser.add_argument('-t', '--boat-ticket-duration', type=int,
                             help='Enable boat ticket auto renewal, use 1, 2, 3, or 5 to speicfy the duration of the ticket')
-        self.args = parser.parse_args()
+        argv = shlex.split(self.config['game'].get('default_arguments', fallback="")) + sys.argv[1:]
+        self.args = parser.parse_args(argv)
 
     def validate_args(self) -> None:
         """Validate args: fishes_in_keepnet and pid.
         """
         if not self._is_fish_count_valid(self.args.fishes_in_keepnet):
             logger.error('Invalid number of fishes in keepnet')
-            exit()
+            sys.exit()
             
         # pid has no fallback value, check if it's None
         if self.args.pid and not self._is_pid_valid(str(self.args.pid)):
             logger.error('Invalid profile id')
-            exit()
+            sys.exit()
         self.pid = self.args.pid # unify pid location in case ask_for_pid() is called afterwards
 
         if self.args.boat_ticket_duration is not None:
@@ -108,7 +110,7 @@ class App():
                 self.args.boat_ticket_duration != 3 and
                 self.args.boat_ticket_duration != 5):
                 logger.error('Invalid ticket duration')
-                exit()
+                sys.exit()
 
 
     def validate_email(self) -> None:
@@ -124,7 +126,7 @@ class App():
         if smtp_server_name is None:
             logger.error('Failed to load environment variable "SMTP_SERVER" from .env')
         if email is None or password is None or smtp_server_name is None:
-            exit()
+            sys.exit()
 
         try:
             with smtplib.SMTP_SSL(smtp_server_name, 465) as smtp_server:
@@ -134,10 +136,10 @@ class App():
             print('Please configure your username and password in .env file')
             print('If you are using Gmail, refer to https://support.google.com/accounts/answer/185833', 
                 '\nto get more information about app password authentication')
-            exit()
+            sys.exit()
         except gaierror:
             logger.error("Invalid SMTP Server, try 'smtp.gmail.com', 'smtp.qq.com' or other SMTP servers")
-            exit()
+            sys.exit()
 
     
     def _is_fish_count_valid(self, fish_count: int) -> bool:
@@ -175,7 +177,7 @@ class App():
         pid = input("Enter profile id or press q to exit: ")
         while not self._is_pid_valid(pid):
             if pid.strip() == 'q':
-                exit()
+                sys.exit()
             pid = input('Invalid profile id, please try again or press q to quit: ')
         self.pid = int(pid)
 
@@ -185,7 +187,7 @@ class App():
         if self.pid == 0:
             os.startfile(self.config_path)
             print('Save the file before restarting the script to apply changes')
-            exit()
+            sys.exit()
 
         self.profile_name = self.profile_names[self.pid]
         self.player = Player(self.args, self.config, self.profile_name)
@@ -264,20 +266,33 @@ class App():
                 real_attribute = getattr(self.player, name.lower().replace(' ', '_') + '_enabled')
                 table.add_row([name, 'enabled' if real_attribute else 'disabled'])
 
+    def run_experimental_func(self):
+        logger.info('Debugging')
+        # self.player.change_broken_lure()
+
+# for debugging
+# from monitor import *
+# from pyautogui import *
+# from time import sleep
+
 if __name__ == '__main__':
     app = App()
     app.get_args()
+
     app.validate_args()
     if app.args.email:
         app.validate_email()
 
-    if app.args.pid is None:
+    if app.args.DEBUG:
+        WindowController().activate_game_window()
+        app.run_experimental_func()
+        sys.exit()
+    elif app.args.pid is None:
         app.show_available_profiles()
         app.ask_for_pid()
     app.gen_player_from_settings()
     app.show_user_settings()
-    
-    
+
     ask_for_confirmation('Do you want to continue with the settings above')
     WindowController().activate_game_window()
     app.player.start_fishing()
