@@ -20,6 +20,7 @@ from dotenv import load_dotenv
 from windowcontroller import WindowController
 from player import Player
 from script import ask_for_confirmation
+from monitor import parent_dir
 
 # logging.BASIC_FORMAT: %(levelname)s:%(name)s:%(message)s
 # timestamp: %(asctime)s, datefmt='%Y-%m-%d %H:%M:%S',
@@ -268,12 +269,36 @@ class App():
 
     def run_experimental_func(self):
         logger.info('Debugging')
+        # for debugging
+        # from monitor import *
+        # from pyautogui import *
+        # from time import sleep
+        # WindowController().activate_game_window()
         # self.player.change_broken_lure()
 
-# for debugging
-# from monitor import *
-# from pyautogui import *
-# from time import sleep
+    def verify_file_integrity(self):
+        """Compare files in static/en and static/{language}, print missing files 
+        """
+        logger.info('Verifying file integrity...')  
+        complete_filenames = os.listdir('../static/en/') # use en version as reference
+        try:
+            current_filenames = os.listdir(parent_dir)
+        except FileNotFoundError:
+            logger.error(f'Directory {parent_dir} not found')
+            print('Please check your language setting in ../config.ini')
+            sys.exit()
+
+        missing_filenames = set(complete_filenames) - set(current_filenames)
+        if len(missing_filenames) != 0:
+            logger.error(f'Integrity check failed, see integrity_guide.md') # todo: add link
+            table = PrettyTable(header=False, align='l')
+            table.title = 'Missing images'
+            for filename in missing_filenames:
+                table.add_row([filename])
+            print(table)
+            sys.exit()
+
+        logger.info('Integrity check passed')
 
 if __name__ == '__main__':
     app = App()
@@ -284,7 +309,6 @@ if __name__ == '__main__':
         app.validate_email()
 
     if app.args.DEBUG:
-        WindowController().activate_game_window()
         app.run_experimental_func()
         sys.exit()
     elif app.args.pid is None:
@@ -293,6 +317,7 @@ if __name__ == '__main__':
     app.gen_player_from_settings()
     app.show_user_settings()
 
+    app.verify_file_integrity()
     ask_for_confirmation('Do you want to continue with the settings above')
     WindowController().activate_game_window()
     app.player.start_fishing()

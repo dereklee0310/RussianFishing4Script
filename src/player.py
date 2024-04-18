@@ -20,6 +20,7 @@ from prettytable import PrettyTable
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from dotenv import load_dotenv
+from pyscreeze import Box
 
 import monitor
 from tackle import Tackle
@@ -576,6 +577,7 @@ class Player():
             if self.unmarked_release_enabled:
                 logger.info('Release unmarked fish')
                 pag.press('backspace')
+                sleep(0.5) # wait for redering
                 return
         else:
             self.marked_fish_count += 1
@@ -584,6 +586,7 @@ class Player():
         sleep(self.keep_fish_delay)
         logger.info('Keep the fish')
         pag.press('space')
+        sleep(0.5) # wait for rendering
 
         # avoid wrong cast hour
         if (self.fishing_strategy == 'bottom' or
@@ -611,11 +614,12 @@ class Player():
         :param termination_cause: the cause of the termination
         :type termination_cause: str
         """
+        sleep(2) # pre-delay
         pag.press('esc')
-        sleep(2)
+        sleep(4)
         pag.moveTo(monitor.get_quit_position()) 
         pag.click()
-        sleep(2)
+        sleep(4)
         pag.moveTo(monitor.get_yes_position())
         pag.click()
 
@@ -790,75 +794,83 @@ class Player():
         exit()
 
 
-    def change_broken_lure(self):
-        from monitor import get_item_info_position, get_broken_item_position, get_favorite_item_positions
-        from time import sleep
-
+    def replacing_stage(self):
+        # open tackle menu
         pag.press('v')
         sleep(0.25)
-        pag.moveTo(get_item_info_position())
-        for _ in range(5):
-            sleep(1)
-            # loc = get_item_info_position()
-            # x, y = self.get_box_center(loc)
-            # pag.moveTo(x + 10, y)
-            # pag.drag(xOffset=0, yOffset=125, duration=0.5, button='left')
-            pag.drag(xOffset=0, yOffset=125, duration=0.5, button='left')
-            replaced = False
-            while True:
-                sleep(2) # wait for wear to update
-                broken_item_position = get_broken_item_position()
-                if broken_item_position is None:
-                    logger.info('Broken lure not found')
-                    break # continue scrolling
-                
-                # click item to open selection menu
-                logger.info('Broken lure found')
-                pag.moveTo(broken_item_position)
-                sleep(0.25)
-                pag.click()
-                sleep(0.25)
 
-                # get all positions
-                favorite_item_positions = get_favorite_item_positions()
-                while True:
-                    favorite_item_position = next(favorite_item_positions, None)
-                    if favorite_item_position is None:
-                        msg = 'Lure for replacement not found'
-                        logger.warning(msg)
-                        pag.press('esc')
-                        sleep(0.25)
-                        pag.press('esc')    
-                        sleep(0.25)
-                        pag.press('esc')    
-                        exit()
-                        # self.general_quit(msg)
-                    x, y = self.get_box_center(favorite_item_position)
-                    if pag.pixel(x - 75, y + 190) == (178, 59, 30): # magic value
-                        logger.info('Skip a broken lure for replacement')
-                        continue
-                    logger.info('The broken lure has been replaced')
-                    pag.moveTo(x - 75, y + 200)
-                    pag.click(clicks=2, interval=0.1)
-                    replaced = True
-                    break
-                if not replaced:
-                    msg = 'Lure for replacement not found'
-                    logger.warning(msg)
-                    pag.press('esc')
-                    sleep(0.25)
-                    pag.press('esc')   
-                    sleep(0.25)
-                    pag.press('esc')    
-                    exit()
-                    # self.general_quit(msg)
-            if replaced:
-                pag.moveTo(get_item_info_position())
+        loc = monitor.get_item_info_position()
+        if not loc:
+            logger.info('Scroll bar not found, changing lures for normal rig')
+            self.replace_lures_no_scrolling()
+        else:
+            logger.info('Scroll bar found, changing lures for dropshot rig')
+            self.replace_lures_with_scrolling(loc)
         pag.press('v')
 
-    import pyscreeze
-    def get_box_center(self, box: pyscreeze.Box) -> tuple[int, int]:
-        # convert np.int64 to int
+    def replace_lures_no_scrolling(self):
+        while self.open_broken_lure_menu():
+            self.replace_single_broken_lure()
+
+    def replace_lures_with_scrolling(self, loc):
+        pag.moveTo(loc) # move to scroll bar
+        for _ in range(5):
+            sleep(1)
+            pag.drag(xOffset=0, yOffset=125, duration=0.5, button='left')
+
+            replaced = False
+            while self.open_broken_lure_menu():
+                self.replace_single_broken_lure()
+                replaced = True
+
+            # adjust mouse location
+            if replaced:
+                pag.moveTo(monitor.get_item_info_position())
+
+    def open_broken_lure_menu(self) -> bool:
+        logger.info('Searching for broken lure')
+        broken_item_position = monitor.get_broken_item_position()
+        if broken_item_position is None:
+            logger.warning('Broken lure not found')
+            return False
+        
+        # click item to open selection menu
+        logger.info('Broken lure found')
+        pag.moveTo(broken_item_position)
+        sleep(0.25)
+        pag.click()
+        sleep(0.25)
+        return True
+            
+
+    def replace_single_broken_lure(self):
+        # iterate through favorite items for replacement
+        favorite_item_positions = monitor.get_favorite_item_positions()
+        while True:
+            favorite_item_position = next(favorite_item_positions, None)
+            if favorite_item_position is None:
+                msg = 'Lure for replacement not found'
+                logger.warning(msg)
+                pag.press('esc')
+                sleep(0.25)
+                pag.press('esc')    
+                sleep(0.25)
+                self.general_quit(msg)
+
+            # check if the lure for replacement is already broken
+            x, y = self.get_box_center(favorite_item_position)
+            if pag.pixel(x - 75, y + 190) != (178, 59, 30): # magic value
+                logger.info('The broken lure has been replaced')
+                # pag.moveTo(x - 75, y + 200) # ?
+                pag.moveTo(x - 75, y + 190)
+                pag.click(clicks=2, interval=0.1)
+                sleep(2) # wait for wear text to update
+                break
+            logger.warning('Lure for replacement found but already broken')
+
+
+    def get_box_center(self, box: Box) -> tuple[int, int]:
+        # np.int64 -> int for win API
         return int(box.left + box.width // 2), int(box.top + box.height // 2) 
 
 # head up backup

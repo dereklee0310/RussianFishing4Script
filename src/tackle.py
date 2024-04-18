@@ -113,6 +113,7 @@ class Tackle():
                 sleep(2)
             if monitor.is_line_at_end():
                 logger.warning('Fishing line is at its end')
+                pag.click()
                 return False
             elif monitor.is_retrieve_finished():
                 break
