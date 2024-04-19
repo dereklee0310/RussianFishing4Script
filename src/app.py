@@ -81,7 +81,6 @@ class App():
         spool_group.add_argument('-R', '--rainbow-line', action='store_true',
                             help='Use rainbow line icon to check if the retrieval is finished')
         
-        
         # options with arguments
         parser.add_argument('-n', '--fishes-in-keepnet', type=int, default=0,
                             help='the current number of fishes in your keepnet, 0 if not specified')
@@ -115,6 +114,8 @@ class App():
 
 
     def validate_email(self) -> None:
+        """Validate email configuration in .env.
+        """
         load_dotenv()
         email = os.getenv('EMAIL')
         password = os.getenv('PASSWORD')
@@ -186,6 +187,7 @@ class App():
         """Generate a player object according to args and configuration file.
         """
         if self.pid == 0:
+            logger.info('Opening configuration file')
             os.startfile(self.config_path)
             print('Save the file before restarting the script to apply changes')
             sys.exit()
@@ -198,16 +200,20 @@ class App():
         """
         table = PrettyTable(header=False, align='l')
         table.title = 'User Settings'
+        table.add_row(['Profile name', self.profile_name])
 
         arg_names = self._get_args_names()
         self._build_table(arg_names, table)
-        
         config_names = self._get_config_names()
         self._build_table(config_names, table)
-
         print(table)
 
     def _get_args_names(self) -> list:
+        """Get names of command line options
+
+        :return: list of option names
+        :rtype: list
+        """
         return [
             'Fishing strategy',
             'Unmarked release',
@@ -227,6 +233,11 @@ class App():
             ]
     
     def _get_config_names(self) -> list:
+        """Get names of configurations with respect to fishing strategy.
+
+        :return: list of configuration names
+        :rtype: list
+        """
         # strategy-specific settings
         config_names = []
         match self.player.fishing_strategy:
@@ -255,9 +266,16 @@ class App():
             case 'wakey_rig':
                 pass
         return config_names
-            # default case already handled in player.py
+            # default case is already handled in player.py
 
     def _build_table(self, names: list, table: PrettyTable) -> None:
+        """Construct a prettytable from player's attributes using title of settings.
+
+        :param names: list of settings names
+        :type names: list
+        :param table: table to be extended
+        :type table: PrettyTable
+        """
         for name in names:
             try:
                 real_attribute = getattr(self.player, name.lower().replace(' ', '_'))
@@ -267,17 +285,18 @@ class App():
                 real_attribute = getattr(self.player, name.lower().replace(' ', '_') + '_enabled')
                 table.add_row([name, 'enabled' if real_attribute else 'disabled'])
 
-    def run_experimental_func(self):
-        logger.info('Debugging')
+    def run_experimental_func(self) -> None:
+        """For debugging.
+        """
         # for debugging
         # from monitor import *
         # from pyautogui import *
         # from time import sleep
-        # WindowController().activate_game_window()
-        # self.player.change_broken_lure()
+        WindowController().activate_game_window()
+        self.player.replace_broken_lures()
 
-    def verify_file_integrity(self):
-        """Compare files in static/en and static/{language}, print missing files 
+    def verify_file_integrity(self) -> None:
+        """Compare files in static/en and static/{language}, print missing files.
         """
         logger.info('Verifying file integrity...')  
         complete_filenames = os.listdir('../static/en/') # use en version as reference
@@ -308,14 +327,15 @@ if __name__ == '__main__':
     if app.args.email:
         app.validate_email()
 
-    if app.args.DEBUG:
-        app.run_experimental_func()
-        sys.exit()
-    elif app.args.pid is None:
+    if app.args.pid is None:
         app.show_available_profiles()
         app.ask_for_pid()
     app.gen_player_from_settings()
     app.show_user_settings()
+
+    if app.args.DEBUG:
+        app.run_experimental_func()
+        exit()
 
     app.verify_file_integrity()
     ask_for_confirmation('Do you want to continue with the settings above')

@@ -40,7 +40,7 @@ def on_release(key: keyboard.KeyCode) -> None:
 def parse_args() -> argparse.Namespace:
     """Cofigure argparser and parse the command line arguments.
 
-    :return dict-like object of parsed arguments
+    :return dict-like parsed arguments
     :rtype: argparse.Namespace
     """
     parser = argparse.ArgumentParser(

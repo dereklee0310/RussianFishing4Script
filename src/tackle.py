@@ -3,6 +3,7 @@ Module for Tackle class
 
 Todo: special retrieval for jig step, twitchiing...
 """
+import sys
 from time import sleep
 
 import pyautogui as pag
@@ -36,10 +37,6 @@ class Tackle():
         :rtype: bool
         """
         logger.info('Resetting')
-
-        if monitor.is_tackle_ready():
-            return True
-
         pag.mouseDown()
         i = self.RESET_TIMEOUT
         while i > 0 and not monitor.is_tackle_ready():
@@ -72,14 +69,14 @@ class Tackle():
 
         if power_level < 0 or power_level > 5:
             logger.error('Invalid power level')
-            exit()
+            sys.exit()
         elif power_level == 1:
             pag.click()
         elif power_level == 5:
             with pag.hold('shift'):
                 hold_left_click(1)
         else:
-            duration = 1.6 * (power_level - 1) / 4 # -1 to keep consistent with old settings
+            duration = 1.6 * (power_level - 1) / 4 # -1 for backward compatibility
             hold_left_click(duration)
             
         sleep(cast_delay)
@@ -246,7 +243,7 @@ class Tackle():
             pag.keyUp('shift')
 
     def switch_gear_ratio(self) -> None:
-        """Switch gear ratio, designed for conventional reel.
+        """Switch gear ratio of conventional reel.
         """
         with pag.hold('ctrl'):
             pag.press('space')

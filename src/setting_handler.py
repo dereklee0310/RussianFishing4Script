@@ -1,5 +1,5 @@
 """
-Module for SettingHandler class.
+Module for SettingHandler class, not used yet.
 """
 
 from pathlib import Path

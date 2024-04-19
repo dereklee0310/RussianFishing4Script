@@ -111,11 +111,11 @@ def is_ticket_expired():
 def get_boat_ticket_position(ticket_time=None): # todo
     return locateOnScreen(fr'{parent_dir}ticket_{ticket_time}.png', confidence=0.95)
 
-def get_item_info_position():
-    return locateOnScreen(fr'{parent_dir}item_info.png', confidence=0.97)
+def get_scrollbar_position():
+    return locateOnScreen(fr'{parent_dir}scrollbar.png', confidence=0.97)
 
-def get_broken_item_position(): #todo
-    return locateOnScreen(fr'{parent_dir}broken.png', confidence=0.98)
+def get_100wear_position():
+    return locateOnScreen(fr'{parent_dir}100wear.png', confidence=0.98)
 
 def get_favorite_item_positions():
     return locateAllOnScreen(fr'{parent_dir}favorite.png', confidence=0.95)

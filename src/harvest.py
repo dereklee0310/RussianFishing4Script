@@ -40,6 +40,7 @@ def consume_food(food: str) -> None:
         sleep(0.25)
         pag.moveTo(getattr(monitor, f'get_{food}_icon_position')())
         pag.click()
+        sleep(0.25)
 
 if __name__ == '__main__':
     parser = ArgumentParser(
@@ -55,10 +56,9 @@ if __name__ == '__main__':
     config = ConfigParser()
     config.read(r'../config.ini')
     threshold = config['game'].getfloat('harvest_baits_threshold')
-    shovel_spoon_shortcut = config['shortcut']['shovel_spoon']
+    shovel_spoon_shortcut = config['shortcut'].get('shovel_spoon')
 
     tea_count = 0
-    pre_refill_time = 0
     carrot_count = 0
     harvest_count = 0
     
@@ -70,39 +70,39 @@ if __name__ == '__main__':
     sleep(3)
 
     try:
+        pre_refill_time = 0
         while True:
             if monitor.is_comfort_low() and time() - pre_refill_time > 300:
+                logger.info('Low comfort level')
                 pre_refill_time = time()
                 consume_food('tea')
                 tea_count += 1
-            sleep(0.25)
 
             if monitor.is_hunger_low():
+                logger.info('Low hunger level')
                 consume_food('carrot')
                 carrot_count += 1
-            sleep(0.25)
 
             if monitor.is_energy_high(threshold):
+                logger.info('High energy level')
                 harvest_baits()
                 harvest_count += 1
-            else:
-                logger.info('Low energy level')
 
+            logger.info('Waiting for energy regeneration')
             if args.power_saving:
                 pag.press('esc')
-                sleep(args.check_delay_second)
+            sleep(args.check_delay_second)
+            if args.power_saving:
                 pag.press('esc')
-            else:
-                sleep(args.check_delay_second)
             sleep(0.25)
     except KeyboardInterrupt:
-        table = PrettyTable(header=False, align='l')
-        table.title = 'Running Results'
-        table.add_rows(
-            [   
-                ['Harvest baits count', harvest_count],
-                ['Tea consumed', tea_count],
-                ['Carrot consumed', carrot_count]
-            ])
-        print(table)
-        exit()
+        pass
+    table = PrettyTable(header=False, align='l')
+    table.title = 'Running Results'
+    table.add_rows(
+        [   
+            ['Harvest baits count', harvest_count],
+            ['Tea consumed', tea_count],
+            ['Carrot consumed', carrot_count]
+        ])
+    print(table)

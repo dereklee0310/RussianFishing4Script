@@ -1,6 +1,8 @@
 """
 Some helper functions.
 """
+import sys
+from pathlib import Path
 
 from configparser import ConfigParser
 from time import sleep
@@ -8,7 +10,7 @@ from time import sleep
 import pyautogui as pag
 
 config = ConfigParser()
-config.read('../config.ini')
+config.read(Path(__file__).resolve().parents[1] / 'config.ini')
 
 def hold_left_click(duration: float=1) -> None:
     """Hold left mouse button.
@@ -61,7 +63,7 @@ def ask_for_confirmation(msg: str) -> None:
             return 
         elif ans == 'n': # quit only when the input is 'n'
             print('The bot has been terminated')
-            exit() 
+            sys.exit() 
 
 if __name__ == '__main__':
     ask_for_confirmation()

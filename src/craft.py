@@ -4,6 +4,7 @@ Activate game window and start crafting things until running out of materials.
 Usage: craft.py
 """
 import argparse
+import logging
 from time import sleep
 
 from prettytable import PrettyTable
@@ -13,10 +14,13 @@ import monitor
 from windowcontroller import WindowController
 from script import ask_for_confirmation
 
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 def parse_args() -> argparse.Namespace:
     """Cofigure argparser and parse the command line arguments.
 
-    :return dict-like object of parsed arguments
+    :return dict-like parsed arguments
     :rtype: argparse.Namespace
     """
     parser = argparse.ArgumentParser(
@@ -42,10 +46,12 @@ if __name__ == '__main__':
     pag.moveTo(monitor.get_make_position())
     try:
         while True:
+            logger.info('Crafting')
             pag.click() # click make button
 
             # recipe not complete
             if monitor.is_operation_failed():
+                logger.warning('Out of materials')
                 pag.press('space')
                 break
 
@@ -53,9 +59,11 @@ if __name__ == '__main__':
             sleep(4)
             while True:
                 if monitor.is_operation_success():
+                    logger.info('Crafting succeed')
                     success_count += 1
                     break
                 elif monitor.is_operation_failed():
+                    logger.info('Crafting failed')
                     fail_count += 1
                     break
                 sleep(0.25)
@@ -65,7 +73,7 @@ if __name__ == '__main__':
             pag.press(key)
             if success_count + fail_count == limit:
                 break
-            sleep(0.1) # wait for animation
+            sleep(0.25) # wait for animation
     except KeyboardInterrupt:
         pass
     table = PrettyTable(header=False, align='l')

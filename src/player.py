@@ -5,6 +5,7 @@ Todo: docstrings
 """
 import os
 import smtplib
+import sys
 from time import sleep, time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -66,6 +67,11 @@ class Player():
             monitor.set_rainbow_line_retrieval()
 
     def _build_args(self, args: Namespace) -> None:
+        """Generate attributes from command line arguments
+
+        :param args: dict-like parsed arguments
+        :type args: Namespace
+        """
         self.unmarked_release_enabled = args.marked
         self.coffee_drinking_enabled = args.coffee
         self.alcohol_drinking_enabled = args.alcohol
@@ -81,6 +87,11 @@ class Player():
         self.boat_ticket_duration = args.boat_ticket_duration
 
     def _build_game_config(self, config: ConfigParser) -> None:
+        """Generate attributes from "game" section in config.ini
+
+        :param config: parser for config.ini
+        :type config: ConfigParser
+        """
         game_section = config['game']
         self.keepnet_limit = game_section.getint('keepnet_limit')
         self.fishes_to_catch = self.keepnet_limit - self.fishes_in_keepnet
@@ -92,8 +103,16 @@ class Player():
         self.lure_broken_action = game_section.get('lure_broken_action')
         self.keepnet_full_action = game_section.get('keepnet_full_action')
         self.alarm_sound_file_path = game_section.get('alarm_sound_file_path')
+        self.unmarked_release_whitelist = [key.strip() for key in game_section.get('unmarked_release_whitelist').split(',')]
 
     def _build_profile_config(self, config: ConfigParser, profile_name: str) -> None:
+        """Generate attributes from chosen user profile section
+
+        :param config: parser for config.ini
+        :type config: ConfigParser
+        :param profile_name: section name of user profile
+        :type profile_name: str
+        """
         profile_section = config[profile_name]
         self.fishing_strategy = profile_section.get('fishing_strategy')
         self.cast_power_level = profile_section.getfloat('cast_power_level')
@@ -118,7 +137,7 @@ class Player():
                 pass
             case _:
                 logger.error('Invalid fishing strategy')
-                exit()
+                sys.exit()
 
     def start_fishing(self) -> None:
         """Start main fishing loop with specified fishing strategt.
@@ -135,15 +154,15 @@ class Player():
                     self.marine_fishing()
                 case 'wakey_rig':
                     self.wakey_rig_fishing()
-                # default: already checked in app.show_user_settings()
+                # already checked in self._build_profile_config()
         except KeyboardInterrupt:
-                # avoid shift key stuck
-                if self.fishing_strategy == 'spin_with_pause' and self.acceleration_enabled:
-                    pag.keyUp('shift')
-                print(self.gen_result('Terminated by user'))
-                if self.plotting_enabled:
-                    self.plot_and_save()
-                exit()
+            # avoid shift key stuck
+            if self.fishing_strategy == 'spin_with_pause' and self.acceleration_enabled:
+                pag.keyUp('shift')
+            print(self.gen_result('Terminated by user'))
+            if self.plotting_enabled:
+                self.plot_and_save()
+            sys.exit()
 
     # ---------------------------------------------------------------------------- #
     #                              main fishing loops                              #
@@ -371,7 +390,7 @@ class Player():
         key = self.shortcut_dict[item]
         if int(key) < -1 or int(key) > 7:
             logger.error(f'Invalid {item} key: {key}')
-            exit()
+            sys.exit()
         elif int(key) != -1:
             pag.press(key)
             return
@@ -397,6 +416,42 @@ class Player():
     def resetting_stage(self) -> None:
         """Reset the tackle until the it's ready or an exceptional event occurs.
         """
+        sleep(0.25) # wait for rendering
+
+        if monitor.is_tackle_ready():
+            return
+        
+        if monitor.is_lure_broken():
+            msg = 'Lure is broken'
+            match self.lure_broken_action:
+                case 'alarm':
+                    logger.warning(msg)
+                    playsound(str(Path(self.alarm_sound_file_path).resolve()))
+
+                    # todo: fix this coffee-limit like handling strategy
+                    result = self.gen_result(msg)
+                    print(result)
+                    if self.email_sending_enabled:
+                        self.send_email(result)
+                    if self.plotting_enabled:
+                        self.plot_and_save()
+                    sys.exit()
+                case 'replace':
+                    self.replace_broken_lures()
+                    sleep(0.25)
+                    return
+                case 'quit':
+                    self.general_quit(msg)           
+        elif monitor.is_ticket_expired():
+            if self.boat_ticket_duration is None:
+                pag.press('esc')
+                sleep(2)
+                self.general_quit('Boat ticket expired')
+            self.renew_boat_ticket()
+            sleep(0.25)
+            return
+        
+        # also deals with scenarios that may occur during resetting
         while not self.tackle.reset():
             if monitor.is_fish_hooked():
                 if self.tackle.pull(): # a single pull should do the job
@@ -405,26 +460,13 @@ class Player():
             elif monitor.is_fish_captured():
                 self.handle_fish()
                 break
-            elif monitor.is_lure_broken():
-                msg = 'Lure is broken'
-                if self.lure_broken_action == 'alarm':
-                    logger.warning(msg)
-                    playsound(str(Path(self.alarm_sound_file_path).resolve()))
-                elif self.lure_broken_action == 'quit':
-                    self.general_quit(msg)
-            elif monitor.is_ticket_expired():
-                if self.boat_ticket_duration is None:
-                    pag.press('esc')
-                    sleep(2)
-                    self.general_quit('Boat ticket expired')
-                else:
-                    self.renew_boat_ticket()
             elif monitor.is_tackle_broken():
                 self.save_screenshot()
                 self.general_quit('Tackle is broken')
             elif monitor.is_disconnected():
                 self.disconnected_quit()
-            # reset again if no fish is hoooked or captured
+        sleep(0.25)
+            # reset again if no special event occured
 
     def retrieving_stage(self, duration=16, delay=4, accelerated=False):
         """Retrieve the fishing line until it's fully retrieved or an exceptional event occurs.
@@ -475,7 +517,7 @@ class Player():
                         self.send_email(result)
                     if self.plotting_enabled:
                         self.plot_and_save()
-                    exit()
+                    sys.exit()
                 logger.info('Consume coffee')
                 self.access_item('coffee')
                 self.total_coffee_count += 1
@@ -572,21 +614,28 @@ class Player():
         """
 
         #! a trophy ruffe will break the checking mechanism            
-        if not monitor.is_fish_green_marked():
+        if monitor.is_fish_green_marked():
+            self.marked_fish_count += 1
+        else:
             self.unmarked_fish_count += 1
             if self.unmarked_release_enabled:
+                if self.unmarked_release_whitelist[0] != 'None':           
+                    for fish_name in self.unmarked_release_whitelist:
+                        if getattr(monitor, f'is_fish_{fish_name}')():
+                            sleep(self.keep_fish_delay)
+                            logger.info('Keep whitelisted fish')
+                            pag.press('space')
+                            return
+                        
+                # no whitelisted fish or fish not in whitelist
                 logger.info('Release unmarked fish')
                 pag.press('backspace')
-                sleep(0.5) # wait for redering
                 return
-        else:
-            self.marked_fish_count += 1
 
         # fish is marked or enable_unmarked_release is set to False
         sleep(self.keep_fish_delay)
         logger.info('Keep the fish')
         pag.press('space')
-        sleep(0.5) # wait for rendering
 
         # avoid wrong cast hour
         if (self.fishing_strategy == 'bottom' or
@@ -607,6 +656,7 @@ class Player():
     # ---------------------------------------------------------------------------- #
     #                                     misc                                     #
     # ---------------------------------------------------------------------------- #
+
     def general_quit(self, termination_cause: str) -> None:
         """Show the running result with cause of termination, 
             then quit the game through control panel.
@@ -630,9 +680,9 @@ class Player():
             self.plot_and_save()
 
         if self.shutdown_enabled:
-            self.shutdown_computer()
+            os.system('shutdown /s /t 5')
         print(result)
-        exit()
+        sys.exit()
 
     def disconnected_quit(self) -> None:
         """show the running result with disconnected status,
@@ -658,9 +708,9 @@ class Player():
             self.send_email(result)
 
         if self.shutdown_enabled:
-            self.shutdown_computer()
+            os.system('shutdown /s /t 5')
         print(result)
-        exit()
+        sys.exit()
 
     def gen_result(self, termination_cause: str) -> PrettyTable:
         """Generate a PrettyTable object for logging and email based on running results.
@@ -746,7 +796,9 @@ class Player():
             pag.screenshot().save(file, 'png')
         pag.press('esc')
 
-    def plot_and_save(self):
+    def plot_and_save(self) -> None:
+        """Plot and save an image using rhour and ghour list from timer object.
+        """
         if self.marked_fish_count + self.unmarked_fish_count == 0:
             return
 
@@ -779,6 +831,8 @@ class Player():
         print('The Plot has been saved under logs/')
 
     def renew_boat_ticket(self):
+        """Select and use the ticket according to boat_ticket_duration argument.
+        """
         logger.info('Renewing boat ticket')
         ticket_loc = monitor.get_boat_ticket_position(self.boat_ticket_duration)
         if ticket_loc is None:
@@ -788,48 +842,46 @@ class Player():
         pag.moveTo(ticket_loc)
         pag.click(clicks=2, interval=0.1) # interval is required, doubleClick() not implemented
         sleep(4) # wait for animation
-
-    def shutdown_computer(self):
-        os.system('shutdown /s /t 5')
-        exit()
-
-
-    def replacing_stage(self):
+        
+    def replace_broken_lures(self):
+        """Replace multiple broken items (lures).
+        """
+        logger.info('Replacing broken lures')
         # open tackle menu
         pag.press('v')
         sleep(0.25)
 
-        loc = monitor.get_item_info_position()
-        if not loc:
+        scrollbar_position = monitor.get_scrollbar_position()
+        if scrollbar_position is None:
             logger.info('Scroll bar not found, changing lures for normal rig')
-            self.replace_lures_no_scrolling()
-        else:
-            logger.info('Scroll bar found, changing lures for dropshot rig')
-            self.replace_lures_with_scrolling(loc)
-        pag.press('v')
-
-    def replace_lures_no_scrolling(self):
-        while self.open_broken_lure_menu():
-            self.replace_single_broken_lure()
-
-    def replace_lures_with_scrolling(self, loc):
-        pag.moveTo(loc) # move to scroll bar
+            while self.open_broken_lure_menu():
+                self.replace_selected_item()
+            pag.press('v')
+            return
+        
+        logger.info('Scroll bar found, changing lures for dropshot rig')
+        pag.moveTo(scrollbar_position)
         for _ in range(5):
             sleep(1)
             pag.drag(xOffset=0, yOffset=125, duration=0.5, button='left')
 
             replaced = False
             while self.open_broken_lure_menu():
-                self.replace_single_broken_lure()
+                self.replace_selected_item()
                 replaced = True
 
-            # adjust mouse location
             if replaced:
-                pag.moveTo(monitor.get_item_info_position())
+                pag.moveTo(monitor.get_scrollbar_position())
+        pag.press('v')
 
     def open_broken_lure_menu(self) -> bool:
+        """Search for text of broken item, open selection menu if found.
+
+        :return: True if broken item is found, False otherwise
+        :rtype: bool
+        """
         logger.info('Searching for broken lure')
-        broken_item_position = monitor.get_broken_item_position()
+        broken_item_position = monitor.get_100wear_position()
         if broken_item_position is None:
             logger.warning('Broken lure not found')
             return False
@@ -841,11 +893,14 @@ class Player():
         pag.click()
         sleep(0.25)
         return True
-            
 
-    def replace_single_broken_lure(self):
+    def replace_selected_item(self) -> None:
+        """Search for favorite items for replacement and skip the broken ones.
+        """
         # iterate through favorite items for replacement
         favorite_item_positions = monitor.get_favorite_item_positions()
+
+        logger.info('Search for favorite items')
         while True:
             favorite_item_position = next(favorite_item_positions, None)
             if favorite_item_position is None:
@@ -857,8 +912,10 @@ class Player():
                 sleep(0.25)
                 self.general_quit(msg)
 
+            # box -> x, y, np.int64 -> int
+            get_box_center = lambda box: (int(box.left + box.width // 2), int(box.top + box.height // 2))
+            x, y = get_box_center(favorite_item_position)
             # check if the lure for replacement is already broken
-            x, y = self.get_box_center(favorite_item_position)
             if pag.pixel(x - 75, y + 190) != (178, 59, 30): # magic value
                 logger.info('The broken lure has been replaced')
                 # pag.moveTo(x - 75, y + 200) # ?
@@ -867,11 +924,6 @@ class Player():
                 sleep(2) # wait for wear text to update
                 break
             logger.warning('Lure for replacement found but already broken')
-
-
-    def get_box_center(self, box: Box) -> tuple[int, int]:
-        # np.int64 -> int for win API
-        return int(box.left + box.width // 2), int(box.top + box.height // 2) 
 
 # head up backup
 # win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(0), int(-200), 0, 0)
