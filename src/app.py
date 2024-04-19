@@ -298,7 +298,12 @@ class App():
     def verify_file_integrity(self) -> None:
         """Compare files in static/en and static/{language}, print missing files.
         """
-        logger.info('Verifying file integrity...')  
+        logger.info('Verifying file integrity...')
+
+        if parent_dir == '../static/en/':
+            logger.info('Integrity check passed')
+            return
+
         complete_filenames = os.listdir('../static/en/') # use en version as reference
         try:
             current_filenames = os.listdir(parent_dir)
@@ -309,7 +314,9 @@ class App():
 
         missing_filenames = set(complete_filenames) - set(current_filenames)
         if len(missing_filenames) != 0:
-            logger.error(f'Integrity check failed, see integrity_guide.md') # todo: add link
+            logger.error(f'Integrity check failed')
+            guide_link = 'https://github.com/dereklee0310/RussianFishing4Script/blob/main/file_integrity.md'
+            print(f'Please refer to {guide_link}')
             table = PrettyTable(header=False, align='l')
             table.title = 'Missing images'
             for filename in missing_filenames:
@@ -322,6 +329,7 @@ class App():
 if __name__ == '__main__':
     app = App()
     app.get_args()
+    app.verify_file_integrity()
 
     app.validate_args()
     if app.args.email:
@@ -337,7 +345,6 @@ if __name__ == '__main__':
         app.run_experimental_func()
         exit()
 
-    app.verify_file_integrity()
     ask_for_confirmation('Do you want to continue with the settings above')
     WindowController().activate_game_window()
     app.player.start_fishing()

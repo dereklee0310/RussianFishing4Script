@@ -3,12 +3,18 @@ A simple fishing bot for Russian Fishing 4, supporting spin, bottom and marine f
 - [Discord](https://discord.gg/BZQWQnAMbY)
 - [文字教程](中文版教程.md)
 
-## 4/6 Patchnotes
-- Added new language options: zh-TW and zh-CN
-- Fixed [#issue16](https://github.com/dereklee0310/RussianFishing4Script/issues/16) 
-- Fixed a potential perma-stuck bug in tackle resetting plase
-- Fixed bug where the script would start pirking without closing the reel if the fish  
-  was hooked and immediately escaped during sinking phase
+## 4/19 Patchnotes
+**Please refer to `template.ini` to check newly added settings**
+- Ended support for other languages, see [Integrity Guide](./integrity_guide.md)
+- Added file integrity check for images
+- Improved image quality of zh-CN versions
+- Added setting for default startup options
+- Added whitelist setting for release of unmarked fish
+- Added automatic broken lure replacement feature
+- Added "replace" option for `lure_broken_action` setting in `config.ini`
+- Fixed a bug that was causing the tackle to be identified as "not ready"
+- Fixed a bug where the game wouldn't quit when the line was at the end
+- Fixed a syntax error in `player.plot_and_save()`
 
 ## Built With
 - Python 3.11 
@@ -16,14 +22,16 @@ A simple fishing bot for Russian Fishing 4, supporting spin, bottom and marine f
 
 ## Getting Started  
 ### Prerequisites
-- Set the language in `config.ini` and change your in-game language
+- Set the language in `config.ini` and add missing images if you aren't using the English version.
 - Set your in-game interface scale as "1x"
 - Enable Mouse ClickLock in Windows mouse settings and set the time before locking to "Long"  
 ![ClickLock](/static/readme/clicklock.png)
-- To refill player's stats automatically, add tea and carrot, and coffee to your  
-  favorite items so that they can be selected through quick food selection menu.  
-  Otherwise, they can only be accessed by quick selection shortcuts (e.g., 1 ~ 7)  
-![Favorites](/static/readme/favorites.png)
+- To refill your stats without using shortcuts (e.g., 1 ~ 7), add tea, carrot, and coffee to your  
+  favorites so that they can be selected through quick food selection menu other.  
+- To enable automatic broken lure replacement, the lures for replacement must be added to favorites.  
+![Favorite_food](/static/readme/favorites.png)
+![Favorite_lure](/static/readme/favorites_2.png)
+
 
 ### Install
 ```
@@ -82,7 +90,7 @@ python app.py -p 3 -c -e
 ```
 - Release unmarked fish, enable hunger and comfort refill, and plot a catch/hour chart after it's terminated
 ```
-python app.py -m -r -P
+python app.py -mrP
 ```
 ## Other Useful Scripts
 ### Toggle moving forward
