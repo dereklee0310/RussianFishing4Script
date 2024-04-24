@@ -541,6 +541,7 @@ class Player():
                 break
             elif monitor.is_fish_hooked():
                 if self.fish_hooked_check_delay == 0:
+                    pag.click()
                     return
                 
                 # check if the fish got away after biting

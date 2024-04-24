@@ -315,7 +315,7 @@ class App():
         missing_filenames = set(complete_filenames) - set(current_filenames)
         if len(missing_filenames) != 0:
             logger.error(f'Integrity check failed')
-            guide_link = 'https://github.com/dereklee0310/RussianFishing4Script/blob/main/file_integrity.md'
+            guide_link = 'https://github.com/dereklee0310/RussianFishing4Script/blob/main/integrity_guide.md'
             print(f'Please refer to {guide_link}')
             table = PrettyTable(header=False, align='l')
             table.title = 'Missing images'
