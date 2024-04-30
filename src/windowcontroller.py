@@ -38,7 +38,7 @@ class WindowController():
             print(f'Failed to locate the window with title "{self._title}"')
             exit()
         return hwnd
-            
+
     def activate_script_window(self) -> None:
         """Focus terminal.
         """

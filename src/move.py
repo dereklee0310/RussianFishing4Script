@@ -20,20 +20,20 @@ def on_press(key: keyboard.KeyCode) -> None:
     """
     if str(key) == "'s'":
         exit()
-        
+
 def on_release(key: keyboard.KeyCode) -> None:
     """Callback for releasing button, including w key toggle control.
 
     :param key: key code used by OS
     :type key: keyboard.KeyCode
     """
-    global holding_w 
+    global holding_w
     if str(key) != "'w'":
         return
     elif holding_w == True:
         holding_w = False
         return
-    
+
     pag.keyDown('w')
     holding_w = True
 
@@ -44,13 +44,13 @@ def parse_args() -> argparse.Namespace:
     :rtype: argparse.Namespace
     """
     parser = argparse.ArgumentParser(
-                        prog='move.py', 
-                        description='Activate game window and start moving forward', 
+                        prog='move.py',
+                        description='Activate game window and start moving forward',
                         epilog='')
     parser.add_argument('-s', '--shift', action='store_true',
                         help="Hold Shift key while moving")
     return parser.parse_args()
-    
+
 if __name__ == '__main__':
     # must be parsed first to display help information
     enable_shift_holding = parse_args().shift
@@ -63,7 +63,7 @@ if __name__ == '__main__':
     pag.keyDown('w')
 
     # blocking listener loop
-    with keyboard.Listener( on_press=on_press, on_release=on_release) as listener: 
+    with keyboard.Listener( on_press=on_press, on_release=on_release) as listener:
         listener.join()
 
     pag.keyUp('w')

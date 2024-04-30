@@ -26,7 +26,7 @@ class Timer():
         :rtype: str
         """
         return str(datetime.timedelta(seconds=int(time.time() - self.start_time))) # truncate to seconds
-    
+
     def get_cur_timestamp(self) -> str:
         """Generate timestamp for images in screenshots/.
 
@@ -34,7 +34,7 @@ class Timer():
         :rtype: str
         """
         return time.strftime("%Y-%m-%d--%H-%M-%S", time.localtime())
-    
+
     def get_start_datetime(self) -> str:
         """Generate a simplified timestamp for quit message.
 
@@ -50,14 +50,14 @@ class Timer():
         :rtype: str
         """
         return time.strftime("%m/%d %H:%M:%S", time.localtime())
-    
+
     def update_cast_hour(self) -> None:
         """Update latest real and in-game hour of casting.
         """
         dt = datetime.datetime.now()
         self.cast_rhour = int((time.time() - self.start_time) // 3600)
         self.cast_ghour = int((dt.minute / 60 + dt.second / 3600) * 24 % 24)
-    
+
     def add_cast_hour(self) -> None:
         """Record latest real and in-game hour
         """
@@ -67,7 +67,7 @@ class Timer():
     def get_cast_hour_list(self) -> tuple[list[int]]:
         """Getter.
 
-        :return: lists of real and in-game hours 
+        :return: lists of real and in-game hours
         :rtype: tuple[list[int]]
         """
         return self.cast_rhour_list, self.cast_ghour_list

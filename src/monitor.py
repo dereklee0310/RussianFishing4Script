@@ -38,7 +38,7 @@ def is_retrieve_finished():
     return locateOnScreen(fr'{parent_dir}wheel.png', confidence=spool_icon_confidence) # original: 0.985
 
 def is_retrieve_finished_v2():
-    return (locateOnScreen(fr'{parent_dir}5m.png', confidence=spool_icon_confidence) or 
+    return (locateOnScreen(fr'{parent_dir}5m.png', confidence=spool_icon_confidence) or
             locateOnScreen(fr'{parent_dir}0m.png', confidence=spool_icon_confidence))
 
 is_spool_icon_valid = is_retrieve_finished # for validate.py
@@ -156,7 +156,7 @@ def is_energy_high(threshold: float) -> bool:
     # default threshold: 0.74,  well done FishSoft
     last_point = int(19 + 152 * threshold) - 1
     return pixel(x + 19, y) == pixel(x + last_point, y)
-    
+
 def is_hunger_low() -> bool:
     """Check if food level is low.
 

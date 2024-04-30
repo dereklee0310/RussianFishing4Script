@@ -61,7 +61,7 @@ if __name__ == '__main__':
     tea_count = 0
     carrot_count = 0
     harvest_count = 0
-    
+
     ask_for_confirmation('Are you ready to start harvesting baits')
     WindowController().activate_game_window()
 
@@ -100,7 +100,7 @@ if __name__ == '__main__':
     table = PrettyTable(header=False, align='l')
     table.title = 'Running Results'
     table.add_rows(
-        [   
+        [
             ['Harvest baits count', harvest_count],
             ['Tea consumed', tea_count],
             ['Carrot consumed', carrot_count]

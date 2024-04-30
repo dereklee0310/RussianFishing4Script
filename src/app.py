@@ -25,7 +25,7 @@ from monitor import parent_dir
 # logging.BASIC_FORMAT: %(levelname)s:%(name)s:%(message)s
 # timestamp: %(asctime)s, datefmt='%Y-%m-%d %H:%M:%S',
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
-logger = logging.getLogger(__name__)    
+logger = logging.getLogger(__name__)
 
 class App():
     def __init__(self):
@@ -45,8 +45,8 @@ class App():
         """Configure argparser and parse the args.
         """
         parser = ArgumentParser(
-                            prog='app.py', 
-                            description='Start the script for Russian Fishing 4', 
+                            prog='app.py',
+                            description='Start the script for Russian Fishing 4',
                             epilog='')
         # boolean flags
         relase_group = parser.add_mutually_exclusive_group()
@@ -58,7 +58,7 @@ class App():
                             help='drink coffee if the retrieval time is greater than 2mins')
         parser.add_argument('-A', '--alcohol', action='store_true',
                             help='drink alcohol before keeping thee fish regularly')
-        parser.add_argument('-r', '--refill', action='store_true', 
+        parser.add_argument('-r', '--refill', action='store_true',
                             help='refill hunger and comfort bar by consuming tea and carrot automatically')
         parser.add_argument('-H', '--harvest', action='store_true',
                             help='harvest baits automatically, only applicable for bottom fishing')
@@ -74,17 +74,17 @@ class App():
                             help='When the retrieval timeout, switch the gear ratio automatically')
         parser.add_argument('-D', '--DEBUG', action='store_true',
                             help='This is only for testing and should not be used')
-        
+
         spool_group = parser.add_mutually_exclusive_group()
         spool_group.add_argument('-d', '--default-spool-icon', action='store_true',
                             help='Use default spool icon to check if the retrieval is finished, used by default')
         spool_group.add_argument('-R', '--rainbow-line', action='store_true',
                             help='Use rainbow line icon to check if the retrieval is finished')
-        
+
         # options with arguments
         parser.add_argument('-n', '--fishes-in-keepnet', type=int, default=0,
                             help='the current number of fishes in your keepnet, 0 if not specified')
-        parser.add_argument('-p', '--pid', type=int, 
+        parser.add_argument('-p', '--pid', type=int,
                             help='the id of profile you want to use')
         parser.add_argument('-t', '--boat-ticket-duration', type=int,
                             help='Enable boat ticket auto renewal, use 1, 2, 3, or 5 to speicfy the duration of the ticket')
@@ -97,7 +97,7 @@ class App():
         if not self._is_fish_count_valid(self.args.fishes_in_keepnet):
             logger.error('Invalid number of fishes in keepnet')
             sys.exit()
-            
+
         # pid has no fallback value, check if it's None
         if self.args.pid and not self._is_pid_valid(str(self.args.pid)):
             logger.error('Invalid profile id')
@@ -105,7 +105,7 @@ class App():
         self.pid = self.args.pid # unify pid location in case ask_for_pid() is called afterwards
 
         if self.args.boat_ticket_duration is not None:
-            if (self.args.boat_ticket_duration != 1 and 
+            if (self.args.boat_ticket_duration != 1 and
                 self.args.boat_ticket_duration != 2 and
                 self.args.boat_ticket_duration != 3 and
                 self.args.boat_ticket_duration != 5):
@@ -136,14 +136,14 @@ class App():
         except smtplib.SMTPAuthenticationError:
             logger.error('Username, password or SMTP server name not accepted')
             print('Please configure your username and password in .env file')
-            print('If you are using Gmail, refer to https://support.google.com/accounts/answer/185833', 
+            print('If you are using Gmail, refer to https://support.google.com/accounts/answer/185833',
                 '\nto get more information about app password authentication')
             sys.exit()
         except gaierror:
             logger.error("Invalid SMTP Server, try 'smtp.gmail.com', 'smtp.qq.com' or other SMTP servers")
             sys.exit()
 
-    
+
     def _is_fish_count_valid(self, fish_count: int) -> bool:
         """Validate the current # of fishes in keepnet.
 
@@ -153,7 +153,7 @@ class App():
         :rtype: bool
         """
         return fish_count >= 0 and fish_count < self.config['game'].getint('keepnet_limit')
-    
+
     def _is_pid_valid(self, pid: str) -> bool:
         """Validate the profile id.
 
@@ -162,7 +162,7 @@ class App():
         :return: True if valid, False otherwise
         :rtype: bool
         """
-        return pid.isdigit() and int(pid) >= 0 and int(pid) < len(self.profile_names) 
+        return pid.isdigit() and int(pid) >= 0 and int(pid) < len(self.profile_names)
 
     def show_available_profiles(self) -> None:
         """List available user profiles.
@@ -172,7 +172,7 @@ class App():
         for i, profile in enumerate(self.profile_names):
             table.add_row([f'{i:>2}. {profile}'])
         print(table)
-    
+
     def ask_for_pid(self) -> None:
         """Get and validate user profile id from user input.
         """
@@ -231,7 +231,7 @@ class App():
             'Cast power level',
             'Boat ticket duration'
             ]
-    
+
     def _get_config_names(self) -> list:
         """Get names of configurations with respect to fishing strategy.
 
@@ -246,8 +246,8 @@ class App():
             case 'spin_with_pause':
                 config_names.extend(
                     [
-                        'Retrieval duration', 
-                        'Retrieval delay', 
+                        'Retrieval duration',
+                        'Retrieval delay',
                         'Base iteration',
                         'Acceleration'
                     ])

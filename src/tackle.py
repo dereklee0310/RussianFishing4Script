@@ -33,7 +33,7 @@ class Tackle():
     def reset(self) -> bool:
         """Reset the tackle with a timeout.
 
-        :return: True if the reset is successful, False otherwise 
+        :return: True if the reset is successful, False otherwise
         :rtype: bool
         """
         logger.info('Resetting')
@@ -46,13 +46,13 @@ class Tackle():
             i = sleep_and_decrease(i, 3) # > ClickLock duration (2.2)
         pag.mouseUp()
         pag.click()
-        
+
         if i <= 0:
             logger.warning('Failed to reset tackle')
         return i > 0
-    
-    def cast(self, 
-             power_level: float | None=3, 
+
+    def cast(self,
+             power_level: float | None=3,
              cast_delay: int | None=6,
              sink_delay: int | None=0) -> None:
         """Cast the rod.
@@ -78,11 +78,11 @@ class Tackle():
         else:
             duration = 1.6 * (power_level - 1) / 4 # -1 for backward compatibility
             hold_left_click(duration)
-            
+
         sleep(cast_delay)
         if sink_delay:
             sleep(sink_delay)
-        
+
         self.timer.update_cast_hour()
 
     def retrieve(self, duration: int, delay: int, lift_enabled: bool) -> bool:
@@ -146,19 +146,19 @@ class Tackle():
             if monitor.is_fish_hooked():
                 if check_again_delay == 0:
                     break
-                    
-                sleep(check_again_delay)    
+
+                sleep(check_again_delay)
                 if monitor.is_fish_hooked():
                     logger.info('Fish is hooked')
                     break
-                
+
             hold_right_click(duration=duration)
             i = sleep_and_decrease(i, delay)
 
         if i <= 0:
             logger.warning('Pirking timeout reached')
         return i > 0
-    
+
     # def wakey_pirking(self, delay: float) -> bool:
     #     """todo
 
@@ -196,7 +196,7 @@ class Tackle():
                 i = 1 # small trick to indicate success
             else:
                 # hide landing net if failed
-                pag.press('space') 
+                pag.press('space')
                 sleep(0.5)
         pag.mouseUp()
         pag.mouseUp(button='right')
@@ -207,10 +207,10 @@ class Tackle():
         return i > 0
 
     #todo: refactor iteration
-    def retrieve_with_pause(self, 
-                            duration: float, 
-                            delay: float, 
-                            base_iteration: int, 
+    def retrieve_with_pause(self,
+                            duration: float,
+                            delay: float,
+                            base_iteration: int,
                             enable_acceleration: bool):
         """Repeat retrieval with pause until timeout.
 
@@ -226,7 +226,7 @@ class Tackle():
         logger.info('Retrieving with pause')
         if enable_acceleration:
             pag.keyDown('shift')
-        
+
         i = self.RETRIEVE_WITH_PAUSE_TIMEOUT
         iteration = 0
         while i > 0:

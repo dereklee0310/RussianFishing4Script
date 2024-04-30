@@ -21,7 +21,7 @@ def hold_left_click(duration: float=1) -> None:
     pag.mouseDown()
     sleep(duration)
     pag.mouseUp()
-    if duration >= 2.1: # + 0.1 due to pag.mouseDown() delay  
+    if duration >= 2.1: # + 0.1 due to pag.mouseDown() delay
         pag.click()
 
 def hold_right_click(duration: float=1) -> None:
@@ -60,17 +60,17 @@ def ask_for_confirmation(msg: str) -> None:
         ans = input(f'{msg}? [Y/n] ').strip().lower()
         if ans == 'y':
             print('The bot has been started')
-            return 
+            return
         elif ans == 'n': # quit only when the input is 'n'
             print('The bot has been terminated')
-            sys.exit() 
+            sys.exit()
 
 if __name__ == '__main__':
     ask_for_confirmation()
 
 # ! archived
 # def start_count_down() -> None:
-#     """If the 'enable_count_down' option is enabled, 
+#     """If the 'enable_count_down' option is enabled,
 #     start a count down before executing the script.
 #     """
 #     print("Hint: Edit 'enable_count_down' option in config.ini to disable the count down")

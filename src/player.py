@@ -36,7 +36,7 @@ class Player():
     unmarked_fish_count = 0
     cast_miss_count = 0
 
-    total_coffee_count = 0 
+    total_coffee_count = 0
     cur_coffee_count = 0
     alcohol_count = 0
     tea_count = 0
@@ -228,7 +228,7 @@ class Player():
                     self.resetting_stage()
                     self.tackle.cast(self.cast_power_level, cast_delay=4)
                     pag.click()
-                
+
                 pag.press('0')
                 sleep(self.check_delay)
                 continue
@@ -245,7 +245,7 @@ class Player():
     def marine_fishing(self) -> None:
         """Main marine fishing loop.
         """
-        while True:    
+        while True:
             self.refilling_stage()
             self.resetting_stage()
             if monitor.is_fish_captured():
@@ -264,7 +264,7 @@ class Player():
     def wakey_rig_fishing(self) -> None:
         """Main wakey rig fishing loop.
         """
-        while True:    
+        while True:
             self.refilling_stage()
             self.resetting_stage()
             self.tackle.cast(self.cast_power_level)
@@ -313,8 +313,8 @@ class Player():
     #            stages and their helper functions in main fishing loops           #
     # ---------------------------------------------------------------------------- #
     def harvesting_stage(self) -> None:
-        """If enable_baits_harvesting is True and the energy level 
-            is greater than the threshold, harvest baits. 
+        """If enable_baits_harvesting is True and the energy level
+            is greater than the threshold, harvest baits.
         """
         if not self.baits_harvesting_enabled:
             return
@@ -323,7 +323,7 @@ class Player():
             self.harvest_count += 1
 
     def harvest_baits(self) -> None:
-        """Use shortcut defined in config.ini to use shovel/spoon, 
+        """Use shortcut defined in config.ini to use shovel/spoon,
             then hide the tool after the harvest success or the timeout is reached.
         """
         logger.info('Harvesting baits')
@@ -345,7 +345,7 @@ class Player():
         sleep(0.5) # wait for hide animation
 
     def refilling_stage(self) -> None:
-        """If enable_food_comfort_refill is enabled, 
+        """If enable_food_comfort_refill is enabled,
             consume tea or carrot to refill comfort and food level.
         """
         if not self.hunger_and_comfort_refill_enabled:
@@ -365,12 +365,12 @@ class Player():
             self.access_item('carrot')
             self.carrot_count += 1
         sleep(0.25)
-    
+
     def drinking_stage(self) -> None:
         """Drink alcohol and update drinking time.
         """
         cur_time = time()
-        if (not self.alcohol_drinking_enabled or 
+        if (not self.alcohol_drinking_enabled or
             cur_time - self.pre_alcohol_drink_time < self.alcohol_drinking_delay):
             return
 
@@ -394,7 +394,7 @@ class Player():
         elif int(key) != -1:
             pag.press(key)
             return
-        
+
         # key = 'u' if item == 'shovel_spoon' else 't'
         with pag.hold('t'):
             sleep(0.25)
@@ -420,7 +420,7 @@ class Player():
 
         if monitor.is_tackle_ready():
             return
-        
+
         if monitor.is_lure_broken():
             msg = 'Lure is broken'
             match self.lure_broken_action:
@@ -441,7 +441,7 @@ class Player():
                     sleep(0.25)
                     return
                 case 'quit':
-                    self.general_quit(msg)           
+                    self.general_quit(msg)
         elif monitor.is_ticket_expired():
             if self.boat_ticket_duration is None:
                 pag.press('esc')
@@ -450,7 +450,7 @@ class Player():
             self.renew_boat_ticket()
             sleep(0.25)
             return
-        
+
         # also deals with scenarios that may occur during resetting
         while not self.tackle.reset():
             if monitor.is_fish_hooked():
@@ -530,7 +530,7 @@ class Player():
         self.cur_coffee_count = 0
 
     def marine_sinking_stage(self) -> None:
-        """Sink the lure until it reaches the bottom layer, 
+        """Sink the lure until it reaches the bottom layer,
             a fish is hooked, or timeout reached.
         """
         logger.info('Sinking Lure')
@@ -543,7 +543,7 @@ class Player():
                 if self.fish_hooked_check_delay == 0:
                     pag.click()
                     return
-                
+
                 # check if the fish got away after biting
                 sleep(self.fish_hooked_check_delay)
                 if monitor.is_fish_hooked():
@@ -581,7 +581,7 @@ class Player():
                                    self.pirk_delay,
                                    self.pirk_timeout,
                                    self.fish_hooked_check_delay):
-            
+
             if monitor.is_ticket_expired():
                 pag.press('esc')
                 sleep(2)
@@ -609,25 +609,26 @@ class Player():
                 break
             elif not monitor.is_retrieve_finished():
                 self.tackle.retrieve(duration=8, delay=4, lift_enabled=self.lift_enabled) # half retrieval
-    
+
     def handle_fish(self) -> None:
         """Keep or release the fish and record the fish count.
         """
 
-        #! a trophy ruffe will break the checking mechanism            
+        #! a trophy ruffe will break the checking mechanism
         if monitor.is_fish_green_marked():
             self.marked_fish_count += 1
         else:
             self.unmarked_fish_count += 1
             if self.unmarked_release_enabled:
-                if self.unmarked_release_whitelist[0] != 'None':           
+                if self.unmarked_release_whitelist[0] != 'None':
                     for fish_name in self.unmarked_release_whitelist:
                         if getattr(monitor, f'is_fish_{fish_name}')():
                             sleep(self.keep_fish_delay)
                             logger.info('Keep whitelisted fish')
+                            self.keep_fish_count += 1
                             pag.press('space')
                             return
-                        
+
                 # no whitelisted fish or fish not in whitelist
                 logger.info('Release unmarked fish')
                 pag.press('backspace')
@@ -642,7 +643,7 @@ class Player():
         if (self.fishing_strategy == 'bottom' or
             self.fishing_strategy == 'marine'):
             self.timer.update_cast_hour()
-        
+
         self.timer.add_cast_hour()
 
         self.keep_fish_count += 1
@@ -659,7 +660,7 @@ class Player():
     # ---------------------------------------------------------------------------- #
 
     def general_quit(self, termination_cause: str) -> None:
-        """Show the running result with cause of termination, 
+        """Show the running result with cause of termination,
             then quit the game through control panel.
 
         :param termination_cause: the cause of the termination
@@ -668,7 +669,7 @@ class Player():
         sleep(2) # pre-delay
         pag.press('esc')
         sleep(4)
-        pag.moveTo(monitor.get_quit_position()) 
+        pag.moveTo(monitor.get_quit_position())
         pag.click()
         sleep(4)
         pag.moveTo(monitor.get_yes_position())
@@ -697,7 +698,7 @@ class Player():
 
         pag.press('space')
         sleep(2)
-  
+
         pag.moveTo(monitor.get_exit_icon_position())
         pag.click()
         sleep(2)
@@ -729,14 +730,14 @@ class Player():
         # table.field_names = ['Record', 'Value']
 
         table.add_rows(
-            [   
+            [
                 ['Cause of termination', termination_cause],
-                ['Start time', self.timer.get_start_datetime()], 
-                ['Finish time', self.timer.get_cur_datetime()], 
-                ['Running time', self.timer.get_duration()], 
+                ['Start time', self.timer.get_start_datetime()],
+                ['Finish time', self.timer.get_cur_datetime()],
+                ['Running time', self.timer.get_duration()],
                 ['Fish caught', self.keep_fish_count]
             ])
-        
+
         if total_fish_count > 0:
             marked_rate = int((self.marked_fish_count) / total_fish_count * 100)
             table.add_row(['Marked ratio', f'{self.marked_fish_count}/{total_fish_count} {marked_rate}%'])
@@ -753,7 +754,7 @@ class Player():
                     ['Tea consumed', self.tea_count],
                     ['Carrot consumed', self.carrot_count]
                 ])
-            
+
         if self.baits_harvesting_enabled:
             table.add_row(['Harvest baits count', self.harvest_count])
         return table
@@ -769,7 +770,7 @@ class Player():
         sender = os.getenv('EMAIL')
         password = os.getenv('PASSWORD')
         smtp_server_name = os.getenv('SMTP_SERVER')
-        
+
         # configure mail info
         msg = MIMEMultipart()
         msg['Subject'] = "RussianFishing4Script: Notice of Program Termination"
@@ -793,7 +794,7 @@ class Player():
         """
         # datetime.now().strftime("%H:%M:%S")
         pag.press('q')
-        with open(fr'../screenshots/{self.timer.get_cur_timestamp()}.png', 'wb') as file: 
+        with open(fr'../screenshots/{self.timer.get_cur_timestamp()}.png', 'wb') as file:
             pag.screenshot().save(file, 'png')
         pag.press('esc')
 
@@ -807,7 +808,7 @@ class Player():
         fig, ax = plt.subplots(nrows=1, ncols=2)
         # fig.canvas.manager.set_window_title('Record')
         ax[0].set_ylabel('Fish')
-        
+
         last_rhour = cast_rhour_list[-1] # hour: 0, 1, 2, 3, 4, "5"
         fish_per_rhour = [0] * (last_rhour + 1) # idx: #(0, 1, 2, 3, 4, 5) = 6
         for hour in cast_rhour_list:
@@ -843,7 +844,7 @@ class Player():
         pag.moveTo(ticket_loc)
         pag.click(clicks=2, interval=0.1) # interval is required, doubleClick() not implemented
         sleep(4) # wait for animation
-        
+
     def replace_broken_lures(self):
         """Replace multiple broken items (lures).
         """
@@ -859,7 +860,7 @@ class Player():
                 self.replace_selected_item()
             pag.press('v')
             return
-        
+
         logger.info('Scroll bar found, changing lures for dropshot rig')
         pag.moveTo(scrollbar_position)
         for _ in range(5):
@@ -886,7 +887,7 @@ class Player():
         if broken_item_position is None:
             logger.warning('Broken lure not found')
             return False
-        
+
         # click item to open selection menu
         logger.info('Broken lure found')
         pag.moveTo(broken_item_position)
@@ -909,7 +910,7 @@ class Player():
                 logger.warning(msg)
                 pag.press('esc')
                 sleep(0.25)
-                pag.press('esc')    
+                pag.press('esc')
                 sleep(0.25)
                 self.general_quit(msg)
 
