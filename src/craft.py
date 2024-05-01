@@ -24,19 +24,58 @@ def parse_args() -> argparse.Namespace:
     :rtype: argparse.Namespace
     """
     parser = argparse.ArgumentParser(
-                        prog='craft.py', 
-                        description='Activate game window and start making things until running out of materials', 
-                        epilog='')
-    parser.add_argument('-d', '--discard', action='store_true',
-                            help='discard all the crafted items')
-    parser.add_argument('-n', '--quantity', type=int, default=-1,
-                            help='the number of item to craft, no limit if not specified')
+        description='Crafting items until running out of materials'
+    )
+    parser.add_argument(
+        '-d', '--discard', action='store_true',
+        help='Discard all the crafted items'
+    )
+    parser.add_argument(
+        '-n', '--quantity', type=int, default=-1,
+        help='Number of item to craft, no limit if not specified'
+    )
     return parser.parse_args()
-    
+
+def start_crafting_loop() -> None:
+    """Main crafting loop."""
+    global limit, discard_enabled
+    global success_count, fail_count
+
+    while True:
+        logger.info('Crafting')
+        pag.click() # click make button
+
+        # recipe not complete
+        if monitor.is_operation_failed():
+            logger.warning('Out of materials')
+            pag.press('space')
+            break
+
+        # crafting, wait for result
+        sleep(4)
+        while True:
+            if monitor.is_operation_success():
+                logger.info('Crafting succeed')
+                success_count += 1
+                break
+            elif monitor.is_operation_failed():
+                logger.info('Crafting failed')
+                fail_count += 1
+                break
+            sleep(0.25)
+
+        # handle result
+        key = 'backspace' if discard_enabled else 'space'
+        pag.press(key)
+        if success_count + fail_count == limit:
+            break
+        sleep(0.25)  # wait for animation
+    return
+
 if __name__ == '__main__':
     args = parse_args()
     limit = args.quantity
-    enable_discard = args.discard
+    discard_enabled = args.discard
     success_count = 0
     fail_count = 0
 
@@ -45,43 +84,15 @@ if __name__ == '__main__':
 
     pag.moveTo(monitor.get_make_position())
     try:
-        while True:
-            logger.info('Crafting')
-            pag.click() # click make button
-
-            # recipe not complete
-            if monitor.is_operation_failed():
-                logger.warning('Out of materials')
-                pag.press('space')
-                break
-
-            # crafting, wait for result
-            sleep(4)
-            while True:
-                if monitor.is_operation_success():
-                    logger.info('Crafting succeed')
-                    success_count += 1
-                    break
-                elif monitor.is_operation_failed():
-                    logger.info('Crafting failed')
-                    fail_count += 1
-                    break
-                sleep(0.25)
-
-            # handle result
-            key = 'backspace' if enable_discard else 'space'
-            pag.press(key)
-            if success_count + fail_count == limit:
-                break
-            sleep(0.25) # wait for animation
+        start_crafting_loop()
     except KeyboardInterrupt:
         pass
+
     table = PrettyTable(header=False, align='l')
     table.title = 'Running Results'
-    table.add_rows(
-        [   
-            ['Item crafted', success_count],
-            ['Number of failures', fail_count],
-            ['Materials used', success_count + fail_count]
-        ])
+    table.add_rows([
+        ['Item crafted', success_count],
+        ['Number of failures', fail_count],
+        ['Materials used', success_count + fail_count]
+    ])
     print(table)

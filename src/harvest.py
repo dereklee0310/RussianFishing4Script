@@ -1,10 +1,10 @@
-from configparser import ConfigParser
-from time import time, sleep
 import logging
+import configparser
+import argparse
+from time import time, sleep
 
 import pyautogui as pag
 from prettytable import PrettyTable
-from argparse import ArgumentParser
 
 import monitor
 from windowcontroller import WindowController
@@ -43,7 +43,7 @@ def consume_food(food: str) -> None:
         sleep(0.25)
 
 if __name__ == '__main__':
-    parser = ArgumentParser(
+    parser = argparse.ArgumentParser(
                         prog='harvest.py',
                         description='Harvest baits automatically, refill food and comfort if needed',
                         epilog='')
@@ -53,7 +53,7 @@ if __name__ == '__main__':
                         help='The time interval between each checks, default to 32 seconds')
     args = parser.parse_args()
 
-    config = ConfigParser()
+    config = configparser.ConfigParser()
     config.read(r'../config.ini')
     threshold = config['game'].getfloat('harvest_baits_threshold')
     shovel_spoon_shortcut = config['shortcut'].get('shovel_spoon')
@@ -99,10 +99,9 @@ if __name__ == '__main__':
         pass
     table = PrettyTable(header=False, align='l')
     table.title = 'Running Results'
-    table.add_rows(
-        [
-            ['Harvest baits count', harvest_count],
-            ['Tea consumed', tea_count],
-            ['Carrot consumed', carrot_count]
-        ])
+    table.add_rows([
+        ['Harvest baits count', harvest_count],
+        ['Tea consumed', tea_count],
+        ['Carrot consumed', carrot_count]
+    ])
     print(table)
