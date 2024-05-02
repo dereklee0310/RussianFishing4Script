@@ -1,11 +1,11 @@
 @echo off
 
 echo This might take a while...
-pip install -q -r requirements.txt
 
-@REM for playsound module
-@REM reference: https://github.com/TaylorSMarks/playsound/issues/145
+@REM for playsound module: https://github.com/TaylorSMarks/playsound/issues/145
 pip install wheel setuptools pip --upgrade
+
+pip install -r requirements.txt
 
 if not exist ".\screenshots\" mkdir screenshots
 if not exist ".\logs\" mkdir logs

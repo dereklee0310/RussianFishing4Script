@@ -17,6 +17,7 @@ from script import ask_for_confirmation
 logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 def parse_args() -> argparse.Namespace:
     """Cofigure argparser and parse the command line arguments.
 
@@ -24,21 +25,24 @@ def parse_args() -> argparse.Namespace:
     :rtype: argparse.Namespace
     """
     parser = argparse.ArgumentParser(
-        description='Crafting items until running out of materials'
-    )
+        description='Crafting items until running out of materials')
     parser.add_argument(
         '-d', '--discard', action='store_true',
-        help='Discard all the crafted items'
-    )
+        help='Discard all the crafted items')
     parser.add_argument(
-        '-n', '--quantity', type=int, default=-1,
-        help='Number of item to craft, no limit if not specified'
-    )
+        '-n', '--craft-limit', type=int, default=-1,
+        help='Number of items to craft, no limit if not specified')
     return parser.parse_args()
 
-def start_crafting_loop() -> None:
-    """Main crafting loop."""
-    global limit, discard_enabled
+
+def start_crafting_loop(craft_limit: bool, discard_enabled: bool) -> None:
+    """Main crafting loop
+
+    :param craft_limit: argument from argparser
+    :type craft_limit: bool
+    :param discard_enabled: argument from argparser
+    :type discard_enabled: bool
+    """
     global success_count, fail_count
 
     while True:
@@ -67,14 +71,14 @@ def start_crafting_loop() -> None:
         # handle result
         key = 'backspace' if discard_enabled else 'space'
         pag.press(key)
-        if success_count + fail_count == limit:
+        if success_count + fail_count == craft_limit:
             break
         sleep(0.25)  # wait for animation
-    return
+
 
 if __name__ == '__main__':
     args = parse_args()
-    limit = args.quantity
+    craft_limit = args.craft_limit
     discard_enabled = args.discard
     success_count = 0
     fail_count = 0
@@ -84,7 +88,7 @@ if __name__ == '__main__':
 
     pag.moveTo(monitor.get_make_position())
     try:
-        start_crafting_loop()
+        start_crafting_loop(args.craft_limit, args.discard)
     except KeyboardInterrupt:
         pass
 

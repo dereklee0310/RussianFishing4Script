@@ -20,6 +20,7 @@ def on_press(key: keyboard.KeyCode) -> None:
     if str(key).lower() == "'s'":
         sys.exit()
 
+
 def on_release(key: keyboard.KeyCode) -> None:
     """Callback for releasing button, including w key toggle control.
 
@@ -37,6 +38,7 @@ def on_release(key: keyboard.KeyCode) -> None:
     pag.keyDown('w')
     w_holding = True
 
+
 def parse_args() -> argparse.Namespace:
     """Cofigure argparser and parse the command line arguments.
 
@@ -52,8 +54,8 @@ def parse_args() -> argparse.Namespace:
     )
     return parser.parse_args()
 
+
 if __name__ == '__main__':
-    # must be parsed first to display help information
     shift_holding_enabled = parse_args().shift
 
     ask_for_confirmation('Are you ready to start moving')
