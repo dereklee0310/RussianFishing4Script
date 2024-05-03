@@ -16,12 +16,12 @@ def get_tackle_stats() -> tuple[float, float]:
     leader_load_capacity = float(input("Leader's load capacity (kg): "))
     leader_wear = float(input("Leader's wear (%): "))
 
-    true_max_drag = max_drag * (100-friction_brake_wear)
-    true_load_capacity = leader_load_capacity * (100-leader_wear)
+    true_max_drag = max_drag * (100 - friction_brake_wear)
+    true_load_capacity = leader_load_capacity * (100 - leader_wear)
     return true_max_drag, true_load_capacity
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tmd, tlc = get_tackle_stats()
     max_friction_brake = int(min(tlc * 30 / tmd, 29))
-    print(f'Maximum friction brake you can use: {max_friction_brake}')
+    print(f"Maximum friction brake you can use: {max_friction_brake}")

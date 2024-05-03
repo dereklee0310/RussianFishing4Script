@@ -1,6 +1,7 @@
 """
 Some helper functions.
 """
+
 import sys
 from pathlib import Path
 
@@ -10,9 +11,10 @@ from time import sleep
 import pyautogui as pag
 
 config = ConfigParser()
-config.read(Path(__file__).resolve().parents[1] / 'config.ini')
+config.read(Path(__file__).resolve().parents[1] / "config.ini")
 
-def hold_left_click(duration: float=1) -> None:
+
+def hold_left_click(duration: float = 1) -> None:
     """Hold left mouse button.
 
     :param duration: hold time, defaults to 1
@@ -21,10 +23,11 @@ def hold_left_click(duration: float=1) -> None:
     pag.mouseDown()
     sleep(duration)
     pag.mouseUp()
-    if duration >= 2.1: # + 0.1 due to pag.mouseDown() delay
+    if duration >= 2.1:  # + 0.1 due to pag.mouseDown() delay
         pag.click()
 
-def hold_right_click(duration: float=1) -> None:
+
+def hold_right_click(duration: float = 1) -> None:
     """Hold right mouse button.
 
     :param duration: hold time, defaults to 1
@@ -34,7 +37,8 @@ def hold_right_click(duration: float=1) -> None:
     sleep(duration)
     pag.mouseUp(button="right")
 
-def sleep_and_decrease(num: int , delay: int) -> int:
+
+def sleep_and_decrease(num: int, delay: int) -> int:
     """Self-decrement with a delay.
 
     :param num: the variable to decrease
@@ -47,25 +51,27 @@ def sleep_and_decrease(num: int , delay: int) -> int:
     sleep(delay)
     return num - delay
 
+
 def ask_for_confirmation(msg: str) -> None:
     """Ask for confirmation of user settings if it's enabled.
 
     :param msg: confirmation message
     :type msg: str
     """
-    if not config['game'].getboolean('enable_confirmation'):
+    if not config["game"].getboolean("enable_confirmation"):
         return
 
     while True:
-        ans = input(f'{msg}? [Y/n] ').strip().lower()
-        if ans == 'y':
-            print('The bot has been started')
+        ans = input(f"{msg}? [Y/n] ").strip().lower()
+        if ans == "y":
+            print("The bot has been started")
             return
-        elif ans == 'n': # quit only when the input is 'n'
-            print('The bot has been terminated')
+        elif ans == "n":  # quit only when the input is 'n'
+            print("The bot has been terminated")
             sys.exit()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     ask_for_confirmation()
 
 # ! archived

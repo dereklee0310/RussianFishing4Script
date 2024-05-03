@@ -1,14 +1,16 @@
 """
 Module for window controller.
 """
+
 from time import sleep
 
 import win32api, win32con, win32gui
 
-class WindowController():
-    """Controller for terminal and game windows management.
-    """
-    def __init__(self, game_window_title='Russian Fishing 4'):
+
+class WindowController:
+    """Controller for terminal and game windows management."""
+
+    def __init__(self, game_window_title="Russian Fishing 4"):
         """Constructor method.
 
         :param title: game title, defaults to 'Russian Fishing 4'
@@ -40,16 +42,19 @@ class WindowController():
         return hwnd
 
     def activate_script_window(self) -> None:
-        """Focus terminal.
-        """
-        win32gui.SetForegroundWindow(self._script_hwnd) # fullscreen mode is not supported
+        """Focus terminal."""
+        win32gui.SetForegroundWindow(
+            self._script_hwnd
+        )  # fullscreen mode is not supported
         sleep(0.25)
 
     def activate_game_window(self) -> None:
-        """Focus game window.
-        """
-        win32gui.SetForegroundWindow(self._game_hwnd) # fullscreen mode is not supported
+        """Focus game window."""
+        win32gui.SetForegroundWindow(
+            self._game_hwnd
+        )  # fullscreen mode is not supported
         sleep(0.25)
+
 
 # if __name__ == '__main__':
 #     from pyautogui import getWindowsWithTitle

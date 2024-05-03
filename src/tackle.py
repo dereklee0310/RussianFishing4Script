@@ -3,6 +3,7 @@ Module for Tackle class
 
 Todo: special retrieval for jig step, twitchiing...
 """
+
 import sys
 from time import sleep
 
@@ -14,9 +15,10 @@ from script import sleep_and_decrease, hold_right_click, hold_left_click
 
 logger = logging.getLogger(__name__)
 
-class Tackle():
-    """Class for all tackle dependent methods.
-    """
+
+class Tackle:
+    """Class for all tackle dependent methods."""
+
     def __init__(self, timer):
         """Constructor method.
 
@@ -36,25 +38,27 @@ class Tackle():
         :return: True if the reset is successful, False otherwise
         :rtype: bool
         """
-        logger.info('Resetting')
+        logger.info("Resetting")
         pag.mouseDown()
         i = self.RESET_TIMEOUT
         while i > 0 and not monitor.is_tackle_ready():
             if monitor.is_fish_hooked() or monitor.is_fish_captured():
-                i = -1 # fail trick
+                i = -1  # fail trick
                 break
-            i = sleep_and_decrease(i, 3) # > ClickLock duration (2.2)
+            i = sleep_and_decrease(i, 3)  # > ClickLock duration (2.2)
         pag.mouseUp()
         pag.click()
 
         if i <= 0:
-            logger.warning('Failed to reset tackle')
+            logger.warning("Failed to reset tackle")
         return i > 0
 
-    def cast(self,
-             power_level: float | None=3,
-             cast_delay: int | None=6,
-             sink_delay: int | None=0) -> None:
+    def cast(
+        self,
+        power_level: float | None = 3,
+        cast_delay: int | None = 6,
+        sink_delay: int | None = 0,
+    ) -> None:
         """Cast the rod.
 
         :param power_level: casting power, 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+, defaults to 3
@@ -65,18 +69,18 @@ class Tackle():
         :type sink_delay: int, optional
         :raises ValueError: raise if the cast power level is invalid
         """
-        logger.info('Casting')
+        logger.info("Casting")
 
         if power_level < 0 or power_level > 5:
-            logger.error('Invalid power level')
+            logger.error("Invalid power level")
             sys.exit()
         elif power_level == 1:
             pag.click()
         elif power_level == 5:
-            with pag.hold('shift'):
+            with pag.hold("shift"):
                 hold_left_click(1)
         else:
-            duration = 1.6 * (power_level - 1) / 4 # -1 for backward compatibility
+            duration = 1.6 * (power_level - 1) / 4  # -1 for backward compatibility
             hold_left_click(duration)
 
         sleep(cast_delay)
@@ -96,7 +100,7 @@ class Tackle():
         :return: True if the retrieval is successful, False otherwise
         :rtype: bool
         """
-        logger.info('Retrieving')
+        logger.info("Retrieving")
 
         # full retrieval to lock the reel, duration must >= 2.2
         pag.mouseDown()
@@ -109,23 +113,25 @@ class Tackle():
                 hold_right_click()
                 sleep(2)
             if monitor.is_line_at_end():
-                logger.warning('Fishing line is at its end')
+                logger.warning("Fishing line is at its end")
                 pag.click()
                 return False
             elif monitor.is_retrieve_finished():
                 break
             elif monitor.is_fish_captured():
                 break
-            i = sleep_and_decrease(i, 2) #todo: revise this
+            i = sleep_and_decrease(i, 2)  # todo: revise this
 
-        sleep(delay) # wait for the line to be fully retrieved
+        sleep(delay)  # wait for the line to be fully retrieved
         pag.click()
 
         if i <= 0:
-            logger.warning('Retrieval timeout reached')
+            logger.warning("Retrieval timeout reached")
         return i > 0
 
-    def pirk(self, duration: float, delay: float, timeout: float, check_again_delay: float) -> bool:
+    def pirk(
+        self, duration: float, delay: float, timeout: float, check_again_delay: float
+    ) -> bool:
         """Perform pirking with a time out.
 
         :param duration: rod lifting time
@@ -139,7 +145,7 @@ class Tackle():
         :return: True if a fish is hooked, False otherwise
         :rtype: bool
         """
-        logger.info('Pirking')
+        logger.info("Pirking")
 
         i = timeout
         while i > 0:
@@ -149,14 +155,14 @@ class Tackle():
 
                 sleep(check_again_delay)
                 if monitor.is_fish_hooked():
-                    logger.info('Fish is hooked')
+                    logger.info("Fish is hooked")
                     break
 
             hold_right_click(duration=duration)
             i = sleep_and_decrease(i, delay)
 
         if i <= 0:
-            logger.warning('Pirking timeout reached')
+            logger.warning("Pirking timeout reached")
         return i > 0
 
     # def wakey_pirking(self, delay: float) -> bool:
@@ -181,37 +187,39 @@ class Tackle():
         :return: True if the pulling is successful, False otherwise
         :rtype: bool
         """
-        logger.info('Pulling')
+        logger.info("Pulling")
 
-        pag.mouseDown() # keep retrieving until fish is captured
-        pag.mouseDown(button='right')
+        pag.mouseDown()  # keep retrieving until fish is captured
+        pag.mouseDown(button="right")
         i = self.PULL_TIMEOUT
         while i > 0 and not monitor.is_fish_captured():
-            i = sleep_and_decrease(i, 3) # > ClickLock duration (2.2)
+            i = sleep_and_decrease(i, 3)  # > ClickLock duration (2.2)
 
         if i <= 0:
-            pag.press('space') # use landing net
+            pag.press("space")  # use landing net
             sleep(6)
             if monitor.is_fish_captured():
-                i = 1 # small trick to indicate success
+                i = 1  # small trick to indicate success
             else:
                 # hide landing net if failed
-                pag.press('space')
+                pag.press("space")
                 sleep(0.5)
         pag.mouseUp()
-        pag.mouseUp(button='right')
+        pag.mouseUp(button="right")
         pag.click()
 
         if i <= 0:
-            logger.warning('Failed to pull the fish up')
+            logger.warning("Failed to pull the fish up")
         return i > 0
 
-    #todo: refactor iteration
-    def retrieve_with_pause(self,
-                            duration: float,
-                            delay: float,
-                            base_iteration: int,
-                            enable_acceleration: bool):
+    # todo: refactor iteration
+    def retrieve_with_pause(
+        self,
+        duration: float,
+        delay: float,
+        base_iteration: int,
+        enable_acceleration: bool,
+    ):
         """Repeat retrieval with pause until timeout.
 
         :param duration: retrieval duration
@@ -223,9 +231,9 @@ class Tackle():
         :param enable_acceleration: determine if the shift key should be pressed
         :type base_iteration: bool
         """
-        logger.info('Retrieving with pause')
+        logger.info("Retrieving with pause")
         if enable_acceleration:
-            pag.keyDown('shift')
+            pag.keyDown("shift")
 
         i = self.RETRIEVE_WITH_PAUSE_TIMEOUT
         iteration = 0
@@ -240,10 +248,9 @@ class Tackle():
             iteration += 1
 
         if enable_acceleration:
-            pag.keyUp('shift')
+            pag.keyUp("shift")
 
     def switch_gear_ratio(self) -> None:
-        """Switch gear ratio of conventional reel.
-        """
-        with pag.hold('ctrl'):
-            pag.press('space')
+        """Switch gear ratio of conventional reel."""
+        with pag.hold("ctrl"):
+            pag.press("space")
