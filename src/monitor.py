@@ -23,7 +23,7 @@ def set_rainbow_line_retrieval():
 #                           icon and text recognition                          #
 # ---------------------------------------------------------------------------- #
 def is_fish_hooked():
-    return locateOnScreen(fr'{parent_dir}get.png', confidence=0.8)
+    return locateOnScreen(fr'{parent_dir}get.png', confidence=0.9)
 
 def is_tackle_broken():
     return locateOnScreen(fr'{parent_dir}broke.png', confidence=0.6)
