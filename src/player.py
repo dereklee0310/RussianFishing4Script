@@ -144,6 +144,8 @@ class Player:
                 self.fish_hooked_check_delay = profile_section.getfloat(
                     "fish_hooked_check_delay"
                 )
+            case "float":
+                pass
             case "wakey_rig":
                 pass
             case _:
@@ -162,6 +164,8 @@ class Player:
                     self.bottom_fishing()
                 case "marine":
                     self.marine_fishing()
+                case "float":
+                    self.float_fishing()
                 case "wakey_rig":
                     self.wakey_rig_fishing()
                 # already checked in self._build_profile_config()
@@ -272,6 +276,32 @@ class Player:
             if monitor.is_fish_hooked():
                 self.drinking_stage()
                 self.pulling_stage()
+
+    def float_fishing(self) -> None:
+        """Main float fishing loop."""
+        from windowcontroller import WindowController
+        float_region = monitor.get_float_camera_region()
+
+        while True:
+            self.refilling_stage()
+            self.resetting_stage()
+            self.tackle.cast(self.cast_power_level)
+            logger.info('Start checking')
+            float_reference = pag.screenshot(region=float_region)
+            pre_time = time()
+            while True:
+                # if time() - pre_time > 10:
+                if time() - pre_time > 30:
+                    break
+
+                float_current = pag.screenshot(region=float_region)
+
+                if not pag.locate(float_current, float_reference, confidence=0.75):
+                    logger.info('Float status changed')
+                    sleep(2)
+                    self.pulling_stage(telescopic=True)
+                    break
+                sleep(1)
 
     def wakey_rig_fishing(self) -> None:
         """Main wakey rig fishing loop."""
@@ -610,15 +640,17 @@ class Player:
             self.cast_miss_count += 1
             # todo: improve dedicated miss count for marine fishing
 
-    def pulling_stage(self) -> None:
+    def pulling_stage(self, telescopic=False) -> None:
         """Pull the fish up, then handle it."""
+        puller = self.tackle.pull if not telescopic else self.tackle.telescopic_pull
+
         while True:
-            if self.tackle.pull():
+            if puller():
                 self.handle_fish()
                 break
             elif not monitor.is_fish_hooked():
                 break
-            elif not monitor.is_retrieve_finished():
+            elif not telescopic and not monitor.is_retrieve_finished():
                 self.tackle.retrieve(
                     duration=8, delay=4, lift_enabled=self.lift_enabled
                 )  # half retrieval
@@ -632,19 +664,10 @@ class Player:
         else:
             self.unmarked_fish_count += 1
             if self.unmarked_release_enabled:
-                if self.unmarked_release_whitelist[0] != "None":
-                    for fish_name in self.unmarked_release_whitelist:
-                        if getattr(monitor, f"is_fish_{fish_name}")():
-                            sleep(self.keep_fish_delay)
-                            logger.info("Keep whitelisted fish")
-                            self.keep_fish_count += 1
-                            pag.press("space")
-                            return
-
-                # no whitelisted fish or fish not in whitelist
-                logger.info("Release unmarked fish")
-                pag.press("backspace")
-                return
+                if not self._is_fish_in_whitelist():
+                    logger.info("Release unmarked fish")
+                    pag.press("backspace")
+                    return
 
         # fish is marked or enable_unmarked_release is set to False
         sleep(self.keep_fish_delay)
@@ -652,9 +675,8 @@ class Player:
         pag.press("space")
 
         # avoid wrong cast hour
-        if self.fishing_strategy == "bottom" or self.fishing_strategy == "marine":
+        if self.fishing_strategy in ["bottom", "marine"]:
             self.timer.update_cast_hour()
-
         self.timer.add_cast_hour()
 
         self.keep_fish_count += 1
@@ -665,6 +687,15 @@ class Player:
                 playsound(str(Path(self.alarm_sound_file_path).resolve()))
             elif self.keepnet_full_action == "quit":
                 self.general_quit(msg)
+
+    def _is_fish_in_whitelist(self):
+        if self.unmarked_release_whitelist[0] == "None":
+            return False
+
+        for fish_name in self.unmarked_release_whitelist:
+            if getattr(monitor, f"is_fish_{fish_name}")():
+                return True
+        return False
 
     # ---------------------------------------------------------------------------- #
     #                                     misc                                     #
@@ -679,6 +710,7 @@ class Player:
         """
         sleep(2)  # pre-delay
         pag.press("esc")
+        pag.click() # prevent possible stuck
         sleep(4)
         pag.moveTo(monitor.get_quit_position())
         pag.click()

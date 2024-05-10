@@ -195,7 +195,7 @@ class Tackle:
         while i > 0 and not monitor.is_fish_captured():
             i = sleep_and_decrease(i, 3)  # > ClickLock duration (2.2)
 
-        if i <= 0:
+        if i <= 0 and not monitor.is_fish_captured():
             pag.press("space")  # use landing net
             sleep(6)
             if monitor.is_fish_captured():
@@ -207,6 +207,43 @@ class Tackle:
         pag.mouseUp()
         pag.mouseUp(button="right")
         pag.click()
+
+        if i <= 0:
+            logger.warning("Failed to pull the fish up")
+        return i > 0
+
+    def telescopic_pull(self) -> bool:
+        """Pull the fish with a timeout, designed for float tackle.
+
+        :return: True if the pulling is successful, False otherwise
+        :rtype: bool
+        """
+        logger.info("Pulling")
+
+        pag.mouseDown()  # keep retrieving until fish is captured
+        # i = self.PULL_TIMEOUT
+        i = 9  # todo
+        i = sleep_and_decrease(i, 3)  # > ClickLock duration (2.2)
+
+        if not monitor.is_fish_hooked():
+            pag.click()
+            return
+
+        while i > 0 and not monitor.is_fish_captured():
+            i = sleep_and_decrease(i, 3)
+
+        if i <= 0 and not monitor.is_fish_captured():
+            logger.info('Using landing net')
+            pag.press("space")  # use landing net
+            sleep(6)
+            if monitor.is_fish_captured():
+                i = 1  # small trick to indicate success
+            else:
+                # hide landing net if failed
+                pag.press("space")
+                sleep(0.5)
+        pag.click()
+        # pag.mouseUp()
 
         if i <= 0:
             logger.warning("Failed to pull the fish up")

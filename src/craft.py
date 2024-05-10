@@ -6,7 +6,9 @@ Usage: craft.py
 
 import argparse
 import logging
+import random
 from time import sleep
+from datetime import datetime
 
 from prettytable import PrettyTable
 import pyautogui as pag
@@ -17,6 +19,7 @@ from script import ask_for_confirmation
 
 logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
+random.seed(datetime.now().timestamp())
 
 
 def parse_args() -> argparse.Namespace:
@@ -61,8 +64,9 @@ def start_crafting_loop(craft_limit: bool, discard_enabled: bool) -> None:
             pag.press("space")
             break
 
-        # crafting, wait for result
-        sleep(4)
+        # crafiting, wait at least 4 seconds
+        delay = random.uniform(4, 6)
+        sleep(delay)
         while True:
             if monitor.is_operation_success():
                 logger.info("Crafting succeed")

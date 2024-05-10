@@ -41,6 +41,9 @@ class WindowController:
             exit()
         return hwnd
 
+    def get_game_rect(self) -> tuple[int, int, int, int]:
+        return win32gui.GetWindowRect(self._game_hwnd)
+
     def activate_script_window(self) -> None:
         """Focus terminal."""
         win32gui.SetForegroundWindow(

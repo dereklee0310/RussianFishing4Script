@@ -5,15 +5,19 @@ Todo:
     Validate language option
     Implement snag detection
 """
-
+import logging
+import sys
 from configparser import ConfigParser
 
 from pyautogui import locateOnScreen, locateCenterOnScreen, pixel, locateAllOnScreen
+from windowcontroller import WindowController
 
+logger = logging.getLogger(__name__)
 config = ConfigParser()
 config.read("../config.ini")
 parent_dir = rf"../static/{config['game']['language']}/"
 spool_icon_confidence = config["game"].getfloat("spool_icon_confidence", fallback=0.985)
+window_size = config["game"].get('Window_size')
 
 
 # todo: revise this shit
@@ -228,3 +232,20 @@ def is_comfort_low() -> bool:
     x, y = int(pos.x), int(pos.y)
     last_point = int(18 + 152 * 0.51) - 1
     return not pixel(x + 18, y) == pixel(x + last_point, y)
+
+def get_float_camera_region() -> tuple[int, int, int, int]:
+    x, y = WindowController().get_game_rect()[:2]
+    match window_size:
+        case "2560x1440":
+            x += 1198
+            y += 1192
+        case "1920x1080":
+            x += 878
+            y += 832
+        case "1600x900":
+            x += 718
+            y += 652
+        case _:
+            logger.error('Invalid window size')
+            sys.exit()
+    return (x, y, 164, 164)
