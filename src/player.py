@@ -145,7 +145,10 @@ class Player:
                     "fish_hooked_check_delay"
                 )
             case "float":
-                pass
+                self.float_confidence = profile_section.getfloat("float_confidence")
+                self.check_delay = profile_section.getfloat("check_delay")
+                self.pull_delay = profile_section.getfloat("pull_delay")
+                self.drifting_timeout = profile_section.getfloat("drifting_timeout")
             case "wakey_rig":
                 pass
             case _:
@@ -279,29 +282,32 @@ class Player:
 
     def float_fishing(self) -> None:
         """Main float fishing loop."""
-        from windowcontroller import WindowController
         float_region = monitor.get_float_camera_region()
 
         while True:
             self.refilling_stage()
-            self.resetting_stage()
+            self.resetting_stage(telescopic=True)
             self.tackle.cast(self.cast_power_level)
-            logger.info('Start checking')
             float_reference = pag.screenshot(region=float_region)
+            logger.info("Start checking")
             pre_time = time()
             while True:
-                # if time() - pre_time > 10:
-                if time() - pre_time > 30:
+                if time() - pre_time > self.drifting_timeout:
                     break
 
                 float_current = pag.screenshot(region=float_region)
-
-                if not pag.locate(float_current, float_reference, confidence=0.75):
-                    logger.info('Float status changed')
-                    sleep(2)
+                if not pag.locate(
+                    float_current,
+                    float_reference,
+                    confidence=self.float_confidence,
+                    grayscale=True,
+                ):
+                    logger.info("Float status changed")
+                    sleep(self.pull_delay)
                     self.pulling_stage(telescopic=True)
                     break
-                sleep(1)
+
+                sleep(self.check_delay)
 
     def wakey_rig_fishing(self) -> None:
         """Main wakey rig fishing loop."""
@@ -454,7 +460,7 @@ class Player:
             pag.moveTo(getattr(monitor, f"get_{food}_icon_position")())
             pag.click()
 
-    def resetting_stage(self) -> None:
+    def resetting_stage(self, telescopic=False) -> None:
         """Reset the tackle until the it's ready or an exceptional event occurs."""
         sleep(0.25)  # wait for rendering
 
@@ -494,7 +500,10 @@ class Player:
         # also deals with scenarios that may occur during resetting
         while not self.tackle.reset():
             if monitor.is_fish_hooked():
-                if self.tackle.pull():  # a single pull should do the job
+                puller = (
+                    self.tackle.pull if not telescopic else self.tackle.telescopic_pull
+                )
+                if self.puller():  # a single pull should do the job
                     self.handle_fish()
                 break  # whether success or not, back to main fishing loop
             elif monitor.is_fish_captured():
@@ -710,7 +719,7 @@ class Player:
         """
         sleep(2)  # pre-delay
         pag.press("esc")
-        pag.click() # prevent possible stuck
+        pag.click()  # prevent possible stuck
         sleep(4)
         pag.moveTo(monitor.get_quit_position())
         pag.click()

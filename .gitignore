@@ -8,3 +8,4 @@ config.ini
 todo_backup.txt
 tests/
 .env
+.vscode

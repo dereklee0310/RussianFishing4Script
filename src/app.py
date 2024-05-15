@@ -344,6 +344,15 @@ class App:
                         "Fish hooked check delay",
                     ]
                 )
+            case "float":
+                config_names.extend(
+                    [
+                        "float confidence",
+                        "check delay",
+                        "pull delay",
+                        "drifting timeout",
+                    ]
+                )
             case "wakey_rig":
                 pass
         return config_names
@@ -373,8 +382,8 @@ class App:
         # from monitor import *
         # from pyautogui import *
         # from time import sleep
-        WindowController().activate_game_window()
-        self.player.replace_broken_lures()
+        # WindowController().activate_game_window()
+        self.player.float_fishing()
 
     def verify_file_integrity(self) -> None:
         """Compare files in static/en and static/{language}
@@ -425,7 +434,6 @@ if __name__ == "__main__":
 
     if app.args.DEBUG:
         app.run_experimental_func()
-        exit()
 
     ask_for_confirmation("Do you want to continue with the settings above")
     WindowController().activate_game_window()

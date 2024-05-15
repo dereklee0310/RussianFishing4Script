@@ -15,6 +15,8 @@ from script import sleep_and_decrease, hold_right_click, hold_left_click
 
 logger = logging.getLogger(__name__)
 
+landing_net_out = False
+
 
 class Tackle:
     """Class for all tackle dependent methods."""
@@ -220,30 +222,40 @@ class Tackle:
         """
         logger.info("Pulling")
 
+        global landing_net_out
+        if not landing_net_out:
+            logger.info("Using landing net")
+            pag.press("space")  # use landing net
+            landing_net_out = True
+
         pag.mouseDown()  # keep retrieving until fish is captured
-        # i = self.PULL_TIMEOUT
-        i = 9  # todo
+        i = 12  # todo
         i = sleep_and_decrease(i, 3)  # > ClickLock duration (2.2)
 
         if not monitor.is_fish_hooked():
+            landing_net_out = False
             pag.click()
             return
 
         while i > 0 and not monitor.is_fish_captured():
             i = sleep_and_decrease(i, 3)
 
-        if i <= 0 and not monitor.is_fish_captured():
-            logger.info('Using landing net')
-            pag.press("space")  # use landing net
-            sleep(6)
-            if monitor.is_fish_captured():
-                i = 1  # small trick to indicate success
-            else:
-                # hide landing net if failed
-                pag.press("space")
-                sleep(0.5)
-        pag.click()
-        # pag.mouseUp()
+        if monitor.is_fish_captured():
+            landing_net_out = False
+            i = 1  # small trick to indicate success
+        else:
+            # # hide landing net if failed
+            # pag.press("space")
+            # sleep(0.5)
+            pag.click()
+            sleep(4)
+
+        if i > 0:
+            landing_net_out = False
+            pag.click()
+        else:
+            pag.click()
+            sleep(4)
 
         if i <= 0:
             logger.warning("Failed to pull the fish up")

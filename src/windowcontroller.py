@@ -5,6 +5,7 @@ Module for window controller.
 from time import sleep
 
 import win32api, win32con, win32gui
+import pyautogui as pag
 
 
 class WindowController:
@@ -46,6 +47,7 @@ class WindowController:
 
     def activate_script_window(self) -> None:
         """Focus terminal."""
+        pag.press("alt")
         win32gui.SetForegroundWindow(
             self._script_hwnd
         )  # fullscreen mode is not supported
@@ -53,6 +55,7 @@ class WindowController:
 
     def activate_game_window(self) -> None:
         """Focus game window."""
+        pag.press("alt")
         win32gui.SetForegroundWindow(
             self._game_hwnd
         )  # fullscreen mode is not supported
@@ -70,3 +73,6 @@ class WindowController:
 #     print(getWindowsWithTitle('123'))
 #     getWindowsWithTitle('123')[0].activate()
 #     window.activate()
+
+# SetForegroundWindow bug reference :
+# https://stackoverflow.com/questions/56857560/win32gui-setforegroundwindowhandle-not-working-in-loop
