@@ -243,15 +243,6 @@ class Tackle:
         if monitor.is_fish_captured():
             landing_net_out = False
             i = 1  # small trick to indicate success
-        else:
-            # # hide landing net if failed
-            # pag.press("space")
-            # sleep(0.5)
-            pag.click()
-            sleep(4)
-
-        if i > 0:
-            landing_net_out = False
             pag.click()
         else:
             pag.click()

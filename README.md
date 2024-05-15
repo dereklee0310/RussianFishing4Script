@@ -1,20 +1,26 @@
-## About the Project
-A simple fishing bot for Russian Fishing 4, supporting spin, bottom and marine fishing.  
-- [Discord][discord]
-- [中文版教程][chinese_guide]
+<div align="center">
 
-## 4/19 Patchnotes
+<h1 align="center">RF4S</h1>
+
+<a target="_blank" href="https://opensource.org/license/gpl-3-0" style="background:none">
+    <img src="https://img.shields.io/badge/License-GPL--3.0--only-blue.svg" style="height: 22px;" />
+</a>
+<!-- <a target="_blank" href="link_to_docs, tbd" style="background:none">
+    <img src="https://img.shields.io/badge/docs-%23BE1B55" style="height: 22px;" />
+</a> -->
+<a target="_blank" href="link_to_docs, tbd" style="background:none">
+    <img src="https://img.shields.io/badge/Gmail-D14d36?style=for-the-badge&logo=gmail&logoColor=white" style="height: 22px;" />
+</a>
+<a target="_blank" href="https://discord.gg/BZQWQnAMbY" style="background:none">
+    <img src="https://img.shields.io/badge/discord-join-rf44.svg?labelColor=191937&color=6F6FF7&logo=discord" style="height: 22px;" />
+</a>
+</div>
+
+## About the Project
+A simple bot for Russian Fishing 4, supporting spin, bottom, marine, and float fishing.  
+
+## tbd
 **Please refer to `template.ini` to check newly added settings**
-- Ended support for other languages, see [Integrity Guide][integrity_guide]
-- Added file integrity check for images
-- Improved image quality of zh-CN versions
-- Added setting for default startup options
-- Added whitelist setting for release of unmarked fish
-- Added automatic broken lure replacement feature
-- Added "replace" option for `lure_broken_action` setting in `config.ini`
-- Fixed a bug that was causing the tackle to be identified as "not ready"
-- Fixed a bug where the game wouldn't quit when the line was at the end
-- Fixed a syntax error in `player.plot_and_save()`
 
 ## Built With
 - Python 3.11 
@@ -34,44 +40,29 @@ A simple fishing bot for Russian Fishing 4, supporting spin, bottom and marine f
 
 
 ### Install
-- Option1: [Download][download]
-the repository and unzip it
-- Option2: Use `git clone <url>`, Git must be installed
+[Download][download] the repository and unzip it, or:
 ```
 git clone https://github.com/dereklee0310/RussianFishing4Script
 ```
 
 ### Dependencies
 ```
+cd "the path of the project"
 .\setup.bat
 ```
 
-### Configuration
-- To edit user profiles, refer to the guides and examples in `template.ini` and edit `config.ini`  
-- To enable email notification, set your Gmail address and Google app password in `.env`  
-- Edit `SMTP_SERVER` in `.env` if you want to use SMTP server other than GMAIL SMTP server
-
 ## Usage
 - Move your character to the fishing spot before executing the script
-- Spin Fishing/Marine Fishing: Pick up the rod you want to use
-- Bottom Fishing: Add the tackles you want to use to the quick selection slots and place  
-them nearby to let the script access them via quick selection shortcuts (1 ~ 3)
+- Spin Fishing/Marine Fishing/Float fishing: Pick up the rod you want to use
+- Bottom Fishing: Add the tackles you want to use to the quick selection slots, 
+  cast them, and place them nearby to let the bot access them via shortcuts (1 ~ 3)
 
 ### 1. Change the current working directory
 ```
 cd src
 ```
 
-### 2. Validate spool Icon (optional)
-- If you are using this script for the first time,
-  run this to check if the spool icon can be recognized (The reel must be fully loaded)
-- The script use the meter of rainbow line for recognition instead if `-R` option is used.
-![Spool icon][spool_icon]
-```
-python validate.py
-```
-
-### 3. Execute the main script
+### 2. Execute the main script
 Here are some examples of how to execute the script with different arguments:
 - Display help information
 ```
@@ -123,11 +114,16 @@ python calculate.py
 python harvest.py [-s] [-n CHECK_DELAY_SECOND]
 ```
 
+## Configuration
+- Please refer to the guides and examples in `template.ini` and edit your settings in `config.ini`  
+- To enable email notification, set your Gmail address and Google app password in `.env`  
+- Edit `SMTP_SERVER` in `.env` if you want to use SMTP server other than Gmail SMTP server
+
 ## Troubleshooting
 - How to exit the program?
-  - Use `Ctrl + C` to send a KeyboardInterrupt signal
+  - Type `Ctrl + C` in your terminal
 - Failed to exit the program?
-  - The Shift key might have been pressed down, press again to release it, then type `Ctrl + C` as usual
+  - The Shift key might have been pressed down, press again to release it and type `Ctrl + C` as usual
 - Rod not getting lifted after the retrieval is finished?
   - Change the game resolution until the `validation.py` is pass
   - Lower the value of `spool_icon_confidence` in `config.ini`
@@ -140,10 +136,8 @@ python harvest.py [-s] [-n CHECK_DELAY_SECOND]
 Any contribution, bug report, or idea about new features is welcome.
 
 ## Contact me
-Email: dereklee0310@gmail.com 
+dereklee0310@gmail.com 
 
-[discord]: https://discord.gg/BZQWQnAMbY
-[chinese_guide]: 中文版教程.md
 [integrity_guide]: integrity_guide.md
 [clicklock]: /static/readme/clicklock.png
 [favorite_food]: /static/readme/favorites.png

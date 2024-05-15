@@ -503,7 +503,7 @@ class Player:
                 puller = (
                     self.tackle.pull if not telescopic else self.tackle.telescopic_pull
                 )
-                if self.puller():  # a single pull should do the job
+                if puller():  # a single pull should do the job
                     self.handle_fish()
                 break  # whether success or not, back to main fishing loop
             elif monitor.is_fish_captured():

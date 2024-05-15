@@ -251,4 +251,3 @@ def get_float_camera_region() -> tuple[int, int, int, int]:
             logger.error("Invalid window size")
             sys.exit()
     return (x, y, 164, 164)
-    
