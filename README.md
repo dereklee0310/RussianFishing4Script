@@ -1,42 +1,38 @@
 <div align="center">
 
+![RF4S](static/readme/RF4S.png)
 <h1 align="center">RF4S</h1>
 
+**A simple bot for Russian Fishing 4, supporting spin, bottom, marine, and float fishing.**
+
 <a target="_blank" href="https://opensource.org/license/gpl-3-0" style="background:none">
-    <img src="https://img.shields.io/badge/License-GPL--3.0--only-blue.svg" style="height: 22px;" />
-</a>
-<!-- <a target="_blank" href="link_to_docs, tbd" style="background:none">
-    <img src="https://img.shields.io/badge/docs-%23BE1B55" style="height: 22px;" />
-</a> -->
-<a target="_blank" href="link_to_docs, tbd" style="background:none">
-    <img src="https://img.shields.io/badge/Gmail-D14d36?style=for-the-badge&logo=gmail&logoColor=white" style="height: 22px;" />
+    <img src="https://img.shields.io/badge/License-GPLv3-blue.svg" style="height: 22px;" />
 </a>
 <a target="_blank" href="https://discord.gg/BZQWQnAMbY" style="background:none">
     <img src="https://img.shields.io/badge/discord-join-rf44.svg?labelColor=191937&color=6F6FF7&logo=discord" style="height: 22px;" />
 </a>
+<a target="_blank" href="http://makeapullrequest.com" style="background:none">
+    <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat" style="height: 22px;" />
+</a>
+<!-- <a target="_blank" href="link_to_docs, tbd" style="background:none">
+    <img src="https://img.shields.io/badge/docs-%23BE1B55" style="height: 22px;" />
+</a> -->  
+
+![python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
 </div>
 
-## About the Project
-A simple bot for Russian Fishing 4, supporting spin, bottom, marine, and float fishing.  
-
-## tbd
-**Please refer to `template.ini` to check newly added settings**
+## [Release Notes](release_notes.md)
+> [!TIP]
+> Join us on our [Discord server](https://discord.gg/BZQWQnAMbY) to get the latest news about the project.
 
 ## Built With
-- Python 3.11 
+- Python 3.11
 - PyAutoGUI
 
 ## Getting Started  
 ### Prerequisites
-- Set the language in `config.ini` and [add missing images][integrity_guide] if you want to use Russian or Chinese other than English version (default)
-- Set your in-game interface scale as "1x"
-- Enable Mouse ClickLock in Windows mouse settings and set the time before locking to "Long"  
-![ClickLock][clicklock]
-- To refill your stats without using shortcuts (e.g., 1 ~ 7), add tea, carrot, and coffee to your  
-  favorites so that they can be selected through quick food selection menu
-- To enable automatic broken lure replacement, the lures for replacement must be added to favorites
-![Favorite food][favorite_food]
-![Favorite lure][favorite_lure]
+- [Python3.10+](https://www.python.org/downloads/)
 
 
 ### Install
@@ -50,28 +46,46 @@ git clone https://github.com/dereklee0310/RussianFishing4Script
 cd "the path of the project"
 .\setup.bat
 ```
+> [!TIP]
+> If you already have Python installed on your computer, create a virtual environment to prevent version conflicts.
 
 ## Usage
+### Prerequisites
+- Enable **[Mouse ClickLock][clicklock]** in Windows mouse settings and set the time before locking to "Long"
+- Change game language to "English"
+- Set interface scale to "1x"
+- Set display mode to "borderless windowed" or "window mode"
+- Add tea, carrot, and coffee to your **[favorites][favorite_food]** so that they can be selected through quick food selection menu
+- To enable broken lure replacement, the lures for replacement must also be added to **[favorites][favorite_lure]**
+### Before you start...
 - Move your character to the fishing spot before executing the script
 - Spin Fishing/Marine Fishing/Float fishing: Pick up the rod you want to use
 - Bottom Fishing: Add the tackles you want to use to the quick selection slots, 
   cast them, and place them nearby to let the bot access them via shortcuts (1 ~ 3)
+> [!NOTE]
+> Currently, We only support single telescopic rod for float fishing.
+
+> [!IMPORTANT]
+> You should change the value of `window_size` in `config.ini` to your game window size for float fishing.  
 
 ### 1. Change the current working directory
 ```
+cd "the path of the project"
 cd src
 ```
 
 ### 2. Execute the main script
 Here are some examples of how to execute the script with different arguments:
-- Display help information
-```
-python app.py -h
-```
-
 - Run with default settings
 ```
 python app.py
+```
+> [!WARNING]
+> If the script doesn't focus on the game window automatically, 
+> you might need to run your terminal as administrator.
+- Display help information
+```
+python app.py -h
 ```
 - Display a list of available user profiles and set the number of fishes in the keepnet to 32 (68 fishes to catch)
 ```
@@ -94,12 +108,14 @@ python move.py [-s]
 ```
 
 ### Item crafting
-- The materials must be selected before the execution
 - Specify the number of items to craft with `-n QUANTITY` 
 - Use `-d` to discard all the crafted items
 ```
 python craft.py [-d] [-n QUANTITY]
 ```
+> [!IMPORTANT]
+> The materials must be selected before the execution.
+
 
 ### Calculate the maximum friction brake you can use on your tackle
 ```
@@ -116,18 +132,21 @@ python harvest.py [-s] [-n CHECK_DELAY_SECOND]
 
 ## Configuration
 - Please refer to the guides and examples in `template.ini` and edit your settings in `config.ini`  
+- Set the language in `config.ini` and **[add missing images][integrity_guide]** if the integrity check failed.
 - To enable email notification, set your Gmail address and Google app password in `.env`  
 - Edit `SMTP_SERVER` in `.env` if you want to use SMTP server other than Gmail SMTP server
 
 ## Troubleshooting
-- How to exit the program?
-  - Type `Ctrl + C` in your terminal
-- Failed to exit the program?
-  - The Shift key might have been pressed down, press again to release it and type `Ctrl + C` as usual
-- Rod not getting lifted after the retrieval is finished?
-  - Change the game resolution until the `validation.py` is pass
-  - Lower the value of `spool_icon_confidence` in `config.ini`
-  - Keep away from light sources or turn off the boat light
+**How to exit the program?**
+- A: Type `Ctrl + C` in your terminal.
+   
+**Cannot quit the program?**
+- The Shift key might have been pressed down, press again to release it and type `Ctrl + C` as usual.  
+
+**Rod not getting lifted after the retrieval is finished?**
+- Change the game resolution until the `validation.py` is pass
+- Lower the value of `spool_icon_confidence` in `config.ini`
+- Keep away from light sources or turn off the boat light
 
 ## License
 [GNU General Public License version 3][license]
