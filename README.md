@@ -83,6 +83,7 @@ python app.py
 > [!WARNING]
 > If the script doesn't focus on the game window automatically, 
 > you might need to run your terminal as administrator.
+
 - Display help information
 ```
 python app.py -h
@@ -116,7 +117,6 @@ python craft.py [-d] [-n QUANTITY]
 > [!IMPORTANT]
 > The materials must be selected before the execution.
 
-
 ### Calculate the maximum friction brake you can use on your tackle
 ```
 python calculate.py
@@ -132,13 +132,13 @@ python harvest.py [-s] [-n CHECK_DELAY_SECOND]
 
 ## Configuration
 - Please refer to the guides and examples in `template.ini` and edit your settings in `config.ini`  
-- Set the language in `config.ini` and **[add missing images][integrity_guide]** if the integrity check failed.
+- Set the `language` setting in `config.ini` and **[add missing images][integrity_guide]** if the integrity check failed.
 - To enable email notification, set your Gmail address and Google app password in `.env`  
 - Edit `SMTP_SERVER` in `.env` if you want to use SMTP server other than Gmail SMTP server
 
 ## Troubleshooting
 **How to exit the program?**
-- A: Type `Ctrl + C` in your terminal.
+- Type `Ctrl + C` in your terminal.
    
 **Cannot quit the program?**
 - The Shift key might have been pressed down, press again to release it and type `Ctrl + C` as usual.  
