@@ -4,7 +4,6 @@ Main CLI.
 Usage: app.py
 """
 
-import threading
 import os
 import smtplib
 import logging
@@ -30,8 +29,10 @@ logger = logging.getLogger(__name__)
 
 
 class App:
+    """Main application class."""
+
     def __init__(self):
-        """Initalize config parser and a list of user profiles."""
+        """Initalize parsers and a list of user profiles."""
         self.config_path = Path(__file__).resolve().parents[1] / "config.ini"
         self.config = ConfigParser()
         self.config.read(self.config_path)
@@ -41,6 +42,10 @@ class App:
         for section in self.config.sections():
             if self.config.has_option(section, "fishing_strategy"):
                 self.profile_names.append(section)
+
+        self.args = self.get_args()
+        self.pid = None
+        self.player = None
 
     def get_args(self) -> None:
         """Configure argparser and parse the args."""
@@ -176,7 +181,7 @@ class App:
         )
 
         argv = self.config["game"].get("default_arguments", fallback="")
-        self.args = parser.parse_args(shlex.split(argv) + sys.argv[1:])
+        return parser.parse_args(shlex.split(argv) + sys.argv[1:])
 
     def validate_args(self) -> None:
         """Validate args that comes with an argument."""
@@ -218,7 +223,7 @@ class App:
                 )
             )
             sys.exit()
-        except (TimeoutError, gaierror) as SMTPServerError:
+        except (TimeoutError, gaierror):
             logger.error("Invalid SMTP Server or connection timed out")
             sys.exit()
 
@@ -231,7 +236,7 @@ class App:
         :rtype: bool
         """
         keepnet_limit = self.config["game"].getint("keepnet_limit")
-        return fish_count >= 0 and fish_count < keepnet_limit
+        return 0 <= fish_count < keepnet_limit
 
     def is_pid_valid(self, pid: str) -> bool:
         """Validate the profile id.
@@ -244,7 +249,7 @@ class App:
         if not pid.isdigit():
             return False
         pid = int(pid)
-        return pid >= 0 and pid < len(self.profile_names)
+        return 0 <= pid < len(self.profile_names)
 
     def show_available_profiles(self) -> None:
         """List available user profiles."""
@@ -272,14 +277,13 @@ class App:
             print("Save it before restarting the script to apply changes")
             sys.exit()
 
-        self.profile_name = self.profile_names[self.pid]
-        self.player = Player(self.args, self.config, self.profile_name)
+        self.player = Player(self.args, self.config, self.profile_names[self.pid])
 
     def show_user_settings(self) -> None:
         """Display user settings."""
         table = PrettyTable(header=False, align="l")
         table.title = "User Settings"
-        table.add_row(["Profile name", self.profile_name])
+        table.add_row(["Profile name", self.profile_names[self.pid]])
 
         arg_names = self._get_args_names()
         self._build_table(arg_names, table)
@@ -398,14 +402,14 @@ class App:
         try:
             current_filenames = os.listdir(parent_dir)
         except FileNotFoundError:
-            logger.error(f"Directory {parent_dir} not found")
+            logger.error("Directory %s not found", parent_dir)
             print("Please check your language setting in ../config.ini")
             sys.exit()
 
         missing_filenames = set(complete_filenames) - set(current_filenames)
         if len(missing_filenames) != 0:
-            logger.error(f"Integrity check failed")
-            guide_link = "https://github.com/dereklee0310/RussianFishing4Script/blob/main/integrity_guide.md"
+            logger.error("Integrity check failed")
+            guide_link = "https://shorturl.at/2AzUI"
             print(f"Please refer to {guide_link}")
             table = PrettyTable(header=False, align="l")
             table.title = "Missing images"
@@ -419,10 +423,9 @@ class App:
 
 if __name__ == "__main__":
     app = App()
-    app.get_args()
+    app.validate_args()
     app.verify_file_integrity()
 
-    app.validate_args()
     if app.args.email:
         app.validate_email()
 

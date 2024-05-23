@@ -65,14 +65,15 @@ def ask_for_confirmation(msg: str) -> None:
         ans = input(f"{msg}? [Y/n] ").strip().lower()
         if ans == "y":
             print("The bot has been started")
-            return
-        elif ans == "n":  # quit only when the input is 'n'
+            break
+        if ans == "n":  # quit only when the input is 'n'
             print("The bot has been terminated")
             sys.exit()
 
 
 if __name__ == "__main__":
-    ask_for_confirmation()
+    pass
+    # ask_for_confirmation()
 
 # ! archived
 # def start_count_down() -> None:

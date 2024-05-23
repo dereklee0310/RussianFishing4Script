@@ -9,7 +9,7 @@ import argparse
 import pyautogui as pag
 from pynput import keyboard
 
-from windowcontroller import WindowController
+from windowcontroller import WindowController  # pylint: disable=c-extension-no-member
 from script import ask_for_confirmation
 
 
@@ -29,7 +29,8 @@ def on_release(key: keyboard.KeyCode) -> None:
     :param key: key code used by OS
     :type key: keyboard.KeyCode
     """
-    global w_holding
+    global w_holding  # pylint: disable=global-statement
+
     if str(key).lower() != "'w'":
         return
 
@@ -65,7 +66,7 @@ if __name__ == "__main__":
     if shift_holding_enabled:
         pag.keyDown("shift")
     pag.keyDown("w")
-    w_holding = True
+    w_holding = True  # pylint: disable=invalid-name
 
     # blocking listener loop
     with keyboard.Listener(on_press, on_release) as listener:
@@ -75,7 +76,11 @@ if __name__ == "__main__":
     if shift_holding_enabled:
         pag.keyUp("shift")
 
-# press/release detection: https://stackoverflow.com/questions/65890326/keyboard-press-detection-with-pynput
-# listner loop : https://stackoverflow.com/questions/75784939/pynput-difference-between-listener-join-and-listener-start
-# ANSI erase : https://itnext.io/overwrite-previously-printed-lines-4218a9563527
-# pynput : https://pynput.readthedocs.io/en/latest/keyboard.html
+# press/release detection
+# https://stackoverflow.com/questions/65890326/keyboard-press-detection-with-pynput
+# listner loop
+# https://stackoverflow.com/questions/75784939/
+# ANSI erase
+# https://itnext.io/overwrite-previously-printed-lines-4218a9563527
+# pynput
+# https://pynput.readthedocs.io/en/latest/keyboard.html

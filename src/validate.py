@@ -20,7 +20,7 @@ if __name__ == "__main__":
     if not is_spool_icon_valid():
         logger.error("TEST FAILED")
         print(
-            "Please make sure your reel is at full capacity or adjust the game resolution and try again"
+            "Please make sure your reel is at full capacity or adjust the window size."
         )
     else:
         logger.info("TEST PASSED")

@@ -2,9 +2,11 @@
 Module for window controller.
 """
 
+import sys
 from time import sleep
 
-import win32api, win32con, win32gui
+# import win32api, win32con
+import win32gui
 import pyautogui as pag
 
 
@@ -39,10 +41,15 @@ class WindowController:
         # print(win32gui.GetClassName(hwnd)) # class name: UnityWndClass
         if not hwnd:
             print(f'Failed to locate the window with title "{self._title}"')
-            exit()
+            sys.exit()
         return hwnd
 
     def get_game_rect(self) -> tuple[int, int, int, int]:
+        """Get the rectangle coordinates of the game window for float fishing camera.
+
+        :return: game window rectangle coordinates
+        :rtype: tuple[int, int, int, int]
+        """
         return win32gui.GetWindowRect(self._game_hwnd)
 
     def activate_script_window(self) -> None:
