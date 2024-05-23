@@ -18,21 +18,21 @@
     <img src="https://img.shields.io/badge/docs-%23BE1B55" style="height: 22px;" />
 </a> -->  
 
-![python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
+![python][Python badge]
+![windows][Windows badge]
 </div>
 
-## [更新日誌](release_notes.md)
+## [更新日誌][Release notes]
 > [!TIP]
-> 加入我們的 [Discord 伺服器](https://discord.gg/BZQWQnAMbY) 以取得最新消息。
+> 加入我們的 [Discord 伺服器][Discord] 以取得最新消息。
 
-## 開始使用 
+## 準備工作
 ### 前提
-- [Python3.10+](https://www.python.org/downloads/)
+- [Python3.10+][Python]
 
 
 ### 安裝腳本
-[下載][download]此項目並解壓縮，或:
+[下載][Download]此項目並解壓縮，或:
 ```
 git clone https://github.com/dereklee0310/RussianFishing4Script
 ```
@@ -47,12 +47,13 @@ cd "項目路徑"
 
 ## 使用方式
 ### 前提
-- 啟用 **[滑鼠鎖定][clicklock]**  並將按下時間設定為"長"
+- 啟用 **[滑鼠鎖定][Clicklock]**  並將按下時間設定為"長"
 - 更改遊戲語言為英文
 - 將遊戲縮放倍率設為"1x"
 - 將遊戲視窗顯示模式設為"視窗化或"無邊框模式"
-- 把茶、咖啡和胡蘿蔔加到 **[最愛][favorite_food]**
-- 如果想使用自動替換損壞擬餌的功能，請將用於替換的擬餌加到 **[最愛][favorite_lure]**
+- 將線杯裝滿線，或是裝備彩虹線並在執行腳本時使用`-R`參數
+- 把茶、咖啡和胡蘿蔔加到 **[最愛][Favorite food]**
+- 如果想使用自動替換損壞擬餌的功能，請將用於替換的擬餌加到 **[最愛][Favorite lure]**
 ### 在啟動腳本前...
 - 移動遊戲人物至釣點
 - 手竿/路亞/海釣: 將釣竿拿在手上
@@ -94,7 +95,7 @@ python app.py -p 3 --coffee --email
 ```
 python app.py -mrP
 ```
-### 常用命令行參數
+### 命令行參數
 - `-m`: 只保留達標魚
 - `-c`: 跟魚纏鬥時自動喝咖啡補充體力
 - `-A`: 定時喝酒
@@ -138,11 +139,11 @@ python harvest.py
 ```
 
 ## 腳本設定
-- [視頻教程(舊)](https://www.youtube.com/watch?v=znLBYoXHxkw)
-- 請參考`template.ini`中的說明, 並在`config.ini`中修改設定。
-- 你可以在`config.ini`中修改`language`以變更語言，並根據 **[圖片添加指南][integrity_guide]** 添加缺失的圖片
+- **[視頻教程(舊)][Video]**
+- 請參考 **[中文版template.ini][Template]** 中的說明, 並在 **[config.ini][Config]** 中修改設定。
+- 你可以在 **[config.ini][Config]** 中修改`language`以變更語言，
+  並根據 **[圖片添加指南][Integrity guide]** 添加缺失的圖片
 - 欲使用郵件功能的話，請在`.env`中配置郵箱以及SMTP伺服器等資訊
-
 
 ## 疑難排解
 **如何停止腳本運行?**
@@ -152,6 +153,7 @@ python harvest.py
 - Shift鍵可能被腳本按下了，再按一次將其鬆開後即可正常退出
 
 **收線卡住了?**
+- 將線杯裝滿，或使用`-R`參數以及彩虹主線
 - 更改視窗大小直到能夠通過`validation.py`的檢查
 - 降低`config.ini`中`spool_icon_confidence`的值
 - 遠離光源(e.g, 露營燈、船燈)
@@ -169,10 +171,21 @@ dereklee0310@gmail.com
 ### WeChat
 <img src="static/readme/wechat.jpg" width="240">
 
-[integrity_guide]: integrity_guide.md
-[clicklock]: /static/readme/clicklock.png
-[favorite_food]: /static/readme/favorites.png
-[favorite_lure]: /static/readme/favorites_2.png
-[download]: https://github.com/dereklee0310/RussianFishing4Script/archive/refs/heads/main.zip
-[spool_icon]: /static/readme/status.png
+[RF4S logo]: static/readme/RF4S.png
+
+[Python badge]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
+[Windows badge]: https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white
+
+[Release notes]: release_notes.md
+[Discord]: https://discord.gg/BZQWQnAMbY
+[Python]: https://www.python.org/downloads/
+[Download]: https://github.com/dereklee0310/RussianFishing4Script/archive/refs/heads/main.zip
+[Clicklock]: /static/readme/clicklock.png
+[Favorite food]: /static/readme/favorites.png
+[Favorite lure]: /static/readme/favorites_2.png
+[Video]: https://www.youtube.com/watch?v=znLBYoXHxkw
+[Template]: 中文版template.ini
+[Config]: config.ini
+[Integrity guide]: integrity_guide.md
+
 [license]: LICENSE

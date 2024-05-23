@@ -247,6 +247,9 @@ class Tackle:
         else:
             pag.click()
             sleep(4)
+            if monitor.is_fish_captured():
+                landing_net_out = False
+                i = 1  # small trick to indicate success
 
         if i <= 0:
             logger.warning("Failed to pull the fish up")

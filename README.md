@@ -1,6 +1,6 @@
 <div align="center">
 
-![RF4S](static/readme/RF4S.png)
+![RF4S][RF4S logo]
 <h1 align="center">RF4S</h1>
 
 **A simple bot for Russian Fishing 4, supporting spin, bottom, marine, and float fishing.**
@@ -18,13 +18,13 @@
     <img src="https://img.shields.io/badge/docs-%23BE1B55" style="height: 22px;" />
 </a> -->  
 
-![python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)
+![Python badge][Python badge]
+![Windows badge][Windows badge]
 </div>
 
-## [Release Notes](release_notes.md)
+## [Release Notes][Release notes]
 > [!TIP]
-> Join us on our [Discord server](https://discord.gg/BZQWQnAMbY) to get the latest news about the project.
+> Join us on our [Discord server][Discord] to get the latest news about the project.
 
 ## Built With
 - Python 3.11
@@ -32,11 +32,11 @@
 
 ## Getting Started  
 ### Prerequisites
-- [Python3.10+](https://www.python.org/downloads/)
+- [Python3.10+][Python]
 
 
 ### Install
-[Download][download] the repository and unzip it, or:
+[Download][Download] the repository and unzip it, or:
 ```
 git clone https://github.com/dereklee0310/RussianFishing4Script
 ```
@@ -51,12 +51,13 @@ cd "the path of the project"
 
 ## Usage
 ### Prerequisites
-- Enable **[Mouse ClickLock][clicklock]** in Windows mouse settings and set the time before locking to "Long"
+- Enable **[Mouse ClickLock][Clicklock]** in Windows mouse settings and set the time before locking to "Long"
 - Change game language to "English"
 - Set interface scale to "1x"
 - Set display mode to "borderless windowed" or "window mode"
-- Add tea, carrot, and coffee to your **[favorites][favorite_food]** so that they can be selected through quick food selection menu
-- To enable broken lure replacement, the lures for replacement must also be added to **[favorites][favorite_lure]**
+- Make sure your reel is fully loaded, or use `-R`  along with a rainbow main when executing the main script
+- Add tea, carrot, and coffee to your **[favorites][Favorite food]** so that they can be selected through quick food selection menu
+- To enable broken lure replacement, the lures for replacement must also be added to **[favorites][Favorite lure]**
 ### Before you start...
 - Move your character to the fishing spot before executing the script
 - Spin Fishing/Marine Fishing/Float fishing: Pick up the rod you want to use
@@ -131,8 +132,10 @@ python harvest.py [-s] [-n CHECK_DELAY_SECOND]
 ```
 
 ## Configuration
-- Please refer to the guides and examples in `template.ini` and edit your settings in `config.ini`  
-- Set the `language` setting in `config.ini` and **[add missing images][integrity_guide]** if the integrity check failed.
+- Please refer to the guides and examples in **[template.ini][Template]** 
+  and edit your settings in **[config.ini][Config]**  
+- Set the `language` setting in **[config.ini][Config]** 
+  and **[add missing images][Integrity guide]** if the integrity check failed.
 - To enable email notification, set your Gmail address and Google app password in `.env`  
 - Edit `SMTP_SERVER` in `.env` if you want to use SMTP server other than Gmail SMTP server
 
@@ -144,6 +147,7 @@ python harvest.py [-s] [-n CHECK_DELAY_SECOND]
 - The Shift key might have been pressed down, press again to release it and type `Ctrl + C` as usual.  
 
 **Rod not getting lifted after the retrieval is finished?**
+- Fill up your reel, or use a rainbow main line with `-R` flag
 - Change the game resolution until the `validation.py` is pass
 - Lower the value of `spool_icon_confidence` in `config.ini`
 - Keep away from light sources or turn off the boat light
@@ -157,10 +161,20 @@ Any contribution, bug report, or idea about new features is welcome.
 ## Contact me
 dereklee0310@gmail.com 
 
-[integrity_guide]: integrity_guide.md
-[clicklock]: /static/readme/clicklock.png
-[favorite_food]: /static/readme/favorites.png
-[favorite_lure]: /static/readme/favorites_2.png
-[download]: https://github.com/dereklee0310/RussianFishing4Script/archive/refs/heads/main.zip
-[spool_icon]: /static/readme/status.png
+[RF4S logo]: static/readme/RF4S.png
+
+[Python badge]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
+[Windows badge]: https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white
+
+[Release notes]: release_notes.md
+[Discord]: https://discord.gg/BZQWQnAMbY
+[Python]: https://www.python.org/downloads/
+[Download]: https://github.com/dereklee0310/RussianFishing4Script/archive/refs/heads/main.zip
+[Clicklock]: /static/readme/clicklock.png
+[Favorite food]: /static/readme/favorites.png
+[Favorite lure]: /static/readme/favorites_2.png
+[Template]: template.ini
+[Config]: config.ini
+[Integrity guide]: integrity_guide.md
+
 [license]: LICENSE
