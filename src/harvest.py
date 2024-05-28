@@ -4,37 +4,41 @@ Script for automatic baits harvesting and hunger/comfort refill.
 Usage: harvest.py
 """
 
-import logging
-import configparser
+# pylint: disable=no-member
+# setting node's attributes will be merged on the fly
+
 import argparse
-import pathlib
 from time import time, sleep
 
 import pyautogui as pag
-from prettytable import PrettyTable
 
-import monitor
-from windowcontroller import WindowController
-from script import sleep_and_decrease, ask_for_confirmation
+import script
+from monitor import Monitor
+from setting import Setting
 
-logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
-logger = logging.getLogger(__name__)
+# ------------------ flag name, attribute name, description ------------------ #
+ARGS = (
+    ("power_saving", "power_saving_enabled", "_"),
+    ("check_delay_second", "check_delay_second", "_"),
+)
+
+# ------------------------ attribute name, description ----------------------- #
+RESULTS = (
+    ("tea_count", "Tea consumed"),
+    ("carrot_count", "Carrot consumed"),
+    ("harvest_count", "Number of harvests"),
+)
 
 
 class App:
     """Main application class."""
 
     def __init__(self):
-        """Initialize counters and parse command line arguments."""
+        """Initialize counters and merge args into setting node."""
         args = self.parse_args()
-        config = configparser.ConfigParser()
-        config.read(pathlib.Path(__file__).resolve().parents[1] / "config.ini")
-
-        self.power_saving_enabled = args.power_saving_
-        self.check_delay_second = args.check_delay_second
-
-        self.energy_threshold = config["game"].getfloat("harvest_baits_threshold")
-        self.shovel_spoon_shortcut = config["shortcut"].get("shovel_spoon")
+        self.setting = Setting()
+        self.setting.merge_args(args, ARGS)
+        self.monitor = Monitor(self.setting)
 
         self.tea_count = 0
         self.carrot_count = 0
@@ -47,7 +51,7 @@ class App:
         :rtype: argparse.Namespace
         """
         parser = argparse.ArgumentParser(
-            description="Harvest baits, refill hunger and comfort if needed",
+            description="Harvest baits and refill hunger/comfort automatically.",
         )
         parser.add_argument(
             "-s",
@@ -66,58 +70,56 @@ class App:
 
     def start_harvesting_loop(self) -> None:
         """Main harvesting loop."""
-        pre_refill_time = 0
+        setting = self.setting
+        monitor = self.monitor
 
+        pag.press(setting.shovel_spoon_shortcut)
+        sleep(3)
+        pre_refill_time = 0
         while True:
             if time() - pre_refill_time > 300 and monitor.is_comfort_low():
-                logger.info("Low comfort level")
                 pre_refill_time = time()
-                self.consume_food("tea")
+                self._consume_food("tea")
                 self.tea_count += 1
 
             if monitor.is_hunger_low():
-                logger.info("Low hunger level")
-                self.consume_food("carrot")
+                self._consume_food("carrot")
                 self.carrot_count += 1
 
-            if monitor.is_energy_high(self.energy_threshold):
-                logger.info("High energy level")
-                self.harvest_baits()
+            if monitor.is_energy_high():
+                self._harvest_baits()
                 self.harvest_count += 1
 
-            logger.info("Waiting for energy regeneration")
-            if self.power_saving_enabled:
+            if setting.power_saving_enabled:
                 pag.press("esc")
             sleep(self.check_delay_second)
-            if self.power_saving_enabled:
+            if setting.power_saving_enabled:
                 pag.press("esc")
             sleep(0.25)
 
-    def harvest_baits(self) -> None:
-        """Harvest baits."""
-        logger.info("Harvesting baits")
+    def _harvest_baits(self) -> None:
+        """Harvest baits, the tool should be pulled out in start_harvesting_loop()."""
+        # dig and wait (4 + 1)s
         pag.click()
+        sleep(5)
 
-        # wait for result
-        sleep(5)  # 4 + 1 for flexibility
         i = 64
-        while i > 0 and not monitor.is_harvest_success():
-            i = sleep_and_decrease(i, 4)
+        while i > 0 and not self.monitor.is_harvest_success():
+            i = script.sleep_and_decrease(i, 2)
 
         # accept result
         pag.press("space")
         sleep(0.25)
 
-    def consume_food(self, food: str) -> None:
+    def _consume_food(self, food: str) -> None:
         """Open food menu, then click on the food icon to consume it.
 
-        :param food: food's name
+        :param food: food name
         :type food: str
         """
-        logger.info("Consume %s", food)
         with pag.hold("t"):
             sleep(0.25)
-            food_position = getattr(monitor, f"get_{food}_icon_position")()
+            food_position = getattr(self.monitor, "get_food_position")(food)
             pag.moveTo(food_position)
             pag.click()
             sleep(0.25)
@@ -125,23 +127,11 @@ class App:
 
 if __name__ == "__main__":
     app = App()
-    ask_for_confirmation("Are you ready to start harvesting baits")
-    WindowController().activate_game_window()
-
-    pag.press(app.shovel_spoon_shortcut)
-    sleep(3)
+    if app.setting.enable_confirmation:
+        script.ask_for_confirmation("Are you ready to start harvesting baits")
+    app.setting.window_controller.activate_game_window()
     try:
         app.start_harvesting_loop()
     except KeyboardInterrupt:
         pass
-
-    table = PrettyTable(header=False, align="l")
-    table.title = "Running Results"
-    table.add_rows(
-        [
-            ["Harvest baits count", app.harvest_count],
-            ["Tea consumed", app.tea_count],
-            ["Carrot consumed", app.carrot_count],
-        ]
-    )
-    print(table)
+    script.display_running_results(app, RESULTS)

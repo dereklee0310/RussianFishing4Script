@@ -3,15 +3,10 @@ Some helper functions.
 """
 
 import sys
-from pathlib import Path
-
-from configparser import ConfigParser
 from time import sleep
 
 import pyautogui as pag
-
-config = ConfigParser()
-config.read(Path(__file__).resolve().parents[1] / "config.ini")
+from prettytable import PrettyTable
 
 
 def hold_left_click(duration: float = 1) -> None:
@@ -58,9 +53,6 @@ def ask_for_confirmation(msg: str) -> None:
     :param msg: confirmation message
     :type msg: str
     """
-    if not config["game"].getboolean("enable_confirmation"):
-        return
-
     while True:
         ans = input(f"{msg}? [Y/n] ").strip().lower()
         if ans == "y":
@@ -71,9 +63,20 @@ def ask_for_confirmation(msg: str) -> None:
             sys.exit()
 
 
-if __name__ == "__main__":
-    pass
-    # ask_for_confirmation()
+def display_running_results(app: object, result_map: tuple[tuple]) -> None:
+    """Display the running results of different apps.
+
+    :param app: caller app
+    :type app: object
+    :param result_map: attribute name - column name mapping
+    :type result_map: tuple[tuple]
+    """
+    table = PrettyTable(header=False, align="l")
+    table.title = "Running Results"
+    for attribute_name, column_name in result_map:
+        table.add_row([column_name, getattr(app, attribute_name)])
+    print(table)
+
 
 # ! archived
 # def start_count_down() -> None:

@@ -2,22 +2,88 @@
 Module for SettingHandler class, not used yet.
 """
 
-import sys
 import pathlib
 import logging
-import argparse
 import configparser
+from argparse import Namespace
+
+from windowcontroller import WindowController
 
 logger = logging.getLogger(__name__)
 
+# -------------------- attribute name - column name - type ------------------- #
+GENERAL_CONFIGS = (
+    ("language", "Language", str),
+    ("enable_confirmation", "Enable confirmation", bool),
+    ("keepnet_limit", "Keepnet limit", int),
+    ("coffee_limit", "Coffee limit", int),
+    ("keep_fish_delay", "Keep fish delay", float),
+    ("energy_threshold", "Energy threshold", float),
+    ("retrieval_detect_confidence", "Retrieve detect confidence", float),
+    ("alcohol_drinking_delay", "Alcohol drinking delay", float),
+    ("alcohol_drinking_quantity", "Alcohol drinking quantity", int),
+    ("lure_broken_action", "Lure broken action", str),
+    ("keepnet_full_action", "Keep net full action", str),
+    ("alarm_sound_file", "Alarm sound file", str),
+    ("default_arguments", "Default arguments", str),
+    ("window_size", "Window size", str),
+    ("SMTP_validation_enabled", "Enable SMTP validation", bool),
+    ("image_verification_enabled", "Enable image verification", bool),
+    ("unmarked_release_whitelist", "Unmarked release whitelist", str),
+)
 
-class Setting():
+# ----------------------- config name - attribute name ----------------------- #
+SHORTCUTS = (
+    ("tea", "tea_shortcut"),
+    ("carrot", "carrot_shortcut"),
+    ("coffee", "coffee_shortcut"),
+    ("shovel_spoon", "shovel_spoon_shortcut"),
+    ("alcohol", "alcohol_shortcut"),
+    ("bottom_rods", "bottom_rods_shortcuts"),
+)
+
+# -------------------- attribute name - column name - type ------------------- #
+COMMON_CONFIGS = (
+    ("fishing_strategy", "Fishing strategy", str),
+    ("cast_power_level", "Cast power level", float),
+)
+
+SPECIAL_CONFIGS = {
+    "spin": (),
+    "spin_with_pause": (
+        ("retrieval_duration", "Retrieval duration", float),
+        ("retrieval_delay", "Retrieval delay", float),
+        ("base_iteration", "Base iteration", float),
+        ("acceleration_enabled", "Acceleration enabled", bool),
+    ),
+    "bottom": (("check_delay", "Check delay", float),),
+    "marine": (
+        ("sink_timeout", "Sink timeout", float),
+        ("pirk_duration", "Pirk duration", float),
+        ("pirk_delay", "Pirk delay", float),
+        ("pirk_timeout", "Pirk timeout", float),
+        ("tighten_duration", "Tighten duration", float),
+        ("fish_hooked_delay", "Fish hooked delay", float),
+    ),
+    "float": (
+        ("float_confidence", "Float confidence", float),
+        ("check_delay", "Check delay", float),
+        ("pull_delay", "Pull delay", float),
+        ("drifting_timeout", "Drifting timeout", float),
+    ),
+    "wakey_rig": (),
+}
+
+
+class Setting:
     """Universal setting node."""
-    # pylint: disable=too-many-instance-attributes, attribute-defined-outside-init
-    # it's a cfg node, no need to overreact
 
-    def __init__(self, args: argparse.Namespace):
-        self.args = args
+    # pylint: disable=maybe-no-member
+    # it's a cfg node,
+
+    def __init__(self):
+        """Initialize attributes and merge the configs."""
+        self.window_controller = WindowController()
         self.config = configparser.ConfigParser()
         self.config.read(pathlib.Path(__file__).resolve().parents[1] / "config.ini")
 
@@ -26,102 +92,75 @@ class Setting():
             if self.config.has_option(section, "fishing_strategy"):
                 self.profile_names.append(section)
 
-        self._get_args_settings()
-        self._get_general_settings()
-        self._get_shortcuts()
+        # args should be handled and merged in caller module first
+        self._merge_general_configs()
+        self._merge_shortcuts()
 
-    def _get_args_settings(self):
-        """Merge command line arguments into settings."""
-        args = self.args
-        self.unmarked_release_enabled = args.marked
-        self.coffee_drinking_enabled = args.coffee
-        self.alcohol_drinking_enabled = args.alcohol
-        self.hunger_and_comfort_refill_enabled = args.refill
-        self.baits_harvesting_enabled = args.harvest
-        self.email_sending_enabled = args.email
-        self.plotting_enabled = args.plot
-        self.shutdown_enabled = args.shutdown
-        self.rainbow_line_enabled = args.rainbow_line
-        self.lift_enabled = args.lift
-        self.gear_ratio_switching_enabled = args.gear_ratio_switching
-        self.fishes_in_keepnet = args.fishes_in_keepnet
-        self.boat_ticket_duration = args.boat_ticket_duration
+        # generate path of the image directory
+        parent_dir = pathlib.Path(__file__).resolve().parents[1]
+        self.image_dir = parent_dir / "static" / self.language
 
-    def _get_general_settings(self):
-        """Merge general configs into settings."""
-        general = self.config["game"]
-        self.keepnet_limit = general.getint("keepnet_limit")
-        self.fishes_to_catch = self.keepnet_limit - self.fishes_in_keepnet
-        self.harvest_baits_threshold = general.getfloat("harvest_baits_threshold")
-        self.coffee_limit = general.getint("coffee_limit")
-        self.keep_fish_delay = general.getint("keep_fish_delay")
-        self.alcohol_drinking_delay = general.getint("alcohol_drinking_delay")
-        self.alcohol_quantity = general.getint("alcohol_quantity")
-        self.lure_broken_action = general.get("lure_broken_action")
-        self.keepnet_full_action = general.get("keepnet_full_action")
-        self.alarm_sound_file_path = general.get("alarm_sound_file_path")
-        self.window_size = general.getint("window_size")
+    def _merge_general_configs(self) -> None:
+        """Merge general configs from config.ini."""
+        section = self.config["game"]
+
+        for attribute_name, _, var_type in GENERAL_CONFIGS:
+            if var_type == bool:
+                attribute_value = section.get(attribute_name) == "True"
+            else:
+                attribute_value = var_type(section.get(attribute_name))
+
+            setattr(self, attribute_name, attribute_value)
+
         self.unmarked_release_whitelist = [
-            key.strip() for key in general.get("unmarked_release_whitelist").split(",")
+            key.strip() for key in self.unmarked_release_whitelist.split(",")
         ]
 
-    def _get_shortcuts(self):
-        """Merge shortcuts into settings."""
-        shortcuts = self.config["shortcut"]
-        self.tea_shortcut = shortcuts.get("tea")
-        self.carrot_shortcut = shortcuts.get("carrot")
-        self.coffee = shortcuts.get("coffee")
-        self.shovel_spoon = shortcuts.get("shovel_spoon")
-        self.alcohol = shortcuts.get("alcohol")
-        self.bottom_rods = [
-            key.strip() for key in shortcuts.get["bottom_rods"].split(",")
+    def _merge_shortcuts(self) -> None:
+        """Merge shortcuts from config.ini."""
+        section = self.config["shortcut"]
+
+        for config, attribute_name in SHORTCUTS:
+            setattr(self, attribute_name, section.get(config))
+
+        self.bottom_rods_shortcuts = [
+            key.strip() for key in self.bottom_rods_shortcuts.split(",")
         ]
 
-    def get_profile_setting(self, profile_name):
-        """Merge the chosen user profile into settings.
+    def merge_args(self, args: Namespace, args_map: tuple[tuple]) -> None:
+        """Merge command line arguments from caller module.
 
-        After a profile id is entered by the user, this method should be invoked
-        to merge the profile section in config.ini into this setting object.
-
-        :param profile_name: section name of user profile
-        :type profile_name: str
+        :param args: parsed command line arguments
+        :type args: Namespace
+        :param args_attributes: flag name - attribute name - column name mapping
+        :type args_attributes: tuple[tuple]
         """
-        profile_section = self.config[profile_name]
-        self.fishing_strategy = profile_section.get("fishing_strategy")
-        self.cast_power_level = profile_section.getfloat("cast_power_level")
-        match self.fishing_strategy:
-            case "spin":
-                pass
-            case "spin_with_pause":
-                self.retrieval_duration = profile_section.getfloat("retrieval_duration")
-                self.retrieval_delay = profile_section.getfloat("retrieval_delay")
-                self.base_iteration = profile_section.getint("base_iteration")
-                self.acceleration_enabled = profile_section.getboolean(
-                    "acceleration_enabled"
-                )
-            case "bottom":
-                self.check_delay = profile_section.getfloat("check_delay")
-            case "marine":
-                self.sink_timeout = profile_section.getfloat("sink_timeout")
-                self.pirk_duration = profile_section.getfloat("pirk_duration")
-                self.pirk_delay = profile_section.getfloat("pirk_delay")
-                self.pirk_timeout = profile_section.getfloat("pirk_timeout")
-                self.tighten_duration = profile_section.getfloat("tighten_duration")
-                self.fish_hooked_check_delay = profile_section.getfloat(
-                    "fish_hooked_check_delay"
-                )
-            case "float":
-                self.float_confidence = profile_section.getfloat("float_confidence")
-                self.check_delay = profile_section.getfloat("check_delay")
-                self.pull_delay = profile_section.getfloat("pull_delay")
-                self.drifting_timeout = profile_section.getfloat("drifting_timeout")
-            case "wakey_rig":
-                pass
-            case _:
-                logger.error("Invalid fishing strategy")
-                sys.exit()
+        for arg_name, attribute_name, _ in args_map:
+            setattr(self, attribute_name, getattr(args, arg_name))
 
+    def merge_user_configs(self, pid: int):
+        """Merge the chosen user profile using pid.
 
-if __name__ == "__main__":
-    # test = Setting(None)
-    pass
+        After a profile id and args is given, this method should be invoked by app.py
+        to merge the profile section in config.ini into this object.
+
+        :param pid: user profile id
+        :type pid: int
+        """
+        section = self.config[self.profile_names[pid]]
+
+        for attribute_name, _, var_type in COMMON_CONFIGS:
+            if var_type == bool:
+                attribute_value = section.get(attribute_name) == "True"
+            else:
+                attribute_value = var_type(section.get(attribute_name))
+
+            setattr(self, attribute_name, attribute_value)
+
+        special_configs = SPECIAL_CONFIGS.get(self.fishing_strategy)
+        for attribute_name, _, var_type in special_configs:
+            if var_type == bool:
+                attribute_value = section.get(attribute_name) == "True"
+            else:
+                attribute_value = var_type(section.get(attribute_name))
+            setattr(self, attribute_name, attribute_value)

@@ -4,168 +4,177 @@ Module for Tackle class
 Todo: special retrieval for jig step, twitchiing...
 """
 
-import sys
+import logging
 from time import sleep
 
 import pyautogui as pag
-import logging
 
-import monitor
-from script import sleep_and_decrease, hold_right_click, hold_left_click
+import script
+import exceptions
+from timer import Timer
+from setting import Setting
+from monitor import Monitor
 
 logger = logging.getLogger(__name__)
 
-landing_net_out = False
+RESET_TIMEOUT = 16
+CAST_SCALE = 0.4  # 25% / 0.4s
+
+# BASE_DELAY + LOOP_DELAY >= 2.2 to trigger clicklock
+BASE_DELAY = 1
+LOOP_DELAY = 2
+
+RETRIEVAL_TIMEOUT = 64
+PULL_TIMEOUT = 32
+RETRIEVAL_WITH_PAUSE_TIMEOUT = 128
+FLY_SINK_DELAY = 6
+LIFT_DURATION = 3
+TELESCOPIC_RETRIEVAL_TIMEOUT = 8
+LANDING_NET_DURATION = 6
+LANDING_NET_DELAY = 0.5
 
 
 class Tackle:
     """Class for all tackle dependent methods."""
 
-    def __init__(self, timer):
-        """Constructor method.
+    def __init__(self, setting: Setting, monitor: Monitor, timer: Timer):
+        """Get timer and setting from caller (Player).
 
-        :param timer: timer initialized in Player class
+        :param setting: universal setting node
+        :type setting: Setting
+        :param setting: universal monitor node
+        :type setting: Monitor
+        :param timer: object for timing methods
         :type timer: Timer
         """
         self.timer = timer
-        self.RESET_TIMEOUT = 16
-        self.RETRIEVE_TIMEOUT = 60
-        self.PULL_TIMEOUT = 32
-        # self.PIRKING_TIMEOUT = 32
-        self.RETRIEVE_WITH_PAUSE_TIMEOUT = 128
+        self.setting = setting
+        self.monitor = monitor
 
-    def reset(self) -> bool:
-        """Reset the tackle with a timeout.
+        self.landing_net_out = False  # for telescopic_pull()
 
-        :return: True if the reset is successful, False otherwise
-        :rtype: bool
+    def reset(self) -> None:
+        """Reset the tackle till ready and detect unexpected events.
+
+        :raises exceptions.FishHookedError: a fish is hooked
+        :raises exceptions.FishCapturedError: a fish is captured
+        :raises exceptions.TimeoutError: loop timeouted
         """
+        # todo: same as retrieve()
         logger.info("Resetting")
         pag.mouseDown()
-        i = self.RESET_TIMEOUT
-        while i > 0 and not monitor.is_tackle_ready():
-            if monitor.is_fish_hooked() or monitor.is_fish_captured():
-                i = -1  # fail trick
-                break
-            i = sleep_and_decrease(i, 3)  # > ClickLock duration (2.2)
-        pag.mouseUp()
+        sleep(BASE_DELAY)
+        i = RESET_TIMEOUT
+        while i > 0:
+            i = script.sleep_and_decrease(i, LOOP_DELAY)
+            if self.monitor.is_tackle_ready():
+                pag.click()
+                return
+
+            # also check for exceptions that occur frequently
+            if self.monitor.is_fish_hooked():
+                raise exceptions.FishHookedError
+            if self.monitor.is_fish_captured():
+                raise exceptions.FishCapturedError
         pag.click()
+        raise TimeoutError
 
-        if i <= 0:
-            logger.warning("Failed to reset tackle")
-        return i > 0
-
-    def cast(
-        self,
-        power_level: float | None = 3,
-        cast_delay: int | None = 6,
-        sink_delay: int | None = 0,
-    ) -> None:
-        """Cast the rod.
-
-        :param power_level: casting power, 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+, defaults to 3
-        :type power_level: float, optional
-        :param cast_delay: time to wait until lure/bait contact with water, defaults to 6
-        :type cast_delay: int, optional
-        :param sink_delay: time to wait until lure/bait sink below water, defaults to 0
-        :type sink_delay: int, optional
-        :raises ValueError: raise if the cast power level is invalid
-        """
+    def cast(self) -> None:
+        """Cast the rod, then wait for the lure/bait to fly and sink."""
+        # todo: verify power level
         logger.info("Casting")
+        match self.setting.cast_power_level:
+            case 1:  # 0%
+                pag.click()
+            case 5:  # power cast
+                with pag.hold("shift"):
+                    script.hold_left_click(1)
+            case _:
+                # level -1 for backward compatibility
+                duration = CAST_SCALE * (self.setting.cast_power_level - 1)
+                script.hold_left_click(duration)
 
-        if power_level < 0 or power_level > 5:
-            logger.error("Invalid power level")
-            sys.exit()
-        elif power_level == 1:
-            pag.click()
-        elif power_level == 5:
-            with pag.hold("shift"):
-                hold_left_click(1)
-        else:
-            duration = 1.6 * (power_level - 1) / 4  # -1 for backward compatibility
-            hold_left_click(duration)
-
-        sleep(cast_delay)
-        if sink_delay:
-            sleep(sink_delay)
-
+        sleep(FLY_SINK_DELAY)
         self.timer.update_cast_hour()
 
-    def retrieve(self, duration: int, delay: int, lift_enabled: bool) -> bool:
-        """Retrieve the lure/bait with a timeout.
-        #todo: docstring
+    def retrieve(self) -> None:
+        """Retrieve the line till the end is reached and detect unexpected events.
 
-        :param duration: base time of retrieval
-        :type duration: int, optional
-        :param delay: delay after retrieval
-        :type delay: int, optional
-        :return: True if the retrieval is successful, False otherwise
-        :rtype: bool
+        :raises exceptions.FishCapturedError: a fish is captured
+        :raises exceptions.LineAtEndError: line is at its end
+        :raises exceptions.TimeoutError: loop timeouted
         """
+        # todo: pag.mouseDown() and pag.click() should be called before and after it
+        # they should be handled in decorater or exception handler
         logger.info("Retrieving")
-
-        # full retrieval to lock the reel, duration must >= 2.2
-        pag.mouseDown()
-        sleep(duration)
-        pag.mouseUp()
-
-        i = self.RETRIEVE_TIMEOUT
+        sleep(BASE_DELAY)
+        i = RETRIEVAL_TIMEOUT
         while i > 0:
-            if lift_enabled and monitor.is_fish_hooked():
-                hold_right_click()
-                sleep(2)
-            if monitor.is_line_at_end():
-                logger.warning("Fishing line is at its end")
-                pag.click()
-                return False
-            elif monitor.is_retrieve_finished():
-                break
-            elif monitor.is_fish_captured():
-                break
-            i = sleep_and_decrease(i, 2)  # todo: revise this
+            i = script.sleep_and_decrease(i, LOOP_DELAY)
+            if self.monitor.is_fish_hooked() and self.setting.lift_enabled:
+                script.hold_right_click(LIFT_DURATION)
 
-        sleep(delay)  # wait for the line to be fully retrieved
-        pag.click()
+            if self.monitor.is_retrieval_finished():
+                finish_delay = 0 if self.setting.rainbow_line_enabled else 2
+                sleep(finish_delay)  # for flexibility of default spool (improve ?)
+                return
 
-        if i <= 0:
-            logger.warning("Retrieval timeout reached")
-        return i > 0
+            if self.monitor.is_fish_captured():
+                raise exceptions.FishCapturedError
+            if self.monitor.is_line_at_end():
+                raise exceptions.LineAtEndError
 
-    def pirk(
-        self, duration: float, delay: float, timeout: float, check_again_delay: float
-    ) -> bool:
-        """Perform pirking with a time out.
+        raise TimeoutError
 
-        :param duration: rod lifting time
-        :type duration: float
-        :param delay: delay after lifting
-        :type delay: float
-        :param timeout: timeout for a single pirking routine
-        :type timeout: float
-        :param timeout: timeout for a single pirking routine
-        :type timeout: float
-        :return: True if a fish is hooked, False otherwise
-        :rtype: bool
+    def retrieve_with_pause(self) -> None:
+        """Retreive the line, pause periodically."""
+        # todo: migrate keyDown('shift) ?
+        logger.info("Retrieving with pause")
+        if self.setting.acceleration_enabled:
+            pag.keyDown("shift")
+
+        i = RETRIEVAL_WITH_PAUSE_TIMEOUT
+        iteration = 0
+        while i > 0:
+            script.hold_left_click(self.setting.retrieval_duration)
+            i = script.sleep_and_decrease(i, self.setting.retrieval_delay)
+            iteration += 1
+
+            if self.monitor.is_fish_hooked():
+                return
+            if iteration > self.setting.base_iteration:
+                raise exceptions.IterationLimitExceedError
+            if self.monitor.is_retrieval_finished():
+                raise exceptions.RetrieveFinishedError
+
+        if self.setting.acceleration_enabled:
+            pag.keyUp("shift")
+
+        raise TimeoutError("retrieve_with_pause")
+
+    def pirk(self) -> None:
+        """Start pirking until a fish is hooked.
+
+        :raises TimeoutError: loop timeouted
         """
         logger.info("Pirking")
 
-        i = timeout
+        i = self.setting.pirk_timeout
         while i > 0:
-            if monitor.is_fish_hooked():
-                if check_again_delay == 0:
-                    break
+            script.hold_right_click(self.setting.pirk_duration)
+            i = script.sleep_and_decrease(i, self.setting.pirk_delay)
 
-                sleep(check_again_delay)
-                if monitor.is_fish_hooked():
-                    logger.info("Fish is hooked")
-                    break
+            if not self.monitor.is_fish_hoooked():
+                continue
 
-            hold_right_click(duration=duration)
-            i = sleep_and_decrease(i, delay)
+            # check if the fish is still hooked after x seconds
+            if self.setting.fish_hooked_delay == 0:
+                return
+            sleep(self.setting.fish_hooked_delay)
+            if self.monitor.is_fish_hooked():
+                return
 
-        if i <= 0:
-            logger.warning("Pirking timeout reached")
-        return i > 0
+            raise TimeoutError("pirk")  # disable clicklock releasing
 
     # def wakey_pirking(self, delay: float) -> bool:
     #     """todo
@@ -181,119 +190,63 @@ class Tackle:
     #     while i > 0 and not monitor.is_fish_hooked():
     #         with pag.hold('ctrl'):
     #             pag.click(button='right')
-    #         i = sleep_and_decrease(i, delay)
+    #         i = script.sleep_and_decrease(i, delay)
 
-    def pull(self) -> bool:
-        """Pull the fish with a timeout.
+    def general_pull(self) -> None:
+        """Pull the fish until it's captured.
 
-        :return: True if the pulling is successful, False otherwise
-        :rtype: bool
+        :raises TimeoutError: loop timeouted
         """
+        # todo: migrate mouseDown(), mouseDown(button="right"), and click()
         logger.info("Pulling")
-
-        pag.mouseDown()  # keep retrieving until fish is captured
         pag.mouseDown(button="right")
-        i = self.PULL_TIMEOUT
-        while i > 0 and not monitor.is_fish_captured():
-            i = sleep_and_decrease(i, 3)  # > ClickLock duration (2.2)
+        sleep(BASE_DELAY)
+        i = PULL_TIMEOUT
+        while i > 0:
+            i = script.sleep_and_decrease(i, LOOP_DELAY)
+            if self.monitor.is_fish_captured():
+                return
 
-        if i <= 0 and not monitor.is_fish_captured():
-            pag.press("space")  # use landing net
-            sleep(6)
-            if monitor.is_fish_captured():
-                i = 1  # small trick to indicate success
-            else:
-                # hide landing net if failed
-                pag.press("space")
-                sleep(0.5)
-        pag.mouseUp()
+        # try using landing net
+        pag.press("space")
+        sleep(LANDING_NET_DURATION)
+        if self.monitor.is_fish_captured():
+            return
+        pag.press("space")
+        sleep(LANDING_NET_DELAY)
         pag.mouseUp(button="right")
-        pag.click()
 
-        if i <= 0:
-            logger.warning("Failed to pull the fish up")
-        return i > 0
+        if not self.monitor.is_fish_hooked():
+            raise exceptions.FishGotAwayError
+        raise TimeoutError
 
-    def telescopic_pull(self) -> bool:
-        """Pull the fish with a timeout, designed for float tackle.
+    def telescopic_pull(self) -> None:
+        """Pull the fish until it's captured, designed for telescopic rod.
 
-        :return: True if the pulling is successful, False otherwise
-        :rtype: bool
+        :raises TimeoutError: loop timeouted
         """
+        # todo: migrate mouseDown() and click()
         logger.info("Pulling")
-
-        global landing_net_out
-        if not landing_net_out:
-            logger.info("Using landing net")
-            pag.press("space")  # use landing net
-            landing_net_out = True
-
-        pag.mouseDown()  # keep retrieving until fish is captured
-        i = 12  # todo
-        i = sleep_and_decrease(i, 3)  # > ClickLock duration (2.2)
-
-        if not monitor.is_fish_hooked():
-            landing_net_out = False
-            pag.click()
+        # check false postive first
+        sleep(BASE_DELAY + LOOP_DELAY)  # 3s is enough for most case?
+        if not self.monitor.is_tackle_ready():
             return
 
-        while i > 0 and not monitor.is_fish_captured():
-            i = sleep_and_decrease(i, 3)
-
-        if monitor.is_fish_captured():
-            landing_net_out = False
-            i = 1  # small trick to indicate success
-            pag.click()
-        else:
-            pag.click()
-            sleep(4)
-            if monitor.is_fish_captured():
-                landing_net_out = False
-                i = 1  # small trick to indicate success
-
-        if i <= 0:
-            logger.warning("Failed to pull the fish up")
-        return i > 0
-
-    # todo: refactor iteration
-    def retrieve_with_pause(
-        self,
-        duration: float,
-        delay: float,
-        base_iteration: int,
-        enable_acceleration: bool,
-    ):
-        """Repeat retrieval with pause until timeout.
-
-        :param duration: retrieval duration
-        :type duration: float
-        :param delay: delay after retrieval
-        :type delay: float
-        :param base_iteration: minimum number of iterations
-        :type base_iteration: int
-        :param enable_acceleration: determine if the shift key should be pressed
-        :type base_iteration: bool
-        """
-        logger.info("Retrieving with pause")
-        if enable_acceleration:
-            pag.keyDown("shift")
-
-        i = self.RETRIEVE_WITH_PAUSE_TIMEOUT
-        iteration = 0
+        # pull out landing net and check
+        if not self.landing_net_out:
+            pag.press("space")
+            self.landing_net_out = True
+        i = TELESCOPIC_RETRIEVAL_TIMEOUT
         while i > 0:
-            if monitor.is_fish_hooked():
-                break
-            elif iteration >= base_iteration and monitor.is_retrieve_finished():
-                break
-            hold_left_click(duration)
-            sleep(delay)
-            i -= delay
-            iteration += 1
+            i = script.sleep_and_decrease(i, LOOP_DELAY)
+            if self.monitor.is_fish_captured():
+                self.landing_net_out = False
+                return
 
-        if enable_acceleration:
-            pag.keyUp("shift")
+        raise TimeoutError("telescopic_pull")
 
     def switch_gear_ratio(self) -> None:
-        """Switch gear ratio of conventional reel."""
+        """Switch the gear ratio of a conventional reel."""
+        logger.info("Switching gear ratio")
         with pag.hold("ctrl"):
             pag.press("space")

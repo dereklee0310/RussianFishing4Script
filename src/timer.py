@@ -5,19 +5,26 @@ Module for Timer class.
 import time
 import datetime
 
+TEA_DRINK_DELAY = 300
 
 class Timer:
     """Class for calculating and generatiing timestamps for logs."""
 
-    cast_rhour = None
-    cast_ghour = None
-    cast_rhour_list = []
-    cast_ghour_list = []
+    # pylint: disable=too-many-instance-attributes
+    # there are too many counters...
 
     def __init__(self):
         """Constructor method."""
         self.start_time = time.time()
         self.start_datetime = time.strftime("%m/%d %H:%M:%S", time.localtime())
+
+        self.cast_rhour = None
+        self.cast_ghour = None
+        self.cast_rhour_list = []
+        self.cast_ghour_list = []
+
+        self.pre_tea_drink_time = 0
+        self.pre_alcohol_drink_time = 0
 
     def get_duration(self) -> str:
         """Calculate the execution time of the program.
@@ -71,3 +78,26 @@ class Timer:
         :rtype: tuple[list[int]]
         """
         return self.cast_rhour_list, self.cast_ghour_list
+
+    def is_tea_drinkable(self) -> bool:
+        """Check if it has been a long time since the last tea consumption.
+
+        :return: True if long enough, False otherwise
+        :rtype: bool
+        """
+        if time.time() - self.pre_tea_drink_time > TEA_DRINK_DELAY:
+            self.pre_tea_drink_time = time.time()
+            return True
+        return False
+
+    def is_alcohol_drinkable(self, alcohol_drink_delay) -> bool:
+        """Check if it has been a long time since the last alcohol consumption.
+
+        :return: True if long enough, False otherwise
+        :rtype: bool
+        """
+        if time.time() - self.pre_alcohol_drink_time > alcohol_drink_delay:
+            self.pre_alcohol_drink_time = time.time()
+            self.pre_tea_drink_time = time.time() # no need to drink tea so fast
+            return True
+        return False
