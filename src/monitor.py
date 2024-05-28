@@ -180,7 +180,7 @@ class Monitor:
         """
         return self._locate_single_image_box(food, 0.8)
 
-    def get_boat_ticket_position(self, duration: int) -> Box | None:
+    def get_ticket_position(self, duration: int) -> Box | None:
         """Locate the image of boat ticket according to the given duration.
 
         :param duration: duration of boat ticket

@@ -36,6 +36,8 @@ DIG_TIMEOUT = 32
 LOOP_DELAY = 2
 ANIMATION_DELAY = 0.5
 LURE_ADJUST_DELAY = 4
+DISCONNECTED_DELAY = 8
+WEAR_TEXT_UPDATE_DELAY = 2
 
 class Player:
     """Main interface of fishing loops and stages."""
@@ -63,6 +65,7 @@ class Player:
             self.puller = self.tackle.telescopic_pull
         else:
             self.puller = self.tackle.general_pull
+        self.special_cast_miss = self.setting.fishing_strategy in ["bottom", "marine"]
 
         # fish count and bite rate
         self.cast_miss_count = 0
@@ -288,7 +291,7 @@ class Player:
 
         if self.cur_coffee_count > self.setting.coffee_limit:
             pag.press("esc")  # back to control panel to reduce power usage
-            self.handle_termination("Coffee limit reached")
+            self.handle_termination("Coffee limit reached", shutdown=False)
 
         logger.info("Consume coffee")
         self._access_item("coffee")
@@ -310,7 +313,7 @@ class Player:
         # key = 1, item is a food
         with pag.hold("t"):
             sleep(ANIMATION_DELAY)
-            food_position = getattr(self.monitor, "get_food_position")(item)
+            food_position = self.monitor.get_food_position(item)
             pag.moveTo(food_position)
             pag.click()
 
@@ -359,26 +362,32 @@ class Player:
         logger.warning(msg)
         match self.setting.lure_broken_action:
             case "alarm":
-                self.handle_termination(msg)
+                self.handle_termination(msg, shutdown=False)
             case "replace":
                 self.replace_broken_lures()
                 return
             case "quit":
                 self.general_quit(msg) #todo: merge with handle_termination
+            case _:
+                raise ValueError
 
-    def handle_termination(self, msg: str) -> None:
+    def handle_termination(self, msg: str, shutdown: bool) -> None:
         """Send email and plot diagram, quit the game if necessary
 
         :param msg: quit message
-        :type msg: str
+        :type msg:
+        :param shutdown: whether to shutdown the computer or not
+        :type shutdown: bool
         """
         #todo: quit game?
         result = self.gen_result(msg)
-        print(result)
         if self.setting.email_sending_enabled:
             self.send_email(result)
         if self.setting.plotting_enabled:
             self.plot_and_save()
+        if shutdown and self.setting.shutdown_enabled:
+            os.system("shutdown /s /t 5")
+        print(result)
         sys.exit()
 
 
@@ -502,43 +511,49 @@ class Player:
 
     def handle_fish(self) -> None:
         """Keep or release the fish and record the fish count."""
-
         #! a trophy ruffe will break the checking mechanism
+        msg, key = "Keep the fish", "space"
         if self.monitor.is_fish_green_marked():
             self.marked_fish_count += 1
         else:
             self.unmarked_fish_count += 1
-            if self.unmarked_release_enabled:
-                if not self._is_fish_in_whitelist():
-                    logger.info("Release unmarked fish")
-                    pag.press("backspace")
-                    return
+            if self.setting.unmarked_release_enabled:
+                if not self._is_fish_whitelisted():
+                    msg, key = "Release the fish", "backspace"
 
-        # fish is marked or enable_unmarked_release is set to False
-        sleep(self.keep_fish_delay)
-        logger.info("Keep the fish")
-        pag.press("space")
+        sleep(self.setting.keep_fish_delay)
+        logger.info(msg)
+        pag.press(key)
 
-        # avoid wrong cast hour
-        if self.fishing_strategy in ["bottom", "marine"]:
-            self.timer.update_cast_hour()
-        self.timer.add_cast_hour()
+        if key == 'backspace':
+            return
 
         self.keep_fish_count += 1
         if self.keep_fish_count == self.fishes_to_catch:
-            msg = "Keepnet is full"
-            if self.keepnet_full_action == "alarm":
-                logger.warning(msg)
-                playsound(str(Path(self.alarm_sound_file_path).resolve()))
-            elif self.keepnet_full_action == "quit":
-                self.general_quit(msg)
+            self._handle_full_keepnet()
 
-    def _is_fish_in_whitelist(self):
-        if self.unmarked_release_whitelist[0] == "None":
+        # avoid wrong cast hour
+        if self.special_cast_miss:
+            self.timer.update_cast_hour()
+        self.timer.add_cast_hour()
+
+    def _handle_full_keepnet(self):
+        msg = "Keepnet is full"
+        match self.setting.keepnet_full_action:
+            case "alarm":
+                logger.warning(msg)
+                playsound(str(Path(self.setting.alarm_sound_file).resolve()))
+            case "quit":
+                self.general_quit(msg)
+            case _:
+                raise ValueError
+
+    def _is_fish_whitelisted(self):
+        if self.setting.unmarked_release_whitelist[0] == "None":
             return False
 
-        for fish_name in self.unmarked_release_whitelist:
-            if getattr(monitor, f"is_fish_{fish_name}")():
+        for species in self.setting.unmarked_release_whitelist:
+            if self.monitor.is_fish_species_matched(species):
                 return True
         return False
 
@@ -546,61 +561,42 @@ class Player:
     #                                     misc                                     #
     # ---------------------------------------------------------------------------- #
 
-    def general_quit(self, termination_cause: str) -> None:
-        """Show the running result with cause of termination,
-            then quit the game through control panel.
+    def general_quit(self, msg: str) -> None:
+        """Quit the game through control panel.
 
-        :param termination_cause: the cause of the termination
-        :type termination_cause: str
+        :param msg: the cause of the termination
+        :type msg: str
         """
-        sleep(2)  # pre-delay
+        sleep(ANIMATION_DELAY)  # pre-delay
         pag.press("esc")
         pag.click()  # prevent possible stuck
-        sleep(4)
-        pag.moveTo(monitor.get_quit_position())
+        sleep(ANIMATION_DELAY)
+        pag.moveTo(self.monitor.get_quit_position())
         pag.click()
-        sleep(4)
-        pag.moveTo(monitor.get_yes_position())
+        sleep(ANIMATION_DELAY)
+        pag.moveTo(self.monitor.get_yes_position())
         pag.click()
 
-        result = self.gen_result(termination_cause)
-        if self.email_sending_enabled:
-            self.send_email(result)
-        if self.plotting_enabled:
-            self.plot_and_save()
-
-        if self.shutdown_enabled:
-            os.system("shutdown /s /t 5")
-        print(result)
-        sys.exit()
+        self.handle_termination(msg, shutdown=True)
 
     def disconnected_quit(self) -> None:
-        """show the running result with disconnected status,
-        then quit the game through main menu.
+        """Quit the game through main menu.
         """
+        pag.click() # release possible clicklock
         pag.press("space")
-        sleep(2)
-
         # sleep to bypass the black screen (experimental)
-        sleep(10)
+        sleep(DISCONNECTED_DELAY)
 
         pag.press("space")
-        sleep(2)
+        sleep(ANIMATION_DELAY)
 
-        pag.moveTo(monitor.get_exit_icon_position())
+        pag.moveTo(self.monitor.get_exit_icon_position())
         pag.click()
-        sleep(2)
-        pag.moveTo(monitor.get_confirm_exit_icon_position())
+        sleep(ANIMATION_DELAY)
+        pag.moveTo(self.monitor.get_confirm_exit_icon_position())
         pag.click()
 
-        result = self.gen_result("Disconnection")
-        if self.email_sending_enabled:
-            self.send_email(result)
-
-        if self.shutdown_enabled:
-            os.system("shutdown /s /t 5")
-        print(result)
-        sys.exit()
+        self.handle_termination("Game disconnected", shutdown=True)
 
     def gen_result(self, termination_cause: str) -> PrettyTable:
         """Generate a PrettyTable object for logging and email based on running results.
@@ -616,7 +612,6 @@ class Player:
         table = PrettyTable(header=False, align="l")
         table.title = "Running Results"
         # table.field_names = ['Record', 'Value']
-
         table.add_rows(
             [
                 ["Cause of termination", termination_cause],
@@ -657,7 +652,7 @@ class Player:
         return table
 
     def send_email(self, table: PrettyTable) -> None:
-        """Send an notification email to the user's email address that specified in ".env".
+        """Send a notification email to the user's email address.
 
         :param table: table consisting cause of termination and run-time records
         :type table: PrettyTable
@@ -674,19 +669,14 @@ class Player:
         msg["From"] = sender
         recipients = [sender]
         msg["To"] = ", ".join(recipients)
-
-        # content
-        html = MIMEText(table.get_html_string(), "html")
-        msg.attach(html)
+        msg.attach(MIMEText(table.get_html_string(), "html"))
 
         # send email with SMTP
         with smtplib.SMTP_SSL(smtp_server_name, 465) as smtp_server:
             # smtp_server.ehlo()
             smtp_server.login(sender, password)
             smtp_server.sendmail(sender, recipients, msg.as_string())
-        print(
-            "An email containing the running results has been sent to your email address"
-        )
+        print("A notification email has been sent to your email address")
 
     def save_screenshot(self) -> None:
         """Save screenshot to screenshot/, only be invoked when the tackle is broke."""
@@ -734,22 +724,18 @@ class Player:
     def handle_expired_ticket(self):
         """Select and use the ticket according to boat_ticket_duration argument."""
         if self.setting.boat_ticket_duration is None:
-            #todo: refactor this
             pag.press("esc")
             sleep(ANIMATION_DELAY)
             self.general_quit("Boat ticket expired")
 
         logger.info("Renewing boat ticket")
-        ticket_loc = monitor.get_boat_ticket_position(self.boat_ticket_duration)
+        ticket_loc = self.monitor.get_ticket_position(self.setting.boat_ticket_duration)
         if ticket_loc is None:
             pag.press("esc")  # quit ticket menu
-            sleep(2)
+            sleep(ANIMATION_DELAY)
             self.general_quit("Boat ticket not found")
         pag.moveTo(ticket_loc)
-        pag.click(
-            clicks=2, interval=0.1
-        )  # interval is required, doubleClick() not implemented
-        sleep(4)  # wait for animation
+        pag.click(clicks=2, interval=0.1)  # pag.doubleClick() not implemented
         sleep(ANIMATION_DELAY)
 
     def replace_broken_lures(self):
@@ -757,9 +743,9 @@ class Player:
         logger.info("Replacing broken lures")
         # open tackle menu
         pag.press("v")
-        sleep(0.25)
+        sleep(ANIMATION_DELAY)
 
-        scrollbar_position = monitor.get_scrollbar_position()
+        scrollbar_position = self.monitor.get_scrollbar_position()
         if scrollbar_position is None:
             logger.info("Scroll bar not found, changing lures for normal rig")
             while self.open_broken_lure_menu():
@@ -779,7 +765,7 @@ class Player:
                 replaced = True
 
             if replaced:
-                pag.moveTo(monitor.get_scrollbar_position())
+                pag.moveTo(self.monitor.get_scrollbar_position())
         pag.press("v")
         sleep(ANIMATION_DELAY)
 
@@ -790,7 +776,7 @@ class Player:
         :rtype: bool
         """
         logger.info("Searching for broken lure")
-        broken_item_position = monitor.get_100wear_position()
+        broken_item_position = self.monitor.get_100wear_position()
         if broken_item_position is None:
             logger.warning("Broken lure not found")
             return False
@@ -798,26 +784,24 @@ class Player:
         # click item to open selection menu
         logger.info("Broken lure found")
         pag.moveTo(broken_item_position)
-        sleep(0.25)
+        sleep(ANIMATION_DELAY)
         pag.click()
-        sleep(0.25)
+        sleep(ANIMATION_DELAY)
         return True
 
     def replace_selected_item(self) -> None:
         """Search for favorite items for replacement and skip the broken ones."""
-        # iterate through favorite items for replacement
-        favorite_item_positions = monitor.get_favorite_item_positions()
-
         logger.info("Search for favorite items")
+        favorite_item_positions = self.monitor.get_favorite_item_positions()
         while True:
             favorite_item_position = next(favorite_item_positions, None)
             if favorite_item_position is None:
                 msg = "Lure for replacement not found"
                 logger.warning(msg)
                 pag.press("esc")
-                sleep(0.25)
+                sleep(ANIMATION_DELAY)
                 pag.press("esc")
-                sleep(0.25)
+                sleep(ANIMATION_DELAY)
                 self.general_quit(msg)
 
             # box -> x, y, np.int64 -> int
@@ -829,10 +813,9 @@ class Player:
             # check if the lure for replacement is already broken
             if pag.pixel(x - 75, y + 190) != (178, 59, 30):  # magic value
                 logger.info("The broken lure has been replaced")
-                # pag.moveTo(x - 75, y + 200) # ?
                 pag.moveTo(x - 75, y + 190)
                 pag.click(clicks=2, interval=0.1)
-                sleep(2)  # wait for wear text to update
+                sleep(WEAR_TEXT_UPDATE_DELAY)
                 break
             logger.warning("Lure for replacement found but already broken")
 
