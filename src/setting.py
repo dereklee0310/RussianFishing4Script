@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 # -------------------- attribute name - column name - type ------------------- #
 GENERAL_CONFIGS = (
     ("language", "Language", str),
-    ("enable_confirmation", "Enable confirmation", bool),
+    ("confirmation_enabled", "Enable confirmation", bool),
     ("keepnet_limit", "Keepnet limit", int),
     ("coffee_limit", "Coffee limit", int),
     ("keep_fish_delay", "Keep fish delay", float),
@@ -47,7 +47,8 @@ SHORTCUTS = (
 COMMON_CONFIGS = (
     ("fishing_strategy", "Fishing strategy", str),
     ("cast_power_level", "Cast power level", float),
-    ("post_acceleration", "Post-acceleration", bool),
+    ("cast_delay", "Cast delay", float),
+    ("post_acceleration", "Post-acceleration", str),
 )
 
 SPECIAL_CONFIGS = {
@@ -74,7 +75,14 @@ SPECIAL_CONFIGS = {
         ("pull_delay", "Pull delay", float),
         ("drifting_timeout", "Drifting timeout", float),
     ),
-    "wakey_rig": (),
+    "wakey_rig": (
+        ("sink_timeout", "Sink timeout", float),
+        ("pirk_duration", "Pirk duration", float),
+        ("pirk_delay", "Pirk delay", float),
+        ("pirk_timeout", "Pirk timeout", float),
+        ("tighten_duration", "Tighten duration", float),
+        ("fish_hooked_delay", "Fish hooked delay", float),
+    ),
 }
 
 

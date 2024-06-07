@@ -117,7 +117,7 @@ class App:
 
 if __name__ == "__main__":
     app = App()
-    if app.setting.enable_confirmation:
+    if app.setting.confirmation_enabled:
         script.ask_for_confirmation()
     app.setting.window_controller.activate_game_window()
     try:

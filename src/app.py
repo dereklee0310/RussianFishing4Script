@@ -333,7 +333,7 @@ if __name__ == "__main__":
     app.display_args()
     app.display_user_configs()
 
-    if app.setting.enable_confirmation:
+    if app.setting.confirmation_enabled:
         script.ask_for_confirmation("Do you want to continue with the settings above")
     app.setting.window_controller.activate_game_window()
 

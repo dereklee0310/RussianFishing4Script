@@ -122,17 +122,13 @@ def initialize_setting_and_monitor(args_map: tuple[tuple]) -> None:
 
 
 def toggle_clicklock(func):
-    """Toggle clicklock before and after calling the function.
+    """Toggle clicklock before and after calling the function."""
 
-    :param msg: message for logger
-    :type msg: str
-    """
-
-    def wrapper(self):
+    def wrapper(self, *args):
         pag.mouseDown()
         sleep(BASE_DELAY + LOOP_DELAY)
         try:
-            func(self)
+            func(self, *args)
             pag.click()
         except Exception as e:
             pag.click()
@@ -142,16 +138,12 @@ def toggle_clicklock(func):
 
 
 def toggle_right_mouse_button(func):
-    """Toggle clicklock before and after calling the function.
+    """Toggle clicklock before and after calling the function."""
 
-    :param msg: message for logger
-    :type msg: str
-    """
-
-    def wrapper(self):
+    def wrapper(self, *args):
         pag.mouseDown(button="right")
         try:
-            func(self)
+            func(self, *args)
             pag.mouseUp(button="right")
         except Exception as e:
             pag.mouseUp(button="right")
@@ -161,18 +153,27 @@ def toggle_right_mouse_button(func):
 
 
 def release_shift_key(func):
-    """Release shift key after calling the function.
+    """Release shift key after calling the function."""
 
-    :param msg: message for logger
-    :type msg: str
-    """
-
-    def wrapper(self):
+    def wrapper(self, *args):
         try:
-            func(self)
+            func(self, *args)
             pag.keyUp("shift")
         except Exception as e:
             pag.keyUp("shift")
+            raise e
+
+    return wrapper
+
+def release_ctrl_key(func):
+    """Release ctrl key after calling the function."""
+
+    def wrapper(self, *args):
+        try:
+            func(self, *args)
+            pag.keyUp("ctrl")
+        except Exception as e:
+            pag.keyUp("ctrl")
             raise e
 
     return wrapper

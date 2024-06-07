@@ -189,8 +189,8 @@ class Player:
             self._pirking_stage()
             self._retrieving_stage()
             if self.monitor.is_fish_hooked():
-                self._drinking_stage()
-                self.pulling_stage()
+                self._drink_alcohol()
+                self._pulling_stage()
 
     # this is not done yet :(
     # def trolling_fishing(self) -> None:
@@ -399,12 +399,12 @@ class Player:
         if self.monitor.is_retrieval_finished():
             return
 
-        gear_ratio_switched = False
-
+        first = False
+        gr_switched = False
         self.cur_coffee_count = 0
         while True:
             try:
-                self.tackle.retrieve()
+                self.tackle.retrieve(first)
                 break
             except exceptions.FishCapturedError:
                 self._handle_fish()
@@ -413,22 +413,23 @@ class Player:
                 self.general_quit("Fishing line is at its end")
             except TimeoutError:
                 self._handle_timeout()
-                if self.setting.gr_switching_enabled and not gear_ratio_switched:
+                first = False
+                if self.setting.gr_switching_enabled and not gr_switched:
                     self.tackle.switch_gear_ratio()
-                    gear_ratio_switched = True
-                # toggle accelerated mode after first timeout
+                    gr_switched = True
                 pag.keyUp("shift")
                 self._drink_coffee()
 
         pag.keyUp("shift")
-        if gear_ratio_switched:
+        if gr_switched:
             self.tackle.switch_gear_ratio()
 
     def _pirking_stage(self) -> None:
         """Perform pirking till a fish hooked, adjust the lure if timeout is reached."""
+        ctrl_enabled = self.setting.fishing_strategy == "wakey_rig"
         while True:
             try:
-                self.tackle.pirk()
+                self.tackle.pirk(ctrl_enabled)
                 break
             except TimeoutError:
                 self._handle_timeout()

@@ -10,15 +10,20 @@ import pyautogui as pag
 from pynput import keyboard
 
 from windowcontroller import WindowController  # pylint: disable=c-extension-no-member
-from script import ask_for_confirmation
+import script
 
+# ------------------ flag name, attribute name, description ------------------ #
+ARGS = (
+    ("shift", "shift_key_holding_enabled", "_"),
+)
 
 class App:
     """Main application class."""
 
+    @script.initialize_setting_and_monitor(ARGS)
     def __init__(self):
         """Initialize moving flag."""
-        self.w_key_pressed = False
+        self.w_key_pressed = True
 
     def parse_args(self) -> argparse.Namespace:
         """Cofigure argparser and parse the command line arguments.
@@ -52,22 +57,23 @@ class App:
         if str(key).lower() != "'w'":
             return
 
-        if w_key_pressed:
-            w_key_pressed = False
+        if self.w_key_pressed:
+            self.w_key_pressed = False
             return
 
         pag.keyDown("w")
-        w_key_pressed = True
+        self.w_key_pressed = True
 
 
 if __name__ == "__main__":
     app = App()
-    shift_holding_enabled = app.parse_args().shift
+    shift_key_holding_enabled = app.parse_args().shift
 
-    ask_for_confirmation("Are you ready to start moving")
+    if app.setting.confirmation_enabled:
+        script.ask_for_confirmation()
     WindowController().activate_game_window()
 
-    if shift_holding_enabled:
+    if shift_key_holding_enabled:
         pag.keyDown("shift")
     pag.keyDown("w")
 
@@ -76,7 +82,7 @@ if __name__ == "__main__":
         listener.join()
 
     pag.keyUp("w")
-    if shift_holding_enabled:
+    if shift_key_holding_enabled:
         pag.keyUp("shift")
 
 # press/release detection

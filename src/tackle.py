@@ -26,7 +26,6 @@ LOOP_DELAY = 2
 RETRIEVAL_TIMEOUT = 64
 PULL_TIMEOUT = 32
 RETRIEVAL_WITH_PAUSE_TIMEOUT = 128
-FLY_SINK_DELAY = 6
 LIFT_DURATION = 3
 TELESCOPIC_RETRIEVAL_TIMEOUT = 8
 LANDING_NET_DURATION = 6
@@ -89,7 +88,7 @@ class Tackle:
                 duration = CAST_SCALE * (self.setting.cast_power_level - 1)
                 script.hold_left_click(duration)
 
-        sleep(FLY_SINK_DELAY)
+        sleep(self.setting.cast_delay)
         self.timer.update_cast_hour()
 
     def sink(self, marine: bool = True) -> None:
@@ -106,13 +105,14 @@ class Tackle:
                 logger.info("Lure reached bottom layer")
                 break
 
-            if self._check_hooking_twice():
+            if self.is_fish_hooked_twice():
                 logger.info("Fish hooked")
                 pag.click()
+                return
 
         script.hold_left_click(self.setting.tighten_duration)
 
-    def _check_hooking_twice(self) -> bool:
+    def is_fish_hooked_twice(self) -> bool:
         if not self.monitor.is_fish_hooked():
             return False
 
@@ -123,9 +123,12 @@ class Tackle:
         return False
 
     @script.toggle_clicklock
-    def retrieve(self) -> None:
+    @script.release_shift_key
+    def retrieve(self, first: bool=True) -> None:
         """Retrieve the line till the end is reached and detect unexpected events.
 
+        :param first: whether it's invoked for the first time, defaults to True
+        :type first: bool, optional
         :raises exceptions.FishCapturedError: a fish is captured
         :raises exceptions.LineAtEndError: line is at its end
         :raises exceptions.TimeoutError: loop timed out
@@ -135,10 +138,13 @@ class Tackle:
         i = RETRIEVAL_TIMEOUT
         while i > 0:
             if self.monitor.is_fish_hooked():
+                if self.setting.post_acceleration == "always":
+                    pag.keyDown("shift")
+                elif self.setting.post_acceleration == "auto" and first:
+                    pag.keyDown("shift")
+
                 if self.setting.lifting_enabled:
                     script.hold_right_click(LIFT_DURATION)
-                if self.setting.post_acceleration:
-                    pag.keyDown("shift")
 
             if self.monitor.is_retrieval_finished():
                 finish_delay = 0 if self.setting.rainbow_line_enabled else 2
@@ -154,6 +160,7 @@ class Tackle:
 
         raise TimeoutError
 
+    @script.release_shift_key
     def retrieve_with_pause(self) -> None:
         """Retreive the line, pause periodically."""
         logger.info("Retrieving with pause")
@@ -168,22 +175,31 @@ class Tackle:
             if self.monitor.is_fish_hooked():
                 return
 
-    @script.release_shift_key
-    def pirk(self) -> None:
+    @script.release_ctrl_key
+    def pirk(self, ctrl_enabled: bool) -> None:
         """Start pirking until a fish is hooked.
 
+        :param ctrl_enabled: whether to hold ctrl key during pirking
+        :type ctrl_enabled: bool
         :raises TimeoutError: loop timed out
         """
         logger.info("Pirking")
 
+        lift_enabled = self.setting.pirk_duration != 0 or self.setting.pirk_delay != 0
         i = self.setting.pirk_timeout
         while i > 0:
-            script.hold_right_click(self.setting.pirk_duration)
-            i = script.sleep_and_decrease(i, self.setting.pirk_delay)
-
-            if self._check_hooking_twice():
+            if self.is_fish_hooked_twice():
                 logger.info("Fish hooked")
                 pag.click()
+                return
+
+            if lift_enabled:
+                if ctrl_enabled:
+                    pag.keyDown('ctrl')
+                script.hold_right_click(self.setting.pirk_duration)
+                i = script.sleep_and_decrease(i, self.setting.pirk_delay)
+            else:
+                i = script.sleep_and_decrease(i, LOOP_DELAY)
 
         raise TimeoutError
 
