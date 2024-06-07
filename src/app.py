@@ -10,18 +10,22 @@ Usage: app.py
 import os
 import sys
 import shlex
+import signal
 import logging
 import smtplib
 from pathlib import Path
 from socket import gaierror
 from argparse import ArgumentParser
 
-from dotenv import load_dotenv
+import pyautogui as pag
+from pynput import keyboard
 from prettytable import PrettyTable
+from dotenv import load_dotenv
 
+import script
 from player import Player
 from setting import Setting, COMMON_CONFIGS, SPECIAL_CONFIGS
-from script import ask_for_confirmation
+
 
 # logging.BASIC_FORMAT: %(levelname)s:%(name)s:%(message)s
 # timestamp: %(asctime)s, datefmt='%Y-%m-%d %H:%M:%S',
@@ -308,10 +312,20 @@ class App:
             table.add_row([column_name, attribute_value])
         print(table)
 
+    def on_release(self, key: keyboard.KeyCode) -> None:
+        """Callback for button release.
+
+        :param key: key code used by OS
+        :type key: keyboard.KeyCode
+        """
+        if key == keyboard.KeyCode.from_char(self.setting.quit_shortcut):
+            logger.info("Shutting down...")
+            os.kill(os.getpid(), signal.CTRL_C_EVENT)
+            sys.exit()
+
 
 if __name__ == "__main__":
     app = App()
-
     if app.pid is None:
         app.display_available_profiles()
         app.ask_for_pid()
@@ -320,20 +334,21 @@ if __name__ == "__main__":
     app.display_user_configs()
 
     if app.setting.enable_confirmation:
-        ask_for_confirmation("Do you want to continue with the settings above")
+        script.ask_for_confirmation("Do you want to continue with the settings above")
     app.setting.window_controller.activate_game_window()
+
+    if app.setting.quit_shortcut != "Ctrl-C":
+        listener = keyboard.Listener(on_release=app.on_release, suppress=True)
+        listener.start()
+
     try:
         app.player.start_fishing()
     except KeyboardInterrupt:
-        # avoid shift key stuck
-        if (
-            app.setting.fishing_strategy == "spin_with_pause"
-            and app.setting.acceleration_enabled
-        ):
-            import pyautogui as pag
+        pass
 
-            pag.keyUp("shift")
-        print(app.gen_result("Terminated by user"))
-        if app.setting.plotting_enabled:
-            app.plot_and_save()
-        sys.exit()
+    pag.keyUp("shift")  # avoid shift key stuck
+    print(app.player.gen_result("Terminated by user"))
+    if app.setting.plotting_enabled:
+        app.plot_and_save()
+
+# CTRL_C_EVENT reference: https://stackoverflow.com/questions/58455684/

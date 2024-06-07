@@ -6,7 +6,15 @@ import sys
 from time import sleep
 
 import pyautogui as pag
+from pyscreeze import Box
 from prettytable import PrettyTable
+
+from setting import Setting
+from monitor import Monitor
+
+# BASE_DELAY + LOOP_DELAY >= 2.2 to trigger clicklock
+BASE_DELAY = 1
+LOOP_DELAY = 2
 
 
 def hold_left_click(duration: float = 1) -> None:
@@ -47,35 +55,127 @@ def sleep_and_decrease(num: int, delay: int) -> int:
     return num - delay
 
 
-def ask_for_confirmation(msg: str) -> None:
+def ask_for_confirmation(msg: str = "Ready to start") -> None:
     """Ask for confirmation of user settings if it's enabled.
 
-    :param msg: confirmation message
+    :param msg: confirmation message, defaults to "Ready to start"
     :type msg: str
     """
+
     while True:
         ans = input(f"{msg}? [Y/n] ").strip().lower()
         if ans == "y":
-            print("The bot has been started")
             break
         if ans == "n":  # quit only when the input is 'n'
-            print("The bot has been terminated")
             sys.exit()
 
 
 def display_running_results(app: object, result_map: tuple[tuple]) -> None:
     """Display the running results of different apps.
 
-    :param app: caller app
+    :param app: caller object
     :type app: object
     :param result_map: attribute name - column name mapping
     :type result_map: tuple[tuple]
     """
     table = PrettyTable(header=False, align="l")
     table.title = "Running Results"
+    # table.field_names = ['Record', 'Value']
     for attribute_name, column_name in result_map:
         table.add_row([column_name, getattr(app, attribute_name)])
     print(table)
+
+
+def get_box_center(box: Box) -> tuple[int, int]:
+    """Get the center coordinate (x, y) of the given box.
+
+    # (x, y, w, h) -> (x, y), np.int64 -> int
+
+    :param box: box coordinates (x, y, w, h)
+    :type box: Box
+    :return: x and y coordinates of the center point
+    :rtype: tuple[int, int]
+    """
+    return int(box.left + box.width // 2), int(box.top + box.height // 2)
+
+
+def initialize_setting_and_monitor(args_map: tuple[tuple]) -> None:
+    """Initialize a setting node and a screen monitor for given application.
+
+    This is a simple decorator that used for constructors in harvest and craft modules.
+
+    :param args_map: args lookup table
+    :type args_map: tuple[tuple]
+    """
+
+    def func_wrapper(func):
+        def args_wrapper(caller):
+            args = caller.parse_args()
+            caller.setting = Setting()
+            caller.setting.merge_args(args, args_map)
+            caller.monitor = Monitor(caller.setting)
+            func(caller)
+
+        return args_wrapper
+
+    return func_wrapper
+
+
+def toggle_clicklock(func):
+    """Toggle clicklock before and after calling the function.
+
+    :param msg: message for logger
+    :type msg: str
+    """
+
+    def wrapper(self):
+        pag.mouseDown()
+        sleep(BASE_DELAY + LOOP_DELAY)
+        try:
+            func(self)
+            pag.click()
+        except Exception as e:
+            pag.click()
+            raise e
+
+    return wrapper
+
+
+def toggle_right_mouse_button(func):
+    """Toggle clicklock before and after calling the function.
+
+    :param msg: message for logger
+    :type msg: str
+    """
+
+    def wrapper(self):
+        pag.mouseDown(button="right")
+        try:
+            func(self)
+            pag.mouseUp(button="right")
+        except Exception as e:
+            pag.mouseUp(button="right")
+            raise e
+
+    return wrapper
+
+
+def release_shift_key(func):
+    """Release shift key after calling the function.
+
+    :param msg: message for logger
+    :type msg: str
+    """
+
+    def wrapper(self):
+        try:
+            func(self)
+            pag.keyUp("shift")
+        except Exception as e:
+            pag.keyUp("shift")
+            raise e
+
+    return wrapper
 
 
 # ! archived

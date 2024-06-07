@@ -7,6 +7,7 @@ import datetime
 
 TEA_DRINK_DELAY = 300
 
+
 class Timer:
     """Class for calculating and generatiing timestamps for logs."""
 
@@ -85,8 +86,9 @@ class Timer:
         :return: True if long enough, False otherwise
         :rtype: bool
         """
-        if time.time() - self.pre_tea_drink_time > TEA_DRINK_DELAY:
-            self.pre_tea_drink_time = time.time()
+        cur_time = time.time()
+        if cur_time - self.pre_tea_drink_time > TEA_DRINK_DELAY:
+            self.pre_tea_drink_time = cur_time
             return True
         return False
 
@@ -98,6 +100,6 @@ class Timer:
         """
         if time.time() - self.pre_alcohol_drink_time > alcohol_drink_delay:
             self.pre_alcohol_drink_time = time.time()
-            self.pre_tea_drink_time = time.time() # no need to drink tea so fast
+            self.pre_tea_drink_time = time.time()  # no need to drink tea so fast
             return True
         return False

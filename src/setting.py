@@ -40,12 +40,14 @@ SHORTCUTS = (
     ("shovel_spoon", "shovel_spoon_shortcut"),
     ("alcohol", "alcohol_shortcut"),
     ("bottom_rods", "bottom_rods_shortcuts"),
+    ("quit_shortcut", "quit_shortcut"),
 )
 
 # -------------------- attribute name - column name - type ------------------- #
 COMMON_CONFIGS = (
     ("fishing_strategy", "Fishing strategy", str),
     ("cast_power_level", "Cast power level", float),
+    ("post_acceleration", "Post-acceleration", bool),
 )
 
 SPECIAL_CONFIGS = {
@@ -53,8 +55,9 @@ SPECIAL_CONFIGS = {
     "spin_with_pause": (
         ("retrieval_duration", "Retrieval duration", float),
         ("retrieval_delay", "Retrieval delay", float),
+        ("retrieval_timeout", "Retrieval timeout", float),
         ("base_iteration", "Base iteration", float),
-        ("acceleration_enabled", "Acceleration enabled", bool),
+        ("pre_acceleration", "Pre-acceleration", bool),
     ),
     "bottom": (("check_delay", "Check delay", float),),
     "marine": (
@@ -109,7 +112,6 @@ class Setting:
                 attribute_value = section.get(attribute_name) == "True"
             else:
                 attribute_value = var_type(section.get(attribute_name))
-
             setattr(self, attribute_name, attribute_value)
 
         self.unmarked_release_whitelist = [

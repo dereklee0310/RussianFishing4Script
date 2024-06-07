@@ -15,9 +15,6 @@ from datetime import datetime
 import pyautogui as pag
 
 import script
-from monitor import Monitor
-from setting import Setting
-
 
 # ------------------ flag name, attribute name, description ------------------ #
 ARGS = (
@@ -36,16 +33,12 @@ RESULTS = (
 class App:
     """Main application class."""
 
+    @script.initialize_setting_and_monitor(ARGS)
     def __init__(self):
         """Initialize counters and merge args into setting node."""
-        args = self.parse_args()
-        self.setting = Setting()
-        self.setting.merge_args(args, ARGS)
-        self.monitor = Monitor(self.setting)
-
-        self.craft_count = 0
         self.success_count = 0
         self.fail_count = 0
+        self.craft_count = 0
 
     def parse_args(self) -> argparse.Namespace:
         """Cofigure argparser and parse the command line arguments.
@@ -66,18 +59,15 @@ class App:
         )
         return parser.parse_args()
 
-    def start_crafting_loop(self) -> None:
+    def start_crafting(self) -> None:
         """Main crafting loop."""
         random.seed(datetime.now().timestamp())
-        monitor = self.monitor
-        setting = self.setting
-
-        pag.moveTo(monitor.get_make_position())
+        pag.moveTo(self.monitor.get_make_position())
         while True:
             pag.click()  # click make button
 
             # recipe not complete
-            if monitor.is_operation_failed():
+            if self.monitor.is_operation_failed():
                 pag.press("space")
                 break
 
@@ -85,11 +75,11 @@ class App:
             delay = random.uniform(4, 6)
             sleep(delay)
             while True:
-                if monitor.is_operation_success():
+                if self.monitor.is_operation_success():
                     self.success_count += 1
                     break
 
-                if monitor.is_operation_failed():
+                if self.monitor.is_operation_failed():
                     self.fail_count += 1
                     break
                 sleep(0.25)
@@ -98,7 +88,7 @@ class App:
             # handle result
             key = "backspace" if self.setting.discard_enabled else "space"
             pag.press(key)
-            if self.craft_count == setting.craft_limit:
+            if self.craft_count == self.setting.craft_limit:
                 break
             sleep(0.25)  # wait for animation
 
@@ -107,10 +97,10 @@ if __name__ == "__main__":
     app = App()
     if app.setting.enable_confirmation:
         print(app.setting.enable_confirmation)
-        script.ask_for_confirmation("Are you ready to start crafting")
+        script.ask_for_confirmation()
     app.setting.window_controller.activate_game_window()
     try:
-        app.start_crafting_loop()
+        app.start_crafting()
     except KeyboardInterrupt:
         pass
     script.display_running_results(app, RESULTS)
