@@ -2,9 +2,9 @@
 Module for SettingHandler class, not used yet.
 """
 
-import pathlib
-import logging
 import configparser
+import logging
+import pathlib
 from argparse import Namespace
 
 from windowcontroller import WindowController
@@ -14,9 +14,13 @@ logger = logging.getLogger(__name__)
 # -------------------- attribute name - column name - type ------------------- #
 GENERAL_CONFIGS = (
     ("language", "Language", str),
+    ("window_size", "Window size", str),
+    ("default_arguments", "Default arguments", str),
     ("confirmation_enabled", "Enable confirmation", bool),
-    ("keepnet_limit", "Keepnet limit", int),
+    ("SMTP_validation_enabled", "Enable SMTP validation", bool),
+    ("image_verification_enabled", "Enable image verification", bool),
     ("coffee_limit", "Coffee limit", int),
+    ("keepnet_limit", "Keepnet limit", int),
     ("keep_fish_delay", "Keep fish delay", float),
     ("energy_threshold", "Energy threshold", float),
     ("retrieval_detect_confidence", "Retrieve detect confidence", float),
@@ -25,10 +29,6 @@ GENERAL_CONFIGS = (
     ("lure_broken_action", "Lure broken action", str),
     ("keepnet_full_action", "Keep net full action", str),
     ("alarm_sound_file", "Alarm sound file", str),
-    ("default_arguments", "Default arguments", str),
-    ("window_size", "Window size", str),
-    ("SMTP_validation_enabled", "Enable SMTP validation", bool),
-    ("image_verification_enabled", "Enable image verification", bool),
     ("unmarked_release_whitelist", "Unmarked release whitelist", str),
 )
 
@@ -40,7 +40,7 @@ SHORTCUTS = (
     ("shovel_spoon", "shovel_spoon_shortcut"),
     ("alcohol", "alcohol_shortcut"),
     ("bottom_rods", "bottom_rods_shortcuts"),
-    ("quit_shortcut", "quit_shortcut"),
+    ("quit", "quitting_shortcut"),
 )
 
 # -------------------- attribute name - column name - type ------------------- #
@@ -48,7 +48,7 @@ COMMON_CONFIGS = (
     ("fishing_strategy", "Fishing strategy", str),
     ("cast_power_level", "Cast power level", float),
     ("cast_delay", "Cast delay", float),
-    ("post_acceleration", "Post-acceleration", str),
+    ("post_acceleration_enabled", "Enable post-acceleration", str),
 )
 
 SPECIAL_CONFIGS = {
@@ -56,9 +56,7 @@ SPECIAL_CONFIGS = {
     "spin_with_pause": (
         ("retrieval_duration", "Retrieval duration", float),
         ("retrieval_delay", "Retrieval delay", float),
-        ("retrieval_timeout", "Retrieval timeout", float),
-        ("base_iteration", "Base iteration", float),
-        ("pre_acceleration", "Pre-acceleration", bool),
+        ("pre_acceleration_enabled", "Enable pre-acceleration", bool),
     ),
     "bottom": (("check_delay", "Check delay", float),),
     "marine": (

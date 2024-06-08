@@ -9,8 +9,8 @@ Todo:
 # pylint: disable=missing-function-docstring
 # docstring for every functions? u serious?
 
-import sys
 import logging
+import sys
 
 import pyautogui as pag
 from pyscreeze import Box
@@ -81,7 +81,7 @@ class Monitor:
         return self._locate_single_image_box(species, 0.9)
 
     # ----------------------------- unmarked release ----------------------------- #
-    def is_fish_green_marked(self):
+    def is_fish_marked(self):
         return self._locate_single_image_box("mark", 0.7)
 
     def is_fish_yellow_marked(self):

@@ -4,18 +4,21 @@ Activate game window and start moving forward.
 Usage: move.py, press W to toggle moving, S to quit
 """
 
-import sys
+# pylint: disable=no-member
+# setting node's attributes will be merged on the fly
+
 import argparse
+import sys
+
 import pyautogui as pag
 from pynput import keyboard
 
-from windowcontroller import WindowController  # pylint: disable=c-extension-no-member
 import script
+from windowcontroller import WindowController
 
 # ------------------ flag name, attribute name, description ------------------ #
-ARGS = (
-    ("shift", "shift_key_holding_enabled", "_"),
-)
+ARGS = (("shift", "shift_key_holding_enabled", "_"),)
+
 
 class App:
     """Main application class."""

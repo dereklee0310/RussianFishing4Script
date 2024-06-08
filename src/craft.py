@@ -7,10 +7,10 @@ Usage: craft.py
 # pylint: disable=no-member
 # setting node's attributes will be merged on the fly
 
-import random
 import argparse
-from time import sleep
+import random
 from datetime import datetime
+from time import sleep
 
 import pyautogui as pag
 
@@ -59,7 +59,7 @@ class App:
         )
         return parser.parse_args()
 
-    def start_crafting(self) -> None:
+    def start(self) -> None:
         """Main crafting loop."""
         random.seed(datetime.now().timestamp())
         pag.moveTo(self.monitor.get_make_position())
@@ -94,12 +94,4 @@ class App:
 
 
 if __name__ == "__main__":
-    app = App()
-    if app.setting.confirmation_enabled:
-        script.ask_for_confirmation()
-    app.setting.window_controller.activate_game_window()
-    try:
-        app.start_crafting()
-    except KeyboardInterrupt:
-        pass
-    script.display_running_results(app, RESULTS)
+    script.start_app(App(), RESULTS)

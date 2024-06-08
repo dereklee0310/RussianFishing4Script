@@ -3,7 +3,7 @@
 ![RF4S](static/readme/RF4S.png)
 <h1 align="center">RF4S</h1>
 
-**俄釣4釣魚腳本，支持手竿、水底、路亞以及海釣**
+**俄釣4釣魚腳本，支持手竿、水底、路亞以及海釣模式**
 
 <a target="_blank" href="https://opensource.org/license/gpl-3-0" style="background:none">
     <img src="https://img.shields.io/badge/License-GPLv3-blue.svg" style="height: 22px;" />
@@ -13,6 +13,12 @@
 </a>
 <a target="_blank" href="http://makeapullrequest.com" style="background:none">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat" style="height: 22px;" />
+</a>
+<a target="_blank" href="https://github.com/pylint-dev/pylint" style="background:none">
+    <img src="https://img.shields.io/badge/linting-pylint-yellowgreen" style="height: 22px;" />
+</a>
+<a target="_blank" href="https://github.com/psf/black" style="background:none">
+    <img src="https://img.shields.io/badge/code%20style-black-000000.svg" style="height: 22px;" />
 </a>
 <!-- <a target="_blank" href="link_to_docs, tbd" style="background:none">
     <img src="https://img.shields.io/badge/docs-%23BE1B55" style="height: 22px;" />
@@ -56,11 +62,11 @@ cd "項目路徑"
 - 如果想使用自動替換損壞擬餌的功能，請將用於替換的擬餌加到 **[最愛][Favorite lure]**
 ### 在啟動腳本前...
 - 移動遊戲人物至釣點
-- 手竿/路亞/海釣: 將釣竿拿在手上
+- 手竿/路亞/海釣/維基釣組: 將釣竿拿在手上
 - 水底: 將釣竿添加至快捷鍵 (1 ~ 3)，並在拋竿後將所有釣竿放置於腳色前方
 
 > [!NOTE]
-> 目前手竿模式只支援單竿作釣。
+> 目前手竿及維基釣組模式只支援單竿作釣。
 
 > [!IMPORTANT]
 > 在使用手竿模式時，請將`config.ini`中的`window_size`設為你的遊戲視窗大小。
@@ -107,6 +113,7 @@ python app.py -mrP
 - `-l`: 中魚後收線時頻繁抬桿
 - `-g`: 自動切換傳送比
 - `-R`: 使用彩虹線米數偵測是否收線完畢
+- `-S`: 上魚後截圖並儲存至`screenshots/`資料夾
 - `-n 數量`: 指定當前漁戶內的魚數量以便在滿戶時自動退出，預設為0
 - `-p 模式id`: 指定欲使用的模式id
 ## 其他腳本

@@ -7,8 +7,8 @@ Usage: harvest.py
 # pylint: disable=no-member
 # setting node's attributes will be merged on the fly
 
-import time
 import argparse
+import time
 
 import pyautogui as pag
 
@@ -64,7 +64,7 @@ class App:
         )
         return parser.parse_args()
 
-    def start_harvesting(self) -> None:
+    def start(self) -> None:
         """Main harvesting loop."""
         pag.press(self.setting.shovel_spoon_shortcut)
         time.sleep(3)
@@ -116,12 +116,4 @@ class App:
 
 
 if __name__ == "__main__":
-    app = App()
-    if app.setting.confirmation_enabled:
-        script.ask_for_confirmation()
-    app.setting.window_controller.activate_game_window()
-    try:
-        app.start_harvesting()
-    except KeyboardInterrupt:
-        pass
-    script.display_running_results(app, RESULTS)
+    script.start_app(App(), RESULTS)

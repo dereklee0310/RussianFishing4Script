@@ -8,11 +8,11 @@ from time import sleep
 
 import pyautogui as pag
 
-import script
 import exceptions
-from timer import Timer
-from setting import Setting
+import script
 from monitor import Monitor
+from setting import Setting
+from timer import Timer
 
 logger = logging.getLogger(__name__)
 
@@ -113,6 +113,11 @@ class Tackle:
         script.hold_left_click(self.setting.tighten_duration)
 
     def is_fish_hooked_twice(self) -> bool:
+        """Check if the fish is still hooked after a short delay.
+
+        :return: True if the fish is still hooked, False otherwise
+        :rtype: bool
+        """
         if not self.monitor.is_fish_hooked():
             return False
 
@@ -124,7 +129,7 @@ class Tackle:
 
     @script.toggle_clicklock
     @script.release_shift_key
-    def retrieve(self, first: bool=True) -> None:
+    def retrieve(self, first: bool = True) -> None:
         """Retrieve the line till the end is reached and detect unexpected events.
 
         :param first: whether it's invoked for the first time, defaults to True
@@ -138,9 +143,9 @@ class Tackle:
         i = RETRIEVAL_TIMEOUT
         while i > 0:
             if self.monitor.is_fish_hooked():
-                if self.setting.post_acceleration == "always":
+                if self.setting.post_acceleration_enabled == "always":
                     pag.keyDown("shift")
-                elif self.setting.post_acceleration == "auto" and first:
+                elif self.setting.post_acceleration_enabled == "auto" and first:
                     pag.keyDown("shift")
 
                 if self.setting.lifting_enabled:
@@ -165,14 +170,14 @@ class Tackle:
         """Retreive the line, pause periodically."""
         logger.info("Retrieving with pause")
 
-        if self.setting.pre_acceleration:
+        if self.setting.pre_acceleration_enabled:
             pag.keyDown("shift")
 
-        i = self.setting.retrieval_timeout
+        i = RETRIEVAL_WITH_PAUSE_TIMEOUT
         while i > 0:
             script.hold_left_click(self.setting.retrieval_duration)
             i = script.sleep_and_decrease(i, self.setting.retrieval_delay)
-            if self.monitor.is_fish_hooked():
+            if self.monitor.is_fish_hooked() or self.monitor.is_retrieval_finished():
                 return
 
     @script.release_ctrl_key
@@ -195,7 +200,7 @@ class Tackle:
 
             if lift_enabled:
                 if ctrl_enabled:
-                    pag.keyDown('ctrl')
+                    pag.keyDown("ctrl")
                 script.hold_right_click(self.setting.pirk_duration)
                 i = script.sleep_and_decrease(i, self.setting.pirk_delay)
             else:

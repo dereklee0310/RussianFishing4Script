@@ -14,12 +14,19 @@
 <a target="_blank" href="http://makeapullrequest.com" style="background:none">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat" style="height: 22px;" />
 </a>
+<a target="_blank" href="https://github.com/pylint-dev/pylint" style="background:none">
+    <img src="https://img.shields.io/badge/linting-pylint-yellowgreen" style="height: 22px;" />
+</a>
+<a target="_blank" href="https://github.com/psf/black" style="background:none">
+    <img src="https://img.shields.io/badge/code%20style-black-000000.svg" style="height: 22px;" />
+</a>
 <!-- <a target="_blank" href="link_to_docs, tbd" style="background:none">
     <img src="https://img.shields.io/badge/docs-%23BE1B55" style="height: 22px;" />
 </a> -->  
 
 ![Python badge][Python badge]
 ![Windows badge][Windows badge]
+
 </div>
 
 ## [Release Notes][Release notes]
@@ -55,19 +62,19 @@ cd "the path of the project"
 - Change game language to "English"
 - Set interface scale to "1x"
 - Set display mode to "borderless windowed" or "window mode"
-- Make sure your reel is fully loaded, or use `-R`  along with a rainbow main when executing the main script
+- Make sure your reel is fully loaded, or use `-R`  along with a rainbow line when executing the main script
 - Add tea, carrot, and coffee to your **[favorites][Favorite food]** so that they can be selected through quick food selection menu
 - To enable broken lure replacement, the lures for replacement must also be added to **[favorites][Favorite lure]**
 ### Before you start...
 - Move your character to the fishing spot before executing the script
-- Spin Fishing/Marine Fishing/Float fishing: Pick up the rod you want to use
+- Spin/marine/float/wakey rig fishing: Pick up the rod you want to use
 - Bottom Fishing: Add the tackles you want to use to the quick selection slots, 
   cast them, and place them nearby to let the bot access them via shortcuts (1 ~ 3)
 > [!NOTE]
-> Currently, We only support single telescopic rod for float fishing.
+> Currently, We only support single rod for float fishing and wakey rig fishing.
 
 > [!IMPORTANT]
-> You should change the value of `window_size` in `config.ini` to your game window size for float fishing.  
+> The value of `window_size` in `config.ini` must be set to the game window size correctly for float fishing.  
 
 ### 1. Change the current working directory
 ```
@@ -144,7 +151,7 @@ python harvest.py [-s] [-n CHECK_DELAY_SECOND]
 - Type `Ctrl + C` in your terminal.
    
 **Cannot quit the program?**
-- The Shift key might have been pressed down, press again to release it and type `Ctrl + C` as usual.  
+- The Shift key might have been pressed down, press again to release it and type `Ctrl-C` as usual.  
 
 **Rod not getting lifted after the retrieval is finished?**
 - Fill up your reel, or use a rainbow main line with `-R` flag

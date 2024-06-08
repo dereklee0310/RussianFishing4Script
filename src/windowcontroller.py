@@ -5,9 +5,10 @@ Module for window controller.
 import sys
 from time import sleep
 
+import pyautogui as pag
+
 # import win32api, win32con
 import win32gui
-import pyautogui as pag
 
 
 class WindowController:

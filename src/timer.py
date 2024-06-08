@@ -2,8 +2,8 @@
 Module for Timer class.
 """
 
-import time
 import datetime
+import time
 
 TEA_DRINK_DELAY = 300
 

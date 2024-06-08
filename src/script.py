@@ -6,11 +6,11 @@ import sys
 from time import sleep
 
 import pyautogui as pag
-from pyscreeze import Box
 from prettytable import PrettyTable
+from pyscreeze import Box
 
-from setting import Setting
 from monitor import Monitor
+from setting import Setting
 
 # BASE_DELAY + LOOP_DELAY >= 2.2 to trigger clicklock
 BASE_DELAY = 1
@@ -153,7 +153,7 @@ def toggle_right_mouse_button(func):
 
 
 def release_shift_key(func):
-    """Release shift key after calling the function."""
+    """Release Shift key after calling the function."""
 
     def wrapper(self, *args):
         try:
@@ -164,6 +164,7 @@ def release_shift_key(func):
             raise e
 
     return wrapper
+
 
 def release_ctrl_key(func):
     """Release ctrl key after calling the function."""
@@ -177,6 +178,25 @@ def release_ctrl_key(func):
             raise e
 
     return wrapper
+
+
+def start_app(app: object, results: tuple[tuple]):
+    """A wrapper for scripts other than the main one.
+
+    :param app:
+    :type app: script object
+    :param results: counter lookup table
+    :type results: tuple[tuple]
+    """
+
+    if app.setting.confirmation_enabled:
+        ask_for_confirmation()
+    app.setting.window_controller.activate_game_window()
+    try:
+        app.start()
+    except KeyboardInterrupt:
+        pass
+    display_running_results(app, results)
 
 
 # ! archived

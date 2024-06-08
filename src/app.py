@@ -7,25 +7,24 @@ Usage: app.py
 # pylint: disable=no-member
 # setting node's attributes will be merged on the fly
 
+import logging
 import os
-import sys
 import shlex
 import signal
-import logging
 import smtplib
+import sys
+from argparse import ArgumentParser
 from pathlib import Path
 from socket import gaierror
-from argparse import ArgumentParser
 
 import pyautogui as pag
-from pynput import keyboard
-from prettytable import PrettyTable
 from dotenv import load_dotenv
+from prettytable import PrettyTable
+from pynput import keyboard
 
 import script
 from player import Player
-from setting import Setting, COMMON_CONFIGS, SPECIAL_CONFIGS
-
+from setting import COMMON_CONFIGS, SPECIAL_CONFIGS, Setting
 
 # logging.BASIC_FORMAT: %(levelname)s:%(name)s:%(message)s
 # timestamp: %(asctime)s, datefmt='%Y-%m-%d %H:%M:%S',
@@ -43,6 +42,7 @@ HELP = [
     ("s", "Shutdown computer after terminated without user interruption"),
     ("l", "After fish is hooked, lift the tackle constantly while retrieving"),
     ("e", "Send email to yourself after terminated without user interruption"),
+    ("S", "Take screenshots of every fish you catch and save them in screenshots/"),
 ]
 
 # ------------------ flag name, attribute name, description ------------------ #
@@ -56,6 +56,7 @@ COMMON_ARGS = (
     ("shutdown", "shutdown_enabled", "Shutdown"),
     ("lifting", "lifting_enabled", "Lifting"),
     ("email", "email_sending_enabled", "Email sending"),
+    ("screenshot", "screenshot_enabled", "Screenshot"),
 )
 
 SPECIAL_ARGS = (
@@ -318,7 +319,7 @@ class App:
         :param key: key code used by OS
         :type key: keyboard.KeyCode
         """
-        if key == keyboard.KeyCode.from_char(self.setting.quit_shortcut):
+        if key == keyboard.KeyCode.from_char(self.setting.quitting_shortcut):
             logger.info("Shutting down...")
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
             sys.exit()
@@ -337,8 +338,8 @@ if __name__ == "__main__":
         script.ask_for_confirmation("Do you want to continue with the settings above")
     app.setting.window_controller.activate_game_window()
 
-    if app.setting.quit_shortcut != "Ctrl-C":
-        listener = keyboard.Listener(on_release=app.on_release, suppress=True)
+    if app.setting.quitting_shortcut != "Ctrl-C":
+        listener = keyboard.Listener(on_release=app.on_release)
         listener.start()
 
     try:
@@ -346,7 +347,7 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         pass
 
-    pag.keyUp("shift")  # avoid shift key stuck
+    pag.keyUp("shift")  # avoid Shift key stuck
     print(app.player.gen_result("Terminated by user"))
     if app.setting.plotting_enabled:
         app.plot_and_save()

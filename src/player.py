@@ -2,30 +2,30 @@
 Module for Player class.
 """
 
-import os
-import sys
 import logging
+import os
 import smtplib
-from time import sleep
+import sys
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 # from email.mime.image import MIMEImage
 from pathlib import Path
+from time import sleep
 
 import pyautogui as pag
-from playsound import playsound
-from prettytable import PrettyTable
+from dotenv import load_dotenv
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
-from dotenv import load_dotenv
+from playsound import playsound
+from prettytable import PrettyTable
 
-import script
 import exceptions
-from timer import Timer
-from tackle import Tackle
-from setting import Setting
+import script
 from monitor import Monitor
+from setting import Setting
+from tackle import Tackle
+from timer import Timer
 
 logger = logging.getLogger(__name__)
 
@@ -103,12 +103,12 @@ class Player:
     # ---------------------------------------------------------------------------- #
     def spin_fishing(self) -> None:
         """Main spin fishing loop for "spin" and "spin_with_pause"."""
-        retrieval_with_pause = self.setting.fishing_strategy == "spin_with_pause"
+        spin_with_pause = self.setting.fishing_strategy == "spin_with_pause"
         while True:
             self._refill_user_stats()
             self._resetting_stage()
             self.tackle.cast()
-            if retrieval_with_pause:
+            if spin_with_pause:
                 self.tackle.retrieve_with_pause()
             self._retrieving_stage()
             if not self.monitor.is_fish_hooked():
@@ -186,7 +186,9 @@ class Player:
             self._resetting_stage()
             self.tackle.cast()
             self.tackle.sink(marine=False)
-            self._pirking_stage()
+
+            if self.setting.pirk_timeout > 0:
+                self._pirking_stage()
             self._retrieving_stage()
             if self.monitor.is_fish_hooked():
                 self._drink_alcohol()
@@ -291,7 +293,7 @@ class Player:
         if not self.setting.coffee_drinking_enabled:
             return
 
-        if not self.monitor.is_energy_high():
+        if self.monitor.is_energy_high():
             return
 
         if self.cur_coffee_count > self.setting.coffee_limit:
@@ -479,23 +481,27 @@ class Player:
                 self.tackle.retrieve()
 
     def _handle_fish(self) -> None:
-        """Keep or release the fish and record the fish count."""
-        #! a trophy ruffe will break the checking mechanism
-        msg, key = "Keep the fish", "space"
-        if self.monitor.is_fish_green_marked():
+        """Keep or release the fish and record the fish count.
+
+        !! a trophy ruffe will break the checking mechanism?
+        """
+        logger.info("handling fish")
+
+        if self.setting.screenshot_enabled:
+            self.save_screenshot()
+
+        if self.monitor.is_fish_marked():
             self.marked_count += 1
         else:
             self.unmarked_count += 1
-            if self.setting.unmarked_release_enabled:
-                if not self._is_fish_whitelisted():
-                    msg, key = "Release the fish", "backspace"
+            unmarked_release_enabled = self.setting.unmarked_release_enabled
+            if unmarked_release_enabled and not self._is_fish_whitelisted():
+                pag.press("backspace")
+                return
 
+        # fish is marked, unmarked release is disabled, or fish is in whitelist
         sleep(self.setting.keep_fish_delay)
-        logger.info(msg)
-        pag.press(key)
-
-        if key == "backspace":
-            return
+        pag.press("space")
 
         self.keep_fish_count += 1
         if self.keep_fish_count == self.setting.fishes_to_catch:
@@ -636,7 +642,7 @@ class Player:
         print("A notification email has been sent to your email address")
 
     def save_screenshot(self) -> None:
-        """Save screenshot to screenshot/, only be invoked when the tackle is broke."""
+        """Save screenshot to screenshots/."""
         # datetime.now().strftime("%H:%M:%S")
         pag.press("q")
         with open(
@@ -682,7 +688,7 @@ class Player:
         """Select and use the ticket according to boat_ticket_duration argument."""
         if self.setting.boat_ticket_duration is None:
             pag.press("esc")
-            sleep(ANIMATION_DELAY)
+            sleep(ANIMATION_DELAY * 4)
             self.general_quit("Boat ticket expired")
 
         logger.info("Renewing boat ticket")
