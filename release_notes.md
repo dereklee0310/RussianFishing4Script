@@ -34,6 +34,7 @@ June 8, 2024
 | spool_icon_confidence | retrieval_detect_confidence |
 | alcohol_quantity | alcohol_drinking_quantity |
 | alarm_sound_file_path | alarm_sound_file |
+| acceleration_enabled | pre_acceleration_enabled |
 | | SMTP_validation_enabled |
 | | image_verification_enabled |
 | | quit |
