@@ -401,7 +401,7 @@ class Player:
         if self.monitor.is_retrieval_finished():
             return
 
-        first = False
+        first = True
         gr_switched = False
         self.cur_coffee_count = 0
         while True:

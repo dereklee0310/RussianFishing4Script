@@ -1,27 +1,44 @@
 
 <div align="center">
 <h1>Release Notes</h1>
-May 16, 2024
+June 8, 2024
 </div>
 
 
 ## New Features
-* Float fishing for single telescopic rod
+* Hotkey to stop the script without typing Ctrl-C in the terminal
+* Fishing mode: spin fishing with wakey rig
+* Options to disable SMTP validation and file integrity check at startup
+* Option to take screenshot of every fish you catch
+* Option to hold Shift key while battling against the fish
+* Option to disable pirking in marine and wakey rig fishing mode
 
 ## Bug Fixes
-* Error raised by `win32gui.SetForegroundWindow()` when activating game window
-* The "Toggle moving forward" script cannot be terminate normally when using `-s` flag
-* The number of kepet fish is incorrectly counted if the release whitelist is not empty
-* Sometimes the script failed to close the game window after it's terminated
+* Possible stuck when using float fishing mode
 
 ## Improvements
-* Reduce the sensitivity of detecting hooked fish
-* Add random delay to the "Item crafting" script
-* Reformatted code with Black coding Style
-* More detailed user guide
-* [#24](https://github.com/dereklee0310/RussianFishing4Script/issues/24)
+* Improve code quality using Pylint and Black formatter
+* Refactor most of the code to improve readability
+* Add a setting node for better config organization
 
 ## Other Changes
-* Refactor code
+* Remove `validate.py`
+* Add `中文版template.ini` for Chinese players
+* Rename and delete some of the settings in `config.ini`
+
+| Old | New |
+| ----| --- |
+| base_iteration | |
+| enable_confirmation | confirmation_enabled |
+| harvest_baits_threhold | energy_threhold |
+| spool_icon_confidence | retrieval_detect_confidence |
+| alcohol_quantity | alcohol_drinking_quantity |
+| alarm_sound_file_path | alarm_sound_file |
+| | SMTP_validation_enabled |
+| | image_verification_enabled |
+| | quit |
+| | cast_delay |
+| | post_acceleration_enabled |
+
 > [!NOTE]
-**Please refer to `template.ini` to check newly added settings**.
+**Please refer to `template.ini` to check new settings**.
