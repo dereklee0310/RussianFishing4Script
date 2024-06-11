@@ -155,8 +155,8 @@ python harvest.py [-s] [-n CHECK_DELAY_SECOND]
 
 **Rod not getting lifted after the retrieval is finished?**
 - Fill up your reel, or use a rainbow main line with `-R` flag
-- Change the game resolution until the `validation.py` is pass
-- Lower the value of `spool_icon_confidence` in `config.ini`
+- Change the game window size
+- Lower the value of `retrieval_detect_confidence` in `config.ini`
 - Keep away from light sources or turn off the boat light
 
 ## License

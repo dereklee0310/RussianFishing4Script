@@ -36,6 +36,7 @@ DIG_DELAY = 5
 DIG_TIMEOUT = 32
 LOOP_DELAY = 2
 ANIMATION_DELAY = 0.5
+TICKET_EXPIRE_DELAY = 16
 LURE_ADJUST_DELAY = 4
 DISCONNECTED_DELAY = 8
 WEAR_TEXT_UPDATE_DELAY = 2
@@ -688,7 +689,7 @@ class Player:
         """Select and use the ticket according to boat_ticket_duration argument."""
         if self.setting.boat_ticket_duration is None:
             pag.press("esc")
-            sleep(ANIMATION_DELAY * 4)
+            sleep(TICKET_EXPIRE_DELAY)
             self.general_quit("Boat ticket expired")
 
         logger.info("Renewing boat ticket")

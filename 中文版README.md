@@ -161,8 +161,8 @@ python harvest.py
 
 **收線卡住了?**
 - 將線杯裝滿，或使用`-R`參數以及彩虹主線
-- 更改視窗大小直到能夠通過`validation.py`的檢查
-- 降低`config.ini`中`spool_icon_confidence`的值
+- 更改遊戲視窗大小
+- 降低`config.ini`中`retrieval_detect_confidence`的值
 - 遠離光源(e.g, 露營燈、船燈)
 
 ## 授權條款
