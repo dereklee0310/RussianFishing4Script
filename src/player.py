@@ -1,7 +1,6 @@
 """
 Module for Player class.
 """
-
 import logging
 import os
 import smtplib
@@ -26,6 +25,8 @@ from monitor import Monitor
 from setting import Setting
 from tackle import Tackle
 from timer import Timer
+from urllib import request, parse
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -390,6 +391,8 @@ class Player:
         result = self.gen_result(msg)
         if self.setting.email_sending_enabled:
             self.send_email(result)
+        if self.setting.miaotixing_sending_enabled:
+            self.send_miaotixing(result)
         if self.setting.plotting_enabled:
             self.plot_and_save()
         if shutdown and self.setting.shutdown_enabled:
@@ -641,6 +644,44 @@ class Player:
             smtp_server.login(sender, password)
             smtp_server.sendmail(sender, recipients, msg.as_string())
         print("A notification email has been sent to your email address")
+
+    def send_miaotixing(self, table: PrettyTable) -> None:
+        """Send a notification Message to the user's miaotixing service."""
+
+        # Prepare the data to be sent as query parameters
+        data_dict = {}
+        for row in table.rows:
+            # Assuming each row contains a column name and an attribute value
+            column_name, attribute_value = row
+            data_dict[column_name] = attribute_value
+
+        # Get the environment variable for MIAO_CODE
+        load_dotenv()  # This function is typically used to load environment variables from a .env file
+        miao_code = os.getenv("MIAO_CODE")
+
+        # Customizable Text Prompt Message
+        text = ("Cause of termination：" + data_dict['Cause of termination'] +
+                "\nStart time：" + data_dict['Start time'] +
+                "\nFinish time：" + data_dict['Finish time'] +
+                "\nRunning time：" + data_dict['Running time'] +
+                "\nFish caught：" + str(data_dict['Fish caught']) +
+                "\nMarked / Unmarked / Mark ratio：" + data_dict['Marked / Unmarked / Mark ratio'] +
+                "\nHit / Miss / Bite ratio：" + data_dict['Hit / Miss / Bite ratio'] +
+                "\nAlcohol consumed：" + str(data_dict['Alcohol consumed']) +
+                "\nCoffee consumed：" + str(data_dict['Coffee consumed']) +
+                "\nTea consumed：" + str(data_dict['Tea consumed']) +
+                "\nCarrot consumed：" + str(data_dict['Carrot consumed']) +
+                "\nHarvest baits count：" + str(data_dict['Harvest baits count']))
+
+        # Build the URL with the miao_code and Customizable Text
+        page = request.urlopen(
+            "http://miaotixing.com/trigger?" + parse.urlencode({"id": miao_code, "text": text, "type": "json"}))
+        result = page.read()
+        jsonObj = json.loads(result)
+        if (jsonObj["code"] == 0):
+            print("A notification message to the user's miaotixing service.")
+        else:
+            print("Sending failed with error code:" + str(jsonObj["code"]) + ", Description:" + jsonObj["msg"])
 
     def save_screenshot(self) -> None:
         """Save screenshot to screenshots/."""

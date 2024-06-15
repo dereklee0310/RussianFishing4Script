@@ -42,6 +42,7 @@ HELP = [
     ("s", "Shutdown computer after terminated without user interruption"),
     ("l", "After fish is hooked, lift the tackle constantly while retrieving"),
     ("e", "Send email to yourself after terminated without user interruption"),
+    ("M", "Send Message to the user's miaotixing service. after terminated without user interruption"),
     ("S", "Take screenshots of every fish you catch and save them in screenshots/"),
 ]
 
@@ -56,6 +57,7 @@ COMMON_ARGS = (
     ("shutdown", "shutdown_enabled", "Shutdown"),
     ("lifting", "lifting_enabled", "Lifting"),
     ("email", "email_sending_enabled", "Email sending"),
+    ("miaotixing", "miaotixing_sending_enabled", "miaotixing sending"),
     ("screenshot", "screenshot_enabled", "Screenshot"),
 )
 
