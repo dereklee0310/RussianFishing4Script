@@ -103,6 +103,7 @@ python app.py -mrP
 ```
 ### 命令行參數
 - `-m`: 只保留達標魚
+- `-M`: 執行完畢後通知用戶，需配置MIAO_CODE相關設定
 - `-c`: 跟魚纏鬥時自動喝咖啡補充體力
 - `-A`: 定時喝酒
 - `-r`: 在拋竿前自動消耗胡蘿蔔/茶補充飽食及體溫
@@ -164,6 +165,17 @@ python harvest.py
 - 更改遊戲視窗大小
 - 降低`config.ini`中`retrieval_detect_confidence`的值
 - 遠離光源(e.g, 露營燈、船燈)
+
+**MIAO_CODE如何配置?**
+- 1.關注微信公衆號 喵提醒 
+- https://miaotixing.com/how
+- 2.新建提醒服務
+- <img src="static/readme/mtx1.png" width="550">
+- <img src="static/readme/mtx2.png" width="550">
+- 3.效果展示
+- <img src="static/readme/mtx3.png" width="550">
+
+
 
 ## 授權條款
 [GNU General Public License version 3][license]
