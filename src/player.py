@@ -5,6 +5,7 @@ import logging
 import os
 import smtplib
 import sys
+import _thread
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -23,6 +24,7 @@ import exceptions
 import script
 from monitor import Monitor
 from setting import Setting
+from trolling import Trolling
 from tackle import Tackle
 from timer import Timer
 from urllib import request, parse
@@ -86,18 +88,27 @@ class Player:
         self.total_coffee_count = 0
         self.harvest_count = 0
 
+    # 选择钓鱼模式的入口
     def start_fishing(self) -> None:
         """Start main fishing loop with specified fishing strategt."""
         match self.setting.fishing_strategy:
             case "spin" | "spin_with_pause":
+                # 路亚
                 self.spin_fishing()
             case "bottom":
+                # 水底
                 self.bottom_fishing()
+            case "trolling":
+                # 拖钓
+                self.trolling()
             case "marine":
+                # 海钓
                 self.marine_fishing()
             case "float":
+                # 浮子手杆
                 self.float_fishing()
             case "wakey_rig":
+                # 维基钓组
                 self.wakey_rig_fishing()
 
     # ---------------------------------------------------------------------------- #
@@ -124,6 +135,40 @@ class Player:
         rod_idx = -1
         rod_count = len(self.setting.bottom_rods_shortcuts)
         check_miss_counts = [0] * rod_count
+
+        while True:
+            self._refill_user_stats()
+            self._harvesting_stage()
+            rod_idx = (rod_idx + 1) % rod_count
+            rod_key = self.setting.bottom_rods_shortcuts[rod_idx]
+            logger.info("Checking rod %s", rod_idx + 1)
+            pag.press(f"{rod_key}")
+            sleep(1)  # wait for pick up animation
+
+            if not self.monitor.is_fish_hooked():
+                self._put_tackle_back(check_miss_counts, rod_idx)
+                self.cast_miss_count += 1
+                continue
+
+            check_miss_counts[rod_idx] = 0
+            self._retrieving_stage()
+            if self.monitor.is_fish_hooked():
+                self._drink_alcohol()
+                self._pulling_stage()
+            self._resetting_stage()
+            self.tackle.cast()
+            pag.click()
+
+    # 拖钓
+    def trolling(self) -> None:
+        rod_idx = -1
+        rod_count = 2
+        check_miss_counts = [0] * rod_count
+
+        # 拖钓点位按需修改
+        trolling = Trolling()
+        # 27图26米坑 60,325 - 85,270
+        _thread.start_new_thread(trolling.cruise, (60, 325, 85, 270))
 
         while True:
             self._refill_user_stats()
@@ -259,6 +304,7 @@ class Player:
 
         # when timed out, do not raise a TimeoutError but defer it to resetting stage
 
+    # 吃饭
     def _refill_user_stats(self) -> None:
         """Refill player stats using tea and carrot."""
         if not self.setting.player_stat_refill_enabled:
@@ -277,6 +323,7 @@ class Player:
             self.carrot_count += 1
             sleep(ANIMATION_DELAY)
 
+    # 喝酒
     def _drink_alcohol(self) -> None:
         """Drink alcohol with given quantity."""
         if not self.setting.alcohol_drinking_enabled:

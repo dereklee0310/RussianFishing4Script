@@ -9,4 +9,5 @@ todo_backup.txt
 tests/
 .env
 .vscode
-中文版教程.md
+.idea
+venv

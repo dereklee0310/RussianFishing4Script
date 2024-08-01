@@ -72,7 +72,7 @@ class App:
                 break
 
             # crafting, wait at least 4 seconds
-            delay = random.uniform(4, 6)
+            delay = random.uniform(1, 2)
             sleep(delay)
             while True:
                 if self.monitor.is_operation_success():
