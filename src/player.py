@@ -341,8 +341,7 @@ class Player:
                 return
             except exceptions.FishHookedError:
                 try:
-                    self.puller()
-                    self._handle_fish()
+                    self._pulling_stage() # do a complete stage
                 except TimeoutError:
                     pass
                 return  # whether success or not, back to main fishing loop

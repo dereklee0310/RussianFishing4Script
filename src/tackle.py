@@ -229,6 +229,7 @@ class Tackle:
     def general_pull(self) -> None:
         """Pull the fish until it's captured.
 
+        :raises exceptions.FishGotAwayError: fish got away during pulling
         :raises TimeoutError: loop timed out
         """
         logger.info("Pulling")
