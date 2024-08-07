@@ -1,45 +1,22 @@
 
 <div align="center">
 <h1>Release Notes</h1>
-June 8, 2024
+Aug. 7, 2024
 </div>
 
 
 ## New Features
-* Hotkey to stop the script without typing Ctrl-C in the terminal
-* Fishing mode: spin fishing with wakey rig
-* Options to disable SMTP validation and file integrity check at startup
-* Option to take screenshot of every fish you catch
-* Option to hold Shift key while battling against the fish
-* Option to disable pirking in marine and wakey rig fishing mode
+- None
 
 ## Bug Fixes
-* Possible stuck when using float fishing mode
+- Fixed a bug that caused the program to freeze when a fish escaped during the rod reset process.
 
 ## Improvements
-* Improve code quality using Pylint and Black formatter
-* Refactor most of the code to improve readability
-* Add a setting node for better config organization
+- None
 
 ## Other Changes
-* Remove `validate.py`
-* Add `中文版template.ini` for Chinese players
-* Rename and delete some of the settings in `config.ini`
+- Change `default_arguments = -rcH` to `default_arguments =` in `template.ini` to prevent misuse by new users
+- Update logo
 
-| Old | New |
-| ----| --- |
-| base_iteration | |
-| enable_confirmation | confirmation_enabled |
-| harvest_baits_threhold | energy_threhold |
-| spool_icon_confidence | retrieval_detect_confidence |
-| alcohol_quantity | alcohol_drinking_quantity |
-| alarm_sound_file_path | alarm_sound_file |
-| acceleration_enabled | pre_acceleration_enabled |
-| | SMTP_validation_enabled |
-| | image_verification_enabled |
-| | quit |
-| | cast_delay |
-| | post_acceleration_enabled |
-
-> [!NOTE]
-**Please refer to `template.ini` to check new settings**.
+<!-- > [!NOTE]
+**Please refer to `template.ini` to check new settings**. -->

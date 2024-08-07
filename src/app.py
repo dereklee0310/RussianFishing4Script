@@ -68,6 +68,14 @@ SPECIAL_ARGS = (
     ("boat_ticket_duration", "boat_ticket_duration", "Boat ticket duratioin"),
 )
 
+# https://patorjk.com/software/taag/#p=testall&f=3D-ASCII&t=RF4S%0A, ANSI Shadow
+ASCII_LOGO = """
+██████╗ ███████╗██╗  ██╗███████╗
+██╔══██╗██╔════╝██║  ██║██╔════╝
+██████╔╝█████╗  ███████║███████╗
+██╔══██╗██╔══╝  ╚════██║╚════██║
+██║  ██║██║          ██║███████║
+╚═╝  ╚═╝╚═╝          ╚═╝╚══════╝"""
 
 class App:
     """Main application class."""
@@ -93,6 +101,8 @@ class App:
         # update number of fishes to catch
         fishes_to_catch = self.setting.keepnet_limit - self.setting.fishes_in_keepnet
         self.setting.fishes_to_catch = fishes_to_catch
+        print(ASCII_LOGO)
+        print("https://github.com/dereklee0310/RussianFishing4Script")
 
     def parse_args(self) -> None:
         """Configure argparser and parse the args."""

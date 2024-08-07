@@ -57,6 +57,7 @@ cd "the path of the project"
 > If you already have Python installed on your computer, create a virtual environment to prevent version conflicts.
 
 ## Usage
+
 ### Prerequisites
 - Enable **[Mouse ClickLock][Clicklock]** in Windows mouse settings and set the time before locking to "Long"
 - Change game language to "English"
@@ -65,6 +66,8 @@ cd "the path of the project"
 - Make sure your reel is fully loaded, or use `-R`  along with a rainbow line when executing the main script
 - Add tea, carrot, and coffee to your **[favorites][Favorite food]** so that they can be selected through quick food selection menu
 - To enable broken lure replacement, the lures for replacement must also be added to **[favorites][Favorite lure]**
+> [!IMPORTANT]
+> Please follow the instructions above step by step, otherwise, you may encounter unexpected errors at runtime
 ### Before you start...
 - Move your character to the fishing spot before executing the script
 - Spin/marine/float/wakey rig fishing: Pick up the rod you want to use
