@@ -61,12 +61,11 @@ def ask_for_confirmation(msg: str = "Ready to start") -> None:
     :param msg: confirmation message, defaults to "Ready to start"
     :type msg: str
     """
-
     while True:
         ans = input(f"{msg}? [Y/n] ").strip().lower()
-        if ans == "y":
+        if ans == "y" or ans == "":
             break
-        if ans == "n":  # quit only when the input is 'n'
+        if ans == "n":
             sys.exit()
 
 
