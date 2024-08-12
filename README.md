@@ -92,8 +92,7 @@ Here are some examples of how to execute the script with different arguments:
 python app.py
 ```
 > [!WARNING]
-> If the script doesn't focus on the game window automatically, 
-> you might need to run your terminal as administrator.
+> If your OS is Windows 11, run the terminal as administrator to grant file access permission.
 
 - Display help information
 ```
@@ -161,6 +160,12 @@ python harvest.py [-s] [-n CHECK_DELAY_SECOND]
 - Change the game window size
 - Lower the value of `retrieval_detect_confidence` in `config.ini`
 - Keep away from light sources or turn off the boat light
+
+**OSError (Usually occured on Windows 11)**
+```
+OSError: Failed to read ... because file is missing, has improper permissions, or is an unsupported or invalid format
+``` 
+- Run the terminal as administrator to grant file access permission
 
 ## License
 [GNU General Public License version 3][license]

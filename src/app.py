@@ -362,6 +362,6 @@ if __name__ == "__main__":
     pag.keyUp("shift")  # avoid Shift key stuck
     print(app.player.gen_result("Terminated by user"))
     if app.setting.plotting_enabled:
-        app.plot_and_save()
+        app.player.plot_and_save()
 
 # CTRL_C_EVENT reference: https://stackoverflow.com/questions/58455684/

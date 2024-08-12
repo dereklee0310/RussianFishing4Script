@@ -84,7 +84,7 @@ cd src
 python app.py
 ```
 > [!WARNING]
-> 如果腳本沒有自動切換至遊戲視窗或是無動作，請使用管理者權限執行終端。
+> 如果你的作業系統是Windows 11，請以系統管理員身分執行終端。
 - 顯示幫助訊息 (參數使用教學)
 ```
 python app.py -h
@@ -166,14 +166,21 @@ python harvest.py
 - 降低`config.ini`中`retrieval_detect_confidence`的值
 - 遠離光源(e.g, 露營燈、船燈)
 
+**OSError (Windows 11)**
+```
+OSError: Failed to read ... because file is missing, has improper permissions, or is an unsupported or invalid format
+``` 
+- 以系統管理員身分執行終端以授予腳本讀寫檔案的權限。
+
 **MIAO_CODE如何配置?**
-- 1.關注微信公衆號 喵提醒 
-- https://miaotixing.com/how
-- 2.新建提醒服務
-- <img src="static/readme/mtx1.png" width="550">
-- <img src="static/readme/mtx2.png" width="550">
-- 3.效果展示
-- <img src="static/readme/mtx3.png" width="550">
+1. 關注微信公衆號 [喵提醒][miaotixing]
+2. 新建提醒服務  
+<img src="static/readme/mtx1.png" height="400">
+<img src="static/readme/mtx2.png" height="400">
+
+3. 效果展示  
+<img src="static/readme/mtx3.png" height="400">
+
 
 
 
@@ -187,8 +194,6 @@ python harvest.py
 ## 聯繫方式
 ### Email
 dereklee0310@gmail.com
-### WeChat
-<img src="static/readme/wechat.jpg" width="240">
 
 [RF4S logo]: static/readme/RF4S.png
 
@@ -206,5 +211,7 @@ dereklee0310@gmail.com
 [Template]: 中文版template.ini
 [Config]: config.ini
 [Integrity guide]: integrity_guide.md
+
+[miaotixing]: https://miaotixing.com/how
 
 [license]: LICENSE
