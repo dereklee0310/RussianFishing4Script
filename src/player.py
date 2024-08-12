@@ -1,16 +1,17 @@
 """
 Module for Player class.
 """
+import json
 import logging
 import os
 import smtplib
 import sys
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-
 # from email.mime.image import MIMEImage
 from pathlib import Path
 from time import sleep
+from urllib import parse, request
 
 import pyautogui as pag
 from dotenv import load_dotenv
@@ -25,8 +26,6 @@ from monitor import Monitor
 from setting import Setting
 from tackle import Tackle
 from timer import Timer
-from urllib import request, parse
-import json
 
 logger = logging.getLogger(__name__)
 
@@ -107,12 +106,16 @@ class Player:
         """Main spin fishing loop for "spin" and "spin_with_pause"."""
         spin_with_pause = self.setting.fishing_strategy == "spin_with_pause"
         while True:
-            self._refill_user_stats()
-            self._resetting_stage()
-            self.tackle.cast()
+            if not self.setting.cast_skipping_enabled:
+                self.setting.cast_skipping_enabled = False
+                self._refill_user_stats()
+                self._resetting_stage()
+                self.tackle.cast()
+
             if spin_with_pause:
                 self.tackle.retrieve_with_pause()
             self._retrieving_stage()
+
             if not self.monitor.is_fish_hooked():
                 self.cast_miss_count += 1
                 continue
@@ -151,13 +154,18 @@ class Player:
     def marine_fishing(self) -> None:
         """Main marine fishing loop."""
         while True:
-            self._refill_user_stats()
-            self._resetting_stage()
-            self.tackle.cast()
-            self.tackle.sink()
+            if not self.setting.cast_skipping_enabled:
+                self.setting.cast_skipping_enabled = False
+                self._refill_user_stats()
+                self._resetting_stage()
+                self.tackle.cast()
+                self.tackle.sink()
+
             if not self.monitor.is_fish_hooked():
                 self._pirking_stage()
+
             self._retrieving_stage()
+
             if self.monitor.is_fish_hooked():
                 self._drink_alcohol()
                 self._pulling_stage()
@@ -169,12 +177,14 @@ class Player:
             self._refill_user_stats()
             self._resetting_stage()
             self.tackle.cast()
+
             logger.info("Checking float status")
             try:
                 self._monitor_float_state(float_region)
             except TimeoutError:
                 self.cast_miss_count += 1
                 continue
+
             sleep(self.setting.pull_delay)
             script.hold_left_click(PRE_RETRIEVAL_DURATION)
             if self.monitor.is_fish_hooked():
@@ -184,14 +194,18 @@ class Player:
     def wakey_rig_fishing(self) -> None:
         """Main wakey rig fishing loop."""
         while True:
-            self._refill_user_stats()
-            self._resetting_stage()
-            self.tackle.cast()
-            self.tackle.sink(marine=False)
+            if not self.setting.cast_skipping_enabled:
+                self.setting.cast_skipping_enabled = False
+                self._refill_user_stats()
+                self._resetting_stage()
+                self.tackle.cast()
+                self.tackle.sink(marine=False)
 
             if self.setting.pirk_timeout > 0:
                 self._pirking_stage()
+
             self._retrieving_stage()
+
             if self.monitor.is_fish_hooked():
                 self._drink_alcohol()
                 self._pulling_stage()
@@ -251,7 +265,6 @@ class Player:
             if self.monitor.is_harvest_success():
                 # accept result and hide the tool
                 pag.press("space")
-                # sleep(ANIMATION_DELAY) #TODO: is this necessary?
                 pag.press("backspace")
                 sleep(ANIMATION_DELAY)
                 self.harvest_count += 1
@@ -386,7 +399,6 @@ class Player:
         :param shutdown: whether to shutdown the computer or not
         :type shutdown: bool
         """
-        # TODO: quit game?
         result = self.gen_result(msg)
         if self.setting.email_sending_enabled:
             self.send_email(result)

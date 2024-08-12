@@ -42,8 +42,9 @@ HELP = [
     ("s", "Shutdown computer after terminated without user interruption"),
     ("l", "After fish is hooked, lift the tackle constantly while retrieving"),
     ("e", "Send email to yourself after terminated without user interruption"),
-    ("M", "Send Message to the user's miaotixing service. after terminated without user interruption"),
+    ("M", "Send miaotixing notification after terminated without user interruption"),
     ("S", "Take screenshots of every fish you catch and save them in screenshots/"),
+    ("C", "Except for bottom and float fishing, skip rod casting for the first fish"),
 ]
 
 # ------------------ flag name, attribute name, description ------------------ #
@@ -52,13 +53,14 @@ COMMON_ARGS = (
     ("alcohol", "alcohol_drinking_enabled", "Alcohol drinking"),
     ("refill", "player_stat_refill_enabled", "Player stat refill"),
     ("harvest", "baits_harvesting_enabled", "Baits harvesting"),
-    ("gear_ratio", "gr_switching_enabled", "Gear ration switching"),
-    ("plotting", "plotting_enabled", "Plotting"),
+    ("gear_ratio", "gr_switching_enabled", "Gear ratio switching"),
+    ("plot", "plotting_enabled", "Plotting"),
     ("shutdown", "shutdown_enabled", "Shutdown"),
-    ("lifting", "lifting_enabled", "Lifting"),
+    ("lift", "lifting_enabled", "Lifting"),
     ("email", "email_sending_enabled", "Email sending"),
     ("miaotixing", "miaotixing_sending_enabled", "miaotixing sending"),
     ("screenshot", "screenshot_enabled", "Screenshot"),
+    ("cast", "cast_skipping_enabled", "Cast skipping"),
 )
 
 SPECIAL_ARGS = (
@@ -76,6 +78,7 @@ ASCII_LOGO = """
 ██╔══██╗██╔══╝  ╚════██║╚════██║
 ██║  ██║██║          ██║███████║
 ╚═╝  ╚═╝╚═╝          ╚═╝╚══════╝"""
+
 
 class App:
     """Main application class."""

@@ -103,7 +103,9 @@ class Monitor:
         )
 
     def _is_spool_full(self):
-        return self._locate_single_image_box("wheel", self.setting.retrieval_detect_confidence)
+        return self._locate_single_image_box(
+            "wheel", self.setting.retrieval_detect_confidence
+        )
 
     # ------------------------------ hint detection ------------------------------ #
     def is_tackle_ready(self):

@@ -15,8 +15,11 @@ Aug. 7, 2024
 - None
 
 ## Other Changes
-- Change `default_arguments = -rcH` to `default_arguments =` in `template.ini` to prevent misuse by new users
-- Update logo
+add `-C` flag
+
+rename flags:
+plotting -> plot
+lifting -> lift
 
 <!-- > [!NOTE]
 **Please refer to `template.ini` to check new settings**. -->
