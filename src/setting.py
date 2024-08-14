@@ -59,6 +59,7 @@ SPECIAL_CONFIGS = {
         ("pre_acceleration_enabled", "Enable pre-acceleration", bool),
     ),
     "bottom": (("check_delay", "Check delay", float),),
+    "trolling": (("check_delay", "Check delay", float),),
     "marine": (
         ("sink_timeout", "Sink timeout", float),
         ("pirk_duration", "Pirk duration", float),
