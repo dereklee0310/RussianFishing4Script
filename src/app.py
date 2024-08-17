@@ -92,10 +92,18 @@ class App:
         self.parse_args()
         self._verify_args()
 
-        if self.args.email and self.setting.SMTP_validation_enabled:
+        if self.args.email is not None and self.setting.SMTP_validation_enabled:
             self._validate_smtp_connection()
         if self.setting.image_verification_enabled:
             self._verify_image_file_integrity()
+
+        # pname -> pid
+        if self.args.pname is not None:
+            try:
+                self.pid = self.setting.profile_names.index(self.args.pname)
+            except ValueError:
+                logger.error("Invalid profile name")
+                sys.exit()
 
         # all checks passed, merge settings
         args_attributes = COMMON_ARGS + SPECIAL_ARGS
@@ -151,7 +159,14 @@ class App:
             "--pid",
             metavar="PID",
             type=int,
-            help="The id of profile you want to use",
+            help="Id of the profile you want to use",
+        )
+        parser.add_argument(
+            "-N",
+            "--pname",
+            metavar="PROFILE_NAME",
+            type=str,
+            help="Name of the profile you want to use",
         )
         parser.add_argument(
             "-n",

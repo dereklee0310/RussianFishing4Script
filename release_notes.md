@@ -22,6 +22,8 @@ plotting -> plot
 lifting -> lift
 
 `window_size` -> automatic detection
+
+add `pname` for profile selection by name
  
 <!-- > [!NOTE]
 **Please refer to `template.ini` to check new settings**. -->
