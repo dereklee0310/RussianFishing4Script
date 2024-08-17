@@ -77,7 +77,7 @@ cd "the path of the project"
 > Currently, We only support single rod for float fishing and wakey rig fishing.
 
 > [!IMPORTANT]
-> The value of `window_size` in `config.ini` must be set to the game window size correctly for float fishing.  
+> The game window size must be 2560x1440, 1920x1080 or 1600x900 when using float fishing mode. 
 
 ### 1. Change the current working directory
 ```

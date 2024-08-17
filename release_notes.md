@@ -21,5 +21,7 @@ rename flags:
 plotting -> plot
 lifting -> lift
 
+`window_size` -> automatic detection
+ 
 <!-- > [!NOTE]
 **Please refer to `template.ini` to check new settings**. -->

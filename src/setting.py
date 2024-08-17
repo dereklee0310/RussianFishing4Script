@@ -14,7 +14,6 @@ logger = logging.getLogger(__name__)
 # -------------------- attribute name - column name - type ------------------- #
 GENERAL_CONFIGS = (
     ("language", "Language", str),
-    ("window_size", "Window size", str),
     ("default_arguments", "Default arguments", str),
     ("confirmation_enabled", "Enable confirmation", bool),
     ("SMTP_validation_enabled", "Enable SMTP validation", bool),

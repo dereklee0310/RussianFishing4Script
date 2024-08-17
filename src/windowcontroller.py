@@ -45,13 +45,15 @@ class WindowController:
             sys.exit()
         return hwnd
 
-    def get_game_rect(self) -> tuple[int, int, int, int]:
-        """Get the rectangle coordinates of the game window for float fishing camera.
+    def get_window_coord(self) -> tuple[int, int, int, int]:
+        """Get the base coordinate, width, and height of the game window.
 
-        :return: game window rectangle coordinates
+        :return: x base, y base, width, height
         :rtype: tuple[int, int, int, int]
         """
-        return win32gui.GetWindowRect(self._game_hwnd)
+        rect = win32gui.GetWindowRect(self._game_hwnd)
+        width, height = rect[2] - rect[0], rect[3] - rect[1]
+        return rect[0], rect[1], width, height
 
     def activate_script_window(self) -> None:
         """Focus terminal."""
@@ -70,17 +72,10 @@ class WindowController:
         sleep(0.25)
 
 
-# if __name__ == '__main__':
-#     from pyautogui import getWindowsWithTitle
-#     w = WindowController('Russian Fishing 4')
-#     w.get_hwnd()
-#     w.activate_window()
-
-#     window = getWindowsWithTitle("Russian Fishing 4")[0]
-#     print(window)
-#     print(getWindowsWithTitle('123'))
-#     getWindowsWithTitle('123')[0].activate()
-#     window.activate()
+if __name__ == "__main__":
+    w = WindowController("Russian Fishing 4")
+    w.activate_game_window()
+    print(w.get_window_coord())
 
 # SetForegroundWindow bug reference :
 # https://stackoverflow.com/questions/56857560/win32gui-setforegroundwindowhandle-not-working-in-loop

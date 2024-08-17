@@ -246,18 +246,22 @@ class Monitor:
         return not pag.pixel(x + 18, y) == pag.pixel(x + last_point, y)
 
     def get_float_camera_region(self) -> tuple[int, int, int, int]:
-        x, y = self.setting.window_controller.get_game_rect()[:2]
-        match self.setting.window_size:
+        coord = self.setting.window_controller.get_window_coord()
+        x_base, y_base, width, height = coord
+        window_size = f"{width}x{height}"
+        match window_size:
             case "2560x1440":
-                x += 1198
-                y += 1192
+                x_base += 1200
+                y_base += 1194
             case "1920x1080":
-                x += 878
-                y += 832
+                x_base += 880
+                y_base += 834
             case "1600x900":
-                x += 718
-                y += 652
+                x_base += 720
+                y_base += 654
             case _:
-                logger.error("Invalid window size")
+                logger.error(
+                    "Invalid window size, must be 2560x1440, 1920x1080 or 1600x900"
+                )
                 sys.exit()
-        return (x, y, 164, 164)
+        return (x_base, y_base, 160, 160)

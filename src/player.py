@@ -1,6 +1,7 @@
 """
 Module for Player class.
 """
+
 import json
 import logging
 import os
@@ -8,6 +9,7 @@ import smtplib
 import sys
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+
 # from email.mime.image import MIMEImage
 from pathlib import Path
 from time import sleep
@@ -354,7 +356,7 @@ class Player:
                 return
             except exceptions.FishHookedError:
                 try:
-                    self._pulling_stage() # do a complete stage
+                    self._pulling_stage()  # do a complete stage
                 except TimeoutError:
                     pass
                 return  # whether success or not, back to main fishing loop
@@ -671,28 +673,49 @@ class Player:
         miao_code = os.getenv("MIAO_CODE")
 
         # Customizable Text Prompt Message
-        text = ("Cause of termination：" + data_dict['Cause of termination'] +
-                "\nStart time：" + data_dict['Start time'] +
-                "\nFinish time：" + data_dict['Finish time'] +
-                "\nRunning time：" + data_dict['Running time'] +
-                "\nFish caught：" + str(data_dict['Fish caught']) +
-                "\nMarked / Unmarked / Mark ratio：" + data_dict['Marked / Unmarked / Mark ratio'] +
-                "\nHit / Miss / Bite ratio：" + data_dict['Hit / Miss / Bite ratio'] +
-                "\nAlcohol consumed：" + str(data_dict['Alcohol consumed']) +
-                "\nCoffee consumed：" + str(data_dict['Coffee consumed']) +
-                "\nTea consumed：" + str(data_dict['Tea consumed']) +
-                "\nCarrot consumed：" + str(data_dict['Carrot consumed']) +
-                "\nHarvest baits count：" + str(data_dict['Harvest baits count']))
+        text = (
+            "Cause of termination："
+            + data_dict["Cause of termination"]
+            + "\nStart time："
+            + data_dict["Start time"]
+            + "\nFinish time："
+            + data_dict["Finish time"]
+            + "\nRunning time："
+            + data_dict["Running time"]
+            + "\nFish caught："
+            + str(data_dict["Fish caught"])
+            + "\nMarked / Unmarked / Mark ratio："
+            + data_dict["Marked / Unmarked / Mark ratio"]
+            + "\nHit / Miss / Bite ratio："
+            + data_dict["Hit / Miss / Bite ratio"]
+            + "\nAlcohol consumed："
+            + str(data_dict["Alcohol consumed"])
+            + "\nCoffee consumed："
+            + str(data_dict["Coffee consumed"])
+            + "\nTea consumed："
+            + str(data_dict["Tea consumed"])
+            + "\nCarrot consumed："
+            + str(data_dict["Carrot consumed"])
+            + "\nHarvest baits count："
+            + str(data_dict["Harvest baits count"])
+        )
 
         # Build the URL with the miao_code and Customizable Text
         page = request.urlopen(
-            "http://miaotixing.com/trigger?" + parse.urlencode({"id": miao_code, "text": text, "type": "json"}))
+            "http://miaotixing.com/trigger?"
+            + parse.urlencode({"id": miao_code, "text": text, "type": "json"})
+        )
         result = page.read()
         jsonObj = json.loads(result)
-        if (jsonObj["code"] == 0):
+        if jsonObj["code"] == 0:
             print("A notification message to the user's miaotixing service.")
         else:
-            print("Sending failed with error code:" + str(jsonObj["code"]) + ", Description:" + jsonObj["msg"])
+            print(
+                "Sending failed with error code:"
+                + str(jsonObj["code"])
+                + ", Description:"
+                + jsonObj["msg"]
+            )
 
     def save_screenshot(self) -> None:
         """Save screenshot to screenshots/."""
