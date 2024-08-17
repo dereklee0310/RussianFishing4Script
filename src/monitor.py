@@ -10,7 +10,6 @@ Todo:
 # docstring for every functions? u serious?
 
 import logging
-import sys
 
 import pyautogui as pag
 from pyscreeze import Box
@@ -106,9 +105,6 @@ class Monitor:
         return self._locate_single_image_box(
             "wheel", self.setting.retrieval_detect_confidence
         )
-
-    def is_line_snagged(self):
-        return self._locate_single_image_box("snag", 0.8)
 
     # ------------------------------ hint detection ------------------------------ #
     def is_tackle_ready(self):

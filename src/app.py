@@ -87,6 +87,7 @@ class App:
         """Merge args into setting node."""
         self.pid = None
         self.player = None
+        self.table = None
 
         self._build_args()
         self._verify_args()
@@ -331,16 +332,14 @@ class App:
         self.player = Player(self.setting)
 
     def _build_args_table(self) -> None:
-        """build table for command line arguments."""
-        self.table = PrettyTable(header=False, align="l")
-        self.table.title = "Settings"
-
+        """Append command line arguments to existing table."""
         arg_table = COMMON_ARGS + SPECIAL_ARGS
-        for _, attribute_name, column_name in arg_table:
+        for i, (_, attribute_name, column_name) in enumerate(arg_table):
             attribute_value = getattr(self.setting, attribute_name)
             if isinstance(attribute_value, bool):
                 attribute_value = "enabled" if attribute_value else "disabled"
-            self.table.add_row([column_name, attribute_value])
+            divider = i == len(arg_table) - 1
+            self.table.add_row([column_name, attribute_value], divider=divider)
 
     def _build_user_config_table(self) -> None:
         """Append user profile to existing table."""
@@ -356,6 +355,9 @@ class App:
             self.table.add_row([column_name, attribute_value])
 
     def display_settings(self) -> None:
+        """Display args and user profile."""
+        self.table = PrettyTable(header=False, align="l")
+        self.table.title = "Settings"
         self._build_args_table()
         self._build_user_config_table()
         print(self.table)
@@ -381,15 +383,18 @@ if __name__ == "__main__":
     app.display_settings()
 
     window_size = app.setting.window_size
-    if window_size not in ["2560x1440", "1920x1080", "1600x900"]:
-        logger.warning("Invalid window size %s, must be 2560x1440, 1920x1080 or 1600x900", window_size)
+    if window_size not in ("2560x1440", "1920x1080", "1600x900"):
+        logger.warning(
+            "Invalid window size %s, must be 2560x1440, 1920x1080 or 1600x900",
+            window_size,
+        )
         logger.warning("Snag detection will be disabled")
-        app.player.setting.snag_detection_enabled = False # modify player setting
+        app.player.setting.snag_detection_enabled = False  # modify player setting
         if app.setting.fishing_strategy == "float":
-            logger.error("Float fishing mode doesn't support window size %s", window_size)
+            logger.error(
+                "Float fishing mode doesn't support window size %s", window_size
+            )
             sys.exit()
-
-    exit()
 
     if app.setting.confirmation_enabled:
         script.ask_for_confirmation("Do you want to continue with the settings above")

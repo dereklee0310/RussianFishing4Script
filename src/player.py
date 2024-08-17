@@ -667,58 +667,56 @@ class Player:
         # Prepare the data to be sent as query parameters
         data_dict = {}
         for row in table.rows:
-            # Assuming each row contains a column name and an attribute value
             column_name, attribute_value = row
             data_dict[column_name] = attribute_value
 
-        # Get the environment variable for MIAO_CODE
-        load_dotenv()  # This function is typically used to load environment variables from a .env file
+        load_dotenv()
         miao_code = os.getenv("MIAO_CODE")
 
         # Customizable Text Prompt Message
         text = (
-            "Cause of termination："
+            "Cause of termination:"
             + data_dict["Cause of termination"]
-            + "\nStart time："
+            + "\nStart time:"
             + data_dict["Start time"]
-            + "\nFinish time："
+            + "\nFinish time:"
             + data_dict["Finish time"]
-            + "\nRunning time："
+            + "\nRunning time:"
             + data_dict["Running time"]
-            + "\nFish caught："
+            + "\nFish caught:"
             + str(data_dict["Fish caught"])
-            + "\nMarked / Unmarked / Mark ratio："
+            + "\nMarked / Unmarked / Mark ratio:"
             + data_dict["Marked / Unmarked / Mark ratio"]
-            + "\nHit / Miss / Bite ratio："
+            + "\nHit / Miss / Bite ratio:"
             + data_dict["Hit / Miss / Bite ratio"]
-            + "\nAlcohol consumed："
+            + "\nAlcohol consumed:"
             + str(data_dict["Alcohol consumed"])
-            + "\nCoffee consumed："
+            + "\nCoffee consumed:"
             + str(data_dict["Coffee consumed"])
-            + "\nTea consumed："
+            + "\nTea consumed:"
             + str(data_dict["Tea consumed"])
-            + "\nCarrot consumed："
+            + "\nCarrot consumed:"
             + str(data_dict["Carrot consumed"])
-            + "\nHarvest baits count："
+            + "\nHarvest baits count:"
             + str(data_dict["Harvest baits count"])
         )
 
-        # Build the URL with the miao_code and Customizable Text
-        page = request.urlopen(
-            "http://miaotixing.com/trigger?"
-            + parse.urlencode({"id": miao_code, "text": text, "type": "json"})
+        url = "http://miaotixing.com/trigger?" + parse.urlencode(
+            {"id": miao_code, "text": text, "type": "json"}
         )
-        result = page.read()
-        jsonObj = json.loads(result)
-        if jsonObj["code"] == 0:
-            print("A notification message to the user's miaotixing service.")
-        else:
-            print(
-                "Sending failed with error code:"
-                + str(jsonObj["code"])
-                + ", Description:"
-                + jsonObj["msg"]
-            )
+
+        with request.urlopen(url) as page:
+            result = page.read()
+            json_object = json.loads(result)
+            if json_object["code"] == 0:
+                print("A notification message to the user's miaotixing service.")
+            else:
+                print(
+                    "Sending failed with error code:"
+                    + str(json_object["code"])
+                    + ", Description:"
+                    + json_object["msg"]
+                )
 
     def save_screenshot(self) -> None:
         """Save screenshot to screenshots/."""

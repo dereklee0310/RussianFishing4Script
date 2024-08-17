@@ -63,7 +63,7 @@ def ask_for_confirmation(msg: str = "Ready to start") -> None:
     """
     while True:
         ans = input(f"{msg}? [Y/n] ").strip().lower()
-        if ans == "y" or ans == "":
+        if ans in ("y", ""):
             break
         if ans == "n":
             sys.exit()
