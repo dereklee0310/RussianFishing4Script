@@ -1,7 +1,7 @@
 """
 Module for SettingHandler class, not used yet.
 """
-
+import sys
 import configparser
 import logging
 import pathlib
@@ -108,6 +108,12 @@ class Setting:
         parent_dir = pathlib.Path(__file__).resolve().parents[1]
         self.image_dir = parent_dir / "static" / self.language
 
+        # set hard coded coordinates
+        coord = self.window_controller.get_window_coord()
+        self.window_size = f"{coord[2]}x{coord[3]}"
+        self._set_float_camera_rect(coord[0], coord[1], self.window_size)
+        self._set_snag_icon_position(coord[0], coord[1], self.window_size)
+
     def _merge_general_configs(self) -> None:
         """Merge general configs from config.ini."""
         section = self.config["game"]
@@ -171,3 +177,30 @@ class Setting:
             else:
                 attribute_value = var_type(section.get(attribute_name))
             setattr(self, attribute_name, attribute_value)
+
+    def _set_float_camera_rect(self, x_base: int, y_base: int, window_size: str) -> None:
+        match window_size:
+            case "2560x1440":
+                x_base += 1200
+                y_base += 1194
+            case "1920x1080":
+                x_base += 880
+                y_base += 834
+            case "1600x900":
+                x_base += 720
+                y_base += 654
+        self.float_camera_rect = (x_base, y_base, 160, 160) # (left, top, w, h)
+
+    def _set_snag_icon_position(self, x_base: int, y_base: int, window_size: str) -> None:
+        match window_size:
+            case "2560x1440":
+                x_base += 1612
+                y_base += 1369
+            case "1920x1080":
+                x_base += 1292
+                y_base += 1009
+            case "1600x900":
+                x_base += 1132
+                y_base += 829
+        x_base += 15
+        self.snag_icon_position = (x_base, y_base) # x, y coordinates

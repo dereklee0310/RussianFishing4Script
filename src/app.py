@@ -13,7 +13,7 @@ import shlex
 import signal
 import smtplib
 import sys
-from argparse import ArgumentParser
+from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from socket import gaierror
 
@@ -88,8 +88,7 @@ class App:
         self.pid = None
         self.player = None
 
-        self.setting = Setting()
-        self.parse_args()
+        self._build_args()
         self._verify_args()
 
         if self.args.email is not None and self.setting.SMTP_validation_enabled:
@@ -115,7 +114,7 @@ class App:
         print(ASCII_LOGO)
         print("https://github.com/dereklee0310/RussianFishing4Script")
 
-    def parse_args(self) -> None:
+    def setup_parser(self) -> ArgumentParser:
         """Configure argparser and parse the args."""
         parser = ArgumentParser(description="Start the script for Russian Fishing 4")
 
@@ -188,8 +187,26 @@ class App:
             ),
         )
 
-        argv = self.setting.default_arguments
-        self.args = parser.parse_args(shlex.split(argv) + sys.argv[1:])
+        return parser
+
+    def _build_args(self) -> None:
+        """Build args from command line arguments and configuration file."""
+        # parse command line arguments first for help
+        parser = self.setup_parser()
+        command_line_args = parser.parse_args()
+
+        # merge with default arguments
+        self.setting = Setting()
+        default_args = parser.parse_args(shlex.split(self.setting.default_arguments))
+
+        # merge with default arguments
+        command_line_args = vars(command_line_args)
+        default_args = vars(default_args)
+        for k, v in default_args.items():
+            if k not in command_line_args:
+                command_line_args[k] = v
+        command_line_args = Namespace(**command_line_args)
+        self.args = command_line_args
 
     def _verify_args(self) -> None:
         """Verify args that comes with an argument."""
@@ -313,35 +330,35 @@ class App:
         self.setting.merge_user_configs(self.pid)
         self.player = Player(self.setting)
 
-    def display_args(self) -> None:
-        """Display command line arguments."""
-        table = PrettyTable(header=False, align="l")
-        table.title = "Command Line Arguments"
+    def _build_args_table(self) -> None:
+        """build table for command line arguments."""
+        self.table = PrettyTable(header=False, align="l")
+        self.table.title = "Settings"
 
         arg_table = COMMON_ARGS + SPECIAL_ARGS
         for _, attribute_name, column_name in arg_table:
             attribute_value = getattr(self.setting, attribute_name)
             if isinstance(attribute_value, bool):
                 attribute_value = "enabled" if attribute_value else "disabled"
-            table.add_row([column_name, attribute_value])
-        print(table)
-        print()
+            self.table.add_row([column_name, attribute_value])
 
-    def display_user_configs(self) -> None:
-        """Display chosen user profile."""
-        table = PrettyTable(header=False, align="l")
-        table.title = "User Profile"
-        table.add_row(["Profile name", self.setting.profile_names[self.pid]])
+    def _build_user_config_table(self) -> None:
+        """Append user profile to existing table."""
+        self.table.add_row(["Profile name", self.setting.profile_names[self.pid]])
 
         for attribute_name, column_name, _ in COMMON_CONFIGS:
             attribute_value = getattr(self.setting, attribute_name)
-            table.add_row([column_name, attribute_value])
+            self.table.add_row([column_name, attribute_value])
 
         special_configs = SPECIAL_CONFIGS.get(self.setting.fishing_strategy)
         for attribute_name, column_name, _ in special_configs:
             attribute_value = getattr(self.setting, attribute_name)
-            table.add_row([column_name, attribute_value])
-        print(table)
+            self.table.add_row([column_name, attribute_value])
+
+    def display_settings(self) -> None:
+        self._build_args_table()
+        self._build_user_config_table()
+        print(self.table)
 
     def on_release(self, key: keyboard.KeyCode) -> None:
         """Callback for button release.
@@ -361,8 +378,18 @@ if __name__ == "__main__":
         app.display_available_profiles()
         app.ask_for_pid()
     app.create_player()
-    app.display_args()
-    app.display_user_configs()
+    app.display_settings()
+
+    window_size = app.setting.window_size
+    if window_size not in ["2560x1440", "1920x1080", "1600x900"]:
+        logger.warning("Invalid window size %s, must be 2560x1440, 1920x1080 or 1600x900", window_size)
+        logger.warning("Snag detection will be disabled")
+        app.player.setting.snag_detection_enabled = False # modify player setting
+        if app.setting.fishing_strategy == "float":
+            logger.error("Float fishing mode doesn't support window size %s", window_size)
+            sys.exit()
+
+    exit()
 
     if app.setting.confirmation_enabled:
         script.ask_for_confirmation("Do you want to continue with the settings above")

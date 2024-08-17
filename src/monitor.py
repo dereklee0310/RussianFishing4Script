@@ -107,6 +107,9 @@ class Monitor:
             "wheel", self.setting.retrieval_detect_confidence
         )
 
+    def is_line_snagged(self):
+        return self._locate_single_image_box("snag", 0.8)
+
     # ------------------------------ hint detection ------------------------------ #
     def is_tackle_ready(self):
         return self._locate_single_image_box("ready", 0.6)
@@ -245,23 +248,10 @@ class Monitor:
         last_point = int(18 + 152 * 0.51) - 1
         return not pag.pixel(x + 18, y) == pag.pixel(x + last_point, y)
 
-    def get_float_camera_region(self) -> tuple[int, int, int, int]:
-        coord = self.setting.window_controller.get_window_coord()
-        x_base, y_base, width, height = coord
-        window_size = f"{width}x{height}"
-        match window_size:
-            case "2560x1440":
-                x_base += 1200
-                y_base += 1194
-            case "1920x1080":
-                x_base += 880
-                y_base += 834
-            case "1600x900":
-                x_base += 720
-                y_base += 654
-            case _:
-                logger.error(
-                    "Invalid window size, must be 2560x1440, 1920x1080 or 1600x900"
-                )
-                sys.exit()
-        return (x_base, y_base, 160, 160)
+    def is_line_snagged(self) -> bool:
+        """Check the top of the snag icon to see if the line is snagged.
+
+        :return: True if snagged, False otherwise
+        :rtype: bool
+        """
+        return pag.pixel(*self.setting.snag_icon_position) == (206, 56, 21)

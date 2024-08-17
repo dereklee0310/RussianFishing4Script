@@ -73,6 +73,8 @@ class Player:
             self.puller = self.tackle.general_pull
         self.special_cast_miss = self.setting.fishing_strategy in ["bottom", "marine"]
 
+        self.setting.snag_detection_enabled = True
+
         # fish count and bite rate
         self.cast_miss_count = 0
         self.keep_fish_count = 0
@@ -174,7 +176,6 @@ class Player:
 
     def float_fishing(self) -> None:
         """Main float fishing loop."""
-        float_region = self.monitor.get_float_camera_region()
         while True:
             self._refill_user_stats()
             self._resetting_stage()
@@ -182,7 +183,7 @@ class Player:
 
             logger.info("Checking float status")
             try:
-                self._monitor_float_state(float_region)
+                self._monitor_float_state(self.setting.float_camera_rect)
             except TimeoutError:
                 self.cast_miss_count += 1
                 continue
@@ -369,7 +370,6 @@ class Player:
     def _handle_timeout(self) -> None:
         """Handle common timeout events."""
         if self.monitor.is_tackle_broken():
-            self.save_screenshot()
             self.general_quit("Tackle is broken")
 
         if self.monitor.is_disconnected():
@@ -377,6 +377,9 @@ class Player:
 
         if self.monitor.is_ticket_expired():
             self._handle_expired_ticket()
+
+        if self.setting.snag_detection_enabled and self.monitor.is_line_snagged():
+            self.general_quit("Line is snagged")
 
     def _handle_broken_lure(self):
         """Handle the broken lure event according to the settings."""
