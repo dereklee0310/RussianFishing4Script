@@ -29,6 +29,11 @@ GENERAL_CONFIGS = (
     ("keepnet_full_action", "Keep net full action", str),
     ("alarm_sound_file", "Alarm sound file", str),
     ("unmarked_release_whitelist", "Unmarked release whitelist", str),
+    ("initial_friction", "Initial friction", int),
+    ("max_friction", "Max friction", int),
+    ("friction_threshold", "Friction threshold", float),
+    ("friction_check_delay", "Friction check delay", str),
+    ("friction_increase_delay", "Friction increase delay", str),
 )
 
 # ----------------------- config name - attribute name ----------------------- #
@@ -108,11 +113,21 @@ class Setting:
         parent_dir = pathlib.Path(__file__).resolve().parents[1]
         self.image_dir = parent_dir / "static" / self.language
 
-        # set hard coded coordinates
-        coord = self.window_controller.get_window_coord()
-        self.window_size = f"{coord[2]}x{coord[3]}"
-        self._set_float_camera_rect(coord[0], coord[1], self.window_size)
-        self._set_snag_icon_position(coord[0], coord[1], self.window_size)
+        # # set hard coded coordinates
+        self.x_base, self.y_base = self.window_controller.get_base_coords()
+        self.window_size = self.window_controller.get_window_size()
+        self._set_float_camera_rect()
+        self._set_snag_icon_position()
+
+        if self.friction_check_delay == "unlimited":
+            self.friction_check_delay = 0
+        else:
+            self.friction_check_delay = float(self.friction_check_delay)
+
+        if self.friction_increase_delay == "unlimited":
+            self.friction_increase_delay = 0
+        else:
+            self.friction_increase_delay = float(self.friction_increase_delay)
 
     def _merge_general_configs(self) -> None:
         """Merge general configs from config.ini."""
@@ -178,33 +193,31 @@ class Setting:
                 attribute_value = var_type(section.get(attribute_name))
             setattr(self, attribute_name, attribute_value)
 
-    def _set_float_camera_rect(
-        self, x_base: int, y_base: int, window_size: str
-    ) -> None:
-        match window_size:
-            case "2560x1440":
-                x_base += 1200
-                y_base += 1194
-            case "1920x1080":
-                x_base += 880
-                y_base += 834
+    def _set_float_camera_rect(self) -> None:
+        x, y = self.x_base, self.y_base
+        match self.window_size:
             case "1600x900":
-                x_base += 720
-                y_base += 654
-        self.float_camera_rect = (x_base, y_base, 160, 160)  # (left, top, w, h)
+                x += 720
+                y += 654
+            case "1920x1080":
+                x += 880
+                y += 834
+            case "2560x1440":
+                x += 1200
+                y += 1194
+        self.float_camera_rect = (x, y, 160, 160)  # (left, top, w, h)
 
-    def _set_snag_icon_position(
-        self, x_base: int, y_base: int, window_size: str
-    ) -> None:
-        match window_size:
-            case "2560x1440":
-                x_base += 1612
-                y_base += 1369
-            case "1920x1080":
-                x_base += 1292
-                y_base += 1009
+    def _set_snag_icon_position(self) -> None:
+        x, y = self.x_base, self.y_base
+        match self.window_size:
             case "1600x900":
-                x_base += 1132
-                y_base += 829
-        x_base += 15
-        self.snag_icon_position = (x_base, y_base)  # x, y coordinates
+                x += 1132
+                y += 829
+            case "1920x1080":
+                x += 1292
+                y += 1009
+            case "2560x1440":
+                x += 1612
+                y += 1369
+        x += 15
+        self.snag_icon_position = (x, y)  # x, y coordinates

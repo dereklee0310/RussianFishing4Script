@@ -45,6 +45,7 @@ HELP = [
     ("M", "Send miaotixing notification after terminated without user interruption"),
     ("S", "Take screenshots of every fish you catch and save them in screenshots/"),
     ("C", "Except for bottom and float fishing, skip rod casting for the first fish"),
+    ("f", "Change friction automatically")
 ]
 
 # ------------------ flag name, attribute name, description ------------------ #
@@ -61,6 +62,7 @@ COMMON_ARGS = (
     ("miaotixing", "miaotixing_sending_enabled", "miaotixing sending"),
     ("screenshot", "screenshot_enabled", "Screenshot"),
     ("cast", "cast_skipping_enabled", "Cast skipping"),
+    ("friction", "friction_changing_enabled", "Friction changing")
 )
 
 SPECIAL_ARGS = (
@@ -406,8 +408,10 @@ if __name__ == "__main__":
 
     try:
         app.player.start_fishing()
+        # app.player.test() #TODO[friction]
+        # app.player.test() #TODO[friction]
     except KeyboardInterrupt:
-        pass
+         pass
 
     pag.keyUp("shift")  # avoid Shift key stuck
     print(app.player.gen_result("Terminated by user"))

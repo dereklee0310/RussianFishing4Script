@@ -8,5 +8,5 @@ config.ini
 todo_backup.txt
 tests/
 .env
-.vscode
+.vscode/
 中文版教程.md

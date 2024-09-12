@@ -9,6 +9,7 @@ import smtplib
 import sys
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from multiprocessing import Process
 
 # from email.mime.image import MIMEImage
 from pathlib import Path
@@ -42,7 +43,18 @@ TICKET_EXPIRE_DELAY = 16
 LURE_ADJUST_DELAY = 4
 DISCONNECTED_DELAY = 8
 WEAR_TEXT_UPDATE_DELAY = 2
+FRICTION_MONITOR_PRE_DELAY = 2
 
+def monitor_friction(is_friction_high, change_friction, check_delay, increase_delay):
+    sleep(FRICTION_MONITOR_PRE_DELAY)
+    while True:
+        high = is_friction_high()
+        if high:
+            change_friction(False)
+        else:
+            change_friction(True)
+            sleep(increase_delay)
+        sleep(check_delay)
 
 class Player:
     """Main interface of fishing loops and stages."""
@@ -74,6 +86,15 @@ class Player:
         self.special_cast_miss = self.setting.fishing_strategy in ["bottom", "marine"]
 
         self.setting.snag_detection_enabled = True
+        self.friction_monitor_process = Process(
+            target=monitor_friction,
+            args=(
+                self.monitor.is_friction_high,
+                self.tackle.change_friction,
+                self.setting.friction_check_delay,
+                self.setting.friction_increase_delay
+                )
+            )
 
         # fish count and bite rate
         self.cast_miss_count = 0
@@ -91,6 +112,9 @@ class Player:
 
     def start_fishing(self) -> None:
         """Start main fishing loop with specified fishing strategt."""
+        self.tackle.initialize_friction()
+        self.friction_monitor_process.start()
+
         match self.setting.fishing_strategy:
             case "spin" | "spin_with_pause":
                 self.spin_fishing()
@@ -871,6 +895,15 @@ class Player:
 
         pag.press("0")
         sleep(self.setting.check_delay)
+
+    # TODO[friction]
+    def test(self):
+        x_coords, y_coord = self.monitor._set_friction_params()
+        for x in x_coords:
+            print(pag.pixel(x, y_coord))
+            # pag.moveTo(x, y_coord)
+            # sleep(4)
+        exit()
 
 
 # head up backup

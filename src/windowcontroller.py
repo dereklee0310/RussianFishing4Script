@@ -23,6 +23,7 @@ class WindowController:
         self._title = game_window_title
         self._script_hwnd = self._get_cur_hwnd()
         self._game_hwnd = self._get_game_hwnd()
+        self._game_rect = win32gui.GetWindowRect(self._game_hwnd)
 
     def _get_cur_hwnd(self) -> int:
         """Get the handle of the terminal.
@@ -45,15 +46,22 @@ class WindowController:
             sys.exit()
         return hwnd
 
-    def get_window_coord(self) -> tuple[int, int, int, int]:
-        """Get the base coordinate, width, and height of the game window.
+    def get_window_size(self) -> str:
+        """Get the window size in "{width}x{height}" format.
+        :return: formatted window size
+        :rtype: str
+          """
+        width = self._game_rect[2] - self._game_rect[0]
+        height = self._game_rect[3] - self._game_rect[1]
+        return f"{width}x{height}"
 
-        :return: x base, y base, width, height
-        :rtype: tuple[int, int, int, int]
+    def get_base_coords(self) -> tuple[int, int]:
+        """Get base x and y coordinates.
+
+        :return: base x, base y
+        :rtype: tuple[int, int]
         """
-        rect = win32gui.GetWindowRect(self._game_hwnd)
-        width, height = rect[2] - rect[0], rect[3] - rect[1]
-        return rect[0], rect[1], width, height
+        return self._game_rect[0], self._game_rect[1]
 
     def activate_script_window(self) -> None:
         """Focus terminal."""
@@ -74,8 +82,9 @@ class WindowController:
 
 if __name__ == "__main__":
     w = WindowController("Russian Fishing 4")
-    w.activate_game_window()
-    print(w.get_window_coord())
+    # w.activate_game_window()
+    print(w.get_window_size())
+    print(w.get_base_coords())
 
 # SetForegroundWindow bug reference :
 # https://stackoverflow.com/questions/56857560/win32gui-setforegroundwindowhandle-not-working-in-loop

@@ -50,6 +50,7 @@ class Tackle:
         self.monitor = monitor
 
         self.landing_net_out = False  # for telescopic_pull()
+        self.cur_friction = self.setting.initial_friction
 
     @script.toggle_clicklock
     def reset(self) -> None:
@@ -280,3 +281,25 @@ class Tackle:
         logger.info("Switching gear ratio")
         with pag.hold("ctrl"):
             pag.press("space")
+
+    def initialize_friction(self) -> None:
+        """Set the in-game friction to "initial_friction"."""
+        for _ in range(30):
+            pag.scroll(1)
+
+        diff = 30 - self.setting.initial_friction
+        for _ in range(diff):
+            pag.scroll(-1)
+
+    def change_friction(self, increase: bool = True) -> None:
+        """Increae or decrease friction.
+
+        :param increase: increase or decrease, defaults to True
+        :type increase: bool, optional
+        """
+        if increase and self.cur_friction < self.setting.max_friction:
+            pag.scroll(1)
+            self.cur_friction = min(30, self.cur_friction + 1)
+        else:
+            pag.scroll(-1)
+            self.cur_friction = max(0, self.cur_friction - 1)

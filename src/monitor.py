@@ -1,14 +1,11 @@
 """
 Module for pyautogui.locateOnScreen wrappers.
-
-Todo:
-    Validate language option
-    Implement snag detection
 """
 
 # pylint: disable=missing-function-docstring
 # docstring for every functions? u serious?
 
+import sys
 import logging
 
 import pyautogui as pag
@@ -17,6 +14,67 @@ from pyscreeze import Box
 from setting import Setting
 
 logger = logging.getLogger(__name__)
+
+# FRICTION_BAR_COORDS = {
+#     # ----------------------------- 16x9 - 1080p - 2k ---------------------------- #
+#     "x_base": (480, 320, 0),
+#     "y_base": (270, 180, 0),
+#     "y": (1146, 1236, 1412),
+
+#     # ------ left - red - yellow - center(left + 424) - yellow - red - right ----- #
+#     # absolute coordinates, should subtract x_base from them according to window size
+#     "x": (855, 960, 1066, 1279, 1491, 1598, 1702),
+# }
+
+# FRICTION_BAR_OFFSETS = {
+#     # ------------ left - red - yellow - center - yellow - red - right ----------- #
+#     "1600x900": {"x": (375, 480, 586, 799, 1011, 1118, 1222), "y": 876},
+#     "1920x1080": {"x": (535, 640, 746, 959, 1171, 1278, 1382), "y": 1056},
+#     "2560x1440": {"x": (855, 960, 1066, 1279, 1491, 1598, 1702), "y": 1412},
+# }
+
+# --------------------------- left - center - right -------------------------- #
+
+# 70%: center + 297 (1279 + 297 = 1576)
+# 80%: center + 340 (1279 + 340 = 1619)
+# 90%: center + 382 (1279 + 382 = 1661)
+# center = 1279
+
+FRICTION_BAR_OFFSETS = {
+    "1600x900": {
+        "x": {
+            0.7: (502, 799, 1096),
+            0.8: (459, 799, 1139),
+            0.9: (417, 799, 1181),
+            0.95: (396, 799, 1202),
+        },
+        "y": 876,
+    },
+    "1920x1080": {
+        "x": {
+            0.7: (662, 959, 1256),
+            0.8: (619, 959, 1299),
+            0.9: (577, 959, 1341),
+            0.95: (556, 959, 1362),
+        },
+        "y": 1056,
+    },
+    "2560x1440": {
+        "x": {
+            0.7: (982, 1279, 1576),
+            0.8: (939, 1279, 1619),
+            0.9: (897, 1279, 1661),
+            0.95: (876, 1279, 1682),
+        },
+        "y": 1412,
+    },
+}
+
+FRICTION_OFFSET_NUM = 3
+YELLOW_FRICTION = (200, 214, 63)
+ORANGE_FRICTION = (229, 188, 0)
+RED_FRICTION = (206, 56, 21)
+SNAG_ICON_COLOR = (206, 56, 21)
 
 
 class Monitor:
@@ -31,6 +89,9 @@ class Monitor:
         :type setting: Setting
         """
         self.setting = setting
+        self.x_coords = None
+        self.y_coord = None
+        self._set_friction_params()
 
     def _locate_single_image_box(self, image: str, confidence: float) -> Box | None:
         """A wrapper for locateOnScreen method and path resolving.
@@ -250,4 +311,34 @@ class Monitor:
         :return: True if snagged, False otherwise
         :rtype: bool
         """
-        return pag.pixel(*self.setting.snag_icon_position) == (206, 56, 21)
+        return pag.pixel(*self.setting.snag_icon_position) == SNAG_ICON_COLOR
+
+    def _set_friction_params(self):
+        """
+        """
+        if self.setting.friction_threshold not in (0.7, 0.8, 0.9, 0.95):
+            logger.error("Invalid friction threshold")
+            sys.exit()
+
+        if self.setting.friction_threshold == 0.7:
+            self.color_group = (ORANGE_FRICTION, RED_FRICTION)
+        else:
+            self.color_group = (RED_FRICTION, )
+
+        x_base, y_base = self.setting.x_base, self.setting.y_base
+        offsets = FRICTION_BAR_OFFSETS[self.setting.window_size]
+        x_offsets = offsets["x"][self.setting.friction_threshold]
+        y_offset = offsets["y"]
+        self.x_coords = tuple(x_base + offset for offset in x_offsets)
+        self.y_coord = y_base + y_offset
+
+    def is_friction_high(self) -> bool:
+        """Check if the friction is too high based on left, mid, and right points.
+
+        :return: True if pixels are the same and color is correct, False otherwise
+        :rtype: bool
+        """
+        pixels = [pag.pixel(x, self.y_coord) for x in self.x_coords] # get pixel values
+        if pixels.count(pixels[0]) != FRICTION_OFFSET_NUM: # check if pixels having same value
+            return False
+        return pixels[0] in self.color_group # check if pixel color is orange or red based on threshold
