@@ -51,6 +51,7 @@ class Tackle:
 
         self.landing_net_out = False  # for telescopic_pull()
         self.cur_friction = self.setting.initial_friction
+        self.friction_brake_initialized = False
 
     @script.toggle_clicklock
     def reset(self) -> None:
@@ -282,14 +283,22 @@ class Tackle:
         with pag.hold("ctrl"):
             pag.press("space")
 
-    def initialize_friction(self) -> None:
-        """Set the in-game friction to "initial_friction"."""
-        for _ in range(30):
-            pag.scroll(1)
+    def reset_friction_brake(self) -> None:
+        """Reset to the initial friction brake."""
+        logger.info("Initializing friction brake")
 
-        diff = 30 - self.setting.initial_friction
-        for _ in range(diff):
-            pag.scroll(-1)
+        if not self.friction_brake_initialized:
+            for _ in range(30):
+                pag.scroll(1)
+            diff = 30 - self.setting.initial_friction
+            for _ in range(diff):
+                pag.scroll(-1)
+        else:
+            diff = self.cur_friction - self.setting.initial_friction
+            direction = -1 if diff > 0 else 1
+            for i in range(abs(diff)):
+                pag.scroll(direction)
+            self.cur_friction = self.setting.initial_friction
 
     def change_friction(self, increase: bool = True) -> None:
         """Increae or decrease friction.

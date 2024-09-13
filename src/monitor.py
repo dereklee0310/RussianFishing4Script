@@ -342,3 +342,7 @@ class Monitor:
         if pixels.count(pixels[0]) != FRICTION_OFFSET_NUM: # check if pixels having same value
             return False
         return pixels[0] in self.color_group # check if pixel color is orange or red based on threshold
+
+    def is_fish_hooked_pixel(self) -> bool:
+        # TODO
+        return True

@@ -29,6 +29,7 @@ GENERAL_CONFIGS = (
     ("keepnet_full_action", "Keep net full action", str),
     ("alarm_sound_file", "Alarm sound file", str),
     ("unmarked_release_whitelist", "Unmarked release whitelist", str),
+    ("snag_detection_enabled", "Enable snag detection", bool),
     ("initial_friction", "Initial friction", int),
     ("max_friction", "Max friction", int),
     ("friction_threshold", "Friction threshold", float),

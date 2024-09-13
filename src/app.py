@@ -31,24 +31,24 @@ from setting import COMMON_CONFIGS, SPECIAL_CONFIGS, Setting
 logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# -------------------------- flag name, help message ------------------------- #
-HELP = [
+# ------------------------- flag name 1, help message ------------------------ #
+HELP = (
     ("c", "Drink coffee if retrieval takes longer than 2 minutes"),
-    ("A", "Drink alcohol before keeping the fish regularly"),
+    ("A", "Regularly drink alcohol before keeping the fish"),
     ("r", "Refill hunger and comfort by consuming tea and carrot"),
-    ("H", "Harvest baits when bottom fishing"),
-    ("g", "Switch the gear ratio automatically"),
-    ("P", "Save a chart of catch logs in log/ after it's terminated"),
+    ("H", "Harvest baits before casting, support mode: bottom"), #TODO
+    ("g", "Switch the gear ratio after the retrieval timed out"),
+    ("P", "Save a chart of catch logs in logs/"),
     ("s", "Shutdown computer after terminated without user interruption"),
-    ("l", "After fish is hooked, lift the tackle constantly while retrieving"),
+    ("l", "Lift the tackle constantly while pulling a fish"),
     ("e", "Send email to yourself after terminated without user interruption"),
     ("M", "Send miaotixing notification after terminated without user interruption"),
     ("S", "Take screenshots of every fish you catch and save them in screenshots/"),
-    ("C", "Except for bottom and float fishing, skip rod casting for the first fish"),
+    ("C", "Skip rod casting for the first fish, support mode: spin, marine, wakey_rig"),
     ("f", "Change friction automatically")
-]
+)
 
-# ------------------ flag name, attribute name, description ------------------ #
+# ----------------- flag name 2, attribute name, description ----------------- #
 COMMON_ARGS = (
     ("coffee", "coffee_drinking_enabled", "Coffee drinking"),
     ("alcohol", "alcohol_drinking_enabled", "Alcohol drinking"),
@@ -65,6 +65,7 @@ COMMON_ARGS = (
     ("friction", "friction_changing_enabled", "Friction changing")
 )
 
+# ----------------- flag name 2, attribute name, description ----------------- #
 SPECIAL_ARGS = (
     ("marked", "unmarked_release_enabled", "Unmarked release"),
     ("rainbow_line", "rainbow_line_enabled", "Rainbow line"),
@@ -72,7 +73,6 @@ SPECIAL_ARGS = (
     ("boat_ticket_duration", "boat_ticket_duration", "Boat ticket duratioin"),
 )
 
-# https://patorjk.com/software/taag/#p=testall&f=3D-ASCII&t=RF4S%0A, ANSI Shadow
 ASCII_LOGO = """
 ██████╗ ███████╗██╗  ██╗███████╗
 ██╔══██╗██╔════╝██║  ██║██╔════╝
@@ -80,6 +80,7 @@ ASCII_LOGO = """
 ██╔══██╗██╔══╝  ╚════██║╚════██║
 ██║  ██║██║          ██║███████║
 ╚═╝  ╚═╝╚═╝          ╚═╝╚══════╝"""
+# https://patorjk.com/software/taag/#p=testall&f=3D-ASCII&t=RF4S%0A, ANSI Shadow
 
 
 class App:
@@ -87,41 +88,31 @@ class App:
 
     def __init__(self):
         """Merge args into setting node."""
+        self.setting = Setting()
         self.pid = None
         self.player = None
         self.table = None
 
         self._build_args()
         self._verify_args()
-
         if self.args.email is not None and self.setting.SMTP_validation_enabled:
             self._validate_smtp_connection()
         if self.setting.image_verification_enabled:
             self._verify_image_file_integrity()
 
-        # pname -> pid
-        if self.args.pname is not None:
-            try:
-                self.pid = self.setting.profile_names.index(self.args.pname)
-            except ValueError:
-                logger.error("Invalid profile name")
-                sys.exit()
-
-        # all checks passed, merge settings
+        # all checks passed, merge args into setting node
         args_attributes = COMMON_ARGS + SPECIAL_ARGS
         self.setting.merge_args(self.args, args_attributes)
-
-        # update number of fishes to catch
         fishes_to_catch = self.setting.keepnet_limit - self.setting.fishes_in_keepnet
         self.setting.fishes_to_catch = fishes_to_catch
-        print(ASCII_LOGO)
-        print("https://github.com/dereklee0310/RussianFishing4Script")
 
-    def setup_parser(self) -> ArgumentParser:
-        """Configure argparser and parse the args."""
-        parser = ArgumentParser(description="Start the script for Russian Fishing 4")
+        self._verify_game_window_size()
 
-        # use first column of .common_arg_table as the second flag name
+
+    def _setup_parser(self) -> ArgumentParser:
+        """Configure argparser."""
+        parser = ArgumentParser(description="Start AFK script for Russian Fishing 4")
+
         for arg_help, common_arg in zip(HELP, COMMON_ARGS):
             flag1 = f"-{arg_help[0]}"
             flag2 = f"--{common_arg[0]}"
@@ -156,14 +147,15 @@ class App:
         )
 
         # -------------------------- arguments with metavar -------------------------- #
-        parser.add_argument(
+        profile_selection_strategy = parser.add_mutually_exclusive_group()
+        profile_selection_strategy.add_argument(
             "-p",
             "--pid",
             metavar="PID",
             type=int,
             help="Id of the profile you want to use",
         )
-        parser.add_argument(
+        profile_selection_strategy.add_argument(
             "-N",
             "--pname",
             metavar="PROFILE_NAME",
@@ -195,14 +187,11 @@ class App:
     def _build_args(self) -> None:
         """Build args from command line arguments and configuration file."""
         # parse command line arguments first for help
-        parser = self.setup_parser()
+        parser = self._setup_parser()
         command_line_args = parser.parse_args()
 
         # merge with default arguments
-        self.setting = Setting()
         default_args = parser.parse_args(shlex.split(self.setting.default_arguments))
-
-        # merge with default arguments
         command_line_args = vars(command_line_args)
         default_args = vars(default_args)
         for k, v in default_args.items():
@@ -220,15 +209,25 @@ class App:
             sys.exit()
 
         # pid has no fallback value, check if it's None
-        if self.args.pid and not self._is_pid_valid(str(self.args.pid)):
+        if self.args.pid is not None and not self._is_pid_valid(str(self.args.pid)):
             logger.error("Invalid profile id")
             sys.exit()
         self.pid = self.args.pid
+
+        # pname -> pid
+        if self.args.pname is not None:
+            try:
+                self.pid = self.setting.profile_names.index(self.args.pname)
+            except ValueError:
+                logger.error("Invalid profile name")
+                sys.exit()
 
         # boat_ticket_duration already checked by choices[...]
 
     def _validate_smtp_connection(self) -> None:
         """Validate email configuration in .env."""
+        logger.info("Validating SMTP connection")
+
         load_dotenv()
         email = os.getenv("EMAIL")
         password = os.getenv("PASSWORD")
@@ -262,34 +261,30 @@ class App:
         Compare files in static/en and static/{language}
         and print missing files in static/{language}.
         """
-        logger.info("Verifying file integrity...")
+        logger.info("Verifying file integrity")
 
         image_dir = self.setting.image_dir
         if image_dir == "../static/en/":
-            logger.info("Integrity check passed")
             return
 
-        complete_filenames = os.listdir("../static/en/")  # use en version as reference
+        target_images = os.listdir("../static/en/")  # use en version as reference
         try:
-            current_filenames = os.listdir(image_dir)
+            current_images = os.listdir(image_dir)
         except FileNotFoundError:
             logger.error("Directory %s not found", image_dir)
             print("Please check your language setting in ../config.ini")
             sys.exit()
 
-        missing_filenames = set(complete_filenames) - set(current_filenames)
-        if len(missing_filenames) != 0:
+        missing_images = set(target_images) - set(current_images)
+        if len(missing_images) != 0:
             logger.error("Integrity check failed")
             guide_link = "https://shorturl.at/2AzUI"
             print(f"Please refer to {guide_link}")
-            table = PrettyTable(header=False, align="l")
-            table.title = "Missing images"
-            for filename in missing_filenames:
+            table = PrettyTable(header=False, align="l", title="Missing images")
+            for filename in missing_images:
                 table.add_row([filename])
             print(table)
             sys.exit()
-
-        logger.info("Integrity check passed")
 
     def _is_pid_valid(self, pid: str) -> bool:
         """Validate the profile id.
@@ -301,8 +296,25 @@ class App:
         """
         if not pid.isdigit():
             return False
-        pid = int(pid)
-        return 0 <= pid < len(self.setting.profile_names)
+        return 0 <= int(pid) < len(self.setting.profile_names)
+
+    def _verify_game_window_size(self) -> None:
+        window_size = self.setting.window_size
+        if window_size in ("2560x1440", "1920x1080", "1600x900"):
+            return
+
+        logger.warning(
+            "Window size %s not supported, must be 2560x1440, 1920x1080 or 1600x900",
+            window_size,
+        )
+        logger.warning("Snag detection and friction changing will be disabled")
+        app.player.setting.snag_detection_enabled = False
+        app.player.setting.friction_changing_enabled = False
+        if app.setting.fishing_strategy == "float":
+            logger.error(
+                "Float fishing mode doesn't support window size %s", window_size
+            )
+            sys.exit()
 
     def display_available_profiles(self) -> None:
         """List available user profiles from setting node."""
@@ -358,8 +370,7 @@ class App:
 
     def display_settings(self) -> None:
         """Display args and user profile."""
-        self.table = PrettyTable(header=False, align="l")
-        self.table.title = "Settings"
+        self.table = PrettyTable(header=False, align="l", title="Setings")
         self._build_args_table()
         self._build_user_config_table()
         print(self.table)
@@ -376,27 +387,18 @@ class App:
             sys.exit()
 
 
+
 if __name__ == "__main__":
     app = App()
+
+    print(ASCII_LOGO)
+    print("https://github.com/dereklee0310/RussianFishing4Script")
+
     if app.pid is None:
         app.display_available_profiles()
         app.ask_for_pid()
     app.create_player()
     app.display_settings()
-
-    window_size = app.setting.window_size
-    if window_size not in ("2560x1440", "1920x1080", "1600x900"):
-        logger.warning(
-            "Invalid window size %s, must be 2560x1440, 1920x1080 or 1600x900",
-            window_size,
-        )
-        logger.warning("Snag detection will be disabled")
-        app.player.setting.snag_detection_enabled = False  # modify player setting
-        if app.setting.fishing_strategy == "float":
-            logger.error(
-                "Float fishing mode doesn't support window size %s", window_size
-            )
-            sys.exit()
 
     if app.setting.confirmation_enabled:
         script.ask_for_confirmation("Do you want to continue with the settings above")
@@ -408,14 +410,13 @@ if __name__ == "__main__":
 
     try:
         app.player.start_fishing()
-        # app.player.test() #TODO[friction]
-        # app.player.test() #TODO[friction]
     except KeyboardInterrupt:
-         pass
+        pass
 
+    app.player.friction_brake_monitor_process.join()
     pag.keyUp("shift")  # avoid Shift key stuck
     print(app.player.gen_result("Terminated by user"))
     if app.setting.plotting_enabled:
         app.player.plot_and_save()
 
-# CTRL_C_EVENT reference: https://stackoverflow.com/questions/58455684/
+# CTRL_C_EVENT: https://stackoverflow.com/questions/58455684/
