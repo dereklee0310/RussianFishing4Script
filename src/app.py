@@ -272,7 +272,7 @@ class App:
             current_images = os.listdir(image_dir)
         except FileNotFoundError:
             logger.error("Directory %s not found", image_dir)
-            print("Please check your language setting in ../config.ini")
+            print("Please check your language setting in config.ini")
             sys.exit()
 
         missing_images = set(target_images) - set(current_images)
@@ -280,7 +280,7 @@ class App:
             logger.error("Integrity check failed")
             guide_link = "https://shorturl.at/2AzUI"
             print(f"Please refer to {guide_link}")
-            table = PrettyTable(header=False, align="l", title="Missing images")
+            table = PrettyTable(header=False, align="l", title="Missing Images")
             for filename in missing_images:
                 table.add_row([filename])
             print(table)

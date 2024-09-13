@@ -1,11 +1,13 @@
 """
 Module for SettingHandler class, not used yet.
 """
-
+import sys
 import configparser
 import logging
 import pathlib
 from argparse import Namespace
+
+from prettytable import PrettyTable
 
 from windowcontroller import WindowController
 
@@ -99,6 +101,13 @@ class Setting:
         """Initialize attributes and merge the configs."""
         self.window_controller = WindowController()
         self.config = configparser.ConfigParser()
+
+        config_file = pathlib.Path(__file__).resolve().parents[1] / "config.ini"
+        if not config_file.is_file():
+            logger.error("config.ini doesn't exist, please run .\\setup.bat first")
+            sys.exit()
+
+
         self.config.read(pathlib.Path(__file__).resolve().parents[1] / "config.ini")
 
         self.profile_names = ["edit configuration file"]
@@ -134,12 +143,27 @@ class Setting:
         """Merge general configs from config.ini."""
         section = self.config["game"]
 
+        missing_attributes = []
         for attribute_name, _, var_type in GENERAL_CONFIGS:
+            section_value = section.get(attribute_name)
+            if section_value is None:
+                missing_attributes.append(attribute_name)
+                continue
+
             if var_type == bool:
-                attribute_value = section.get(attribute_name) == "True"
+                attribute_value = section_value == "True"
             else:
                 attribute_value = var_type(section.get(attribute_name))
             setattr(self, attribute_name, attribute_value)
+
+        if missing_attributes:
+            logger.error("Failed to merge settings in [game] in config.ini")
+            print("Please refer to template.ini to add missing settings")
+            table = PrettyTable(header=False, align="l", title="Missing Settings")
+            for attribute_name in missing_attributes:
+                table.add_row([(attribute_name)])
+            print(table)
+            sys.exit()
 
         self.unmarked_release_whitelist = [
             key.strip() for key in self.unmarked_release_whitelist.split(",")
@@ -177,22 +201,43 @@ class Setting:
         :type pid: int
         """
         section = self.config[self.profile_names[pid]]
+        missing_attributes = []
 
         for attribute_name, _, var_type in COMMON_CONFIGS:
+            section_value = section.get(attribute_name)
+            if section_value is None:
+                missing_attributes.append(attribute_name)
+                continue
+
             if var_type == bool:
-                attribute_value = section.get(attribute_name) == "True"
+                attribute_value = section_value == "True"
             else:
-                attribute_value = var_type(section.get(attribute_name))
+                attribute_value = var_type(section_value)
 
             setattr(self, attribute_name, attribute_value)
 
         special_configs = SPECIAL_CONFIGS.get(self.fishing_strategy)
         for attribute_name, _, var_type in special_configs:
+            section_value = section.get(attribute_name)
+            if section_value is None:
+                missing_attributes.append(attribute_name)
+                continue
+
             if var_type == bool:
-                attribute_value = section.get(attribute_name) == "True"
+                attribute_value = section_value == "True"
             else:
-                attribute_value = var_type(section.get(attribute_name))
+                attribute_value = var_type(section_value)
             setattr(self, attribute_name, attribute_value)
+
+        if missing_attributes:
+            logger.error("Failed to merge settings in [%s] in config.ini:", self.profile_names[pid])
+            print("Please refer to template.ini to add missing settings")
+            table = PrettyTable(header=False, align="l", title="Missing Settings")
+            for attribute_name in missing_attributes:
+                table.add_row([attribute_name])
+            print(table)
+            sys.exit()
+
 
     def _set_float_camera_rect(self) -> None:
         x, y = self.x_base, self.y_base
