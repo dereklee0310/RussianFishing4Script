@@ -24,6 +24,9 @@ lifting -> lift
 `window_size` -> automatic detection
 
 add `pname` for profile selection by name
+
+
+verify missing config entries
  
 <!-- > [!NOTE]
 **Please refer to `template.ini` to check new settings**. -->

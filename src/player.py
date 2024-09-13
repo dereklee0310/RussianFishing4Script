@@ -8,6 +8,8 @@ import os
 import smtplib
 import sys
 import time
+from datetime import datetime
+import random
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from multiprocessing import Process
@@ -32,6 +34,7 @@ from tackle import Tackle
 from timer import Timer
 
 logger = logging.getLogger(__name__)
+random.seed(datetime.now().timestamp())
 
 CHECK_MISS_LIMIT = 16
 PRE_RETRIEVAL_DURATION = 1
@@ -44,17 +47,17 @@ TICKET_EXPIRE_DELAY = 16
 LURE_ADJUST_DELAY = 4
 DISCONNECTED_DELAY = 8
 WEAR_TEXT_UPDATE_DELAY = 2
-FRICTION_MONITOR_DELAY = 2
+FRICTION_BRAKE_MONITOR_DELAY = 2
 
-def monitor_friction(is_fish_hooked, is_friction_high, change_friction, check_delay, increase_delay):
+def monitor_friction(is_fish_hooked, is_friction_brake_high, change_friction, check_delay, increase_delay):
     logger.info("Monitoring friction brake")
     try:
         while True:
             if not is_fish_hooked():
-                sleep(FRICTION_MONITOR_DELAY)
+                sleep(FRICTION_BRAKE_MONITOR_DELAY)
                 continue
 
-            if is_friction_high():
+            if is_friction_brake_high():
                 change_friction(False)
             else:
                 change_friction(True)
@@ -96,8 +99,8 @@ class Player:
             target=monitor_friction,
             args=(
                 self.monitor.is_fish_hooked_pixel,
-                self.monitor.is_friction_high,
-                self.tackle.change_friction,
+                self.monitor.is_friction_brake_high,
+                self.tackle.change_friction_brake,
                 self.setting.friction_check_delay,
                 self.setting.friction_increase_delay,
                 )
@@ -909,7 +912,8 @@ class Player:
             pag.click()
 
         pag.press("0")
-        sleep(self.setting.check_delay)
+        random_offset = random.uniform(-self.setting.offset, self.setting.offset)
+        sleep(self.setting.check_delay + random_offset)
 
 
 # head up backup

@@ -45,7 +45,7 @@ HELP = (
     ("M", "Send miaotixing notification after terminated without user interruption"),
     ("S", "Take screenshots of every fish you catch and save them in screenshots/"),
     ("C", "Skip rod casting for the first fish, support mode: spin, marine, wakey_rig"),
-    ("f", "Change friction automatically")
+    ("f", "Change friction brake automatically")
 )
 
 # ----------------- flag name 2, attribute name, description ----------------- #
@@ -62,7 +62,7 @@ COMMON_ARGS = (
     ("miaotixing", "miaotixing_sending_enabled", "miaotixing sending"),
     ("screenshot", "screenshot_enabled", "Screenshot"),
     ("cast", "cast_skipping_enabled", "Cast skipping"),
-    ("friction", "friction_changing_enabled", "Friction changing")
+    ("friction_brake", "friction_brake_changing_enabled", "Friction brake changing")
 )
 
 # ----------------- flag name 2, attribute name, description ----------------- #
@@ -307,9 +307,9 @@ class App:
             "Window size %s not supported, must be 2560x1440, 1920x1080 or 1600x900",
             window_size,
         )
-        logger.warning("Snag detection and friction changing will be disabled")
+        logger.warning("Snag detection and friction brake changing will be disabled")
         app.player.setting.snag_detection_enabled = False
-        app.player.setting.friction_changing_enabled = False
+        app.player.setting.friction_brake_changing_enabled = False
         if app.setting.fishing_strategy == "float":
             logger.error(
                 "Float fishing mode doesn't support window size %s", window_size

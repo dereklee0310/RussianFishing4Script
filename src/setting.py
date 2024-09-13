@@ -34,9 +34,9 @@ GENERAL_CONFIGS = (
     ("snag_detection_enabled", "Enable snag detection", bool),
     ("initial_friction", "Initial friction", int),
     ("max_friction", "Max friction", int),
-    ("friction_threshold", "Friction threshold", float),
-    ("friction_check_delay", "Friction check delay", str),
-    ("friction_increase_delay", "Friction increase delay", str),
+    ("friction_brake_threshold", "Friction brake threshold", float),
+    ("friction_brake_check_delay", "Friction brake check delay", str),
+    ("friction_brake_increase_delay", "Friction brake increase delay", str),
 )
 
 # ----------------------- config name - attribute name ----------------------- #
@@ -129,15 +129,15 @@ class Setting:
         self._set_float_camera_rect()
         self._set_snag_icon_position()
 
-        if self.friction_check_delay == "unlimited":
-            self.friction_check_delay = 0
+        if self.friction_brake_check_delay == "unlimited":
+            self.friction_brake_check_delay = 0
         else:
-            self.friction_check_delay = float(self.friction_check_delay)
+            self.friction_brake_check_delay = float(self.friction_brake_check_delay)
 
-        if self.friction_increase_delay == "unlimited":
-            self.friction_increase_delay = 0
+        if self.friction_brake_increase_delay == "unlimited":
+            self.friction_brake_increase_delay = 0
         else:
-            self.friction_increase_delay = float(self.friction_increase_delay)
+            self.friction_brake_increase_delay = float(self.friction_brake_increase_delay)
 
     def _merge_general_configs(self) -> None:
         """Merge general configs from config.ini."""

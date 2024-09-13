@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 # 90%: center + 382 (1279 + 382 = 1661)
 # center = 1279
 
-FRICTION_BAR_OFFSETS = {
+FRICTION_BRAKE_BAR_OFFSETS = {
     "1600x900": {
         "x": {
             0.7: (502, 799, 1096),
@@ -70,7 +70,7 @@ FRICTION_BAR_OFFSETS = {
     },
 }
 
-FRICTION_OFFSET_NUM = 3
+FRICTION_BRAKE_OFFSET_NUM = 3
 YELLOW_FRICTION = (200, 214, 63)
 ORANGE_FRICTION = (229, 188, 0)
 RED_FRICTION = (206, 56, 21)
@@ -91,7 +91,7 @@ class Monitor:
         self.setting = setting
         self.x_coords = None
         self.y_coord = None
-        self._set_friction_params()
+        self._set_friction_brake_params()
 
     def _locate_single_image_box(self, image: str, confidence: float) -> Box | None:
         """A wrapper for locateOnScreen method and path resolving.
@@ -313,33 +313,33 @@ class Monitor:
         """
         return pag.pixel(*self.setting.snag_icon_position) == SNAG_ICON_COLOR
 
-    def _set_friction_params(self):
+    def _set_friction_brake_params(self):
         """
         """
-        if self.setting.friction_threshold not in (0.7, 0.8, 0.9, 0.95):
+        if self.setting.friction_brake_threshold not in (0.7, 0.8, 0.9, 0.95):
             logger.error("Invalid friction threshold")
             sys.exit()
 
-        if self.setting.friction_threshold == 0.7:
+        if self.setting.friction_brake_threshold == 0.7:
             self.color_group = (ORANGE_FRICTION, RED_FRICTION)
         else:
             self.color_group = (RED_FRICTION, )
 
         x_base, y_base = self.setting.x_base, self.setting.y_base
-        offsets = FRICTION_BAR_OFFSETS[self.setting.window_size]
-        x_offsets = offsets["x"][self.setting.friction_threshold]
+        offsets = FRICTION_BRAKE_BAR_OFFSETS[self.setting.window_size]
+        x_offsets = offsets["x"][self.setting.friction_brake_threshold]
         y_offset = offsets["y"]
         self.x_coords = tuple(x_base + offset for offset in x_offsets)
         self.y_coord = y_base + y_offset
 
-    def is_friction_high(self) -> bool:
+    def is_friction_brake_high(self) -> bool:
         """Check if the friction is too high based on left, mid, and right points.
 
         :return: True if pixels are the same and color is correct, False otherwise
         :rtype: bool
         """
         pixels = [pag.pixel(x, self.y_coord) for x in self.x_coords] # get pixel values
-        if pixels.count(pixels[0]) != FRICTION_OFFSET_NUM: # check if pixels having same value
+        if pixels.count(pixels[0]) != FRICTION_BRAKE_OFFSET_NUM: # check if pixels having same value
             return False
         return pixels[0] in self.color_group # check if pixel color is orange or red based on threshold
 

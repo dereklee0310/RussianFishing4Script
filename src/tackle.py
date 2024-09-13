@@ -301,7 +301,7 @@ class Tackle:
                 pag.scroll(direction)
             self.cur_friction = self.setting.initial_friction
 
-    def change_friction(self, increase: bool = True) -> None:
+    def change_friction_brake(self, increase: bool = True) -> None:
         """Increae or decrease friction.
 
         :param increase: increase or decrease, defaults to True
