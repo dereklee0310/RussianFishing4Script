@@ -7,9 +7,10 @@ import logging
 import os
 import smtplib
 import sys
+import time
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from multiprocessing import Process, Value
+from multiprocessing import Process
 
 # from email.mime.image import MIMEImage
 from pathlib import Path
@@ -142,6 +143,8 @@ class Player:
             if not self.setting.cast_skipping_enabled:
                 self.setting.cast_skipping_enabled = False
                 self._refill_user_stats()
+                self._harvesting_stage()
+                self._access_item("main_rod") # pick up again
                 self._resetting_stage()
                 self.tackle.cast()
 
@@ -161,7 +164,13 @@ class Player:
         rod_count = len(self.setting.bottom_rods_shortcuts)
         check_miss_counts = [0] * rod_count
 
+        spod_rod_recast_delay = self.setting.spod_rod_recast_delay
         while True:
+            if time.time() - self.timer.start_time > spod_rod_recast_delay:
+                spod_rod_recast_delay += self.setting.spod_rod_recast_delay
+                self._access_item("spod_rod")
+                self.tackle.cast(update=False)
+
             self._refill_user_stats()
             self._harvesting_stage()
             rod_idx = (rod_idx + 1) % rod_count
@@ -207,6 +216,7 @@ class Player:
         """Main float fishing loop."""
         while True:
             self._refill_user_stats()
+            self._access_item("main_rod") # pick up again
             self._resetting_stage()
             self.tackle.cast()
 

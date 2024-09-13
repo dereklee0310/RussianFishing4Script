@@ -76,7 +76,7 @@ class Tackle:
 
         raise TimeoutError
 
-    def cast(self) -> None:
+    def cast(self, update=True) -> None:
         """Cast the rod, then wait for the lure/bait to fly and sink."""
         logger.info("Casting")
         match self.setting.cast_power_level:
@@ -91,7 +91,8 @@ class Tackle:
                 script.hold_left_click(duration)
 
         sleep(self.setting.cast_delay)
-        self.timer.update_cast_hour()
+        if update:
+            self.timer.update_cast_hour()
 
     def sink(self, marine: bool = True) -> None:
         """Sink the lure until an event happend, designed for marine and wakey rig.
