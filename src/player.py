@@ -8,6 +8,10 @@ import sys
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+##
+import time
+import random
+
 # from email.mime.image import MIMEImage
 from pathlib import Path
 from time import sleep
@@ -30,13 +34,17 @@ import json
 
 logger = logging.getLogger(__name__)
 
+#
+#min_deviation = 1
+#max_deviation = 5
+
 CHECK_MISS_LIMIT = 16
 PRE_RETRIEVAL_DURATION = 1
 PULL_OUT_DELAY = 3
 DIG_DELAY = 5
 DIG_TIMEOUT = 32
 LOOP_DELAY = 2
-ANIMATION_DELAY = 0.5
+ANIMATION_DELAY = 1
 TICKET_EXPIRE_DELAY = 16
 LURE_ADJUST_DELAY = 4
 DISCONNECTED_DELAY = 8
@@ -178,7 +186,7 @@ class Player:
             sleep(self.setting.pull_delay)
             script.hold_left_click(PRE_RETRIEVAL_DURATION)
             if self.monitor.is_fish_hooked():
-                self._drink_alcohol()
+#                self._drink_alcohol()
                 self._pulling_stage()
 
     def wakey_rig_fishing(self) -> None:
@@ -826,6 +834,12 @@ class Player:
         :param rod_idx: current index of the rod
         :type rod_idx: int
         """
+##        
+        print("Checking fishing rod...")
+        deviation = random.uniform(self.setting.min_deviation, self.setting.max_deviation)
+        next_interval = self.setting.check_delay + deviation
+        print (f"Next check in {next_interval:.2f} seconds.")
+        
         check_miss_counts[rod_idx] += 1
         if check_miss_counts[rod_idx] > CHECK_MISS_LIMIT:
             check_miss_counts[rod_idx] = 0
@@ -834,7 +848,7 @@ class Player:
             pag.click()
 
         pag.press("0")
-        sleep(self.setting.check_delay)
+        time.sleep(next_interval)
 
 
 # head up backup
