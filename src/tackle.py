@@ -16,7 +16,7 @@ from timer import Timer
 
 logger = logging.getLogger(__name__)
 
-RESET_TIMEOUT = 16
+RESET_TIMEOUT = 8
 CAST_SCALE = 0.4  # 25% / 0.4s
 
 # BASE_DELAY + LOOP_DELAY >= 2.2 to trigger clicklock
@@ -50,8 +50,6 @@ class Tackle:
         self.monitor = monitor
 
         self.landing_net_out = False  # for telescopic_pull()
-        self.cur_friction = self.setting.initial_friction
-        self.friction_brake_initialized = False
 
     @script.toggle_clicklock
     def reset(self) -> None:
@@ -283,33 +281,3 @@ class Tackle:
         logger.info("Switching gear ratio")
         with pag.hold("ctrl"):
             pag.press("space")
-
-    def reset_friction_brake(self) -> None:
-        """Reset to the initial friction brake."""
-        logger.info("Initializing friction brake")
-
-        if not self.friction_brake_initialized:
-            for _ in range(30):
-                pag.scroll(1)
-            diff = 30 - self.setting.initial_friction
-            for _ in range(diff):
-                pag.scroll(-1)
-        else:
-            diff = self.cur_friction - self.setting.initial_friction
-            direction = -1 if diff > 0 else 1
-            for i in range(abs(diff)):
-                pag.scroll(direction)
-            self.cur_friction = self.setting.initial_friction
-
-    def change_friction_brake(self, increase: bool = True) -> None:
-        """Increae or decrease friction.
-
-        :param increase: increase or decrease, defaults to True
-        :type increase: bool, optional
-        """
-        if increase and self.cur_friction < self.setting.max_friction:
-            pag.scroll(1)
-            self.cur_friction = min(30, self.cur_friction + 1)
-        else:
-            pag.scroll(-1)
-            self.cur_friction = max(0, self.cur_friction - 1)

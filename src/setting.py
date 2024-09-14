@@ -48,6 +48,8 @@ SHORTCUTS = (
     ("alcohol", "alcohol_shortcut"),
     ("bottom_rods", "bottom_rods_shortcuts"),
     ("quit", "quitting_shortcut"),
+    ("main_rod", "main_rod_shortcut"),
+    ("spod_rod", "spod_rod_shortcut")
 )
 
 # -------------------- attribute name - column name - type ------------------- #

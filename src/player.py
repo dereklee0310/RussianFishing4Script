@@ -12,7 +12,7 @@ from datetime import datetime
 import random
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from multiprocessing import Process
+from multiprocessing import Process, Value
 
 # from email.mime.image import MIMEImage
 from pathlib import Path
@@ -32,6 +32,7 @@ from monitor import Monitor
 from setting import Setting
 from tackle import Tackle
 from timer import Timer
+from friction_brake import reset_friction_brake, change_friction_brake, monitor_friction
 
 logger = logging.getLogger(__name__)
 random.seed(datetime.now().timestamp())
@@ -47,24 +48,6 @@ TICKET_EXPIRE_DELAY = 16
 LURE_ADJUST_DELAY = 4
 DISCONNECTED_DELAY = 8
 WEAR_TEXT_UPDATE_DELAY = 2
-FRICTION_BRAKE_MONITOR_DELAY = 2
-
-def monitor_friction(is_fish_hooked, is_friction_brake_high, change_friction, check_delay, increase_delay):
-    logger.info("Monitoring friction brake")
-    try:
-        while True:
-            if not is_fish_hooked():
-                sleep(FRICTION_BRAKE_MONITOR_DELAY)
-                continue
-
-            if is_friction_brake_high():
-                change_friction(False)
-            else:
-                change_friction(True)
-                sleep(increase_delay)
-            sleep(check_delay)
-    except KeyboardInterrupt:
-        pass
 
 class Player:
     """Main interface of fishing loops and stages."""
@@ -95,14 +78,16 @@ class Player:
             self.puller = self.tackle.general_pull
         self.special_cast_miss = self.setting.fishing_strategy in ["bottom", "marine"]
 
+        cur_friction_brake = Value("i", self.tackle.cur_friction)
         self.friction_brake_monitor_process = Process(
             target=monitor_friction,
             args=(
                 self.monitor.is_fish_hooked_pixel,
                 self.monitor.is_friction_brake_high,
                 self.tackle.change_friction_brake,
-                self.setting.friction_check_delay,
-                self.setting.friction_increase_delay,
+                self.setting.friction_brake_check_delay,
+                self.setting.friction_brake_increase_delay,
+                cur_friction_brake
                 )
             )
 
@@ -122,7 +107,6 @@ class Player:
 
     def start_fishing(self) -> None:
         """Start main fishing loop with specified fishing strategt."""
-        self.tackle.reset_friction_brake()
         self.friction_brake_monitor_process.start()
         match self.setting.fishing_strategy:
             case "spin" | "spin_with_pause":
@@ -146,9 +130,9 @@ class Player:
             if not self.setting.cast_skipping_enabled:
                 self.setting.cast_skipping_enabled = False
                 self._refill_user_stats()
-                self._harvesting_stage()
-                self._access_item("main_rod") # pick up again
+                self._harvesting_stage(pickup=True)
                 self._resetting_stage()
+
                 self.tackle.cast()
 
             if spin_with_pause:
@@ -203,6 +187,7 @@ class Player:
                 self.setting.cast_skipping_enabled = False
                 self._refill_user_stats()
                 self._resetting_stage()
+
                 self.tackle.cast()
                 self.tackle.sink()
 
@@ -219,7 +204,7 @@ class Player:
         """Main float fishing loop."""
         while True:
             self._refill_user_stats()
-            self._access_item("main_rod") # pick up again
+            self._harvesting_stage(pickup=True)
             self._resetting_stage()
             self.tackle.cast()
 
@@ -243,6 +228,7 @@ class Player:
                 self.setting.cast_skipping_enabled = False
                 self._refill_user_stats()
                 self._resetting_stage()
+
                 self.tackle.cast()
                 self.tackle.sink(marine=False)
 
@@ -291,7 +277,7 @@ class Player:
     # ---------------------------------------------------------------------------- #
     #            stages and their helper functions in main fishing loops           #
     # ---------------------------------------------------------------------------- #
-    def _harvesting_stage(self) -> None:
+    def _harvesting_stage(self, pickup=False) -> None:
         """Harvest the bait."""
         if not self.setting.baits_harvesting_enabled:
             return
@@ -304,16 +290,18 @@ class Player:
         sleep(PULL_OUT_DELAY)
         pag.click()
 
-        i = DIG_TIMEOUT
-        while i > 0:
-            i = script.sleep_and_decrease(i, DIG_DELAY)
+        while True:
+            sleep(DIG_DELAY)
             if self.monitor.is_harvest_success():
                 # accept result and hide the tool
                 pag.press("space")
                 pag.press("backspace")
                 sleep(ANIMATION_DELAY)
                 self.harvest_count += 1
-                return
+                break
+
+        if pickup:
+            self._access_item("main_rod") # pick up again
 
         # when timed out, do not raise a TimeoutError but defer it to resetting stage
 
@@ -383,6 +371,7 @@ class Player:
             pag.moveTo(food_position)
             pag.click()
 
+    # TODO: reset friction brake decorator
     def _resetting_stage(self) -> None:
         """Reset the tackle till it's ready."""
         sleep(ANIMATION_DELAY)
@@ -547,7 +536,7 @@ class Player:
 
         !! a trophy ruffe will break the checking mechanism?
         """
-        logger.info("handling fish")
+        logger.info("Handling fish")
 
         if self.setting.screenshot_enabled:
             self.save_screenshot()

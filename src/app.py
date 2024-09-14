@@ -408,12 +408,16 @@ if __name__ == "__main__":
         listener = keyboard.Listener(on_release=app.on_release)
         listener.start()
 
+    # pos = app.player.monitor.is_fish_hooked_pixel()
+    # print(pos)
+    # exit()
+
     try:
         app.player.start_fishing()
     except KeyboardInterrupt:
         pass
 
-    app.player.friction_brake_monitor_process.join()
+    # app.player.friction_brake_monitor_process.join()
     pag.keyUp("shift")  # avoid Shift key stuck
     print(app.player.gen_result("Terminated by user"))
     if app.setting.plotting_enabled:

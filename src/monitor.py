@@ -70,11 +70,25 @@ FRICTION_BRAKE_BAR_OFFSETS = {
     },
 }
 
+FISH_ICON_OFFSETS = {
+    "1600x900": (389, 844),
+    "1920x1080": (549, 1024),
+    "2560x1440": (869, 1384)
+}
+
+# 1600x900
+# 869, 1114, (480, 270)
+# 1920x1080
+# 869, 1204 (320, 180)
+# 2560x1440
+# 869, 1384, (0, 0)
+
 FRICTION_BRAKE_OFFSET_NUM = 3
 YELLOW_FRICTION = (200, 214, 63)
 ORANGE_FRICTION = (229, 188, 0)
 RED_FRICTION = (206, 56, 21)
 SNAG_ICON_COLOR = (206, 56, 21)
+FISH_ICON_COLOR = (234, 234, 234)
 
 
 class Monitor:
@@ -314,8 +328,6 @@ class Monitor:
         return pag.pixel(*self.setting.snag_icon_position) == SNAG_ICON_COLOR
 
     def _set_friction_brake_params(self):
-        """
-        """
         if self.setting.friction_brake_threshold not in (0.7, 0.8, 0.9, 0.95):
             logger.error("Invalid friction threshold")
             sys.exit()
@@ -325,12 +337,11 @@ class Monitor:
         else:
             self.color_group = (RED_FRICTION, )
 
-        x_base, y_base = self.setting.x_base, self.setting.y_base
         offsets = FRICTION_BRAKE_BAR_OFFSETS[self.setting.window_size]
         x_offsets = offsets["x"][self.setting.friction_brake_threshold]
         y_offset = offsets["y"]
-        self.x_coords = tuple(x_base + offset for offset in x_offsets)
-        self.y_coord = y_base + y_offset
+        self.x_coords = tuple(self.setting.x_base + offset for offset in x_offsets)
+        self.y_coord = self.setting.y_base + y_offset
 
     def is_friction_brake_high(self) -> bool:
         """Check if the friction is too high based on left, mid, and right points.
@@ -343,6 +354,11 @@ class Monitor:
             return False
         return pixels[0] in self.color_group # check if pixel color is orange or red based on threshold
 
+    def _set_fish_icon_params(self):
+        offsets = FISH_ICON_OFFSETS[self.setting.window_size]
+        self.fish_icon_x = self.setting.x_base + offsets[0]
+        self.fish_icon_y = self.setting.y_base + offsets[1]
+
     def is_fish_hooked_pixel(self) -> bool:
-        # TODO
-        return True
+        self._set_fish_icon_params()
+        return all(c > 150 for c in pag.pixel(self.fish_icon_x, self.fish_icon_y))
