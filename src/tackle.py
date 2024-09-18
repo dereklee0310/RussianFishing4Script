@@ -236,9 +236,9 @@ class Tackle:
         logger.info("Pulling")
         i = PULL_TIMEOUT
         while i > 0:
+            i = script.sleep_and_decrease(i, LOOP_DELAY)
             if self.monitor.is_fish_captured():
                 return
-            i = script.sleep_and_decrease(i, LOOP_DELAY)
 
         # try using landing net
         pag.press("space")
@@ -269,10 +269,10 @@ class Tackle:
             self.landing_net_out = True
         i = TELESCOPIC_RETRIEVAL_TIMEOUT
         while i > 0:
+            i = script.sleep_and_decrease(i, LOOP_DELAY)
             if self.monitor.is_fish_captured():
                 self.landing_net_out = False
                 return
-            i = script.sleep_and_decrease(i, LOOP_DELAY)
 
         raise TimeoutError()
 
