@@ -84,12 +84,10 @@ FISH_ICON_OFFSETS = {
 # 869, 1384, (0, 0)
 
 FRICTION_BRAKE_OFFSET_NUM = 3
-YELLOW_FRICTION = (200, 214, 63)
-ORANGE_FRICTION = (229, 188, 0)
-RED_FRICTION = (206, 56, 21)
+YELLOW_FRICTION_BRAKE = (200, 214, 63)
+ORANGE_FRICTION_BRAKE = (229, 188, 0)
+RED_FRICTION_BRAKE = (206, 56, 21)
 SNAG_ICON_COLOR = (206, 56, 21)
-FISH_ICON_COLOR = (234, 234, 234)
-
 
 class Monitor:
     """A class that holds different aliases of locateOnScreen(image)."""
@@ -329,13 +327,13 @@ class Monitor:
 
     def _set_friction_brake_params(self):
         if self.setting.friction_brake_threshold not in (0.7, 0.8, 0.9, 0.95):
-            logger.error("Invalid friction threshold")
+            logger.error("Invalid friction brake threshold")
             sys.exit()
 
         if self.setting.friction_brake_threshold == 0.7:
-            self.color_group = (ORANGE_FRICTION, RED_FRICTION)
+            self.color_group = (ORANGE_FRICTION_BRAKE, RED_FRICTION_BRAKE)
         else:
-            self.color_group = (RED_FRICTION, )
+            self.color_group = (RED_FRICTION_BRAKE, )
 
         offsets = FRICTION_BRAKE_BAR_OFFSETS[self.setting.window_size]
         x_offsets = offsets["x"][self.setting.friction_brake_threshold]
@@ -344,7 +342,7 @@ class Monitor:
         self.y_coord = self.setting.y_base + y_offset
 
     def is_friction_brake_high(self) -> bool:
-        """Check if the friction is too high based on left, mid, and right points.
+        """Check if the friction brake is too high based on left, mid, and right points.
 
         :return: True if pixels are the same and color is correct, False otherwise
         :rtype: bool

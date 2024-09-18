@@ -16,7 +16,7 @@ from timer import Timer
 
 logger = logging.getLogger(__name__)
 
-RESET_TIMEOUT = 8
+RESET_TIMEOUT = 16
 CAST_SCALE = 0.4  # 25% / 0.4s
 
 # BASE_DELAY + LOOP_DELAY >= 2.2 to trigger clicklock

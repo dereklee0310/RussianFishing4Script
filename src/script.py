@@ -11,6 +11,7 @@ from pyscreeze import Box
 
 from monitor import Monitor
 from setting import Setting
+from frictionbrake import _reset_friction_brake
 
 # BASE_DELAY + LOOP_DELAY >= 2.2 to trigger clicklock
 BASE_DELAY = 1
@@ -175,6 +176,21 @@ def release_ctrl_key(func):
         except Exception as e:
             pag.keyUp("ctrl")
             raise e
+
+    return wrapper
+
+
+def reset_friction_brake(func):
+    """Reset friction brake after calling the function."""
+
+    def wrapper(self, *args):
+        func(self, *args)
+        if self.setting.friction_brake_changing_enabled:
+            with self.lock:
+                _reset_friction_brake(self.cur_friction_brake, self.setting.initial_friction_brake, self.friction_brake_initialized)
+                self.cur_friction_brake.value = self.setting.initial_friction_brake
+            if not self.friction_brake_initialized:
+                self.friction_brake_initialized = True
 
     return wrapper
 
