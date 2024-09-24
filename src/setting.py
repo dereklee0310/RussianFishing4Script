@@ -35,8 +35,8 @@ GENERAL_CONFIGS = (
     ("initial_friction_brake", "Initial friction brake", int),
     ("max_friction_brake", "Max friction brake", int),
     ("friction_brake_threshold", "Friction brake threshold", float),
-    ("friction_brake_check_delay", "Friction brake check delay", str),
-    ("friction_brake_increase_delay", "Friction brake increase delay", str),
+    ("friction_brake_check_delay", "Friction brake check delay", float),
+    ("friction_brake_increase_delay", "Friction brake increase delay", float),
 )
 
 # ----------------------- config name - attribute name ----------------------- #
@@ -130,16 +130,6 @@ class Setting:
         self.window_size = self.window_controller.get_window_size()
         self._set_float_camera_rect()
         self._set_snag_icon_position()
-
-        if self.friction_brake_check_delay == "unlimited":
-            self.friction_brake_check_delay = 0
-        else:
-            self.friction_brake_check_delay = float(self.friction_brake_check_delay)
-
-        if self.friction_brake_increase_delay == "unlimited":
-            self.friction_brake_increase_delay = 0
-        else:
-            self.friction_brake_increase_delay = float(self.friction_brake_increase_delay)
 
     def _merge_general_configs(self) -> None:
         """Merge general configs from config.ini."""

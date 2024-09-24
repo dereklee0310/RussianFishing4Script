@@ -11,7 +11,7 @@ from pyscreeze import Box
 
 from monitor import Monitor
 from setting import Setting
-from frictionbrake import _reset_friction_brake
+from frictionbrake import FrictionBrake
 
 # BASE_DELAY + LOOP_DELAY >= 2.2 to trigger clicklock
 BASE_DELAY = 1
@@ -152,7 +152,7 @@ def toggle_right_mouse_button(func):
     return wrapper
 
 
-def release_shift_key(func):
+def release_shift_key_after(func):
     """Release Shift key after calling the function."""
 
     def wrapper(self, *args):
@@ -166,7 +166,7 @@ def release_shift_key(func):
     return wrapper
 
 
-def release_ctrl_key(func):
+def release_ctrl_key_after(func):
     """Release ctrl key after calling the function."""
 
     def wrapper(self, *args):
@@ -180,7 +180,9 @@ def release_ctrl_key(func):
     return wrapper
 
 
-def reset_friction_brake(func):
+# there's lots of early return in player._resetting_stage(), so use a decorator here
+# to simplify the code
+def reset_friction_brake_after(func):
     """Reset friction brake after calling the function."""
 
     def wrapper(self, *args):
@@ -188,10 +190,14 @@ def reset_friction_brake(func):
         if not self.setting.friction_brake_changing_enabled:
             return
 
-        with self.lock:
-            _reset_friction_brake(self.cur_friction_brake, self.setting.initial_friction_brake, self.friction_brake_initialized)
-        if not self.friction_brake_initialized:
-            self.friction_brake_initialized = True
+        with self.friction_brake_lock:
+            self.friction_brake.reset_friction_brake(
+                self.friction_brake.cur_friction_brake,
+                self.setting.initial_friction_brake,
+                self.friction_brake.initialized
+            )
+        if not self.friction_brake.initialized:
+            self.friction_brake.initialized = True
 
     return wrapper
 

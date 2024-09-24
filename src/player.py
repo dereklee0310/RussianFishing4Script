@@ -28,11 +28,12 @@ from prettytable import PrettyTable
 
 import exceptions
 import script
+from frictionbrake import FrictionBrake
 from monitor import Monitor
 from setting import Setting
 from tackle import Tackle
 from timer import Timer
-from frictionbrake import _reset_friction_brake, change_friction_brake, monitor_friction_brake
+from frictionbrake import monitor_friction_brake
 
 logger = logging.getLogger(__name__)
 random.seed(datetime.now().timestamp())
@@ -78,22 +79,8 @@ class Player:
             self.puller = self.tackle.general_pull
         self.special_cast_miss = self.setting.fishing_strategy in ["bottom", "marine"]
 
-        self.cur_friction_brake = Value("i", self.setting.initial_friction_brake)
-        self.lock = Lock()
-        self.friction_brake_initialized = False
-        self.friction_brake_monitor_process = Process(
-            target=monitor_friction_brake,
-            args=(
-                self.monitor.is_fish_hooked_pixel,
-                self.monitor.is_friction_brake_high,
-                change_friction_brake,
-                self.setting.friction_brake_check_delay,
-                self.setting.friction_brake_increase_delay,
-                self.setting.max_friction_brake,
-                self.cur_friction_brake,
-                self.lock
-                )
-            )
+        self.friction_brake_lock = Lock()
+        self.friction_brake = FrictionBrake(self.setting, self.monitor, self.friction_brake_lock)
 
         # fish count and bite rate
         self.cast_miss_count = 0
@@ -111,7 +98,7 @@ class Player:
 
     def start_fishing(self) -> None:
         """Start main fishing loop with specified fishing strategt."""
-        self.friction_brake_monitor_process.start()
+        self.friction_brake.monitor_process.start()
         match self.setting.fishing_strategy:
             case "spin" | "spin_with_pause":
                 self.spin_fishing()
@@ -375,8 +362,7 @@ class Player:
             pag.moveTo(food_position)
             pag.click()
 
-    # TODO: reset friction brake decorator
-    @script.reset_friction_brake
+    @script.reset_friction_brake_after
     def _resetting_stage(self) -> None:
         """Reset the tackle till it's ready."""
         sleep(ANIMATION_DELAY)

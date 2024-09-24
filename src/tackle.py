@@ -129,7 +129,7 @@ class Tackle:
         return False
 
     @script.toggle_clicklock
-    @script.release_shift_key
+    @script.release_shift_key_after
     def retrieve(self, first: bool = True) -> None:
         """Retrieve the line till the end is reached and detect unexpected events.
 
@@ -166,7 +166,7 @@ class Tackle:
 
         raise TimeoutError
 
-    @script.release_shift_key
+    @script.release_shift_key_after
     def retrieve_with_pause(self) -> None:
         """Retreive the line, pause periodically."""
         logger.info("Retrieving with pause")
@@ -181,7 +181,7 @@ class Tackle:
             if self.monitor.is_fish_hooked() or self.monitor.is_retrieval_finished():
                 return
 
-    @script.release_ctrl_key
+    @script.release_ctrl_key_after
     def pirk(self, ctrl_enabled: bool) -> None:
         """Start pirking until a fish is hooked.
 
