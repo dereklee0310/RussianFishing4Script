@@ -185,12 +185,13 @@ def reset_friction_brake(func):
 
     def wrapper(self, *args):
         func(self, *args)
-        if self.setting.friction_brake_changing_enabled:
-            with self.lock:
-                _reset_friction_brake(self.cur_friction_brake, self.setting.initial_friction_brake, self.friction_brake_initialized)
-                self.cur_friction_brake.value = self.setting.initial_friction_brake
-            if not self.friction_brake_initialized:
-                self.friction_brake_initialized = True
+        if not self.setting.friction_brake_changing_enabled:
+            return
+
+        with self.lock:
+            _reset_friction_brake(self.cur_friction_brake, self.setting.initial_friction_brake, self.friction_brake_initialized)
+        if not self.friction_brake_initialized:
+            self.friction_brake_initialized = True
 
     return wrapper
 
