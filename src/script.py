@@ -11,12 +11,14 @@ from pyscreeze import Box
 
 from monitor import Monitor
 from setting import Setting
-from frictionbrake import FrictionBrake
 
 # BASE_DELAY + LOOP_DELAY >= 2.2 to trigger clicklock
 BASE_DELAY = 1
 LOOP_DELAY = 2
 
+# ---------------------------------------------------------------------------- #
+#                            common functionalities                            #
+# ---------------------------------------------------------------------------- #
 
 def hold_left_click(duration: float = 1) -> None:
     """Hold left mouse button.
@@ -98,8 +100,29 @@ def get_box_center(box: Box) -> tuple[int, int]:
     """
     return int(box.left + box.width // 2), int(box.top + box.height // 2)
 
+def start_app(app: object, results: tuple[tuple]) -> None:
+    """A wrapper for confirmation, window activatioin, and start.
 
-def initialize_setting_and_monitor(args_map: tuple[tuple]) -> None:
+    :param app: main application class
+    :type app: object
+    :param results: counter lookup table
+    :type results: tuple[tuple]
+    """
+
+    if app.setting.confirmation_enabled:
+        ask_for_confirmation()
+    app.setting.window_controller.activate_game_window()
+    try:
+        app.start()
+    except KeyboardInterrupt:
+        pass
+    display_running_results(app, results)
+
+# ---------------------------------------------------------------------------- #
+#                                  decorators                                  #
+# ---------------------------------------------------------------------------- #
+
+def initialize_setting_and_monitor(args_map: tuple[tuple]):
     """Initialize a setting node and a screen monitor for given application.
 
     This is a simple decorator that used for constructors in harvest and craft modules.
@@ -180,8 +203,8 @@ def release_ctrl_key_after(func):
     return wrapper
 
 
-# there's lots of early return in player._resetting_stage(), so use a decorator here
-# to simplify the code
+# there's lots of early return in player._resetting_stage(),
+# so use a decorator here to simplify the code
 def reset_friction_brake_after(func):
     """Reset friction brake after calling the function."""
 
@@ -200,34 +223,3 @@ def reset_friction_brake_after(func):
             self.friction_brake.initialized = True
 
     return wrapper
-
-
-def start_app(app: object, results: tuple[tuple]):
-    """A wrapper for scripts other than the main one.
-
-    :param app:
-    :type app: script object
-    :param results: counter lookup table
-    :type results: tuple[tuple]
-    """
-
-    if app.setting.confirmation_enabled:
-        ask_for_confirmation()
-    app.setting.window_controller.activate_game_window()
-    try:
-        app.start()
-    except KeyboardInterrupt:
-        pass
-    display_running_results(app, results)
-
-
-# ! archived
-# def start_count_down() -> None:
-#     """If the 'enable_count_down' option is enabled,
-#     start a count down before executing the script.
-#     """
-#     print("Hint: Edit 'enable_count_down' option in config.ini to disable the count down")
-#     for i in range(5, 0, -1):
-#         print(f'The script will start in: {i} seconds', end='\r')
-#         sleep(1)
-#     print('')

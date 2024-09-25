@@ -13,6 +13,10 @@ from windowcontroller import WindowController
 
 logger = logging.getLogger(__name__)
 
+# ---------------------------------------------------------------------------- #
+#                          configuration lookup table                          #
+# ---------------------------------------------------------------------------- #
+
 # -------------------- attribute name - column name - type ------------------- #
 GENERAL_CONFIGS = (
     ("language", "Language", str),
@@ -24,11 +28,11 @@ GENERAL_CONFIGS = (
     ("keepnet_limit", "Keepnet limit", int),
     ("keep_fish_delay", "Keep fish delay", float),
     ("energy_threshold", "Energy threshold", float),
-    ("retrieval_detect_confidence", "Retrieve detect confidence", float),
+    ("retrieval_detect_confidence", "Retrieval detect confidence", float),
     ("alcohol_drinking_delay", "Alcohol drinking delay", float),
     ("alcohol_drinking_quantity", "Alcohol drinking quantity", int),
     ("lure_broken_action", "Lure broken action", str),
-    ("keepnet_full_action", "Keep net full action", str),
+    ("keepnet_full_action", "Keepnet full action", str),
     ("alarm_sound_file", "Alarm sound file", str),
     ("unmarked_release_whitelist", "Unmarked release whitelist", str),
     ("snag_detection_enabled", "Enable snag detection", bool),
@@ -47,9 +51,9 @@ SHORTCUTS = (
     ("shovel_spoon", "shovel_spoon_shortcut"),
     ("alcohol", "alcohol_shortcut"),
     ("bottom_rods", "bottom_rods_shortcuts"),
-    ("quit", "quitting_shortcut"),
     ("main_rod", "main_rod_shortcut"),
     ("spod_rod", "spod_rod_shortcut")
+    ("quit", "quitting_shortcut"),
 )
 
 # -------------------- attribute name - column name - type ------------------- #
@@ -92,6 +96,96 @@ SPECIAL_CONFIGS = {
     ),
 }
 
+# ---------------------------------------------------------------------------- #
+#                     friction brake coordinates and colors                    #
+# ---------------------------------------------------------------------------- #
+
+# ----------------------------- 16x9 - 1080p - 2k ---------------------------- #
+# "bases": ((480, 270), (320, 180), (0, 0)),
+# ------ left - red - yellow - center(left + 424) - yellow - red - right ----- #
+# absolute coordinates, should subtract x_base from them according to window size
+# "x": (855, 960, 1066, 1279, 1491, 1598, 1702),
+# "y": (1146, 1236, 1412),
+
+# ------------ left - red - yellow - center - yellow - red - right ----------- #
+# "1600x900": {"x": (375, 480, 586, 799, 1011, 1118, 1222), "y": 876},
+# "1920x1080": {"x": (535, 640, 746, 959, 1171, 1278, 1382), "y": 1056},
+# "2560x1440": {"x": (855, 960, 1066, 1279, 1491, 1598, 1702), "y": 1412},
+
+# 70%: center + 297 (1279 + 297 = 1576)
+# 80%: center + 340 (1279 + 340 = 1619)
+# 90%: center + 382 (1279 + 382 = 1661)
+# 95%: center + 382 (1279 + 403 = 1682)
+# 100%: center + 424 (1279 + 424 = 1703)
+
+
+COORD_OFFSETS = {
+    "1600x900": {
+        "friction_brake": {
+            {
+                0.7: (502, 799, 1096),
+                0.8: (459, 799, 1139),
+                0.9: (417, 799, 1181),
+                0.95: (396, 799, 1202),
+            },
+            876,
+        },
+        "fish_icon":{
+            389, 844
+        },
+        "snag_icon": {
+            1132 + 15, 829
+        },
+        "float_camera": {
+            720, 654
+        },
+    },
+    "1920x1080": {
+        "friction_brake": {
+            {
+                0.7: (662, 959, 1256),
+                0.8: (619, 959, 1299),
+                0.9: (577, 959, 1341),
+                0.95: (556, 959, 1362),
+            },
+            1056,
+        },
+        "fish_icon":{
+            549, 1024
+        },
+        "snag_icon": {
+            1292 + 15, 1009
+        },
+        "float_camera": {
+            880, 834
+        },
+    },
+    "2560x1440": {
+        "friction_brake": {
+            {
+                0.7: (982, 1279, 1576),
+                0.8: (939, 1279, 1619),
+                0.9: (897, 1279, 1661),
+                0.95: (876, 1279, 1682),
+            },
+            1412,
+        },
+        "fish_icon":{
+            869, 1384
+        },
+        "snag_icon": {
+            1612 + 15, 1369
+        },
+        "float_camera": {
+            1200, 1194
+        },
+    },
+}
+
+CAMERA_W = CAMERA_H = 160
+YELLOW_FRICTION_BRAKE = (200, 214, 63)
+ORANGE_FRICTION_BRAKE = (229, 188, 0)
+RED_FRICTION_BRAKE = (206, 56, 21)
 
 class Setting:
     """Universal setting node."""
@@ -125,11 +219,19 @@ class Setting:
         parent_dir = pathlib.Path(__file__).resolve().parents[1]
         self.image_dir = parent_dir / "static" / self.language
 
-        # # set hard coded coordinates
-        self.x_base, self.y_base = self.window_controller.get_base_coords()
+        # set coordinates responsively
+        self.coord_bases = self.window_controller.get_base_coords()
         self.window_size = self.window_controller.get_window_size()
-        self._set_float_camera_rect()
-        self._set_snag_icon_position()
+        self._set_absolute_coords()
+
+        if self.friction_brake_threshold not in (0.7, 0.8, 0.9, 0.95):
+            logger.error("Invalid friction brake threshold")
+            sys.exit()
+
+        if self.friction_brake_threshold == 0.7:
+            self.color_group = (ORANGE_FRICTION_BRAKE, RED_FRICTION_BRAKE)
+        else:
+            self.color_group = (RED_FRICTION_BRAKE, )
 
     def _merge_general_configs(self) -> None:
         """Merge general configs from config.ini."""
@@ -230,32 +332,15 @@ class Setting:
             print(table)
             sys.exit()
 
+    def _set_absolute_coords(self) -> None:
+        """Add offsets to the base coordinates to get absolute ones."""
+        coord_offsets = COORD_OFFSETS[self.window_size]
+        x, y = self.coord_bases + coord_offsets["float_camera"]
+        self.float_camera_rect = (x, y, CAMERA_W, CAMERA_H) # (left, top, w, h)
 
-    def _set_float_camera_rect(self) -> None:
-        x, y = self.x_base, self.y_base
-        match self.window_size:
-            case "1600x900":
-                x += 720
-                y += 654
-            case "1920x1080":
-                x += 880
-                y += 834
-            case "2560x1440":
-                x += 1200
-                y += 1194
-        self.float_camera_rect = (x, y, 160, 160)  # (left, top, w, h)
+        self.fish_icon_position = self.coord_bases + coord_offsets["fish_icon"]
+        self.snag_icon_position = self.coord_bases + coord_offsets["snag_icon"]
 
-    def _set_snag_icon_position(self) -> None:
-        x, y = self.x_base, self.y_base
-        match self.window_size:
-            case "1600x900":
-                x += 1132
-                y += 829
-            case "1920x1080":
-                x += 1292
-                y += 1009
-            case "2560x1440":
-                x += 1612
-                y += 1369
-        x += 15
-        self.snag_icon_position = (x, y)  # x, y coordinates
+        x_offsets, y_offset = coord_offsets["frictiion_brake"]
+        self.fb_xs = tuple(self.coord_bases[0] + offset for offset in x_offsets)
+        self.fb_y = self.coord_bases[1] + y_offset

@@ -1,5 +1,5 @@
 """
-Module for pyautogui.locateOnScreen wrappers.
+Module for pyautogui.locateOnScreen and pag.pixel wrappers.
 """
 
 # pylint: disable=missing-function-docstring
@@ -15,79 +15,9 @@ from setting import Setting
 
 logger = logging.getLogger(__name__)
 
-# FRICTION_BAR_COORDS = {
-#     # ----------------------------- 16x9 - 1080p - 2k ---------------------------- #
-#     "x_base": (480, 320, 0),
-#     "y_base": (270, 180, 0),
-#     "y": (1146, 1236, 1412),
-
-#     # ------ left - red - yellow - center(left + 424) - yellow - red - right ----- #
-#     # absolute coordinates, should subtract x_base from them according to window size
-#     "x": (855, 960, 1066, 1279, 1491, 1598, 1702),
-# }
-
-# FRICTION_BAR_OFFSETS = {
-#     # ------------ left - red - yellow - center - yellow - red - right ----------- #
-#     "1600x900": {"x": (375, 480, 586, 799, 1011, 1118, 1222), "y": 876},
-#     "1920x1080": {"x": (535, 640, 746, 959, 1171, 1278, 1382), "y": 1056},
-#     "2560x1440": {"x": (855, 960, 1066, 1279, 1491, 1598, 1702), "y": 1412},
-# }
-
-# --------------------------- left - center - right -------------------------- #
-
-# 70%: center + 297 (1279 + 297 = 1576)
-# 80%: center + 340 (1279 + 340 = 1619)
-# 90%: center + 382 (1279 + 382 = 1661)
-# center = 1279
-
-FRICTION_BRAKE_BAR_OFFSETS = {
-    "1600x900": {
-        "x": {
-            0.7: (502, 799, 1096),
-            0.8: (459, 799, 1139),
-            0.9: (417, 799, 1181),
-            0.95: (396, 799, 1202),
-        },
-        "y": 876,
-    },
-    "1920x1080": {
-        "x": {
-            0.7: (662, 959, 1256),
-            0.8: (619, 959, 1299),
-            0.9: (577, 959, 1341),
-            0.95: (556, 959, 1362),
-        },
-        "y": 1056,
-    },
-    "2560x1440": {
-        "x": {
-            0.7: (982, 1279, 1576),
-            0.8: (939, 1279, 1619),
-            0.9: (897, 1279, 1661),
-            0.95: (876, 1279, 1682),
-        },
-        "y": 1412,
-    },
-}
-
-FISH_ICON_OFFSETS = {
-    "1600x900": (389, 844),
-    "1920x1080": (549, 1024),
-    "2560x1440": (869, 1384)
-}
-
-# 1600x900
-# 869, 1114, (480, 270)
-# 1920x1080
-# 869, 1204 (320, 180)
-# 2560x1440
-# 869, 1384, (0, 0)
-
 FRICTION_BRAKE_OFFSET_NUM = 3
-YELLOW_FRICTION_BRAKE = (200, 214, 63)
-ORANGE_FRICTION_BRAKE = (229, 188, 0)
-RED_FRICTION_BRAKE = (206, 56, 21)
 SNAG_ICON_COLOR = (206, 56, 21)
+MIN_LEVEL = 150
 
 class Monitor:
     """A class that holds different aliases of locateOnScreen(image)."""
@@ -101,10 +31,7 @@ class Monitor:
         :type setting: Setting
         """
         self.setting = setting
-        self.x_coords = None
-        self.y_coord = None
-        self._set_friction_brake_params()
-
+        
     def _locate_single_image_box(self, image: str, confidence: float) -> Box | None:
         """A wrapper for locateOnScreen method and path resolving.
 
@@ -325,38 +252,25 @@ class Monitor:
         """
         return pag.pixel(*self.setting.snag_icon_position) == SNAG_ICON_COLOR
 
-    def _set_friction_brake_params(self):
-        if self.setting.friction_brake_threshold not in (0.7, 0.8, 0.9, 0.95):
-            logger.error("Invalid friction brake threshold")
-            sys.exit()
-
-        if self.setting.friction_brake_threshold == 0.7:
-            self.color_group = (ORANGE_FRICTION_BRAKE, RED_FRICTION_BRAKE)
-        else:
-            self.color_group = (RED_FRICTION_BRAKE, )
-
-        offsets = FRICTION_BRAKE_BAR_OFFSETS[self.setting.window_size]
-        x_offsets = offsets["x"][self.setting.friction_brake_threshold]
-        y_offset = offsets["y"]
-        self.x_coords = tuple(self.setting.x_base + offset for offset in x_offsets)
-        self.y_coord = self.setting.y_base + y_offset
-
     def is_friction_brake_high(self) -> bool:
         """Check if the friction brake is too high based on left, mid, and right points.
 
         :return: True if pixels are the same and color is correct, False otherwise
         :rtype: bool
         """
-        pixels = [pag.pixel(x, self.y_coord) for x in self.x_coords] # get pixel values
-        if pixels.count(pixels[0]) != FRICTION_BRAKE_OFFSET_NUM: # check if pixels having same value
+        pixels = [pag.pixel(x, self.setting.fb_y) for x in self.setting.fb_xs]
+        if pixels.count(pixels[0]) != FRICTION_BRAKE_OFFSET_NUM:
             return False
-        return pixels[0] in self.color_group # check if pixel color is orange or red based on threshold
-
-    def _set_fish_icon_params(self):
-        offsets = FISH_ICON_OFFSETS[self.setting.window_size]
-        self.fish_icon_x = self.setting.x_base + offsets[0]
-        self.fish_icon_y = self.setting.y_base + offsets[1]
+        return pixels[0] in self.setting.color_group
 
     def is_fish_hooked_pixel(self) -> bool:
-        self._set_fish_icon_params()
-        return all(c > 150 for c in pag.pixel(self.fish_icon_x, self.fish_icon_y))
+        return all(c > MIN_LEVEL for c in pag.pixel(*self.setting.fish_icon_position))
+
+    def is_float_state_changed(self, reference_img):
+        current_img = pag.screenshot(region=self.setting.float_camera_rect)
+        return not pag.locate(
+            current_img,
+            reference_img,
+            grayscale=True,
+            confidence=self.setting.float_confidence,
+        )

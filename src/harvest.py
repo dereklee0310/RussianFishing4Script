@@ -28,6 +28,7 @@ RESULTS = (
     ("harvest_count", "Number of harvests"),
 )
 
+ANIMATION_DELAY = 0.25
 
 class App:
     """Main application class."""
@@ -65,7 +66,7 @@ class App:
         return parser.parse_args()
 
     def start(self) -> None:
-        """Main harvesting loop."""
+        """Main eating and harvesting loop."""
         pag.press(self.setting.shovel_spoon_shortcut)
         time.sleep(3)
         while True:
@@ -86,7 +87,7 @@ class App:
             time.sleep(self.setting.check_delay_second)
             if self.setting.power_saving_enabled:
                 pag.press("esc")
-            time.sleep(0.25)
+            time.sleep(ANIMATION_DELAY)
 
     def _harvest_baits(self) -> None:
         """Harvest baits, the tool should be pulled out in start_harvesting_loop()."""
@@ -100,7 +101,7 @@ class App:
 
         # accept result
         pag.press("space")
-        time.sleep(0.25)
+        time.sleep(ANIMATION_DELAY)
 
     def _consume_food(self, food: str) -> None:
         """Open food menu, then click on the food icon to consume it.
@@ -109,10 +110,10 @@ class App:
         :type food: str
         """
         with pag.hold("t"):
-            time.sleep(0.25)
+            time.sleep(ANIMATION_DELAY)
             pag.moveTo(self.monitor.get_food_position(food))
             pag.click()
-            time.sleep(0.25)
+            time.sleep(ANIMATION_DELAY)
 
 
 if __name__ == "__main__":

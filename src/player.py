@@ -98,7 +98,8 @@ class Player:
 
     def start_fishing(self) -> None:
         """Start main fishing loop with specified fishing strategt."""
-        self.friction_brake.monitor_process.start()
+        if self.setting.friction_brake_changing_enabled:
+            self.friction_brake.monitor_process.start()
         match self.setting.fishing_strategy:
             case "spin" | "spin_with_pause":
                 self.spin_fishing()
@@ -495,13 +496,7 @@ class Player:
         i = self.setting.drifting_timeout
         while i > 0:
             i = script.sleep_and_decrease(i, self.setting.check_delay)
-            current_img = pag.screenshot(region=float_region)
-            if not pag.locate(
-                current_img,
-                reference_img,
-                grayscale=True,
-                confidence=self.setting.float_confidence,
-            ):
+            if self.monitor.is_float_state_changed(reference_img, float_region):
                 logger.info("Float status changed")
                 return
 

@@ -75,7 +75,11 @@ class Tackle:
         raise TimeoutError
 
     def cast(self, update=True) -> None:
-        """Cast the rod, then wait for the lure/bait to fly and sink."""
+        """Cast the rod, then wait for the lure/bait to fly and sink.
+
+        :param update: update the record or not (for spod rod), defaults to True
+        :type update: bool, optional
+        """
         logger.info("Casting")
         match self.setting.cast_power_level:
             case 1:  # 0%
@@ -208,22 +212,6 @@ class Tackle:
                 i = script.sleep_and_decrease(i, LOOP_DELAY)
 
         raise TimeoutError
-
-    # def wakey_pirking(self, delay: float) -> bool:
-    #     """todo
-
-    #     :param delay: _description_
-    #     :type delay: float
-    #     :return: _description_
-    #     :rtype: bool
-    #     """
-    #     logger.info('Pirking')
-
-    #     i = self.PIRKING_TIMEOUT
-    #     while i > 0 and not monitor.is_fish_hooked():
-    #         with pag.hold('ctrl'):
-    #             pag.click(button='right')
-    #         i = script.sleep_and_decrease(i, delay)
 
     @script.toggle_right_mouse_button
     @script.toggle_clicklock
