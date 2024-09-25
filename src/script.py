@@ -20,6 +20,7 @@ LOOP_DELAY = 2
 #                            common functionalities                            #
 # ---------------------------------------------------------------------------- #
 
+
 def hold_left_click(duration: float = 1) -> None:
     """Hold left mouse button.
 
@@ -100,6 +101,7 @@ def get_box_center(box: Box) -> tuple[int, int]:
     """
     return int(box.left + box.width // 2), int(box.top + box.height // 2)
 
+
 def start_app(app: object, results: tuple[tuple]) -> None:
     """A wrapper for confirmation, window activatioin, and start.
 
@@ -118,9 +120,11 @@ def start_app(app: object, results: tuple[tuple]) -> None:
         pass
     display_running_results(app, results)
 
+
 # ---------------------------------------------------------------------------- #
 #                                  decorators                                  #
 # ---------------------------------------------------------------------------- #
+
 
 def initialize_setting_and_monitor(args_map: tuple[tuple]):
     """Initialize a setting node and a screen monitor for given application.
@@ -214,10 +218,9 @@ def reset_friction_brake_after(func):
             return
 
         with self.friction_brake_lock:
-            self.friction_brake.reset_friction_brake(
-                self.friction_brake.cur_friction_brake,
+            self.friction_brake.reset(
                 self.setting.initial_friction_brake,
-                self.friction_brake.initialized
+                self.friction_brake.initialized,
             )
         if not self.friction_brake.initialized:
             self.friction_brake.initialized = True

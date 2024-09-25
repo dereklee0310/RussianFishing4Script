@@ -5,7 +5,6 @@ Module for pyautogui.locateOnScreen and pag.pixel wrappers.
 # pylint: disable=missing-function-docstring
 # docstring for every functions? u serious?
 
-import sys
 import logging
 
 import pyautogui as pag
@@ -19,6 +18,7 @@ FRICTION_BRAKE_OFFSET_NUM = 3
 SNAG_ICON_COLOR = (206, 56, 21)
 MIN_LEVEL = 150
 
+
 class Monitor:
     """A class that holds different aliases of locateOnScreen(image)."""
 
@@ -31,7 +31,7 @@ class Monitor:
         :type setting: Setting
         """
         self.setting = setting
-        
+
     def _locate_single_image_box(self, image: str, confidence: float) -> Box | None:
         """A wrapper for locateOnScreen method and path resolving.
 

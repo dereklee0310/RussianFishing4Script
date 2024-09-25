@@ -30,6 +30,7 @@ RESULTS = (
 
 ANIMATION_DELAY = 0.25
 
+
 class App:
     """Main application class."""
 

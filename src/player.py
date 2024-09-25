@@ -5,14 +5,14 @@ Module for Player class.
 import json
 import logging
 import os
+import random
 import smtplib
 import sys
 import time
 from datetime import datetime
-import random
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from multiprocessing import Process, Value, Lock
+from multiprocessing import Lock
 
 # from email.mime.image import MIMEImage
 from pathlib import Path
@@ -33,7 +33,6 @@ from monitor import Monitor
 from setting import Setting
 from tackle import Tackle
 from timer import Timer
-from frictionbrake import monitor_friction_brake
 
 logger = logging.getLogger(__name__)
 random.seed(datetime.now().timestamp())
@@ -49,6 +48,7 @@ TICKET_EXPIRE_DELAY = 16
 LURE_ADJUST_DELAY = 4
 DISCONNECTED_DELAY = 8
 WEAR_TEXT_UPDATE_DELAY = 2
+
 
 class Player:
     """Main interface of fishing loops and stages."""
@@ -80,7 +80,9 @@ class Player:
         self.special_cast_miss = self.setting.fishing_strategy in ["bottom", "marine"]
 
         self.friction_brake_lock = Lock()
-        self.friction_brake = FrictionBrake(self.setting, self.monitor, self.friction_brake_lock)
+        self.friction_brake = FrictionBrake(
+            self.setting, self.monitor, self.friction_brake_lock
+        )
 
         # fish count and bite rate
         self.cast_miss_count = 0
@@ -99,6 +101,7 @@ class Player:
     def start_fishing(self) -> None:
         """Start main fishing loop with specified fishing strategt."""
         if self.setting.friction_brake_changing_enabled:
+            logger.info("Spawing new process, do not quit the script")
             self.friction_brake.monitor_process.start()
         match self.setting.fishing_strategy:
             case "spin" | "spin_with_pause":
@@ -293,7 +296,7 @@ class Player:
                 break
 
         if pickup:
-            self._access_item("main_rod") # pick up again
+            self._access_item("main_rod")  # pick up again
 
         # when timed out, do not raise a TimeoutError but defer it to resetting stage
 
@@ -415,7 +418,7 @@ class Player:
                 self._replace_broken_lures()
                 return
             case "quit":
-                self.general_quit(msg)  # TODO: merge with handle_termination
+                self.general_quit(msg)
             case _:
                 raise ValueError
 
@@ -496,7 +499,7 @@ class Player:
         i = self.setting.drifting_timeout
         while i > 0:
             i = script.sleep_and_decrease(i, self.setting.check_delay)
-            if self.monitor.is_float_state_changed(reference_img, float_region):
+            if self.monitor.is_float_state_changed(reference_img):
                 logger.info("Float status changed")
                 return
 

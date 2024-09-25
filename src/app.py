@@ -36,7 +36,7 @@ HELP = (
     ("c", "Drink coffee if retrieval takes longer than 2 minutes"),
     ("A", "Regularly drink alcohol before keeping the fish"),
     ("r", "Refill hunger and comfort by consuming tea and carrot"),
-    ("H", "Harvest baits before casting, support mode: bottom"), #TODO
+    ("H", "Harvest baits before casting, support mode: bottom, spin, and float"),
     ("g", "Switch the gear ratio after the retrieval timed out"),
     ("P", "Save a chart of catch logs in logs/"),
     ("s", "Shutdown computer after terminated without user interruption"),
@@ -45,7 +45,7 @@ HELP = (
     ("M", "Send miaotixing notification after terminated without user interruption"),
     ("S", "Take screenshots of every fish you catch and save them in screenshots/"),
     ("C", "Skip rod casting for the first fish, support mode: spin, marine, wakey_rig"),
-    ("f", "Change friction brake automatically")
+    ("f", "Change friction brake automatically"),
 )
 
 # ----------------- flag name 2, attribute name, description ----------------- #
@@ -62,7 +62,7 @@ COMMON_ARGS = (
     ("miaotixing", "miaotixing_sending_enabled", "miaotixing sending"),
     ("screenshot", "screenshot_enabled", "Screenshot"),
     ("cast", "cast_skipping_enabled", "Cast skipping"),
-    ("friction_brake", "friction_brake_changing_enabled", "Friction brake changing")
+    ("friction_brake", "friction_brake_changing_enabled", "Friction brake changing"),
 )
 
 # ----------------- flag name 2, attribute name, description ----------------- #
@@ -107,7 +107,6 @@ class App:
         self.setting.fishes_to_catch = fishes_to_catch
 
         self._verify_game_window_size()
-
 
     def _setup_parser(self) -> ArgumentParser:
         """Configure argparser."""
@@ -308,9 +307,9 @@ class App:
             window_size,
         )
         logger.warning("Snag detection and friction brake changing will be disabled")
-        app.player.setting.snag_detection_enabled = False
-        app.player.setting.friction_brake_changing_enabled = False
-        if app.setting.fishing_strategy == "float":
+        self.setting.snag_detection_enabled = False
+        self.setting.friction_brake_changing_enabled = False
+        if self.setting.fishing_strategy == "float":
             logger.error(
                 "Float fishing mode doesn't support window size %s", window_size
             )
@@ -385,7 +384,6 @@ class App:
             logger.info("Shutting down...")
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
             sys.exit()
-
 
 
 if __name__ == "__main__":

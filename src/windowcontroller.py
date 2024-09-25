@@ -50,7 +50,7 @@ class WindowController:
         """Get the window size in "{width}x{height}" format.
         :return: formatted window size
         :rtype: str
-          """
+        """
         width = self._game_rect[2] - self._game_rect[0]
         height = self._game_rect[3] - self._game_rect[1]
         return f"{width}x{height}"

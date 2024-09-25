@@ -1,10 +1,11 @@
 """
 Module for SettingHandler class, not used yet.
 """
-import sys
+
 import configparser
 import logging
 import pathlib
+import sys
 from argparse import Namespace
 
 from prettytable import PrettyTable
@@ -52,7 +53,7 @@ SHORTCUTS = (
     ("alcohol", "alcohol_shortcut"),
     ("bottom_rods", "bottom_rods_shortcuts"),
     ("main_rod", "main_rod_shortcut"),
-    ("spod_rod", "spod_rod_shortcut")
+    ("spod_rod", "spod_rod_shortcut"),
     ("quit", "quitting_shortcut"),
 )
 
@@ -121,7 +122,7 @@ SPECIAL_CONFIGS = {
 
 COORD_OFFSETS = {
     "1600x900": {
-        "friction_brake": {
+        "friction_brake": (
             {
                 0.7: (502, 799, 1096),
                 0.8: (459, 799, 1139),
@@ -129,19 +130,13 @@ COORD_OFFSETS = {
                 0.95: (396, 799, 1202),
             },
             876,
-        },
-        "fish_icon":{
-            389, 844
-        },
-        "snag_icon": {
-            1132 + 15, 829
-        },
-        "float_camera": {
-            720, 654
-        },
+        ),
+        "fish_icon": (389, 844),
+        "snag_icon": (1132 + 15, 829),
+        "float_camera": (720, 654),
     },
     "1920x1080": {
-        "friction_brake": {
+        "friction_brake": (
             {
                 0.7: (662, 959, 1256),
                 0.8: (619, 959, 1299),
@@ -149,19 +144,13 @@ COORD_OFFSETS = {
                 0.95: (556, 959, 1362),
             },
             1056,
-        },
-        "fish_icon":{
-            549, 1024
-        },
-        "snag_icon": {
-            1292 + 15, 1009
-        },
-        "float_camera": {
-            880, 834
-        },
+        ),
+        "fish_icon": (549, 1024),
+        "snag_icon": (1292 + 15, 1009),
+        "float_camera": (880, 834),
     },
     "2560x1440": {
-        "friction_brake": {
+        "friction_brake": (
             {
                 0.7: (982, 1279, 1576),
                 0.8: (939, 1279, 1619),
@@ -169,16 +158,10 @@ COORD_OFFSETS = {
                 0.95: (876, 1279, 1682),
             },
             1412,
-        },
-        "fish_icon":{
-            869, 1384
-        },
-        "snag_icon": {
-            1612 + 15, 1369
-        },
-        "float_camera": {
-            1200, 1194
-        },
+        ),
+        "fish_icon": (869, 1384),
+        "snag_icon": (1612 + 15, 1369),
+        "float_camera": (1200, 1194),
     },
 }
 
@@ -186,6 +169,7 @@ CAMERA_W = CAMERA_H = 160
 YELLOW_FRICTION_BRAKE = (200, 214, 63)
 ORANGE_FRICTION_BRAKE = (229, 188, 0)
 RED_FRICTION_BRAKE = (206, 56, 21)
+
 
 class Setting:
     """Universal setting node."""
@@ -202,7 +186,6 @@ class Setting:
         if not config_file.is_file():
             logger.error("config.ini doesn't exist, please run .\\setup.bat first")
             sys.exit()
-
 
         self.config.read(pathlib.Path(__file__).resolve().parents[1] / "config.ini")
 
@@ -222,7 +205,6 @@ class Setting:
         # set coordinates responsively
         self.coord_bases = self.window_controller.get_base_coords()
         self.window_size = self.window_controller.get_window_size()
-        self._set_absolute_coords()
 
         if self.friction_brake_threshold not in (0.7, 0.8, 0.9, 0.95):
             logger.error("Invalid friction brake threshold")
@@ -231,7 +213,8 @@ class Setting:
         if self.friction_brake_threshold == 0.7:
             self.color_group = (ORANGE_FRICTION_BRAKE, RED_FRICTION_BRAKE)
         else:
-            self.color_group = (RED_FRICTION_BRAKE, )
+            self.color_group = (RED_FRICTION_BRAKE,)
+        self._set_absolute_coords()
 
     def _merge_general_configs(self) -> None:
         """Merge general configs from config.ini."""
@@ -324,7 +307,10 @@ class Setting:
             setattr(self, attribute_name, attribute_value)
 
         if missing_attributes:
-            logger.error("Failed to merge settings in [%s] in config.ini:", self.profile_names[pid])
+            logger.error(
+                "Failed to merge settings in [%s] in config.ini:",
+                self.profile_names[pid],
+            )
             print("Please refer to template.ini to add missing settings")
             table = PrettyTable(header=False, align="l", title="Missing Settings")
             for attribute_name in missing_attributes:
@@ -335,12 +321,13 @@ class Setting:
     def _set_absolute_coords(self) -> None:
         """Add offsets to the base coordinates to get absolute ones."""
         coord_offsets = COORD_OFFSETS[self.window_size]
-        x, y = self.coord_bases + coord_offsets["float_camera"]
-        self.float_camera_rect = (x, y, CAMERA_W, CAMERA_H) # (left, top, w, h)
+        coords = self.coord_bases + coord_offsets["float_camera"]
+        self.float_camera_rect = (*coords, CAMERA_W, CAMERA_H)  # (left, top, w, h)
 
         self.fish_icon_position = self.coord_bases + coord_offsets["fish_icon"]
         self.snag_icon_position = self.coord_bases + coord_offsets["snag_icon"]
 
-        x_offsets, y_offset = coord_offsets["frictiion_brake"]
+
+        x_offsets = coord_offsets["friction_brake"][0][self.friction_brake_threshold]
         self.fb_xs = tuple(self.coord_bases[0] + offset for offset in x_offsets)
-        self.fb_y = self.coord_bases[1] + y_offset
+        self.fb_y = self.coord_bases[1] + coord_offsets["friction_brake"][1]
