@@ -148,10 +148,10 @@ class Player:
 
         spod_rod_recast_delay = self.setting.spod_rod_recast_delay
         while True:
-            if time.time() - self.timer.start_time > spod_rod_recast_delay:
-                spod_rod_recast_delay += self.setting.spod_rod_recast_delay
-                self._access_item("spod_rod")
-                self.tackle.cast(update=False)
+            # if time.time() - self.timer.start_time > spod_rod_recast_delay:
+            #     spod_rod_recast_delay += self.setting.spod_rod_recast_delay
+            #     self._access_item("spod_rod")
+            #     self.tackle.cast(update=False)
 
             self._refill_user_stats()
             self._harvesting_stage()

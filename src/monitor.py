@@ -258,10 +258,13 @@ class Monitor:
         :return: True if pixels are the same and color is correct, False otherwise
         :rtype: bool
         """
+        return pag.pixelMatchesColor(self.setting.fb_xs[1], self.setting.fb_y, (206, 56, 21), 30)
+
+        return pag.pixel(self.setting.fb_xs[1], self.setting.fb_y) in self.setting.color_group
         pixels = [pag.pixel(x, self.setting.fb_y) for x in self.setting.fb_xs]
-        if pixels.count(pixels[0]) != FRICTION_BRAKE_OFFSET_NUM:
-            return False
-        return pixels[0] in self.setting.color_group
+        # if pixels.count(pixels[0]) != FRICTION_BRAKE_OFFSET_NUM:       
+        #     return False
+        return pixels[1] in self.setting.color_group
 
     def is_fish_hooked_pixel(self) -> bool:
         return all(c > MIN_LEVEL for c in pag.pixel(*self.setting.fish_icon_position))

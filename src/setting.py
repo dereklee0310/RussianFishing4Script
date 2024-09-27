@@ -42,6 +42,8 @@ GENERAL_CONFIGS = (
     ("friction_brake_threshold", "Friction brake threshold", float),
     ("friction_brake_check_delay", "Friction brake check delay", float),
     ("friction_brake_increase_delay", "Friction brake increase delay", float),
+    ("spod_rod_recast_delay", "Friction brake increase delay", float),
+    ("offset", "Offset", float)
 )
 
 # ----------------------- config name - attribute name ----------------------- #
@@ -168,8 +170,9 @@ COORD_OFFSETS = {
 CAMERA_W = CAMERA_H = 160
 YELLOW_FRICTION_BRAKE = (200, 214, 63)
 ORANGE_FRICTION_BRAKE = (229, 188, 0)
-RED_FRICTION_BRAKE = (206, 56, 21)
 
+RED_FRICTION_BRAKE = (206, 56, 21)
+RED_FRICTION_BRAKE_2 = (186, 36, 2)
 
 class Setting:
     """Universal setting node."""
@@ -324,8 +327,8 @@ class Setting:
         coords = self.coord_bases + coord_offsets["float_camera"]
         self.float_camera_rect = (*coords, CAMERA_W, CAMERA_H)  # (left, top, w, h)
 
-        self.fish_icon_position = self.coord_bases + coord_offsets["fish_icon"]
-        self.snag_icon_position = self.coord_bases + coord_offsets["snag_icon"]
+        self.fish_icon_position = self.coord_bases[0] + coord_offsets["fish_icon"][0], self.coord_bases[1] + coord_offsets["fish_icon"][1]
+        self.snag_icon_position = self.coord_bases[0] + coord_offsets["snag_icon"][0], self.coord_bases[1] + coord_offsets["snag_icon"][1]
 
 
         x_offsets = coord_offsets["friction_brake"][0][self.friction_brake_threshold]

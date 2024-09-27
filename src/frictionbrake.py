@@ -64,12 +64,14 @@ class FrictionBrake:
         """
         if increase:
             if self.cur_friction_brake.value < max_friction_brake:
-                pag.scroll(UP)
+                pag.scroll(UP, _pause=False)
                 self.cur_friction_brake.value += 1
         else:
-            if self.cur_friction_brake.value > 0:
-                pag.scroll(DOWN)
-                self.cur_friction_brake.value -= 1
+            # if self.cur_friction_brake.value > 0:
+            #     pag.scroll(DOWN)
+            #     self.cur_friction_brake.value -= 1
+            pag.scroll(DOWN, _pause=False)
+            self.cur_friction_brake.value -= 1
 
 
 def monitor_friction_brake(friction_brake):
@@ -82,9 +84,13 @@ def monitor_friction_brake(friction_brake):
     :type friction_brake: FrictionBrake
     """
     logger.info("Monitoring friction brake")
+    import time
+    pre_time = time.time()
     try:
         while True:
-            if not friction_brake.monitor.is_fish_hooked():
+            # print(friction_brake.cur_friction_brake.value)
+
+            if not friction_brake.monitor.is_fish_hooked_pixel():
                 sleep(FRICTION_BRAKE_MONITOR_DELAY)
                 continue
             with friction_brake.lock:
@@ -94,7 +100,10 @@ def monitor_friction_brake(friction_brake):
                         False,
                     )
                 else:
-                    sleep(friction_brake.setting.friction_brake_increase_delay)
+                    cur_time = time.time()
+                    if cur_time - pre_time < friction_brake.setting.friction_brake_increase_delay:
+                        continue
+                    pre_time = cur_time
                     friction_brake.change(
                         friction_brake.setting.max_friction_brake,
                         True,
