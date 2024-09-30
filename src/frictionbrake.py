@@ -4,8 +4,7 @@ Module for friction brake related methods.
 
 import logging
 from multiprocessing import Process, Value
-from multiprocessing.sharedctypes import Synchronized
-from time import sleep
+from time import sleep, time
 
 import pyautogui as pag
 
@@ -26,7 +25,7 @@ class FrictionBrake:
         self.cur_friction_brake = Value("i", setting.initial_friction_brake)
         self.lock = lock
         self.initialized = False
-        self.monitor_process = Process(target=monitor_friction_brake, args=(self, ))
+        self.monitor_process = Process(target=monitor_friction_brake, args=(self,))
 
     def reset(
         self,
@@ -43,18 +42,16 @@ class FrictionBrake:
         logger.info("Resetting friction brake")
         if not initialized:
             for _ in range(MAX_FRICTION_BRAKE):
-                pag.scroll(UP)
+                pag.scroll(UP, _pause=False)
             self.cur_friction_brake.value = MAX_FRICTION_BRAKE
 
         diff = self.cur_friction_brake.value - target_friction_brake
         direction = DOWN if diff > 0 else UP
         for _ in range(abs(diff)):
-            pag.scroll(direction)
+            pag.scroll(direction, _pause=False)
         self.cur_friction_brake.value = target_friction_brake
 
-    def change(
-        self, max_friction_brake: int, increase
-    ) -> None:
+    def change(self, max_friction_brake: int, increase) -> None:
         """Increae or decrease friction.
 
         :param max_friction_brake: maximum friction brake
@@ -67,11 +64,9 @@ class FrictionBrake:
                 pag.scroll(UP, _pause=False)
                 self.cur_friction_brake.value += 1
         else:
-            # if self.cur_friction_brake.value > 0:
-            #     pag.scroll(DOWN)
-            #     self.cur_friction_brake.value -= 1
-            pag.scroll(DOWN, _pause=False)
-            self.cur_friction_brake.value -= 1
+            if self.cur_friction_brake.value > 0:
+                pag.scroll(DOWN, _pause=False)
+                self.cur_friction_brake.value -= 1
 
 
 def monitor_friction_brake(friction_brake):
@@ -84,12 +79,10 @@ def monitor_friction_brake(friction_brake):
     :type friction_brake: FrictionBrake
     """
     logger.info("Monitoring friction brake")
-    import time
-    pre_time = time.time()
+
+    pre_time = time()
     try:
         while True:
-            # print(friction_brake.cur_friction_brake.value)
-
             if not friction_brake.monitor.is_fish_hooked_pixel():
                 sleep(FRICTION_BRAKE_MONITOR_DELAY)
                 continue
@@ -100,8 +93,11 @@ def monitor_friction_brake(friction_brake):
                         False,
                     )
                 else:
-                    cur_time = time.time()
-                    if cur_time - pre_time < friction_brake.setting.friction_brake_increase_delay:
+                    cur_time = time()
+                    if (
+                        cur_time - pre_time
+                        < friction_brake.setting.friction_brake_increase_delay
+                    ):
                         continue
                     pre_time = cur_time
                     friction_brake.change(

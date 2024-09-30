@@ -14,9 +14,12 @@ from setting import Setting
 
 logger = logging.getLogger(__name__)
 
-FRICTION_BRAKE_OFFSET_NUM = 3
 SNAG_ICON_COLOR = (206, 56, 21)
-MIN_LEVEL = 150
+MIN_GRAY_SCALE_LEVEL = 150
+YELLOW_FRICTION_BRAKE = (200, 214, 63)
+ORANGE_FRICTION_BRAKE = (229, 188, 0)
+RED_FRICTION_BRAKE = (206, 56, 21)
+COLOR_TOLERANCE = 30
 
 
 class Monitor:
@@ -253,21 +256,20 @@ class Monitor:
         return pag.pixel(*self.setting.snag_icon_position) == SNAG_ICON_COLOR
 
     def is_friction_brake_high(self) -> bool:
-        """Check if the friction brake is too high based on left, mid, and right points.
+        """Check if the friction brake is too high using friction brake bar center.
 
-        :return: True if pixels are the same and color is correct, False otherwise
+        :return: True if pixel color matched, False otherwise
         :rtype: bool
         """
-        return pag.pixelMatchesColor(self.setting.fb_xs[1], self.setting.fb_y, (206, 56, 21), 30)
-
-        return pag.pixel(self.setting.fb_xs[1], self.setting.fb_y) in self.setting.color_group
-        pixels = [pag.pixel(x, self.setting.fb_y) for x in self.setting.fb_xs]
-        # if pixels.count(pixels[0]) != FRICTION_BRAKE_OFFSET_NUM:       
-        #     return False
-        return pixels[1] in self.setting.color_group
+        return pag.pixelMatchesColor(
+            *self.setting.friction_brake_position, RED_FRICTION_BRAKE, COLOR_TOLERANCE
+        )
 
     def is_fish_hooked_pixel(self) -> bool:
-        return all(c > MIN_LEVEL for c in pag.pixel(*self.setting.fish_icon_position))
+        return all(
+            c > MIN_GRAY_SCALE_LEVEL
+            for c in pag.pixel(*self.setting.fish_icon_position)
+        )
 
     def is_float_state_changed(self, reference_img):
         current_img = pag.screenshot(region=self.setting.float_camera_rect)

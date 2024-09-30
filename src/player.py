@@ -8,7 +8,6 @@ import os
 import random
 import smtplib
 import sys
-import time
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -16,7 +15,7 @@ from multiprocessing import Lock
 
 # from email.mime.image import MIMEImage
 from pathlib import Path
-from time import sleep
+from time import time, sleep
 from urllib import parse, request
 
 import pyautogui as pag
@@ -48,6 +47,7 @@ TICKET_EXPIRE_DELAY = 16
 LURE_ADJUST_DELAY = 4
 DISCONNECTED_DELAY = 8
 WEAR_TEXT_UPDATE_DELAY = 2
+RANDOM_RANGE = 2
 
 
 class Player:
@@ -148,10 +148,11 @@ class Player:
 
         spod_rod_recast_delay = self.setting.spod_rod_recast_delay
         while True:
-            # if time.time() - self.timer.start_time > spod_rod_recast_delay:
-            #     spod_rod_recast_delay += self.setting.spod_rod_recast_delay
-            #     self._access_item("spod_rod")
-            #     self.tackle.cast(update=False)
+            if time() - self.timer.start_time > spod_rod_recast_delay:
+                spod_rod_recast_delay += self.setting.spod_rod_recast_delay
+                self._access_item("spod_rod")
+                self.tackle.cast(update=False)
+                self.press("0")
 
             self._refill_user_stats()
             self._harvesting_stage()
@@ -890,7 +891,7 @@ class Player:
             pag.click()
 
         pag.press("0")
-        random_offset = random.uniform(-self.setting.offset, self.setting.offset)
+        random_offset = random.uniform(-RANDOM_RANGE, RANDOM_RANGE)
         sleep(self.setting.check_delay + random_offset)
 
 

@@ -2,16 +2,16 @@
 Module for window controller.
 """
 
-import sys
 import logging
+import sys
 from time import sleep
 
-import win32gui
 # import win32api, win32con
 import pyautogui as pag
-
+import win32gui
 
 logger = logging.getLogger(__name__)
+
 
 class WindowController:
     """Controller for terminal and game windows management."""
@@ -44,7 +44,7 @@ class WindowController:
         hwnd = win32gui.FindWindow(None, self._title)
         # print(win32gui.GetClassName(hwnd)) # class name: UnityWndClass
         if not hwnd:
-            logger.error(f'Failed to locate the game window: "{self._title}"')
+            logger.error("Failed to locate the game window: %s", self._title)
             sys.exit()
         return hwnd
 
@@ -57,7 +57,7 @@ class WindowController:
         height = self._game_rect[3] - self._game_rect[1]
         return f"{width}x{height}"
 
-    def get_base_coords(self) -> tuple[int, int]:
+    def get_coord_bases(self) -> tuple[int, int]:
         """Get base x and y coordinates.
 
         :return: base x, base y
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     w = WindowController("Russian Fishing 4")
     # w.activate_game_window()
     print(w.get_window_size())
-    print(w.get_base_coords())
+    print(w.get_coord_bases())
 
 # SetForegroundWindow bug reference :
 # https://stackoverflow.com/questions/56857560/win32gui-setforegroundwindowhandle-not-working-in-loop

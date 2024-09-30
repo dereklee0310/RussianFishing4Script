@@ -88,7 +88,7 @@ class App:
 
     def __init__(self):
         """Merge args into setting node."""
-        self.setting = None # dummy setting, parse args first for help message
+        self.setting = None  # dummy setting, parse args first for help message
         self.pid = None
         self.player = None
         self.table = None
@@ -208,7 +208,7 @@ class App:
         """Verify args that comes with an argument."""
 
         # verify number of fishes in keepnet
-        if not (0 <= self.args.fishes_in_keepnet < self.setting.keepnet_limit):
+        if not 0 <= self.args.fishes_in_keepnet < self.setting.keepnet_limit:
             logger.error("Invalid number of fishes in keepnet")
             sys.exit()
 
@@ -292,7 +292,7 @@ class App:
         missing_images = set(target_images) - set(current_images)
         if len(missing_images) != 0:
             logger.error("Integrity check failed")
-            print(f"Please refer to https://shorturl.at/2AzUI")
+            print("Please refer to https://shorturl.at/2AzUI")
             table = PrettyTable(header=False, align="l", title="Missing Images")
             for filename in missing_images:
                 table.add_row([filename])
@@ -393,6 +393,7 @@ class App:
             sys.exit()
 
         return False
+
 
 if __name__ == "__main__":
     app = App()

@@ -39,11 +39,8 @@ GENERAL_CONFIGS = (
     ("snag_detection_enabled", "Enable snag detection", bool),
     ("initial_friction_brake", "Initial friction brake", int),
     ("max_friction_brake", "Max friction brake", int),
-    ("friction_brake_threshold", "Friction brake threshold", float),
-    ("friction_brake_check_delay", "Friction brake check delay", float),
     ("friction_brake_increase_delay", "Friction brake increase delay", float),
     ("spod_rod_recast_delay", "Friction brake increase delay", float),
-    ("offset", "Offset", float)
 )
 
 # ----------------------- config name - attribute name ----------------------- #
@@ -125,12 +122,13 @@ SPECIAL_CONFIGS = {
 COORD_OFFSETS = {
     "1600x900": {
         "friction_brake": (
-            {
-                0.7: (502, 799, 1096),
-                0.8: (459, 799, 1139),
-                0.9: (417, 799, 1181),
-                0.95: (396, 799, 1202),
-            },
+            # {
+            #     0.7: (502, 799, 1096),
+            #     0.8: (459, 799, 1139),
+            #     0.9: (417, 799, 1181),
+            #     0.95: (396, 799, 1202),
+            # },
+            799,
             876,
         ),
         "fish_icon": (389, 844),
@@ -139,12 +137,13 @@ COORD_OFFSETS = {
     },
     "1920x1080": {
         "friction_brake": (
-            {
-                0.7: (662, 959, 1256),
-                0.8: (619, 959, 1299),
-                0.9: (577, 959, 1341),
-                0.95: (556, 959, 1362),
-            },
+            # {
+            #     0.7: (662, 959, 1256),
+            #     0.8: (619, 959, 1299),
+            #     0.9: (577, 959, 1341),
+            #     0.95: (556, 959, 1362),
+            # },
+            959,
             1056,
         ),
         "fish_icon": (549, 1024),
@@ -153,12 +152,13 @@ COORD_OFFSETS = {
     },
     "2560x1440": {
         "friction_brake": (
-            {
-                0.7: (982, 1279, 1576),
-                0.8: (939, 1279, 1619),
-                0.9: (897, 1279, 1661),
-                0.95: (876, 1279, 1682),
-            },
+            # {
+            #     0.7: (982, 1279, 1576),
+            #     0.8: (939, 1279, 1619),
+            #     0.9: (897, 1279, 1661),
+            #     0.95: (876, 1279, 1682),
+            # },
+            1279,
             1412,
         ),
         "fish_icon": (869, 1384),
@@ -168,11 +168,7 @@ COORD_OFFSETS = {
 }
 
 CAMERA_W = CAMERA_H = 160
-YELLOW_FRICTION_BRAKE = (200, 214, 63)
-ORANGE_FRICTION_BRAKE = (229, 188, 0)
 
-RED_FRICTION_BRAKE = (206, 56, 21)
-RED_FRICTION_BRAKE_2 = (186, 36, 2)
 
 class Setting:
     """Universal setting node."""
@@ -183,38 +179,42 @@ class Setting:
     def __init__(self):
         """Initialize attributes and merge the configs."""
         self.window_controller = WindowController()
-        self.config = configparser.ConfigParser()
+        self.coord_bases = self.window_controller.get_coord_bases()
+        self.window_size = self.window_controller.get_window_size()
+        self.coord_offsets = COORD_OFFSETS[self.window_size]
+        self.float_camera_rect = None
+        self.fish_icon_position = None
+        self.snag_icon_position = None
+        self.friction_brake_position = None
 
-        config_file = pathlib.Path(__file__).resolve().parents[1] / "config.ini"
-        if not config_file.is_file():
-            logger.error("config.ini doesn't exist, please run .\\setup.bat first")
-            sys.exit()
-        self.config.read(config_file)
-
+        self.config = self._build_config()
+        # build available profile table
         self.profile_names = ["edit configuration file"]
         for section in self.config.sections():
             if self.config.has_option(section, "fishing_strategy"):
                 self.profile_names.append(section)
 
-        # args should be handled and merged in caller module first
+        # args will be handled and merged in App()
         self._merge_general_configs()
         self._merge_shortcuts()
 
-        # generate path of the image directory
         parent_dir = pathlib.Path(__file__).resolve().parents[1]
         self.image_dir = parent_dir / "static" / self.language
 
-        if self.friction_brake_threshold not in (0.7, 0.8, 0.9, 0.95):
-            logger.error("Invalid friction brake threshold")
+    def _build_config(self) -> configparser.ConfigParser:
+        """Build a config and read the data from config.ini.
+
+        :return: parsed config object
+        :rtype: configparser.ConfigParser
+        """
+        config = configparser.ConfigParser()
+
+        config_file = pathlib.Path(__file__).resolve().parents[1] / "config.ini"
+        if not config_file.is_file():
+            logger.error("config.ini doesn't exist, please run .\\setup.bat first")
             sys.exit()
-
-        if self.friction_brake_threshold == 0.7:
-            self.color_group = (ORANGE_FRICTION_BRAKE, RED_FRICTION_BRAKE)
-        else:
-            self.color_group = (RED_FRICTION_BRAKE,)
-
-        self.base_coords = self.window_controller.get_base_coords()
-        self.window_size = self.window_controller.get_window_size()
+        config.read(config_file)
+        return config
 
     def _merge_general_configs(self) -> None:
         """Merge general configs from config.ini."""
@@ -249,13 +249,39 @@ class Setting:
     def _merge_shortcuts(self) -> None:
         """Merge shortcuts from config.ini."""
         section = self.config["shortcut"]
+        missing_attributes = []
 
-        for config, attribute_name in SHORTCUTS:
-            setattr(self, attribute_name, section.get(config))
+        for section_name, attribute_name in SHORTCUTS:
+            section_value = section.get(section_name)
+            if section_value is None:
+                missing_attributes.append(section_name)
+                continue
+
+            setattr(self, attribute_name, section.get(section_name))
 
         self.bottom_rods_shortcuts = [
             key.strip() for key in self.bottom_rods_shortcuts.split(",")
         ]
+
+        if missing_attributes:
+            logger.error("Failed to merge settings in [shortcut] in config.ini:")
+            print("Please refer to template.ini to add missing settings")
+            table = PrettyTable(header=False, align="l", title="Missing Settings")
+            for attribute_name in missing_attributes:
+                table.add_row([attribute_name])
+            print(table)
+            sys.exit()
+
+    def _calculate_position(self, offset_key: str) -> None:
+        """Calculate absolute coordinates based on given key.
+
+        :param offset_key: a key in offset dictionary
+        :type offset_key: str
+        """
+        return (
+            self.coord_bases[0] + self.coord_offsets[offset_key][0],
+            self.coord_bases[1] + self.coord_offsets[offset_key][1],
+        )
 
     def merge_args(self, args: Namespace, args_map: tuple[tuple]) -> None:
         """Merge command line arguments from caller module.
@@ -321,13 +347,9 @@ class Setting:
     def set_absolute_coords(self) -> None:
         """Add offsets to the base coordinates to get absolute ones."""
         coord_offsets = COORD_OFFSETS[self.window_size]
-        coords = self.base_coords + coord_offsets["float_camera"]
+        coords = self.coord_bases + coord_offsets["float_camera"]
         self.float_camera_rect = (*coords, CAMERA_W, CAMERA_H)  # (left, top, w, h)
 
-        self.fish_icon_position = self.base_coords[0] + coord_offsets["fish_icon"][0], self.base_coords[1] + coord_offsets["fish_icon"][1]
-        self.snag_icon_position = self.base_coords[0] + coord_offsets["snag_icon"][0], self.base_coords[1] + coord_offsets["snag_icon"][1]
-
-
-        x_offsets = coord_offsets["friction_brake"][0][self.friction_brake_threshold]
-        self.fb_xs = tuple(self.base_coords[0] + offset for offset in x_offsets)
-        self.fb_y = self.base_coords[1] + coord_offsets["friction_brake"][1]
+        self.fish_icon_position = self._calculate_position("fish_icon")
+        self.snag_icon_position = self._calculate_position("snag_icon")
+        self.friction_brake_position = self._calculate_position("friction_brake")
