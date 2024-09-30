@@ -42,13 +42,13 @@ class FrictionBrake:
         logger.info("Resetting friction brake")
         if not initialized:
             for _ in range(MAX_FRICTION_BRAKE):
-                pag.scroll(UP, _pause=False)
+                pag.scroll(UP)
             self.cur_friction_brake.value = MAX_FRICTION_BRAKE
 
         diff = self.cur_friction_brake.value - target_friction_brake
         direction = DOWN if diff > 0 else UP
         for _ in range(abs(diff)):
-            pag.scroll(direction, _pause=False)
+            pag.scroll(direction)
         self.cur_friction_brake.value = target_friction_brake
 
     def change(self, max_friction_brake: int, increase) -> None:
@@ -104,6 +104,5 @@ def monitor_friction_brake(friction_brake):
                         friction_brake.setting.max_friction_brake,
                         True,
                     )
-            sleep(friction_brake.setting.friction_brake_check_delay)
     except KeyboardInterrupt:
         pass
