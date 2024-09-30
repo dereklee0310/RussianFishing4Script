@@ -3,13 +3,15 @@ Module for window controller.
 """
 
 import sys
+import logging
 from time import sleep
 
+import win32gui
+# import win32api, win32con
 import pyautogui as pag
 
-# import win32api, win32con
-import win32gui
 
+logger = logging.getLogger(__name__)
 
 class WindowController:
     """Controller for terminal and game windows management."""
@@ -42,7 +44,7 @@ class WindowController:
         hwnd = win32gui.FindWindow(None, self._title)
         # print(win32gui.GetClassName(hwnd)) # class name: UnityWndClass
         if not hwnd:
-            print(f'Failed to locate the window with title "{self._title}"')
+            logger.error(f'Failed to locate the game window: "{self._title}"')
             sys.exit()
         return hwnd
 

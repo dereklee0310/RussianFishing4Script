@@ -189,8 +189,7 @@ class Setting:
         if not config_file.is_file():
             logger.error("config.ini doesn't exist, please run .\\setup.bat first")
             sys.exit()
-
-        self.config.read(pathlib.Path(__file__).resolve().parents[1] / "config.ini")
+        self.config.read(config_file)
 
         self.profile_names = ["edit configuration file"]
         for section in self.config.sections():
@@ -205,10 +204,6 @@ class Setting:
         parent_dir = pathlib.Path(__file__).resolve().parents[1]
         self.image_dir = parent_dir / "static" / self.language
 
-        # set coordinates responsively
-        self.coord_bases = self.window_controller.get_base_coords()
-        self.window_size = self.window_controller.get_window_size()
-
         if self.friction_brake_threshold not in (0.7, 0.8, 0.9, 0.95):
             logger.error("Invalid friction brake threshold")
             sys.exit()
@@ -217,7 +212,9 @@ class Setting:
             self.color_group = (ORANGE_FRICTION_BRAKE, RED_FRICTION_BRAKE)
         else:
             self.color_group = (RED_FRICTION_BRAKE,)
-        self._set_absolute_coords()
+
+        self.base_coords = self.window_controller.get_base_coords()
+        self.window_size = self.window_controller.get_window_size()
 
     def _merge_general_configs(self) -> None:
         """Merge general configs from config.ini."""
@@ -321,16 +318,16 @@ class Setting:
             print(table)
             sys.exit()
 
-    def _set_absolute_coords(self) -> None:
+    def set_absolute_coords(self) -> None:
         """Add offsets to the base coordinates to get absolute ones."""
         coord_offsets = COORD_OFFSETS[self.window_size]
-        coords = self.coord_bases + coord_offsets["float_camera"]
+        coords = self.base_coords + coord_offsets["float_camera"]
         self.float_camera_rect = (*coords, CAMERA_W, CAMERA_H)  # (left, top, w, h)
 
-        self.fish_icon_position = self.coord_bases[0] + coord_offsets["fish_icon"][0], self.coord_bases[1] + coord_offsets["fish_icon"][1]
-        self.snag_icon_position = self.coord_bases[0] + coord_offsets["snag_icon"][0], self.coord_bases[1] + coord_offsets["snag_icon"][1]
+        self.fish_icon_position = self.base_coords[0] + coord_offsets["fish_icon"][0], self.base_coords[1] + coord_offsets["fish_icon"][1]
+        self.snag_icon_position = self.base_coords[0] + coord_offsets["snag_icon"][0], self.base_coords[1] + coord_offsets["snag_icon"][1]
 
 
         x_offsets = coord_offsets["friction_brake"][0][self.friction_brake_threshold]
-        self.fb_xs = tuple(self.coord_bases[0] + offset for offset in x_offsets)
-        self.fb_y = self.coord_bases[1] + coord_offsets["friction_brake"][1]
+        self.fb_xs = tuple(self.base_coords[0] + offset for offset in x_offsets)
+        self.fb_y = self.base_coords[1] + coord_offsets["friction_brake"][1]

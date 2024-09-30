@@ -88,13 +88,14 @@ class App:
 
     def __init__(self):
         """Merge args into setting node."""
-        self.setting = Setting()
+        self.setting = None # dummy setting, parse args first for help message
         self.pid = None
         self.player = None
         self.table = None
 
-        self._build_args()
+        self._build_setting_args()
         self._verify_args()
+
         if self.args.email is not None and self.setting.SMTP_validation_enabled:
             self._validate_smtp_connection()
         if self.setting.image_verification_enabled:
@@ -105,8 +106,6 @@ class App:
         self.setting.merge_args(self.args, args_attributes)
         fishes_to_catch = self.setting.keepnet_limit - self.setting.fishes_in_keepnet
         self.setting.fishes_to_catch = fishes_to_catch
-
-        self._verify_game_window_size()
 
     def _setup_parser(self) -> ArgumentParser:
         """Configure argparser."""
@@ -183,27 +182,33 @@ class App:
 
         return parser
 
-    def _build_args(self) -> None:
-        """Build args from command line arguments and configuration file."""
+    def _build_setting_args(self) -> None:
+        """Build args from command line arguments and configuration file.
+
+        Parse the command line arguments first to display the help message before
+        attempting to locate the game window when initializing Setting node, then merge
+        the parsed dictionary with the default arguments in config.ini without
+        overwriting them.
+        """
         # parse command line arguments first for help
         parser = self._setup_parser()
-        command_line_args = parser.parse_args()
+        command_line_args = vars(parser.parse_args())
 
         # merge with default arguments
-        default_args = parser.parse_args(shlex.split(self.setting.default_arguments))
-        command_line_args = vars(command_line_args)
-        default_args = vars(default_args)
+        self.setting = Setting()
+        default_arguments_list = shlex.split(self.setting.default_arguments)
+        default_args = vars(parser.parse_args(default_arguments_list))
         for k, v in default_args.items():
             if k not in command_line_args:
                 command_line_args[k] = v
-        command_line_args = Namespace(**command_line_args)
-        self.args = command_line_args
+
+        self.args = Namespace(**command_line_args)
 
     def _verify_args(self) -> None:
         """Verify args that comes with an argument."""
 
         # verify number of fishes in keepnet
-        if not 0 <= self.args.fishes_in_keepnet < self.setting.keepnet_limit:
+        if not (0 <= self.args.fishes_in_keepnet < self.setting.keepnet_limit):
             logger.error("Invalid number of fishes in keepnet")
             sys.exit()
 
@@ -222,6 +227,16 @@ class App:
                 sys.exit()
 
         # boat_ticket_duration already checked by choices[...]
+
+    def _is_pid_valid(self, pid: str) -> bool:
+        """Validate the profile id.
+
+        :param pid: user profile id
+        :type pid: str
+        :return: True if valid, False otherwise
+        :rtype: bool
+        """
+        return pid.isdigit() and 0 <= int(pid) < len(self.setting.profile_names)
 
     def _validate_smtp_connection(self) -> None:
         """Validate email configuration in .env."""
@@ -277,43 +292,35 @@ class App:
         missing_images = set(target_images) - set(current_images)
         if len(missing_images) != 0:
             logger.error("Integrity check failed")
-            guide_link = "https://shorturl.at/2AzUI"
-            print(f"Please refer to {guide_link}")
+            print(f"Please refer to https://shorturl.at/2AzUI")
             table = PrettyTable(header=False, align="l", title="Missing Images")
             for filename in missing_images:
                 table.add_row([filename])
             print(table)
             sys.exit()
 
-    def _is_pid_valid(self, pid: str) -> bool:
-        """Validate the profile id.
+    def _build_args_table(self) -> None:
+        """Append command line arguments to existing table."""
+        arg_table = COMMON_ARGS + SPECIAL_ARGS
+        for i, (_, attribute_name, column_name) in enumerate(arg_table):
+            attribute_value = getattr(self.setting, attribute_name)
+            if isinstance(attribute_value, bool):
+                attribute_value = "enabled" if attribute_value else "disabled"
+            divider = i == len(arg_table) - 1
+            self.table.add_row([column_name, attribute_value], divider=divider)
 
-        :param pid: user profile id
-        :type pid: str
-        :return: True if valid, False otherwise
-        :rtype: bool
-        """
-        if not pid.isdigit():
-            return False
-        return 0 <= int(pid) < len(self.setting.profile_names)
+    def _build_user_config_table(self) -> None:
+        """Append user profile to existing table."""
+        self.table.add_row(["Profile name", self.setting.profile_names[self.pid]])
 
-    def _verify_game_window_size(self) -> None:
-        window_size = self.setting.window_size
-        if window_size in ("2560x1440", "1920x1080", "1600x900"):
-            return
+        for attribute_name, column_name, _ in COMMON_CONFIGS:
+            attribute_value = getattr(self.setting, attribute_name)
+            self.table.add_row([column_name, attribute_value])
 
-        logger.warning(
-            "Window size %s not supported, must be 2560x1440, 1920x1080 or 1600x900",
-            window_size,
-        )
-        logger.warning("Snag detection and friction brake changing will be disabled")
-        self.setting.snag_detection_enabled = False
-        self.setting.friction_brake_changing_enabled = False
-        if self.setting.fishing_strategy == "float":
-            logger.error(
-                "Float fishing mode doesn't support window size %s", window_size
-            )
-            sys.exit()
+        special_configs = SPECIAL_CONFIGS.get(self.setting.fishing_strategy)
+        for attribute_name, column_name, _ in special_configs:
+            attribute_value = getattr(self.setting, attribute_name)
+            self.table.add_row([column_name, attribute_value])
 
     def display_available_profiles(self) -> None:
         """List available user profiles from setting node."""
@@ -344,29 +351,6 @@ class App:
         self.setting.merge_user_configs(self.pid)
         self.player = Player(self.setting)
 
-    def _build_args_table(self) -> None:
-        """Append command line arguments to existing table."""
-        arg_table = COMMON_ARGS + SPECIAL_ARGS
-        for i, (_, attribute_name, column_name) in enumerate(arg_table):
-            attribute_value = getattr(self.setting, attribute_name)
-            if isinstance(attribute_value, bool):
-                attribute_value = "enabled" if attribute_value else "disabled"
-            divider = i == len(arg_table) - 1
-            self.table.add_row([column_name, attribute_value], divider=divider)
-
-    def _build_user_config_table(self) -> None:
-        """Append user profile to existing table."""
-        self.table.add_row(["Profile name", self.setting.profile_names[self.pid]])
-
-        for attribute_name, column_name, _ in COMMON_CONFIGS:
-            attribute_value = getattr(self.setting, attribute_name)
-            self.table.add_row([column_name, attribute_value])
-
-        special_configs = SPECIAL_CONFIGS.get(self.setting.fishing_strategy)
-        for attribute_name, column_name, _ in special_configs:
-            attribute_value = getattr(self.setting, attribute_name)
-            self.table.add_row([column_name, attribute_value])
-
     def display_settings(self) -> None:
         """Display args and user profile."""
         self.table = PrettyTable(header=False, align="l", title="Setings")
@@ -385,6 +369,30 @@ class App:
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
             sys.exit()
 
+    def verify_window_size(self) -> bool:
+        """Check if the window size is supported.
+
+        :return: True if supported, False otherwise
+        :rtype: bool
+        """
+        window_size = self.setting.window_size
+        if window_size in ("2560x1440", "1920x1080", "1600x900"):
+            return True
+
+        logger.warning(
+            "Window size %s not supported, must be 2560x1440, 1920x1080 or 1600x900",
+            window_size,
+        )
+        logger.warning("Snag detection and friction brake changing will be disabled")
+        self.setting.snag_detection_enabled = False
+        self.setting.friction_brake_changing_enabled = False
+        if self.setting.fishing_strategy == "float":
+            logger.error(
+                "Float fishing mode doesn't support window size %s", window_size
+            )
+            sys.exit()
+
+        return False
 
 if __name__ == "__main__":
     app = App()
@@ -398,6 +406,9 @@ if __name__ == "__main__":
     app.create_player()
     app.display_settings()
 
+    if app.verify_window_size():
+        app.setting.set_absolute_coords()
+
     if app.setting.confirmation_enabled:
         script.ask_for_confirmation("Do you want to continue with the settings above")
     app.setting.window_controller.activate_game_window()
@@ -405,10 +416,6 @@ if __name__ == "__main__":
     if app.setting.quitting_shortcut != "Ctrl-C":
         listener = keyboard.Listener(on_release=app.on_release)
         listener.start()
-
-    # pos = app.player.monitor.is_fish_hooked_pixel()
-    # print(pos)
-    # exit()
 
     try:
         app.player.start_fishing()
