@@ -122,6 +122,9 @@ class Monitor:
     def is_moving_in_bottom_layer(self):
         return self._locate_single_image_box("movement", 0.7)
 
+    def is_groundbait_not_chosen(self):
+        return self._locate_single_image_box("groundbait", 0.7)
+
     # ------------------------------ hint detection ------------------------------ #
     def is_disconnected(self):
         return self._locate_single_image_box("disconnected", 0.9)

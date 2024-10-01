@@ -70,6 +70,8 @@ class Tackle:
                 raise exceptions.FishHookedError
             if self.monitor.is_fish_captured():
                 raise exceptions.FishCapturedError
+            if self.monitor.is_groundbait_not_chosen():
+                raise exceptions.GroundbaitNotChosenError
             i = script.sleep_and_decrease(i, LOOP_DELAY)
 
         raise TimeoutError

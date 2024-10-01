@@ -148,11 +148,17 @@ class Player:
 
         spod_rod_recast_delay = self.setting.spod_rod_recast_delay
         while True:
-            if time() - self.timer.start_time > spod_rod_recast_delay:
+            if (self.setting.spod_rod_recast_enabled and
+                time() - self.timer.start_time > spod_rod_recast_delay):
+                logger.info("Recasting spod rod")
                 spod_rod_recast_delay += self.setting.spod_rod_recast_delay
                 self._access_item("spod_rod")
+                sleep(1)
+                self._resetting_stage()
                 self.tackle.cast(update=False)
-                self.press("0")
+                pag.click()
+                pag.press("0")
+                sleep(ANIMATION_DELAY)
 
             self._refill_user_stats()
             self._harvesting_stage()
@@ -298,6 +304,7 @@ class Player:
 
         if pickup:
             self._access_item("main_rod")  # pick up again
+            sleep(1)
 
         # when timed out, do not raise a TimeoutError but defer it to resetting stage
 
@@ -390,6 +397,10 @@ class Player:
                 return  # whether success or not, back to main fishing loop
             except exceptions.FishCapturedError:
                 self._handle_fish()
+                return
+            except exceptions.GroundbaitNotChosenError:
+                # trick to avoid invalid cast
+                pag.press("0")
                 return
             except TimeoutError:  # rare events
                 self._handle_timeout()

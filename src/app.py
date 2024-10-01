@@ -46,6 +46,7 @@ HELP = (
     ("S", "Take screenshots of every fish you catch and save them in screenshots/"),
     ("C", "Skip rod casting for the first fish, support mode: spin, marine, wakey_rig"),
     ("f", "Change friction brake automatically"),
+    ("o", "Recast the spod rod automatically")
 )
 
 # ----------------- flag name 2, attribute name, description ----------------- #
@@ -63,6 +64,7 @@ COMMON_ARGS = (
     ("screenshot", "screenshot_enabled", "Screenshot"),
     ("cast", "cast_skipping_enabled", "Cast skipping"),
     ("friction_brake", "friction_brake_changing_enabled", "Friction brake changing"),
+    ("spod_rod_recast", "spod_rod_recast_enabled", "Spod rod recast")
 )
 
 # ----------------- flag name 2, attribute name, description ----------------- #
