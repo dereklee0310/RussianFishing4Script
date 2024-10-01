@@ -42,6 +42,8 @@
 ```
 git clone https://github.com/dereklee0310/RussianFishing4Script
 ```
+> [!IMPORTANT]
+> 下載的目標檔案路徑須為全英文。
 
 ### 安裝依賴庫並初始化設定
 ```
@@ -67,9 +69,6 @@ cd "項目路徑"
 
 > [!NOTE]
 > 目前手竿及維基釣組模式只支援單竿作釣。
-
-> [!IMPORTANT]
-> 在使用手竿模式時，請確保你的遊戲視窗大小為2560x1440、1920x1080或1600x900。
 
 ### 1. 變更當前工作目錄
 ```
@@ -147,10 +146,7 @@ python harvest.py
 ```
 
 ## 腳本設定
-- **[視頻教程(舊)][Video]**
 - 請參考 **[中文版template.ini][Template]** 中的說明, 並在 **[config.ini][Config]** 中修改設定。
-- 你可以在 **[config.ini][Config]** 中修改`language`以變更語言，
-  並根據 **[圖片添加指南][Integrity guide]** 添加缺失的圖片
 - 欲使用郵件功能的話，請在`.env`中配置郵箱以及SMTP伺服器等資訊
 
 ## 疑難排解
@@ -166,23 +162,15 @@ python harvest.py
 - 降低`config.ini`中`retrieval_detect_confidence`的值
 - 遠離光源(e.g, 露營燈、船燈)
 
-**OSError (Windows 11)**
-```
-OSError: Failed to read ... because file is missing, has improper permissions, or is an unsupported or invalid format
-``` 
-- 以系統管理員身分執行終端以授予腳本讀寫檔案的權限。
-
 **MIAO_CODE如何配置?**
 1. 關注微信公衆號 [喵提醒][miaotixing]
+   
 2. 新建提醒服務  
 <img src="static/readme/mtx1.png" height="400">
 <img src="static/readme/mtx2.png" height="400">
 
 3. 效果展示  
 <img src="static/readme/mtx3.png" height="400">
-
-
-
 
 ## 授權條款
 [GNU General Public License version 3][license]

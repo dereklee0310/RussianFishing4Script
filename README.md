@@ -33,10 +33,6 @@
 > [!TIP]
 > Join us on our [Discord server][Discord] to get the latest news about the project.
 
-## Built With
-- Python 3.11
-- PyAutoGUI
-
 ## Getting Started  
 ### Prerequisites
 - [Python3.10+][Python]
@@ -47,6 +43,8 @@
 ```
 git clone https://github.com/dereklee0310/RussianFishing4Script
 ```
+> [!IMPORTANT]
+> Download path cannot contain non-English characters.
 
 ### Dependencies
 ```
@@ -60,14 +58,15 @@ cd "the path of the project"
 
 ### Prerequisites
 - Enable **[Mouse ClickLock][Clicklock]** in Windows mouse settings and set the time before locking to "Long"
-- Change game language to "English"
+- Set the language in `config.ini`
 - Set interface scale to "1x"
 - Set display mode to "borderless windowed" or "window mode"
 - Make sure your reel is fully loaded, or use `-R`  along with a rainbow line when executing the main script
 - Add tea, carrot, and coffee to your **[favorites][Favorite food]** so that they can be selected through quick food selection menu
 - To enable broken lure replacement, the lures for replacement must also be added to **[favorites][Favorite lure]**
 > [!IMPORTANT]
-> Please follow the instructions above step by step, otherwise, you may encounter unexpected errors at runtime
+> Please follow the instructions above, otherwise, you may encounter unexpected errors at runtime
+> 
 ### Before you start...
 - Move your character to the fishing spot before executing the script
 - Spin/marine/float/wakey rig fishing: Pick up the rod you want to use
@@ -75,9 +74,6 @@ cd "the path of the project"
   cast them, and place them nearby to let the bot access them via shortcuts (1 ~ 3)
 > [!NOTE]
 > Currently, We only support single rod for float fishing and wakey rig fishing.
-
-> [!IMPORTANT]
-> The game window size must be 2560x1440, 1920x1080 or 1600x900 when using float fishing mode. 
 
 ### 1. Change the current working directory
 ```
@@ -91,10 +87,8 @@ Here are some examples of how to execute the script with different arguments:
 ```
 python app.py
 ```
-> [!WARNING]
-> If your OS is Windows 11, run the terminal as administrator to grant file access permission.
 
-- Display help information
+- Display help message
 ```
 python app.py -h
 ```
@@ -143,10 +137,8 @@ python harvest.py [-s] [-n CHECK_DELAY_SECOND]
 ## Configuration
 - Please refer to the guides and examples in **[template.ini][Template]** 
   and edit your settings in **[config.ini][Config]**  
-- Set the `language` setting in **[config.ini][Config]** 
-  and **[add missing images][Integrity guide]** if the integrity check failed.
 - To enable email notification, set your Gmail address and Google app password in `.env`  
-- Edit `SMTP_SERVER` in `.env` if you want to use SMTP server other than Gmail SMTP server
+- Edit `SMTP_SERVER` in `.env` if you want to use other SMTP server
 
 ## Troubleshooting
 **How to exit the program?**
@@ -160,12 +152,6 @@ python harvest.py [-s] [-n CHECK_DELAY_SECOND]
 - Change the game window size
 - Lower the value of `retrieval_detect_confidence` in `config.ini`
 - Keep away from light sources or turn off the boat light
-
-**OSError (Usually occured on Windows 11)**
-```
-OSError: Failed to read ... because file is missing, has improper permissions, or is an unsupported or invalid format
-``` 
-- Run the terminal as administrator to grant file access permission
 
 ## License
 [GNU General Public License version 3][license]
