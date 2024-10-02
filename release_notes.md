@@ -6,10 +6,11 @@ Oct. 2, 2024
 
 
 ## New Features
-- Now you can skip the casting stage after restarting the script by using `-C` flag.
+- Skip the casting stage after restarting the script by using `-C` flag
+  when using spin, marine, and wakey rig fishing modes.
 - Use `-N <profile name>` to select the profile by name.
-- Enable friction brake auto-changer with `-f` flag.
-- Enable spod rod recast with `-o` flag
+- Enable riction brake auto-changer with `-f` flag. (BETA)
+- Set the hotkey and delay in `config.ini`, then use `-o` flag to recast the spod rod
 - Snag detection can be enabled by setting `snag_detection_enabled` to `True` in `config.ini`.
 
 ## Bug Fixes

@@ -51,22 +51,21 @@ class FrictionBrake:
             pag.scroll(direction)
         self.cur_friction_brake.value = target_friction_brake
 
-    def change(self, max_friction_brake: int, increase) -> None:
+    def change(self, increase: bool) -> None:
         """Increae or decrease friction.
 
-        :param max_friction_brake: maximum friction brake
-        :type max_friction_brake: int
         :param increase: increae or decreae the friction brake
         :type increase: bool
         """
         if increase:
-            if self.cur_friction_brake.value < max_friction_brake:
+            if self.cur_friction_brake.value < self.setting.max_friction_brake:
                 pag.scroll(UP, _pause=False)
                 self.cur_friction_brake.value += 1
         else:
             if self.cur_friction_brake.value > 0:
                 pag.scroll(DOWN, _pause=False)
                 self.cur_friction_brake.value -= 1
+        sleep(0.04)
 
 
 def monitor_friction_brake(friction_brake):
@@ -88,10 +87,7 @@ def monitor_friction_brake(friction_brake):
                 continue
             with friction_brake.lock:
                 if friction_brake.monitor.is_friction_brake_high():
-                    friction_brake.change(
-                        friction_brake.setting.max_friction_brake,
-                        False,
-                    )
+                    friction_brake.change(increase=False)
                 else:
                     cur_time = time()
                     if (
@@ -100,9 +96,6 @@ def monitor_friction_brake(friction_brake):
                     ):
                         continue
                     pre_time = cur_time
-                    friction_brake.change(
-                        friction_brake.setting.max_friction_brake,
-                        True,
-                    )
+                    friction_brake.change(increase=True)
     except KeyboardInterrupt:
         pass

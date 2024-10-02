@@ -201,10 +201,10 @@ class App:
         default_arguments_list = shlex.split(self.setting.default_arguments)
         default_args = vars(parser.parse_args(default_arguments_list))
         for k, v in default_args.items():
-            if k not in command_line_args:
-                command_line_args[k] = v
+            if (v is None or not v) and command_line_args[k] is not None:
+                default_args[k] = command_line_args[k]
 
-        self.args = Namespace(**command_line_args)
+        self.args = Namespace(**default_args)
 
     def _verify_args(self) -> None:
         """Verify args that comes with an argument."""

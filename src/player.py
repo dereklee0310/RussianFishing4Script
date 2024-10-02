@@ -123,12 +123,11 @@ class Player:
         spin_with_pause = self.setting.fishing_strategy == "spin_with_pause"
         while True:
             if not self.setting.cast_skipping_enabled:
-                self.setting.cast_skipping_enabled = False
                 self._refill_user_stats()
                 self._harvesting_stage(pickup=True)
                 self._resetting_stage()
-
                 self.tackle.cast()
+            self.setting.cast_skipping_enabled = False
 
             if spin_with_pause:
                 self.tackle.retrieve_with_pause()
@@ -186,12 +185,11 @@ class Player:
         """Main marine fishing loop."""
         while True:
             if not self.setting.cast_skipping_enabled:
-                self.setting.cast_skipping_enabled = False
                 self._refill_user_stats()
                 self._resetting_stage()
-
                 self.tackle.cast()
                 self.tackle.sink()
+            self.setting.cast_skipping_enabled = False
 
             if not self.monitor.is_fish_hooked():
                 self._pirking_stage()
@@ -227,12 +225,11 @@ class Player:
         """Main wakey rig fishing loop."""
         while True:
             if not self.setting.cast_skipping_enabled:
-                self.setting.cast_skipping_enabled = False
                 self._refill_user_stats()
                 self._resetting_stage()
-
                 self.tackle.cast()
                 self.tackle.sink(marine=False)
+            self.setting.cast_skipping_enabled = False
 
             if self.setting.pirk_timeout > 0:
                 self._pirking_stage()
