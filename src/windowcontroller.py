@@ -9,6 +9,7 @@ from time import sleep
 # import win32api, win32con
 import pyautogui as pag
 import win32gui
+import win32con
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +48,11 @@ class WindowController:
             logger.error("Failed to locate the game window: %s", self._title)
             sys.exit()
         return hwnd
+
+    def is_title_bar_exist(self) -> bool:
+        style = win32gui.GetWindowLong(self._game_hwnd, win32con.GWL_STYLE)
+        return style & win32con.WS_CAPTION
+
 
     def get_window_size(self) -> str:
         """Get the window size in "{width}x{height}" format.

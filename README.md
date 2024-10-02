@@ -60,7 +60,7 @@ cd "the path of the project"
 - Enable **[Mouse ClickLock][Clicklock]** in Windows mouse settings and set the time before locking to "Long"
 - Set the language in `config.ini`
 - Set interface scale to "1x"
-- Set display mode to "borderless windowed" or "window mode"
+- Set display mode to "borderless windowed"
 - Make sure your reel is fully loaded, or use `-R`  along with a rainbow line when executing the main script
 - Add tea, carrot, and coffee to your **[favorites][Favorite food]** so that they can be selected through quick food selection menu
 - To enable broken lure replacement, the lures for replacement must also be added to **[favorites][Favorite lure]**

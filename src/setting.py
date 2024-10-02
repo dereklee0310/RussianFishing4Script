@@ -181,7 +181,7 @@ class Setting:
         self.window_controller = WindowController()
         self.coord_bases = self.window_controller.get_coord_bases()
         self.window_size = self.window_controller.get_window_size()
-        self.coord_offsets = COORD_OFFSETS[self.window_size]
+        self.coord_offsets = None
         self.float_camera_rect = None
         self.fish_icon_position = None
         self.snag_icon_position = None
@@ -346,10 +346,9 @@ class Setting:
 
     def set_absolute_coords(self) -> None:
         """Add offsets to the base coordinates to get absolute ones."""
-        coord_offsets = COORD_OFFSETS[self.window_size]
-        coords = self.coord_bases + coord_offsets["float_camera"]
+        self.coord_offsets = COORD_OFFSETS[self.window_size]
+        coords = self._calculate_position("float_camera")
         self.float_camera_rect = (*coords, CAMERA_W, CAMERA_H)  # (left, top, w, h)
-
         self.fish_icon_position = self._calculate_position("fish_icon")
         self.snag_icon_position = self._calculate_position("snag_icon")
         self.friction_brake_position = self._calculate_position("friction_brake")

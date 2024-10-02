@@ -24,7 +24,7 @@ from pynput import keyboard
 
 import script
 from player import Player
-from setting import COMMON_CONFIGS, SPECIAL_CONFIGS, Setting
+from setting import COMMON_CONFIGS, SPECIAL_CONFIGS, Setting, COORD_OFFSETS
 
 # logging.BASIC_FORMAT: %(levelname)s:%(name)s:%(message)s
 # timestamp: %(asctime)s, datefmt='%Y-%m-%d %H:%M:%S',
@@ -381,13 +381,20 @@ class App:
         if window_size in ("2560x1440", "1920x1080", "1600x900"):
             return True
 
-        logger.warning(
-            "Window size %s not supported, must be 2560x1440, 1920x1080 or 1600x900",
-            window_size,
-        )
+        if self.setting.window_controller.is_title_bar_exist():
+            logger.error("Invalid display mode: window mode")
+            print('Please set the display mode to "Borderless windowed"')
+            sys.exit()
+        else:
+            logger.warning(
+                "Window size %s not supported, must be 2560x1440, 1920x1080 or 1600x900",
+                window_size,
+            )
+            logger.warning('Window mode must be "Borderless windowed"')
         logger.warning("Snag detection and friction brake changing will be disabled")
         self.setting.snag_detection_enabled = False
         self.setting.friction_brake_changing_enabled = False
+
         if self.setting.fishing_strategy == "float":
             logger.error(
                 "Float fishing mode doesn't support window size %s", window_size
