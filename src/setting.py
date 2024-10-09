@@ -41,6 +41,7 @@ GENERAL_CONFIGS = (
     ("max_friction_brake", "Max friction brake", int),
     ("friction_brake_increase_delay", "Friction brake increase delay", float),
     ("spod_rod_recast_delay", "Friction brake increase delay", float),
+    ("bottom_rods_checking_weights", "Bottom rods checking weights", str),
 )
 
 # ----------------------- config name - attribute name ----------------------- #
@@ -244,6 +245,9 @@ class Setting:
 
         self.unmarked_release_whitelist = [
             key.strip() for key in self.unmarked_release_whitelist.split(",")
+        ]
+        self.bottom_rods_checking_weights = [
+            float(key.strip()) for key in self.bottom_rods_checking_weights.split(",")
         ]
 
     def _merge_shortcuts(self) -> None:

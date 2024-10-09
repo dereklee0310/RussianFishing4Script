@@ -141,14 +141,17 @@ class Player:
 
     def bottom_fishing(self) -> None:
         """Main bottom fishing loop."""
-        rod_idx = -1
         rod_count = len(self.setting.bottom_rods_shortcuts)
+        rod_indices = range(rod_count)
+        polling_weights = self.setting.bottom_rods_checking_weights[:rod_count]
         check_miss_counts = [0] * rod_count
 
         spod_rod_recast_delay = self.setting.spod_rod_recast_delay
         while True:
-            if (self.setting.spod_rod_recast_enabled and
-                time() - self.timer.start_time > spod_rod_recast_delay):
+            if (
+                self.setting.spod_rod_recast_enabled
+                and time() - self.timer.start_time > spod_rod_recast_delay
+            ):
                 logger.info("Recasting spod rod")
                 spod_rod_recast_delay += self.setting.spod_rod_recast_delay
                 self._access_item("spod_rod")
@@ -161,7 +164,7 @@ class Player:
 
             self._refill_user_stats()
             self._harvesting_stage()
-            rod_idx = (rod_idx + 1) % rod_count
+            rod_idx = random.choices(rod_indices, weights=polling_weights, k=1)[0]
             rod_key = self.setting.bottom_rods_shortcuts[rod_idx]
             logger.info("Checking rod %s", rod_idx + 1)
             pag.press(f"{rod_key}")
