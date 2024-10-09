@@ -98,7 +98,7 @@ class App:
         self._build_setting_args()
         self._verify_args()
 
-        if self.args.email is not None and self.setting.SMTP_validation_enabled:
+        if self.args.email and self.setting.SMTP_validation_enabled:
             self._validate_smtp_connection()
         if self.setting.image_verification_enabled:
             self._verify_image_file_integrity()
