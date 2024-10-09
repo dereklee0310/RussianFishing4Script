@@ -188,7 +188,7 @@ dereklee0310@gmail.com
 [Python badge]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
 [Windows badge]: https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white
 
-[Release notes]: release_notes.md
+[Release notes]: /docs/release_notes.md
 [Discord]: https://discord.gg/BZQWQnAMbY
 [Python]: https://www.python.org/downloads/
 [Download]: https://github.com/dereklee0310/RussianFishing4Script/archive/refs/heads/main.zip
@@ -198,7 +198,7 @@ dereklee0310@gmail.com
 [Video]: https://www.youtube.com/watch?v=znLBYoXHxkw
 [Template]: 中文版template.ini
 [Config]: config.ini
-[Integrity guide]: integrity_guide.md
+[Integrity guide]: /docs/integrity_guide.md
 
 [miaotixing]: https://miaotixing.com/how
 

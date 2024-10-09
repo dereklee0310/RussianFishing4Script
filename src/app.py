@@ -294,7 +294,7 @@ class App:
         missing_images = set(target_images) - set(current_images)
         if len(missing_images) != 0:
             logger.error("Integrity check failed")
-            print("Please refer to https://shorturl.at/2AzUI")
+            print("Please refer to docs/integrity_guide.md")
             table = PrettyTable(header=False, align="l", title="Missing Images")
             for filename in missing_images:
                 table.add_row([filename])
