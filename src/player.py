@@ -493,11 +493,17 @@ class Player:
                 break
             except TimeoutError:
                 self._handle_timeout()
-                # adjust lure depth if no fish is hooked
-                logger.info("Adjusting lure depth")
-                pag.press("enter")  # open reel
-                sleep(LURE_ADJUST_DELAY)
-                script.hold_left_click(self.setting.tighten_duration)
+                if self.setting.pirk_timeout_action == "recast":
+                    self._resetting_stage()
+                    self.tackle.cast()
+                    self.tackle.sink()
+                elif self.setting.pirk_timeout_action == "adjust":
+                    # adjust lure depth if no fish is hooked
+                    logger.info("Adjusting lure depth")
+                    pag.press("enter")  # open reel
+                    sleep(LURE_ADJUST_DELAY)
+                    script.hold_left_click(self.setting.tighten_duration)
+                # TODO: setting saturation
                 # TODO: improve dedicated miss count for marine fishing
                 self.cast_miss_count += 1
 
