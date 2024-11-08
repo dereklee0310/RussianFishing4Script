@@ -49,6 +49,7 @@ HELP = (
     ("o", "Recast the spod rod automatically"),
     ("L", "Change current lure with a random one automatically"),
     ("x", "Move mouse randomly before casting the rod"),
+    ("X", "Pause the script after catchig a fish regularly")
 )
 
 # ----------------- flag name 2, attribute name, description ----------------- #
@@ -69,6 +70,7 @@ COMMON_ARGS = (
     ("spod_rod", "spod_rod_recast_enabled", "Spod rod recast"),
     ("lure", "lure_changing_enabled", "Lure changing"),
     ("mouse", "mouse_moving_enabled", "Mouse moving"),
+    ("pause", "pause_enabled", "Pause")
 )
 
 # ----------------- flag name 2, attribute name, description ----------------- #

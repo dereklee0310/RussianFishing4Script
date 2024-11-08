@@ -47,8 +47,7 @@ TICKET_EXPIRE_DELAY = 16
 LURE_ADJUST_DELAY = 4
 DISCONNECTED_DELAY = 8
 WEAR_TEXT_UPDATE_DELAY = 2
-RANDOM_RANGE = 2
-
+BOUND = 2
 
 class Player:
     """Main interface of fishing loops and stages."""
@@ -83,6 +82,10 @@ class Player:
         self.friction_brake = FrictionBrake(
             self.setting, self.monitor, self.friction_brake_lock
         )
+
+        bound = self.setting.pause_time // 20
+        offset = random.randint(-bound, bound)
+        self.setting.pause_time = self.setting.pause_time + offset
 
         # fish count and bite rate
         self.cast_miss_count = 0
@@ -559,6 +562,12 @@ class Player:
             unmarked_release_enabled = self.setting.unmarked_release_enabled
             if unmarked_release_enabled and not self._is_fish_whitelisted():
                 pag.press("backspace")
+                curr_time = time()
+                if self.setting.pause_enabled and curr_time - self.timer.last_pause > self.setting.pause_delay:
+                    self.timer.last_pause = curr_time
+                    pag.press("esc")
+                    sleep(self.setting.pause_time)
+                    pag.press("esc")
                 return
 
         # fish is marked, unmarked release is disabled, or fish is in whitelist
@@ -573,6 +582,13 @@ class Player:
         if self.special_cast_miss:
             self.timer.update_cast_hour()
         self.timer.add_cast_hour()
+
+        curr_time = time()
+        if self.setting.pause_enabled and curr_time - self.timer.last_pause > self.setting.pause_delay:
+            self.timer.last_pause = curr_time
+            pag.press("esc")
+            sleep(self.setting.pause_time)
+            pag.press("esc")
 
     def _handle_full_keepnet(self):
         msg = "Keepnet is full"
@@ -933,7 +949,7 @@ class Player:
             pag.click()
 
         pag.press("0")
-        random_offset = random.uniform(-RANDOM_RANGE, RANDOM_RANGE)
+        random_offset = random.uniform(-BOUND, BOUND)
         sleep(self.setting.check_delay + random_offset)
 
 

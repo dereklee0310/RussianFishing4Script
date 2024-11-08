@@ -24,8 +24,10 @@ class Timer:
         self.cast_rhour_list = []
         self.cast_ghour_list = []
 
-        self.pre_tea_drink_time = 0
-        self.pre_alcohol_drink_time = 0
+        self.last_tea = 0
+        self.last_alcohol = 0
+
+        self.last_pause = 0
 
     def get_duration(self) -> str:
         """Calculate the execution time of the program.
@@ -87,8 +89,8 @@ class Timer:
         :rtype: bool
         """
         cur_time = time.time()
-        if cur_time - self.pre_tea_drink_time > TEA_DRINK_DELAY:
-            self.pre_tea_drink_time = cur_time
+        if cur_time - self.last_tea > TEA_DRINK_DELAY:
+            self.last_tea = cur_time
             return True
         return False
 
@@ -98,8 +100,8 @@ class Timer:
         :return: True if long enough, False otherwise
         :rtype: bool
         """
-        if time.time() - self.pre_alcohol_drink_time > alcohol_drink_delay:
-            self.pre_alcohol_drink_time = time.time()
-            self.pre_tea_drink_time = time.time()  # no need to drink tea so fast
+        if time.time() - self.last_alcohol > alcohol_drink_delay:
+            self.last_alcohol = time.time()
+            self.last_tea = time.time()  # no need to drink tea so fast
             return True
         return False
