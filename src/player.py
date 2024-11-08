@@ -937,5 +937,3 @@ class Player:
         sleep(self.setting.check_delay + random_offset)
 
 
-# head up backup
-# win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, int(0), int(-200), 0, 0)

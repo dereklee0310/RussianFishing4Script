@@ -47,7 +47,8 @@ HELP = (
     ("C", "Skip rod casting for the first fish, support mode: spin, marine, wakey_rig"),
     ("f", "Change friction brake automatically"),
     ("o", "Recast the spod rod automatically"),
-    ("L", "Change current lure with a random one automatically")
+    ("L", "Change current lure with a random one automatically"),
+    ("x", "Move mouse randomly before casting the rod"),
 )
 
 # ----------------- flag name 2, attribute name, description ----------------- #
@@ -66,7 +67,8 @@ COMMON_ARGS = (
     ("cast", "cast_skipping_enabled", "Cast skipping"),
     ("friction_brake", "friction_brake_changing_enabled", "Friction brake changing"),
     ("spod_rod", "spod_rod_recast_enabled", "Spod rod recast"),
-    ("lure", "lure_changing_enabled", "Lure changing")
+    ("lure", "lure_changing_enabled", "Lure changing"),
+    ("mouse", "mouse_moving_enabled", "Mouse moving"),
 )
 
 # ----------------- flag name 2, attribute name, description ----------------- #

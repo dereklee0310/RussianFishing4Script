@@ -4,6 +4,9 @@ Module for Tackle class and some decorators.
 """
 
 import logging
+import random
+import win32api
+import win32con
 from time import sleep
 
 import pyautogui as pag
@@ -23,6 +26,8 @@ CAST_SCALE = 0.4  # 25% / 0.4s
 BASE_DELAY = 1
 LOOP_DELAY = 2
 
+ANIMATION_DELAY = 0.5
+
 RETRIEVAL_TIMEOUT = 64
 PULL_TIMEOUT = 32
 RETRIEVAL_WITH_PAUSE_TIMEOUT = 128
@@ -30,6 +35,10 @@ LIFT_DURATION = 3
 TELESCOPIC_RETRIEVAL_TIMEOUT = 8
 LANDING_NET_DURATION = 6
 LANDING_NET_DELAY = 0.5
+
+
+OFFSET = 100
+NUM_OF_MOVEMENT = 4
 
 
 class Tackle:
@@ -83,6 +92,8 @@ class Tackle:
         :type update: bool, optional
         """
         logger.info("Casting")
+        if self.setting.mouse_moving_enabled:
+            self.move_mouse_randomly()
         match self.setting.cast_power_level:
             case 1:  # 0%
                 pag.click()
@@ -271,3 +282,15 @@ class Tackle:
         logger.info("Switching gear ratio")
         with pag.hold("ctrl"):
             pag.press("space")
+
+
+    def move_mouse_randomly(self) -> None:
+        """Randomly move the mouse for four times."""
+        coords = []
+        for _ in range(NUM_OF_MOVEMENT - 1):
+            x, y = random.randint(-OFFSET, OFFSET), random.randint(-OFFSET, OFFSET)
+            coords.append((x, y))
+        coords.append((-sum(x for x, _ in coords), -sum(y for _, y in coords)))
+        for x, y in coords:
+            win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, x, y, 0, 0)
+            sleep(ANIMATION_DELAY)
