@@ -42,6 +42,7 @@ GENERAL_CONFIGS = (
     ("friction_brake_increase_delay", "Friction brake increase delay", float),
     ("spod_rod_recast_delay", "Friction brake increase delay", float),
     ("bottom_rods_checking_weights", "Bottom rods checking weights", str),
+    ("lure_changing_delay", "Lure changing delay", int),
 )
 
 # ----------------------- config name - attribute name ----------------------- #

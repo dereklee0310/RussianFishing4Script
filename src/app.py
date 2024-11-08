@@ -46,7 +46,8 @@ HELP = (
     ("S", "Take screenshots of every fish you catch and save them in screenshots/"),
     ("C", "Skip rod casting for the first fish, support mode: spin, marine, wakey_rig"),
     ("f", "Change friction brake automatically"),
-    ("o", "Recast the spod rod automatically")
+    ("o", "Recast the spod rod automatically"),
+    ("L", "Change current lure with a random one automatically")
 )
 
 # ----------------- flag name 2, attribute name, description ----------------- #
@@ -64,7 +65,8 @@ COMMON_ARGS = (
     ("screenshot", "screenshot_enabled", "Screenshot"),
     ("cast", "cast_skipping_enabled", "Cast skipping"),
     ("friction_brake", "friction_brake_changing_enabled", "Friction brake changing"),
-    ("spod_rod_recast", "spod_rod_recast_enabled", "Spod rod recast")
+    ("spod_rod", "spod_rod_recast_enabled", "Spod rod recast"),
+    ("lure", "lure_changing_enabled", "Lure changing")
 )
 
 # ----------------- flag name 2, attribute name, description ----------------- #
@@ -172,7 +174,7 @@ class App:
         )
         parser.add_argument(
             "-t",
-            "--boat-ticket-duration",
+            "--boat_ticket_duration",
             metavar="DURATION",
             type=int,
             choices=[1, 2, 3, 5],

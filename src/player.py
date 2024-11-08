@@ -121,11 +121,15 @@ class Player:
     def spin_fishing(self) -> None:
         """Main spin fishing loop for "spin" and "spin_with_pause"."""
         spin_with_pause = self.setting.fishing_strategy == "spin_with_pause"
+        lure_changing_delay = self.setting.lure_changing_delay
         while True:
             if not self.setting.cast_skipping_enabled:
                 self._refill_user_stats()
                 self._harvesting_stage(pickup=True)
                 self._resetting_stage()
+                if self.setting.lure_changing_enabled and time() - self.timer.start_time > lure_changing_delay:
+                    self._change_lure_randomly()
+                    lure_changing_delay += self.setting.lure_changing_delay
                 self.tackle.cast()
             self.setting.cast_skipping_enabled = False
 
@@ -868,11 +872,12 @@ class Player:
         return True
 
     def _replace_selected_item(self) -> None:
-        """Search for favorite items for replacement and skip the broken ones."""
+        """Select a favorite item for replacement and replace the broken one."""
         logger.info("Search for favorite items")
         favorite_item_positions = self.monitor.get_favorite_item_positions()
         while True:
             favorite_item_position = next(favorite_item_positions, None)
+
             if favorite_item_position is None:
                 msg = "Lure for replacement not found"
                 logger.warning(msg)
@@ -890,7 +895,27 @@ class Player:
                 pag.click(clicks=2, interval=0.1)
                 sleep(WEAR_TEXT_UPDATE_DELAY)
                 break
+
             logger.warning("Lure for replacement found but already broken")
+
+    def _change_lure_randomly(self) -> None:
+        """Open menu, select a random lure and replace the current one."""
+        logger.info("Search for favorite items")
+        with pag.hold("b"):
+            sleep(ANIMATION_DELAY)
+            favorite_item_positions = list(self.monitor.get_favorite_item_positions())
+            random.shuffle(favorite_item_positions)
+            for favorite_item_position in favorite_item_positions:
+                # check if the lure for replacement is already broken
+                x, y = script.get_box_center(favorite_item_position)
+                if pag.pixel(x - 75, y + 190) != (178, 59, 30):  # magic value
+                    logger.info("The lure has been replaced")
+                    pag.moveTo(x - 75, y + 190)
+                    pag.click()
+                    break
+                logger.warning("Lure for replacement found but already broken")
+            logger.warning("Lure for replacement not found, stay unchanged")
+        sleep(ANIMATION_DELAY)
 
     def _put_tackle_back(self, check_miss_counts: list[int], rod_idx: int) -> None:
         """Update counters, put down the tackle and wait for a while.
