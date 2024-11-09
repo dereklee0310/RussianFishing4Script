@@ -15,7 +15,7 @@ from multiprocessing import Lock
 
 # from email.mime.image import MIMEImage
 from pathlib import Path
-from time import time, sleep
+from time import sleep, time
 from urllib import parse, request
 
 import pyautogui as pag
@@ -50,6 +50,7 @@ WEAR_TEXT_UPDATE_DELAY = 2
 BOUND = 2
 
 SCREENSHOT_DELAY = 2
+
 
 class Player:
     """Main interface of fishing loops and stages."""
@@ -134,7 +135,10 @@ class Player:
                 self._refill_user_stats()
                 self._harvesting_stage(pickup=True)
                 self._resetting_stage()
-                if self.setting.lure_changing_enabled and time() - self.timer.start_time > lure_changing_delay:
+                if (
+                    self.setting.lure_changing_enabled
+                    and time() - self.timer.start_time > lure_changing_delay
+                ):
                     self._change_lure_randomly()
                     lure_changing_delay += self.setting.lure_changing_delay
                 self.tackle.cast()
@@ -485,7 +489,7 @@ class Player:
         print(result)
         sys.exit()
 
-    def _retrieving_stage(self, pirk: bool=False) -> None:
+    def _retrieving_stage(self, pirk: bool = False) -> None:
         """Retrieve the line till it's fully retrieved with timeout handling.
 
         :param pirk: is user using marine_pirk fishing mode, defaults to False
@@ -508,13 +512,11 @@ class Player:
             except exceptions.FishGotAwayError:
                 if not pirk:
                     return
-                else:
-                    pag.press("enter")
-                    self.tackle.sink()
-                    if self.monitor.is_fish_hooked():
-                        continue
-                    else:
-                        self._pirking_stage()
+                pag.press("enter")
+                self.tackle.sink()
+                if self.monitor.is_fish_hooked():
+                    continue
+                self._pirking_stage()
             except exceptions.FishCapturedError:
                 self._handle_fish()
                 break
@@ -617,7 +619,10 @@ class Player:
             unmarked_release_enabled = self.setting.unmarked_release_enabled
             if unmarked_release_enabled and not self._is_fish_whitelisted():
                 pag.press("backspace")
-                if self.setting.pause_enabled and time() - self.timer.last_pause > self.setting.pause_delay:
+                if (
+                    self.setting.pause_enabled
+                    and time() - self.timer.last_pause > self.setting.pause_delay
+                ):
                     pag.press("esc")
                     sleep(self.setting.pause_duration)
                     pag.press("esc")
@@ -637,7 +642,10 @@ class Player:
             self.timer.update_cast_hour()
         self.timer.add_cast_hour()
 
-        if self.setting.pause_enabled and time() - self.timer.last_pause > self.setting.pause_delay:
+        if (
+            self.setting.pause_enabled
+            and time() - self.timer.last_pause > self.setting.pause_delay
+        ):
             pag.press("esc")
             sleep(self.setting.pause_duration)
             pag.press("esc")
@@ -834,8 +842,10 @@ class Player:
         # datetime.now().strftime("%H:%M:%S")
         left, top = self.setting.window_controller.get_coord_bases()
         width, height = self.setting.window_controller.get_window_size()
-        pag.screenshot(imageFilename=rf"../screenshots/{self.timer.get_cur_timestamp()}.png",
-                           region=(left, top, width, height))
+        pag.screenshot(
+            imageFilename=rf"../screenshots/{self.timer.get_cur_timestamp()}.png",
+            region=(left, top, width, height),
+        )
 
     def plot_and_save(self) -> None:
         """Plot and save an image using rhour and ghour list from timer object."""
@@ -1002,5 +1012,3 @@ class Player:
         pag.press("0")
         random_offset = random.uniform(-BOUND, BOUND)
         sleep(self.setting.check_delay + random_offset)
-
-

@@ -24,7 +24,7 @@ from pynput import keyboard
 
 import script
 from player import Player
-from setting import COMMON_CONFIGS, SPECIAL_CONFIGS, Setting, COORD_OFFSETS
+from setting import COMMON_CONFIGS, SPECIAL_CONFIGS, Setting
 
 # logging.BASIC_FORMAT: %(levelname)s:%(name)s:%(message)s
 # timestamp: %(asctime)s, datefmt='%Y-%m-%d %H:%M:%S',

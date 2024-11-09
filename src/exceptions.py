@@ -18,5 +18,6 @@ class LineAtEndError(Exception):
 class FishGotAwayError(Exception):
     """A hooked fish got away during pulling or retrieving stage."""
 
+
 class GroundbaitNotChosenError(Exception):
     """Run out of groundbait on spod rod."""

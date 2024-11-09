@@ -8,8 +8,8 @@ from time import sleep
 
 # import win32api, win32con
 import pyautogui as pag
-import win32gui
 import win32con
+import win32gui
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class WindowController:
         self._title = game_window_title
         self._script_hwnd = self._get_cur_hwnd()
         self._game_hwnd = self._get_game_hwnd()
-        self.game_rect = win32gui.GetWindowRect(self._game_hwnd) # l, t, r, b
+        self.game_rect = win32gui.GetWindowRect(self._game_hwnd)  # l, t, r, b
 
     def _get_cur_hwnd(self) -> int:
         """Get the handle of the terminal.
@@ -50,9 +50,13 @@ class WindowController:
         return hwnd
 
     def is_title_bar_exist(self) -> bool:
+        """Check if the game window is in windowed mode.
+
+        :return: True if yes, False otherwise
+        :rtype: bool
+        """
         style = win32gui.GetWindowLong(self._game_hwnd, win32con.GWL_STYLE)
         return style & win32con.WS_CAPTION
-
 
     def get_window_size(self) -> str:
         """Get the width and height of the game window.

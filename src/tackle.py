@@ -3,13 +3,15 @@ Module for Tackle class and some decorators.
 
 """
 
+# pylint: disable=c-extension-no-member
+
 import logging
 import random
-import win32api
-import win32con
 from time import sleep
 
 import pyautogui as pag
+import win32api
+import win32con
 
 import exceptions
 import script
@@ -231,7 +233,6 @@ class Tackle:
 
         raise TimeoutError
 
-
     def elevate(self, drop: bool) -> None:
         """Perform elevator tactic (drop/rise) until a fish is hooked.
 
@@ -240,7 +241,7 @@ class Tackle:
         """
         logger.info("Dropping" if drop else "Rising")
 
-        lock = True # reel is locked after tackle.sink()
+        lock = True  # reel is locked after tackle.sink()
         i = self.setting.elevate_timeout
         while i > 0:
             if self.is_fish_hooked_twice():
@@ -263,7 +264,6 @@ class Tackle:
             lock = not lock
 
         raise TimeoutError
-
 
     @script.toggle_right_mouse_button
     @script.toggle_clicklock
@@ -321,7 +321,6 @@ class Tackle:
         logger.info("Switching gear ratio")
         with pag.hold("ctrl"):
             pag.press("space")
-
 
     def move_mouse_randomly(self) -> None:
         """Randomly move the mouse for four times."""
