@@ -65,7 +65,7 @@ cd "the path of the project"
 - Set display mode to "borderless windowed"
 - Make sure your reel is fully loaded, or use `-R`  along with a rainbow line when executing the main script
 - Add tea, carrot, and coffee to your **[favorites][Favorite food]** so that they can be selected through quick food selection menu
-- To enable broken lure replacement, the lures for replacement must also be added to **[favorites][Favorite lure]**
+- To enable broken or random lure replacement, the lures for replacement must also be added to **[favorites][Favorite lure]**
 > [!IMPORTANT]
 > Please follow the instructions above, otherwise, you may encounter unexpected errors at runtime
 > 
@@ -84,6 +84,10 @@ cd src
 ```
 
 ### 2. Execute the main script
+> [!IMPORTANT]
+> If the scrip is running but no action is taken, please run your terminal as 
+> administrator and try again.
+
 Here are some examples of how to execute the script with different arguments:
 - Run with default settings
 ```
