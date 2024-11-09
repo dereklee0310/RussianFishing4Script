@@ -49,7 +49,8 @@ HELP = (
     ("o", "Recast the spod rod automatically"),
     ("L", "Change current lure with a random one automatically"),
     ("x", "Move mouse randomly before casting the rod"),
-    ("X", "Pause the script after catchig a fish regularly")
+    ("X", "Pause the script after catchig a fish regularly"),
+    ("b", "Take a screenshot when a fish bites and save it in screenshots/"),
 )
 
 # ----------------- flag name 2, attribute name, description ----------------- #
@@ -64,13 +65,14 @@ COMMON_ARGS = (
     ("lift", "lifting_enabled", "Lifting"),
     ("email", "email_sending_enabled", "Email sending"),
     ("miaotixing", "miaotixing_sending_enabled", "miaotixing sending"),
-    ("screenshot", "screenshot_enabled", "Screenshot"),
+    ("result_screenshot", "result_screenshot_enabled", "Result screenshot"),
     ("cast", "cast_skipping_enabled", "Cast skipping"),
     ("friction_brake", "friction_brake_changing_enabled", "Friction brake changing"),
     ("spod_rod", "spod_rod_recast_enabled", "Spod rod recast"),
     ("lure", "lure_changing_enabled", "Lure changing"),
     ("mouse", "mouse_moving_enabled", "Mouse moving"),
-    ("pause", "pause_enabled", "Pause")
+    ("pause", "pause_enabled", "Pause"),
+    ("bite_screenshot", "bite_screenshot_enabled", "Bite screenshot"),
 )
 
 # ----------------- flag name 2, attribute name, description ----------------- #
@@ -384,7 +386,7 @@ class App:
         :rtype: bool
         """
         window_size = self.setting.window_size
-        if window_size in ("2560x1440", "1920x1080", "1600x900"):
+        if window_size in ((2560, 1440), (1920, 1080), (1600, 900)):
             return True
 
         if self.setting.window_controller.is_title_bar_exist():

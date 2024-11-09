@@ -26,7 +26,7 @@ class WindowController:
         self._title = game_window_title
         self._script_hwnd = self._get_cur_hwnd()
         self._game_hwnd = self._get_game_hwnd()
-        self._game_rect = win32gui.GetWindowRect(self._game_hwnd)
+        self.game_rect = win32gui.GetWindowRect(self._game_hwnd) # l, t, r, b
 
     def _get_cur_hwnd(self) -> int:
         """Get the handle of the terminal.
@@ -55,21 +55,21 @@ class WindowController:
 
 
     def get_window_size(self) -> str:
-        """Get the window size in "{width}x{height}" format.
+        """Get the width and height of the game window.
         :return: formatted window size
         :rtype: str
         """
-        width = self._game_rect[2] - self._game_rect[0]
-        height = self._game_rect[3] - self._game_rect[1]
-        return f"{width}x{height}"
+        width = self.game_rect[2] - self.game_rect[0]
+        height = self.game_rect[3] - self.game_rect[1]
+        return width, height
 
     def get_coord_bases(self) -> tuple[int, int]:
-        """Get base x and y coordinates.
+        """Get base x and y coordinates of the game window.
 
         :return: base x, base y
         :rtype: tuple[int, int]
         """
-        return self._game_rect[0], self._game_rect[1]
+        return self.game_rect[0], self.game_rect[1]
 
     def activate_script_window(self) -> None:
         """Focus terminal."""

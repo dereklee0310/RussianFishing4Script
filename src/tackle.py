@@ -161,9 +161,7 @@ class Tackle:
 
         i = RETRIEVAL_TIMEOUT
         while i > 0:
-            if not self.monitor.is_fish_hooked():
-                raise exceptions.FishGotAwayError
-            else:
+            if self.monitor.is_fish_hooked():
                 if self.setting.post_acceleration_enabled == "always":
                     pag.keyDown("shift")
                 elif self.setting.post_acceleration_enabled == "auto" and first:
@@ -181,6 +179,10 @@ class Tackle:
                 raise exceptions.FishCapturedError
             if self.monitor.is_line_at_end():
                 raise exceptions.LineAtEndError
+
+            # check after is_fish_captured() because a re-sinking might follows
+            if not self.monitor.is_fish_hooked():
+                raise exceptions.FishGotAwayError
 
             i = script.sleep_and_decrease(i, LOOP_DELAY)
 

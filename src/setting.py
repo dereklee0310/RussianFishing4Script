@@ -351,7 +351,8 @@ class Setting:
 
     def set_absolute_coords(self) -> None:
         """Add offsets to the base coordinates to get absolute ones."""
-        self.coord_offsets = COORD_OFFSETS[self.window_size]
+        window_size_key = f"{self.window_size[0]}x{self.window_size[1]}"
+        self.coord_offsets = COORD_OFFSETS[window_size_key]
         coords = self._calculate_position("float_camera")
         self.float_camera_rect = (*coords, CAMERA_W, CAMERA_H)  # (left, top, w, h)
         self.fish_icon_position = self._calculate_position("fish_icon")

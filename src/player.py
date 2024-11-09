@@ -49,6 +49,8 @@ DISCONNECTED_DELAY = 8
 WEAR_TEXT_UPDATE_DELAY = 2
 BOUND = 2
 
+SCREENSHOT_DELAY = 2
+
 class Player:
     """Main interface of fishing loops and stages."""
 
@@ -468,6 +470,10 @@ class Player:
         :param marine: is user using marine fishing mode, defaults to False
         :type marine: bool, optional
         """
+        if self.setting.bite_screenshot_enabled:
+            # wait until the popup at bottom right corner becomes transparent
+            sleep(SCREENSHOT_DELAY)
+            self.save_screenshot()
         if self.monitor.is_retrieval_finished():
             return
 
@@ -567,7 +573,7 @@ class Player:
         """
         logger.info("Handling fish")
 
-        if self.setting.screenshot_enabled:
+        if self.setting.result_screenshot_enabled:
             self.save_screenshot()
 
         if self.monitor.is_fish_marked():
@@ -794,12 +800,10 @@ class Player:
     def save_screenshot(self) -> None:
         """Save screenshot to screenshots/."""
         # datetime.now().strftime("%H:%M:%S")
-        pag.press("q")
-        with open(
-            rf"../screenshots/{self.timer.get_cur_timestamp()}.png", "wb"
-        ) as file:
-            pag.screenshot().save(file, "png")
-        pag.press("esc")
+        left, top = self.setting.window_controller.get_coord_bases()
+        width, height = self.setting.window_controller.get_window_size()
+        pag.screenshot(imageFilename=rf"../screenshots/{self.timer.get_cur_timestamp()}.png",
+                           region=(left, top, width, height))
 
     def plot_and_save(self) -> None:
         """Plot and save an image using rhour and ghour list from timer object."""
