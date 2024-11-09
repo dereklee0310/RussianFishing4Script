@@ -204,7 +204,7 @@ class Player:
             if not self.monitor.is_fish_hooked():
                 self._pirking_stage()
 
-            self._retrieving_stage()
+            self._retrieving_stage(marine=True)
 
             if self.monitor.is_fish_hooked():
                 self._drink_alcohol()
@@ -462,8 +462,12 @@ class Player:
         print(result)
         sys.exit()
 
-    def _retrieving_stage(self) -> None:
-        """Retrieve the fishing line till it's fully retrieved."""
+    def _retrieving_stage(self, marine: bool=False) -> None:
+        """Retrieve the fishing line till it's fully retrieved.
+
+        :param marine: is user using marine fishing mode, defaults to False
+        :type marine: bool, optional
+        """
         if self.monitor.is_retrieval_finished():
             return
 
@@ -474,6 +478,16 @@ class Player:
             try:
                 self.tackle.retrieve(first)
                 break
+            except exceptions.FishGotAwayError:
+                if not marine:
+                    return
+                else:
+                    pag.press("enter")
+                    self.tackle.sink()
+                    if self.monitor.is_fish_hooked():
+                        continue
+                    else:
+                        self._pirking_stage()
             except exceptions.FishCapturedError:
                 self._handle_fish()
                 break
@@ -544,7 +558,7 @@ class Player:
                 self._handle_timeout()
                 if self.telescopic:
                     continue
-                self.tackle.retrieve()
+                self._retrieving_stage()
 
     def _handle_fish(self) -> None:
         """Keep or release the fish and record the fish count.

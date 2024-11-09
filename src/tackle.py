@@ -152,6 +152,7 @@ class Tackle:
 
         :param first: whether it's invoked for the first time, defaults to True
         :type first: bool, optional
+        :raises exceptions.FishCapturedError: a fish got away
         :raises exceptions.FishCapturedError: a fish is captured
         :raises exceptions.LineAtEndError: line is at its end
         :raises exceptions.TimeoutError: loop timed out
@@ -160,7 +161,9 @@ class Tackle:
 
         i = RETRIEVAL_TIMEOUT
         while i > 0:
-            if self.monitor.is_fish_hooked():
+            if not self.monitor.is_fish_hooked():
+                raise exceptions.FishGotAwayError
+            else:
                 if self.setting.post_acceleration_enabled == "always":
                     pag.keyDown("shift")
                 elif self.setting.post_acceleration_enabled == "auto" and first:
