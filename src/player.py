@@ -85,9 +85,9 @@ class Player:
             self.setting, self.monitor, self.friction_brake_lock
         )
 
-        bound = self.setting.pause_time // 20
+        bound = self.setting.pause_duration // 20
         offset = random.randint(-bound, bound)
-        self.setting.pause_time = self.setting.pause_time + offset
+        self.setting.pause_duration = self.setting.pause_duration + offset
 
         # fish count and bite rate
         self.cast_miss_count = 0
@@ -617,12 +617,11 @@ class Player:
             unmarked_release_enabled = self.setting.unmarked_release_enabled
             if unmarked_release_enabled and not self._is_fish_whitelisted():
                 pag.press("backspace")
-                curr_time = time()
-                if self.setting.pause_enabled and curr_time - self.timer.last_pause > self.setting.pause_delay:
-                    self.timer.last_pause = curr_time
+                if self.setting.pause_enabled and time() - self.timer.last_pause > self.setting.pause_delay:
                     pag.press("esc")
-                    sleep(self.setting.pause_time)
+                    sleep(self.setting.pause_duration)
                     pag.press("esc")
+                    self.timer.last_pause = time()
                 return
 
         # fish is marked, unmarked release is disabled, or fish is in whitelist
@@ -638,12 +637,11 @@ class Player:
             self.timer.update_cast_hour()
         self.timer.add_cast_hour()
 
-        curr_time = time()
-        if self.setting.pause_enabled and curr_time - self.timer.last_pause > self.setting.pause_delay:
-            self.timer.last_pause = curr_time
+        if self.setting.pause_enabled and time() - self.timer.last_pause > self.setting.pause_delay:
             pag.press("esc")
-            sleep(self.setting.pause_time)
+            sleep(self.setting.pause_duration)
             pag.press("esc")
+            self.timer.last_pause = time()
 
     def _handle_full_keepnet(self):
         msg = "Keepnet is full"
