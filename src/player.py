@@ -113,8 +113,10 @@ class Player:
                 self.spin_fishing()
             case "bottom":
                 self.bottom_fishing()
-            case "marine":
-                self.marine_fishing()
+            case "marine_pirk":
+                self.marine_pirk_fishing()
+            case "marine_elevator":
+                self.marine_elevator_fishing()
             case "float":
                 self.float_fishing()
             case "wakey_rig":
@@ -193,7 +195,7 @@ class Player:
             self.tackle.cast()
             pag.click()
 
-    def marine_fishing(self) -> None:
+    def marine_pirk_fishing(self) -> None:
         """Main marine fishing loop."""
         while True:
             if not self.setting.cast_skipping_enabled:
@@ -206,7 +208,26 @@ class Player:
             if not self.monitor.is_fish_hooked():
                 self._pirking_stage()
 
-            self._retrieving_stage(marine=True)
+            self._retrieving_stage(pirk=True)
+
+            if self.monitor.is_fish_hooked():
+                self._drink_alcohol()
+                self._pulling_stage()
+
+    def marine_elevator_fishing(self) -> None:
+        """Main marine fishing loop."""
+        while True:
+            if not self.setting.cast_skipping_enabled:
+                self._refill_user_stats()
+                self._resetting_stage()
+                self.tackle.cast()
+                self.tackle.sink()
+            self.setting.cast_skipping_enabled = False
+
+            if not self.monitor.is_fish_hooked():
+                self._elevating_stage()
+
+            self._retrieving_stage()
 
             if self.monitor.is_fish_hooked():
                 self._drink_alcohol()
@@ -464,11 +485,11 @@ class Player:
         print(result)
         sys.exit()
 
-    def _retrieving_stage(self, marine: bool=False) -> None:
-        """Retrieve the fishing line till it's fully retrieved.
+    def _retrieving_stage(self, pirk: bool=False) -> None:
+        """Retrieve the line till it's fully retrieved with timeout handling.
 
-        :param marine: is user using marine fishing mode, defaults to False
-        :type marine: bool, optional
+        :param pirk: is user using marine_pirk fishing mode, defaults to False
+        :type pirk: bool, optional
         """
         if self.setting.bite_screenshot_enabled:
             # wait until the popup at bottom right corner becomes transparent
@@ -485,7 +506,7 @@ class Player:
                 self.tackle.retrieve(first)
                 break
             except exceptions.FishGotAwayError:
-                if not marine:
+                if not pirk:
                     return
                 else:
                     pag.press("enter")
@@ -513,7 +534,7 @@ class Player:
             self.tackle.switch_gear_ratio()
 
     def _pirking_stage(self) -> None:
-        """Perform pirking till a fish hooked, adjust the lure if timeout is reached."""
+        """Perform pirking till a fish hooked with timeout handling."""
         ctrl_enabled = self.setting.fishing_strategy == "wakey_rig"
         while True:
             try:
@@ -534,6 +555,19 @@ class Player:
                 # TODO: setting saturation
                 # TODO: improve dedicated miss count for marine fishing
                 self.cast_miss_count += 1
+
+    def _elevating_stage(self) -> None:
+        """Perform elevating till a fish hooked with timeout handling."""
+        drop = False
+        while True:
+            try:
+                drop = not drop
+                self.tackle.elevate(drop)
+                break
+            except TimeoutError:
+                self._handle_timeout()
+                self.cast_miss_count += 1
+                # lazy skip
 
     def _monitor_float_state(self, float_region: tuple[int, int, int, int]) -> None:
         """Monitor the state of the float.

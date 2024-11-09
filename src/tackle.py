@@ -231,6 +231,40 @@ class Tackle:
 
         raise TimeoutError
 
+
+    def elevate(self, drop: bool) -> None:
+        """Perform elevator tactic (drop/rise) until a fish is hooked.
+
+        :param drop: whether to drop or rise the lure
+        :type drop: bool
+        """
+        logger.info("Dropping" if drop else "Rising")
+
+        lock = True # reel is locked after tackle.sink()
+        i = self.setting.elevate_timeout
+        while i > 0:
+            if self.is_fish_hooked_twice():
+                logger.info("Fish hooked")
+                pag.click()
+                return
+
+            if drop:
+                pag.press("enter")
+                if lock:
+                    i = script.sleep_and_decrease(i, self.setting.lock_delay)
+                else:
+                    i = script.sleep_and_decrease(i, self.setting.lock_duration)
+            else:
+                if lock:
+                    i = script.sleep_and_decrease(i, self.setting.lock_delay)
+                else:
+                    script.hold_left_click(self.setting.lock_duration)
+                    i -= self.setting.lock_duration
+            lock = not lock
+
+        raise TimeoutError
+
+
     @script.toggle_right_mouse_button
     @script.toggle_clicklock
     def general_pull(self) -> None:
