@@ -299,15 +299,16 @@ class Player:
         sleep(PULL_OUT_DELAY)
         pag.click()
 
-        while True:
-            sleep(DIG_DELAY)
+        i = DIG_TIMEOUT
+        while i > 0:
+            i = script.sleep_and_decrease(i, DIG_DELAY)
             if self.monitor.is_harvest_success():
                 # accept result and hide the tool
                 pag.press("space")
                 pag.press("backspace")
                 sleep(ANIMATION_DELAY)
                 self.harvest_count += 1
-                break
+                return
 
         if pickup:
             self._access_item("main_rod")  # pick up again
