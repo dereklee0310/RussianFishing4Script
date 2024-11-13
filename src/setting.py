@@ -44,6 +44,7 @@ GENERAL_CONFIGS = (
     ("lure_changing_delay", "Lure changing delay", int),
     ("pause_duration", "Pause duration", int),
     ("pause_delay", "Pause delay", int),
+    ("coffee_drinking_quantity", "Coffee drinking quantity", int)
 )
 
 # ----------------------- config name - attribute name ----------------------- #

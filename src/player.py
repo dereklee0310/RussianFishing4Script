@@ -369,6 +369,7 @@ class Player:
         if not self.timer.is_alcohol_drinkable(self.setting.alcohol_drinking_delay):
             return
 
+        logger.info("Drinking alcohol")
         for _ in range(self.setting.alcohol_drinking_quantity):
             self._access_item("alcohol")
             self.alcohol_count += 1
@@ -386,10 +387,13 @@ class Player:
             pag.press("esc")  # back to control panel to reduce power usage
             self._handle_termination("Coffee limit reached", shutdown=False)
 
-        logger.info("Consume coffee")
-        self._access_item("coffee")
-        self.cur_coffee_count += 1
-        self.total_coffee_count += 1
+        logger.info("Drinking coffee")
+        for _ in range(self.setting.coffee_drinking_quantity):
+            self._access_item("coffee")
+            self.cur_coffee_count += 1
+            self.total_coffee_count += 1
+            sleep(ANIMATION_DELAY)
+
 
     def _access_item(self, item: str) -> None:
         """Access item by name using quick selection shortcut or menu.
