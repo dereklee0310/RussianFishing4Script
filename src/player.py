@@ -509,6 +509,9 @@ class Player:
             try:
                 self.tackle.retrieve(first)
                 break
+            except exceptions.FishCapturedError:
+                self._handle_fish()
+                break
             except exceptions.FishGotAwayError:
                 if not pirk:
                     return
@@ -517,9 +520,6 @@ class Player:
                 if self.monitor.is_fish_hooked():
                     continue
                 self._pirking_stage()
-            except exceptions.FishCapturedError:
-                self._handle_fish()
-                break
             except exceptions.LineAtEndError:
                 self.general_quit("Fishing line is at its end")
             except TimeoutError:
