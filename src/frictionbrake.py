@@ -24,31 +24,24 @@ class FrictionBrake:
         self.monitor = monitor
         self.cur_friction_brake = Value("i", setting.initial_friction_brake)
         self.lock = lock
-        self.initialized = False
         self.monitor_process = Process(target=monitor_friction_brake, args=(self,))
 
     def reset(
         self,
         target_friction_brake: int,
-        initialized: bool,
     ) -> None:
         """Reset to the target friction brake.
 
         :param target_friction_brake: target friction brake to reset
         :type target_friction_brake: int
-        :param initialized: whether it's the fisrt time to reset the friction brake
-        :type initialized: bool
         """
         logger.info("Resetting friction brake")
-        if not initialized:
-            for _ in range(MAX_FRICTION_BRAKE):
-                pag.scroll(UP)
-            self.cur_friction_brake.value = MAX_FRICTION_BRAKE
+        for _ in range(MAX_FRICTION_BRAKE):
+            pag.scroll(UP)
 
-        diff = self.cur_friction_brake.value - target_friction_brake
-        direction = DOWN if diff > 0 else UP
+        diff = MAX_FRICTION_BRAKE - target_friction_brake
         for _ in range(abs(diff)):
-            pag.scroll(direction)
+            pag.scroll(DOWN)
         self.cur_friction_brake.value = target_friction_brake
 
     def change(self, increase: bool) -> None:

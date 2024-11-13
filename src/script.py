@@ -219,10 +219,6 @@ def reset_friction_brake_after(func):
 
         with self.friction_brake_lock:
             self.friction_brake.reset(
-                self.setting.initial_friction_brake,
-                self.friction_brake.initialized,
-            )
-        if not self.friction_brake.initialized:
-            self.friction_brake.initialized = True
+                self.setting.initial_friction_brake)
 
     return wrapper
