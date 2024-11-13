@@ -335,7 +335,7 @@ class Player:
                 pag.press("backspace")
                 sleep(ANIMATION_DELAY)
                 self.harvest_count += 1
-                return
+                break
 
         if pickup:
             self._access_item("main_rod")  # pick up again
