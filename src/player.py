@@ -519,6 +519,8 @@ class Player:
             except exceptions.FishGotAwayError:
                 if not pirk:
                     break
+                if self.monitor.is_fish_captured():
+                    self._handle_fish()
                 pag.press("enter")
                 self.tackle.sink()
                 if self.monitor.is_fish_hooked():

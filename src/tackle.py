@@ -179,11 +179,7 @@ class Tackle:
 
             if self.monitor.is_line_at_end():
                 raise exceptions.LineAtEndError
-
-            # check if a fish is captured first because a re-sinking might follows
-            if not self.monitor.is_fish_hooked():
-                if self.monitor.is_fish_captured():
-                    raise exceptions.FishCapturedError
+            if not self.monitor.is_fish_hooked(): # check capture in retrieving_stage()
                 raise exceptions.FishGotAwayError
 
             i = script.sleep_and_decrease(i, LOOP_DELAY)
