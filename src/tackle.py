@@ -177,13 +177,13 @@ class Tackle:
                 sleep(finish_delay)  # for flexibility of default spool (improve ?)
                 return
 
-            if self.monitor.is_fish_captured():
-                raise exceptions.FishCapturedError
             if self.monitor.is_line_at_end():
                 raise exceptions.LineAtEndError
 
-            # check after is_fish_captured() because a re-sinking might follows
+            # check if a fish is captured first because a re-sinking might follows
             if not self.monitor.is_fish_hooked():
+                if self.monitor.is_fish_captured():
+                    raise exceptions.FishCapturedError
                 raise exceptions.FishGotAwayError
 
             i = script.sleep_and_decrease(i, LOOP_DELAY)

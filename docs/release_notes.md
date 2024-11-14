@@ -1,7 +1,7 @@
 
 <div align="center">
 <h1>Release Notes</h1>
-Nov. 10, 2024 
+Nov. 14, 2024 
 </div>
 
 
