@@ -154,8 +154,7 @@ class Tackle:
 
         :param first: whether it's invoked for the first time, defaults to True
         :type first: bool, optional
-        :raises exceptions.FishCapturedError: a fish got away
-        :raises exceptions.FishCapturedError: a fish is captured
+        :raises exceptions.FishGotAwayError: a fish got away
         :raises exceptions.LineAtEndError: line is at its end
         :raises exceptions.TimeoutError: loop timed out
         """

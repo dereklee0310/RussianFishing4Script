@@ -513,14 +513,14 @@ class Player:
             try:
                 self.tackle.retrieve(first)
                 break
-            except exceptions.FishCapturedError:
-                self._handle_fish()
-                break
             except exceptions.FishGotAwayError:
                 if not pirk:
                     break
+                # place it here because the player might capture the fish durint the
+                # delay time after calling tackle.retrieve()
                 if self.monitor.is_fish_captured():
                     self._handle_fish()
+                    break
                 pag.press("enter")
                 self.tackle.sink()
                 if self.monitor.is_fish_hooked():
