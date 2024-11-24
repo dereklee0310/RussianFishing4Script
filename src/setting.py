@@ -40,6 +40,7 @@ GENERAL_CONFIGS = (
     ("initial_friction_brake", "Initial friction brake", int),
     ("max_friction_brake", "Max friction brake", int),
     ("friction_brake_increase_delay", "Friction brake increase delay", float),
+    ("friction_brake_adjust_delay", "Friction brake adjust delay", float),
     ("spod_rod_recast_delay", "Friction brake increase delay", float),
     ("lure_changing_delay", "Lure changing delay", int),
     ("pause_duration", "Pause duration", int),

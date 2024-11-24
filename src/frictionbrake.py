@@ -73,11 +73,17 @@ def monitor_friction_brake(friction_brake):
     logger.info("Monitoring friction brake")
 
     pre_time = time()
+    fish_hooked = False
     try:
         while True:
             if not friction_brake.monitor.is_fish_hooked_pixel():
                 sleep(FRICTION_BRAKE_MONITOR_DELAY)
+                fish_hooked = False
                 continue
+            else:
+                if not fish_hooked:
+                    sleep(friction_brake.setting.friction_brake_adjust_delay)
+                    fish_hooked = True
             with friction_brake.lock:
                 if friction_brake.monitor.is_friction_brake_high():
                     friction_brake.change(increase=False)
