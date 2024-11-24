@@ -282,3 +282,18 @@ class Monitor:
             grayscale=True,
             confidence=self.setting.float_confidence,
         )
+    
+    def is_bolognese_state_changed(self, reference_img):
+        current_img = pag.screenshot(region=self.setting.bolognese_camera_rect)
+        return not pag.locate(
+            current_img,
+            reference_img,
+            grayscale=True,
+            confidence=self.setting.float_confidence,
+        )
+
+    def is_bolognese_state_changed_pixel(self) -> bool:
+        return not all(
+            c > MIN_GRAY_SCALE_LEVEL
+            for c in pag.pixel(1201,924)#卡线图标❤不靠近皮肤的位置
+        )

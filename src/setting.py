@@ -40,7 +40,6 @@ GENERAL_CONFIGS = (
     ("initial_friction_brake", "Initial friction brake", int),
     ("max_friction_brake", "Max friction brake", int),
     ("friction_brake_increase_delay", "Friction brake increase delay", float),
-    ("friction_brake_adjust_delay", "Friction brake adjust delay", float),
     ("spod_rod_recast_delay", "Friction brake increase delay", float),
     ("lure_changing_delay", "Lure changing delay", int),
     ("pause_duration", "Pause duration", int),
@@ -95,6 +94,12 @@ SPECIAL_CONFIGS = {
         ("fish_hooked_delay", "Fish hooked delay", float),
     ),
     "float": (
+        ("float_confidence", "Float confidence", float),
+        ("check_delay", "Check delay", float),
+        ("pull_delay", "Pull delay", float),
+        ("drifting_timeout", "Drifting timeout", float),
+    ),
+    "bolognese": (
         ("float_confidence", "Float confidence", float),
         ("check_delay", "Check delay", float),
         ("pull_delay", "Pull delay", float),
@@ -198,6 +203,7 @@ class Setting:
         self.window_size = self.window_controller.get_window_size()
         self.coord_offsets = None
         self.float_camera_rect = None
+        self.bolognese_camera_rect = None
         self.fish_icon_position = None
         self.snag_icon_position = None
         self.friction_brake_position = None
@@ -365,6 +371,7 @@ class Setting:
         self.coord_offsets = COORD_OFFSETS[window_size_key]
         coords = self._calculate_position("float_camera")
         self.float_camera_rect = (*coords, CAMERA_W, CAMERA_H)  # (left, top, w, h)
+        self.bolognese_camera_rect = (1183,901,36, 36)  # 卡线图标 (left, top, w, h)
         self.fish_icon_position = self._calculate_position("fish_icon")
         self.snag_icon_position = self._calculate_position("snag_icon")
         self.friction_brake_position = self._calculate_position("friction_brake")

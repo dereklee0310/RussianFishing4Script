@@ -37,7 +37,7 @@
 
 ## Getting Started  
 ### Prerequisites
-- [Python3.10+][Python]
+- [Python3.10~3.12][Python]
 
 
 ### Install

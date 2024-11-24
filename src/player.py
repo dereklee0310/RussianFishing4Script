@@ -212,7 +212,7 @@ class Player:
             if not self.monitor.is_fish_hooked():
                 self._pirking_stage()
 
-            self._retrieving_stage()
+            self._retrieving_stage(pirk=True)
 
             if self.monitor.is_fish_hooked():
                 self._drink_alcohol()
@@ -254,6 +254,28 @@ class Player:
 
             sleep(self.setting.pull_delay)
             script.hold_left_click(PRE_RETRIEVAL_DURATION)
+            if self.monitor.is_fish_hooked():
+                self._drink_alcohol()
+                self._pulling_stage()
+
+    def bolognese_fishing(self) -> None:
+        """Main bolognese fishing loop."""
+        while True:
+            self._refill_user_stats()
+            self._harvesting_stage(pickup=True)
+            self._resetting_stage()
+            self.tackle.cast()
+
+            logger.info("Checking bolognese status")
+            try:
+                self._monitor_bolognese_state(self.setting.bolognese_camera_rect)
+            except TimeoutError:
+                self.cast_miss_count += 1
+                continue
+
+            logger.info("Checking get status")
+            sleep(self.setting.pull_delay)
+            script.hold_left_right_click(1.2)
             if self.monitor.is_fish_hooked():
                 self._drink_alcohol()
                 self._pulling_stage()
@@ -493,8 +515,12 @@ class Player:
         print(result)
         sys.exit()
 
-    def _retrieving_stage(self) -> None:
-        """Retrieve the line till it's fully retrieved with timeout handling."""
+    def _retrieving_stage(self, pirk: bool = False) -> None:
+        """Retrieve the line till it's fully retrieved with timeout handling.
+
+        :param pirk: is user using marine_pirk fishing mode, defaults to False
+        :type pirk: bool, optional
+        """
         if self.setting.bite_screenshot_enabled:
             # wait until the popup at bottom right corner becomes transparent
             sleep(SCREENSHOT_DELAY)
@@ -509,9 +535,19 @@ class Player:
             try:
                 self.tackle.retrieve(first)
                 break
-            except exceptions.FishCapturedError:
-                self._handle_fish()
-                break
+            except exceptions.FishGotAwayError:
+                if not pirk:
+                    break
+                # place it here because the player might capture the fish durint the
+                # delay time after calling tackle.retrieve()
+                if self.monitor.is_fish_captured():
+                    self._handle_fish()
+                    break
+                pag.press("enter")
+                self.tackle.sink()
+                if self.monitor.is_fish_hooked():
+                    continue
+                self._pirking_stage()
             except exceptions.LineAtEndError:
                 self.general_quit("Fishing line is at its end")
             except TimeoutError:
@@ -579,6 +615,27 @@ class Player:
 
         raise TimeoutError
 
+    def _monitor_bolognese_state(self, float_region: tuple[int, int, int, int]) -> None:
+        """Monitor the state of the bolognese.
+
+        :param float_region: a line clip tuple
+        :type float_region: tuple[int, int, int, int]
+        """
+        reference_img = pag.screenshot(region=float_region)
+        i = self.setting.drifting_timeout
+        while i > 0:
+            i = script.sleep_and_decrease(i, self.setting.check_delay)
+            if self.monitor.is_bolognese_state_changed_pixel():
+                logger.info("bolognese status changed")
+                return
+            elif self.monitor.is_bolognese_state_changed(reference_img):
+                logger.info("bolognese status changed2")
+                return
+
+        raise TimeoutError
+
+    
+    
     def _pulling_stage(self) -> None:
         """Pull the fish up, then handle it."""
         while True:

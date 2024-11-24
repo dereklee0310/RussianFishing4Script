@@ -33,8 +33,8 @@
 > 加入我們的 [Discord 伺服器][Discord] 以取得最新消息。
 
 ## 準備工作
-### 前提
-- [Python3.10+][Python]
+### 安裝直譯器
+- [Python3.10~3.12][Python]
 
 
 ### 安裝腳本
@@ -166,11 +166,11 @@ python harvest.py
 1. 關注微信公衆號 [喵提醒][miaotixing]
    
 2. 新建提醒服務  
-<img src="static/readme/mtx1.png" height="400">
-<img src="static/readme/mtx2.png" height="400">
+<img src="../static/readme/mtx1.png" height="400">
+<img src="../static/readme/mtx2.png" height="400">
 
 3. 效果展示  
-<img src="static/readme/mtx3.png" height="400">
+<img src="../static/readme/mtx3.png" height="400">
 
 ## 授權條款
 [GNU General Public License version 3][license]

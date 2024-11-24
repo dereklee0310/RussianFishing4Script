@@ -30,7 +30,7 @@ LOOP_DELAY = 2
 
 ANIMATION_DELAY = 0.5
 
-RETRIEVAL_TIMEOUT = 32
+RETRIEVAL_TIMEOUT = 64
 PULL_TIMEOUT = 32
 RETRIEVAL_WITH_PAUSE_TIMEOUT = 128
 LIFT_DURATION = 3
@@ -154,7 +154,7 @@ class Tackle:
 
         :param first: whether it's invoked for the first time, defaults to True
         :type first: bool, optional
-        :raises exceptions.FishCapturedError: a fish is captured
+        :raises exceptions.FishGotAwayError: a fish got away
         :raises exceptions.LineAtEndError: line is at its end
         :raises exceptions.TimeoutError: loop timed out
         """
@@ -176,10 +176,10 @@ class Tackle:
                 sleep(finish_delay)  # for flexibility of default spool (improve ?)
                 return
 
-            elif self.monitor.is_fish_captured():
-                raise exceptions.FishCapturedError
             if self.monitor.is_line_at_end():
                 raise exceptions.LineAtEndError
+            if not self.monitor.is_fish_hooked(): # check capture in retrieving_stage()
+                raise exceptions.FishGotAwayError
 
             i = script.sleep_and_decrease(i, LOOP_DELAY)
 

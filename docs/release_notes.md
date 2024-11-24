@@ -13,7 +13,7 @@ Nov. 24, 2024
 - Remove re-sinking feature.
 
 ## Improvements
-- Decreaes retrieval timeout (64 -> 32) to check the stamina and drink coffee more often.
+- Decrease retrieval timeout (64 -> 32) to check the stamina and drink coffee more often.
 
 <!-- ## Other Changes -->
  
