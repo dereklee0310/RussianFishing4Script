@@ -212,7 +212,7 @@ class Player:
             if not self.monitor.is_fish_hooked():
                 self._pirking_stage()
 
-            self._retrieving_stage(pirk=True)
+            self._retrieving_stage()
 
             if self.monitor.is_fish_hooked():
                 self._drink_alcohol()
@@ -493,12 +493,8 @@ class Player:
         print(result)
         sys.exit()
 
-    def _retrieving_stage(self, pirk: bool = False) -> None:
-        """Retrieve the line till it's fully retrieved with timeout handling.
-
-        :param pirk: is user using marine_pirk fishing mode, defaults to False
-        :type pirk: bool, optional
-        """
+    def _retrieving_stage(self) -> None:
+        """Retrieve the line till it's fully retrieved with timeout handling."""
         if self.setting.bite_screenshot_enabled:
             # wait until the popup at bottom right corner becomes transparent
             sleep(SCREENSHOT_DELAY)
@@ -513,19 +509,9 @@ class Player:
             try:
                 self.tackle.retrieve(first)
                 break
-            except exceptions.FishGotAwayError:
-                if not pirk:
-                    break
-                # place it here because the player might capture the fish durint the
-                # delay time after calling tackle.retrieve()
-                if self.monitor.is_fish_captured():
-                    self._handle_fish()
-                    break
-                pag.press("enter")
-                self.tackle.sink()
-                if self.monitor.is_fish_hooked():
-                    continue
-                self._pirking_stage()
+            except exceptions.FishCapturedError:
+                self._handle_fish()
+                break
             except exceptions.LineAtEndError:
                 self.general_quit("Fishing line is at its end")
             except TimeoutError:
