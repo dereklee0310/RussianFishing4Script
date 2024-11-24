@@ -262,26 +262,37 @@ class Player:
 
     def bolognese_fishing(self) -> None:
         """Main bolognese fishing loop."""
+        if self.setting.action_mode==0:
+            while True:
+                self._refill_user_stats()
+                self._harvesting_stage(pickup=True)
+                self._resetting_stage()
+                self.tackle.cast()
+
+                logger.info("Checking bolognese status")
+                try:
+                    self._monitor_bolognese_state(self.setting.bolognese_clip_rect)
+                except TimeoutError:
+                    self.cast_miss_count += 1
+                    continue
+
+                logger.info("Checking get status")
+                sleep(self.setting.pull_delay)
+                script.hold_left_right_click(1.2)
+                if self.monitor.is_fish_hooked():
+                    self._drink_alcohol()
+                    self._pulling_stage()
+        if self.setting.action_mode==1:
+            is_fishing=True
         while True:
-            self._refill_user_stats()
-            self._harvesting_stage(pickup=True)
-            self._resetting_stage()
-            self.tackle.cast()
-
-            logger.info("Checking bolognese status")
-            try:
-                self._monitor_bolognese_state(self.setting.bolognese_camera_rect)
-            except TimeoutError:
-                self.cast_miss_count += 1
-                continue
-
-            logger.info("Checking get status")
-            sleep(self.setting.pull_delay)
-            script.hold_left_right_click(1.2)
-            if self.monitor.is_fish_hooked():
-                self._drink_alcohol()
-                self._pulling_stage()
-
+            if self.monitor.is_bolognese_state_changed_pixel():
+                if is_fishing:
+                    playsound(str(Path(self.setting.alarm_sound_file).resolve()))
+                    logger.info("bolognese status change")
+                    is_fishing=False
+            else:
+               is_fishing=True
+            sleep(self.setting.check_delay)
     def wakey_rig_fishing(self) -> None:
         """Main wakey rig fishing loop."""
         while True:
@@ -612,8 +623,11 @@ class Player:
         while i > 0:
             i = script.sleep_and_decrease(i, self.setting.check_delay)
             if self.monitor.is_float_state_changed(reference_img):
-                logger.info("Float status changed")
+                logger.info("Float cream changed")
                 return
+                #if self.monitor.is_float_state_changed_pixel():
+                #    logger.info("Float status changed")
+                #    return
 
         raise TimeoutError
 
