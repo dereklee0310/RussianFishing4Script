@@ -120,6 +120,8 @@ class Player:
                 self.marine_elevator_fishing()
             case "float":
                 self.float_fishing()
+            case "bolognese":
+                self.bolognese_fishing()
             case "wakey_rig":
                 self.wakey_rig_fishing()
 
