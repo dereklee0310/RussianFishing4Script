@@ -33,7 +33,20 @@ def hold_left_click(duration: float = 1) -> None:
     if duration >= 2.1:  # + 0.1 due to pag.mouseDown() delay
         pag.click()
 
+def hold_left_right_click(duration: float = 1) -> None:
+    """Hold left mouse button.
 
+    :param duration: hold time, defaults to 1
+    :type duration: float, optional
+    """
+    pag.mouseDown()
+    pag.mouseDown(button="right")
+    sleep(duration)
+    pag.mouseUp()
+    pag.mouseUp(button="right")
+    if duration >= 2.1:  # + 0.1 due to pag.mouseDown() delay
+        pag.click()
+        
 def hold_right_click(duration: float = 1) -> None:
     """Hold right mouse button.
 

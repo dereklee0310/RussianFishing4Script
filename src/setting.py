@@ -40,7 +40,6 @@ GENERAL_CONFIGS = (
     ("initial_friction_brake", "Initial friction brake", int),
     ("max_friction_brake", "Max friction brake", int),
     ("friction_brake_increase_delay", "Friction brake increase delay", float),
-    ("friction_brake_adjust_delay", "Friction brake adjust delay", float),
     ("spod_rod_recast_delay", "Friction brake increase delay", float),
     ("lure_changing_delay", "Lure changing delay", int),
     ("pause_duration", "Pause duration", int),
@@ -100,6 +99,14 @@ SPECIAL_CONFIGS = {
         ("pull_delay", "Pull delay", float),
         ("drifting_timeout", "Drifting timeout", float),
     ),
+    "bolognese": (
+        ("float_confidence", "Float confidence", float),
+        ("check_delay", "Check delay", float),
+        ("pull_delay", "Pull delay", float),
+        ("action_mode", "Action mode", float),
+        ("drifting_timeout", "Drifting timeout", float),
+    ),
+    
     "wakey_rig": (
         ("sink_timeout", "Sink timeout", float),
         ("pirk_duration", "Pirk duration", float),
@@ -149,6 +156,8 @@ COORD_OFFSETS = {
         "fish_icon": (389, 844),
         "snag_icon": (1132 + 15, 829),
         "float_camera": (720, 654),
+        "clip_icon": (1183,901),
+        "clip_color_xy": (1201,918),
     },
     "1920x1080": {
         "friction_brake": (
@@ -164,6 +173,8 @@ COORD_OFFSETS = {
         "fish_icon": (549, 1024),
         "snag_icon": (1292 + 15, 1009),
         "float_camera": (880, 834),
+        "clip_color_xy": (1202,1028),
+        "clip_icon": (1343,1075),
     },
     "2560x1440": {
         "friction_brake": (
@@ -179,6 +190,8 @@ COORD_OFFSETS = {
         "fish_icon": (869, 1384),
         "snag_icon": (1612 + 15, 1369),
         "float_camera": (1200, 1194),
+        "clip_color_xy": (1201,1388),
+        "clip_icon": (1663, 1435),
     },
 }
 
@@ -198,6 +211,8 @@ class Setting:
         self.window_size = self.window_controller.get_window_size()
         self.coord_offsets = None
         self.float_camera_rect = None
+        self.bolognese_clip_rect = None
+        self.bolognese_clip_position = None
         self.fish_icon_position = None
         self.snag_icon_position = None
         self.friction_brake_position = None
@@ -365,6 +380,10 @@ class Setting:
         self.coord_offsets = COORD_OFFSETS[window_size_key]
         coords = self._calculate_position("float_camera")
         self.float_camera_rect = (*coords, CAMERA_W, CAMERA_H)  # (left, top, w, h)
+        clip_coords=(self.coord_offsets["clip_icon"][0],self.coord_offsets["clip_icon"][1])
+        self.bolognese_clip_rect = (*clip_coords,36, 36)  # 卡线图标 (left, top, w, h)
         self.fish_icon_position = self._calculate_position("fish_icon")
         self.snag_icon_position = self._calculate_position("snag_icon")
         self.friction_brake_position = self._calculate_position("friction_brake")
+        self.bolognese_clip_position= (self.coord_offsets["clip_color_xy"][0],self.coord_offsets["clip_color_xy"][1])#self._calculate_position("clip_color_xy")
+        print(self.bolognese_clip_position)
