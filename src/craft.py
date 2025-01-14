@@ -6,7 +6,7 @@ Usage: craft.py
 
 # pylint: disable=no-member
 # setting node's attributes will be merged on the fly
-
+import logging
 import argparse
 import random
 from datetime import datetime
@@ -16,17 +16,27 @@ import pyautogui as pag
 
 import script
 
+logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+CRAFT_DELAY = 4.0
+CRAFT_DELAY_2X = 8.0
+
+ANIMATION_DELAY = 0.5
+ANIMATION_DELAY_2X = 1.0
+
 # ------------------ flag name, attribute name, description ------------------ #
 ARGS = (
     ("discard", "discard_enabled", "_"),
     ("craft_limit", "craft_limit", "_"),
+    ("fast", "fast_enabled", "_"),
 )
 
 # ------------------------ attribute_name, description ----------------------- #
 RESULTS = (
-    ("success_count", "Item crafted"),
-    ("fail_count", "Number of failures"),
-    ("craft_count", "Materials used"),
+    ("success_count", "Successful Crafts"),
+    ("fail_count", "Failed Attempts"),
+    ("craft_count", "Materials Used"),
 )
 
 
@@ -48,32 +58,50 @@ class App:
         """
         parser = argparse.ArgumentParser(description="Craft items automatically.")
         parser.add_argument(
-            "-d", "--discard", action="store_true", help="Discard all the crafted items"
+            "-d", "--discard", action="store_true", help="discard all the crafted items"
+        )
+        parser.add_argument(
+            "-f",
+            "--fast",
+            action="store_true",
+            help="disable delay randomization to speed up crafting",
         )
         parser.add_argument(
             "-n",
             "--craft-limit",
             type=int,
             default=-1,
-            help="Number of items to craft, no limit if not specified",
+            help="number of items to craft, no limit if not specified",
+            metavar="LIMIT"
         )
         return parser.parse_args()
 
     def start(self) -> None:
         """Main crafting loop."""
         random.seed(datetime.now().timestamp())
-        pag.moveTo(self.monitor.get_make_position())
-        while True:
-            pag.click()  # click make button
+        craft_delay = CRAFT_DELAY
+        click_delay = ANIMATION_DELAY
 
-            # recipe not complete
-            if self.monitor.is_operation_failed():
-                pag.press("space")
-                break
+        # locate make button
+        make_btn_coord = self.monitor.get_make_position()
+        if make_btn_coord is None:
+            logger.error("Make button not found, please set the interface scale to "
+                         "1x or move your mouse around")
+            self.setting.window_controller.activate_script_window()
+            return
+        pag.moveTo(make_btn_coord)
 
-            # crafting, wait at least 4 seconds
-            delay = random.uniform(4, 6)
-            sleep(delay)
+
+        while self.monitor.is_material_complete():
+            pag.click()
+
+            # crafting
+            if not self.setting.fast_enabled:
+                craft_delay = random.uniform(CRAFT_DELAY, CRAFT_DELAY_2X)
+                click_delay = random.uniform(ANIMATION_DELAY, ANIMATION_DELAY_2X)
+            sleep(craft_delay)
+
+            # checking
             while True:
                 if self.monitor.is_operation_success():
                     self.success_count += 1
@@ -82,15 +110,14 @@ class App:
                 if self.monitor.is_operation_failed():
                     self.fail_count += 1
                     break
-                sleep(0.25)
+                sleep(ANIMATION_DELAY)
             self.craft_count += 1
 
             # handle result
-            key = "backspace" if self.setting.discard_enabled else "space"
-            pag.press(key)
+            pag.press("backspace" if self.setting.discard_enabled else "space")
             if self.craft_count == self.setting.craft_limit:
                 break
-            sleep(0.25)  # wait for animation
+            sleep(click_delay)
 
 
 if __name__ == "__main__":

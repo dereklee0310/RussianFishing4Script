@@ -140,7 +140,11 @@ class Monitor:
         return self._locate_single_image_box("warning", 0.8)
 
     def is_operation_success(self):
-        return self._locate_single_image_box("ok", 0.8)
+        return (self._locate_single_image_box("ok_black", 0.8) or
+                self._locate_single_image_box("ok_white", 0.8))
+
+    def is_material_complete(self):
+        return not self._locate_single_image_box("material_slot", 0.9)
 
     # ---------------------- quiting game from control panel --------------------- #
     def get_quit_position(self):
