@@ -86,6 +86,7 @@ SPECIAL_CONFIGS = {
         ("pirk_timeout_action", "Pirk timeout action", str),
         ("tighten_duration", "Tighten duration", float),
         ("fish_hooked_delay", "Fish hooked delay", float),
+        ("trolling", "Trolling", str),
     ),
     "marine_elevator": (
         ("sink_timeout", "Sink timeout", float),
@@ -94,6 +95,7 @@ SPECIAL_CONFIGS = {
         ("lock_delay", "Lock delay", float),
         ("tighten_duration", "Tighten duration", float),
         ("fish_hooked_delay", "Fish hooked delay", float),
+        ("trolling", "Trolling", str),
     ),
     "float": (
         ("float_confidence", "Float confidence", float),

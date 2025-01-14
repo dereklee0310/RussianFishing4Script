@@ -51,6 +51,12 @@ BOUND = 2
 
 SCREENSHOT_DELAY = 2
 
+TROLLING_KEY = "j"
+
+FORWARD = "w"
+LEFT_KEY = "a"
+RIGHT_KEY = "d"
+
 
 class Player:
     """Main interface of fishing loops and stages."""
@@ -203,6 +209,8 @@ class Player:
 
     def marine_pirk_fishing(self) -> None:
         """Main marine fishing loop."""
+        self._trolling_stage()
+
         while True:
             if not self.setting.cast_skipping_enabled:
                 self._refill_user_stats()
@@ -222,6 +230,8 @@ class Player:
 
     def marine_elevator_fishing(self) -> None:
         """Main marine fishing loop."""
+        self._trolling_stage()
+
         while True:
             if not self.setting.cast_skipping_enabled:
                 self._refill_user_stats()
@@ -483,6 +493,7 @@ class Player:
         :param shutdown: whether to shutdown the computer or not
         :type shutdown: bool
         """
+        script.release_keys()
         result = self.gen_result(msg)
         if self.setting.email_sending_enabled:
             self.send_email(result)
@@ -1006,3 +1017,17 @@ class Player:
         pag.press("0")
         random_offset = random.uniform(-BOUND, BOUND)
         sleep(self.setting.check_delay + random_offset)
+
+
+    def _trolling_stage(self):
+        """Start trolling and change moving direction based on trolling setting.
+
+        Available options: never, forward, left, right.
+        """
+        if self.setting.trolling == "never":
+            return
+        pag.press(TROLLING_KEY)
+        if self.setting.trolling not in ("left", "right"):
+            return
+        pag.keyDown(LEFT_KEY if self.setting.trolling == "left" else RIGHT_KEY)
+

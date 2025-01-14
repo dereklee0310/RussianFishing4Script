@@ -223,3 +223,10 @@ def reset_friction_brake_after(func):
                 self.setting.initial_friction_brake)
 
     return wrapper
+
+
+def release_keys():
+    """Release keys that might be holding down."""
+    pag.keyUp("shift")
+    pag.keyUp("a")
+    pag.keyUp("d")

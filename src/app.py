@@ -441,9 +441,9 @@ if __name__ == "__main__":
         pass
 
     # app.player.friction_brake_monitor_process.join()
-    pag.keyUp("shift")  # avoid Shift key stuck
+    script.release_keys()
     print(app.player.gen_result("Terminated by user"))
     if app.setting.plotting_enabled:
         app.player.plot_and_save()
 
-# CTRL_C_EVENT: https://stackoverflow.com/questions/58455684/
+    # CTRL_C_EVENT: https://stackoverflow.com/questions/58455684/
