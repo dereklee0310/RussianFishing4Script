@@ -145,6 +145,8 @@ class Player:
             self.setting.cast_skipping_enabled = False
 
             if spin_with_pause:
+                if self.setting.tighten_duration > 0:
+                    script.hold_left_click(self.setting.tighten_duration)
                 self.tackle.retrieve_with_pause()
             self._retrieving_stage()
 

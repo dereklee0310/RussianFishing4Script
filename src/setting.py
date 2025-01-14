@@ -75,6 +75,7 @@ SPECIAL_CONFIGS = {
         ("retrieval_duration", "Retrieval duration", float),
         ("retrieval_delay", "Retrieval delay", float),
         ("pre_acceleration_enabled", "Enable pre-acceleration", bool),
+        ("tighten_duration", "Tighten duration", float),
     ),
     "bottom": (("check_delay", "Check delay", float),),
     "marine_pirk": (
