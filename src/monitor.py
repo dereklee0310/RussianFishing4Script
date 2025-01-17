@@ -231,27 +231,27 @@ class Monitor:
     def is_hunger_low(self) -> bool:
         """Check if hunger is low.
 
-        :return: True if lower than 50%, False otherwise
+        :return: True if low, False otherwise
         :rtype: bool
         """
         pos = self._get_food_icon_position()
         if not pos:
             return False
         x, y = int(pos.x), int(pos.y)
-        last_point = int(18 + 152 * 0.5) - 1
+        last_point = int(18 + 152 * self.setting.hunger_threshold) - 1
         return not pag.pixel(x + 18, y) == pag.pixel(x + last_point, y)
 
     def is_comfort_low(self) -> bool:
         """Check if comfort is low.
 
-        :return: True if lower than 51%, False otherwise
+        :return: True if low, False otherwise
         :rtype: bool
         """
         pos = self._get_comfort_icon_position()
         if not pos:
             return False
         x, y = int(pos.x), int(pos.y)
-        last_point = int(18 + 152 * 0.51) - 1
+        last_point = int(18 + 152 * self.setting.comfort_threshold) - 1
         return not pag.pixel(x + 18, y) == pag.pixel(x + last_point, y)
 
     def is_line_snagged(self) -> bool:

@@ -29,6 +29,8 @@ GENERAL_CONFIGS = (
     ("keepnet_limit", "Keepnet limit", int),
     ("keep_fish_delay", "Keep fish delay", float),
     ("energy_threshold", "Energy threshold", float),
+    ("hunger_threshold", "Hunger threshold", float),
+    ("comfort_threshold", "Comfort threshold", float),
     ("retrieval_detect_confidence", "Retrieval detect confidence", float),
     ("alcohol_drinking_delay", "Alcohol drinking delay", float),
     ("alcohol_drinking_quantity", "Alcohol drinking quantity", int),
@@ -371,6 +373,13 @@ class Setting:
         self.coord_offsets = COORD_OFFSETS[window_size_key]
 
         coords = self._calculate_absolute_coord("float_camera")
+        self.fish_icon_position = self._calculate_absolute_coord("fish_icon")
+        self.snag_icon_position = self._calculate_absolute_coord("snag_icon")
+        self.friction_brake_position = self._calculate_absolute_coord("friction_brake")
+
+        if self.fishing_strategy != "float":
+            return
+        
         match self.camera_shape:
             case "tall":
                 coords[0] += CAMERA_OFFSET
@@ -385,6 +394,3 @@ class Setting:
         self.float_camera_rect = (*coords, width, height)  # (left, top, w, h)
 
 
-        self.fish_icon_position = self._calculate_absolute_coord("fish_icon")
-        self.snag_icon_position = self._calculate_absolute_coord("snag_icon")
-        self.friction_brake_position = self._calculate_absolute_coord("friction_brake")
