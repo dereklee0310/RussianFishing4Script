@@ -385,20 +385,19 @@ class App:
         :return: True if supported, False otherwise
         :rtype: bool
         """
+        if self.setting.window_controller.is_title_bar_exist():
+            # logger.error("Invalid display mode: window mode")
+            logger.info("Window mode detected, if you want to move the game window, " +
+                        "please restart the script after moving it.")
         window_size = self.setting.window_size
         if window_size in ((2560, 1440), (1920, 1080), (1600, 900)):
             return True
 
-        if self.setting.window_controller.is_title_bar_exist():
-            logger.error("Invalid display mode: window mode")
-            print('Please set the display mode to "Borderless windowed"')
-            sys.exit()
-        else:
-            logger.warning(
-                "Window size %s not supported, must be 2560x1440, 1920x1080 or 1600x900",
-                window_size,
-            )
-            logger.warning('Window mode must be "Borderless windowed"')
+        logger.warning(
+            "Window size %s not supported, must be 2560x1440, 1920x1080 or 1600x900",
+            window_size,
+        )
+        logger.warning('Window mode must be "Borderless windowed" or "Window mode"')
         logger.warning("Snag detection and friction brake changing will be disabled")
         self.setting.snag_detection_enabled = False
         self.setting.friction_brake_changing_enabled = False
