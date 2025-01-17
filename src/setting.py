@@ -102,6 +102,7 @@ SPECIAL_CONFIGS = {
         ("check_delay", "Check delay", float),
         ("pull_delay", "Pull delay", float),
         ("drifting_timeout", "Drifting timeout", float),
+        ("camera_shape", "Camera shape", str)
     ),
     "wakey_rig": (
         ("sink_timeout", "Sink timeout", float),
@@ -135,7 +136,6 @@ SPECIAL_CONFIGS = {
 # 90%: center + 382 (1279 + 382 = 1661)
 # 95%: center + 382 (1279 + 403 = 1682)
 # 100%: center + 424 (1279 + 424 = 1703)
-
 
 COORD_OFFSETS = {
     "1600x900": {
@@ -185,8 +185,9 @@ COORD_OFFSETS = {
     },
 }
 
-CAMERA_W = CAMERA_H = 160
-
+CAMERA_OFFSET = 40
+SIDE_LENGTH = 160
+SIDE_LENGTH_HALF = 80
 
 class Setting:
     """Universal setting node."""
@@ -290,16 +291,18 @@ class Setting:
             print(table)
             sys.exit()
 
-    def _calculate_position(self, offset_key: str) -> None:
-        """Calculate absolute coordinates based on given key.
+    def _calculate_absolute_coord(self, offset_key: str) -> list[int]:
+        """Calculate absolute coordinate based on given key.
 
         :param offset_key: a key in offset dictionary
         :type offset_key: str
+        :return: converted absolute coordinate
+        :rtype: list[int]
         """
-        return (
+        return [
             self.coord_bases[0] + self.coord_offsets[offset_key][0],
             self.coord_bases[1] + self.coord_offsets[offset_key][1],
-        )
+        ]
 
     def merge_args(self, args: Namespace, args_map: tuple[tuple]) -> None:
         """Merge command line arguments from caller module.
@@ -366,8 +369,22 @@ class Setting:
         """Add offsets to the base coordinates to get absolute ones."""
         window_size_key = f"{self.window_size[0]}x{self.window_size[1]}"
         self.coord_offsets = COORD_OFFSETS[window_size_key]
-        coords = self._calculate_position("float_camera")
-        self.float_camera_rect = (*coords, CAMERA_W, CAMERA_H)  # (left, top, w, h)
-        self.fish_icon_position = self._calculate_position("fish_icon")
-        self.snag_icon_position = self._calculate_position("snag_icon")
-        self.friction_brake_position = self._calculate_position("friction_brake")
+
+        coords = self._calculate_absolute_coord("float_camera")
+        match self.camera_shape:
+            case "tall":
+                coords[0] += CAMERA_OFFSET
+                width, height = SIDE_LENGTH_HALF, SIDE_LENGTH
+            case "wide":
+                coords[1] += CAMERA_OFFSET
+                width, height = SIDE_LENGTH, SIDE_LENGTH_HALF
+            case "square":
+                width, height = SIDE_LENGTH, SIDE_LENGTH
+            case _:
+                raise ValueError("Invalid camera size")
+        self.float_camera_rect = (*coords, width, height)  # (left, top, w, h)
+
+
+        self.fish_icon_position = self._calculate_absolute_coord("fish_icon")
+        self.snag_icon_position = self._calculate_absolute_coord("snag_icon")
+        self.friction_brake_position = self._calculate_absolute_coord("friction_brake")

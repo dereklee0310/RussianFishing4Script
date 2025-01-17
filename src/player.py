@@ -259,7 +259,7 @@ class Player:
 
             logger.info("Checking float status")
             try:
-                self._monitor_float_state(self.setting.float_camera_rect)
+                self._monitor_float_state()
             except TimeoutError:
                 self.cast_miss_count += 1
                 continue
@@ -576,13 +576,9 @@ class Player:
                 self.cast_miss_count += 1
                 # lazy skip
 
-    def _monitor_float_state(self, float_region: tuple[int, int, int, int]) -> None:
-        """Monitor the state of the float.
-
-        :param float_region: a PyScreeze.Box-like coordinate tuple
-        :type float_region: tuple[int, int, int, int]
-        """
-        reference_img = pag.screenshot(region=float_region)
+    def _monitor_float_state(self) -> None:
+        """Monitor the state of the float."""
+        reference_img = pag.screenshot(region=self.setting.float_camera_rect)
         i = self.setting.drifting_timeout
         while i > 0:
             i = script.sleep_and_decrease(i, self.setting.check_delay)
