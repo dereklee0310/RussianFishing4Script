@@ -164,7 +164,7 @@ class Player:
         while True:
             if (
                 self.setting.spod_rod_recast_enabled
-                and time() - self.timer.start_time > spod_rod_recast_delay
+                and time.time() - self.timer.start_time > spod_rod_recast_delay
             ):
                 logger.info("Recasting spod rod")
                 spod_rod_recast_delay += self.setting.spod_rod_recast_delay
@@ -174,16 +174,21 @@ class Player:
                 self.tackle.cast(update=False)
                 pag.click()
                 pag.press("0")
-                sleep(ANIMATION_DELAY)
+                sleep(1)
 
             self._refill_user_stats()
             self._harvesting_stage()
-            if rod_count > 1:
-                rod_idx = (rod_idx + random.randint(1, rod_count - 1)) % rod_count
+
+            # Use random rod selection if enabled
+            if self.setting.random_rod_selection_enabled:
+                rod_idx = random.randint(0, rod_count - 1)  # Random rod selection
+            else:
+                rod_idx = (rod_idx + 1) % rod_count  # Sequential rod selection
+
             rod_key = self.setting.bottom_rods_shortcuts[rod_idx]
             logger.info("Checking rod %s", rod_idx + 1)
             pag.press(f"{rod_key}")
-            sleep(1)  # wait for pick up animation
+            sleep(1)  # Wait for pick-up animation
 
             if not self.monitor.is_fish_hooked():
                 self._put_tackle_back(check_miss_counts, rod_idx)
@@ -192,9 +197,11 @@ class Player:
 
             check_miss_counts[rod_idx] = 0
             self._retrieving_stage()
+
             if self.monitor.is_fish_hooked():
                 self._drink_alcohol()
                 self._pulling_stage()
+
             self._resetting_stage()
             self.tackle.cast()
             pag.click()

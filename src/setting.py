@@ -45,8 +45,10 @@ GENERAL_CONFIGS = (
     ("lure_changing_delay", "Lure changing delay", int),
     ("pause_duration", "Pause duration", int),
     ("pause_delay", "Pause delay", int),
-    ("coffee_drinking_quantity", "Coffee drinking quantity", int)
+    ("coffee_drinking_quantity", "Coffee drinking quantity", int),
+    ("random_rod_selection_enabled", "Enable random rod selection", bool)  # Add this line
 )
+
 
 # ----------------------- config name - attribute name ----------------------- #
 SHORTCUTS = (
