@@ -14,7 +14,7 @@ import pyautogui as pag
 from pynput import keyboard
 
 import script
-from windowcontroller import WindowController
+from script import release_shift_key_after
 
 # ------------------ flag name, attribute name, description ------------------ #
 ARGS = (("shift", "shift_key_holding_enabled", "_"),)
@@ -67,26 +67,21 @@ class App:
         pag.keyDown("w")
         self.w_key_pressed = True
 
+    @release_shift_key_after
+    def start(self):
+        if self.setting.shift_key_holding_enabled:
+            pag.keyDown("shift")
+        pag.keyDown("w")
+
+        # blocking listener loop
+        with keyboard.Listener(self.on_press, self.on_release) as listener:
+            listener.join()
+
+        pag.keyUp("w")
+
 
 if __name__ == "__main__":
-    app = App()
-    shift_key_holding_enabled = app.parse_args().shift
-
-    if app.setting.confirmation_enabled:
-        script.ask_for_confirmation()
-    WindowController().activate_game_window()
-
-    if shift_key_holding_enabled:
-        pag.keyDown("shift")
-    pag.keyDown("w")
-
-    # blocking listener loop
-    with keyboard.Listener(app.on_press, app.on_release) as listener:
-        listener.join()
-
-    pag.keyUp("w")
-    if shift_key_holding_enabled:
-        pag.keyUp("shift")
+    script.start_app(App(), None)
 
 # press/release detection
 # https://stackoverflow.com/questions/65890326/keyboard-press-detection-with-pynput

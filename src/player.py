@@ -27,7 +27,7 @@ from prettytable import PrettyTable
 
 import exceptions
 import script
-from frictionbrake import FrictionBrake
+from friction_brake import FrictionBrake
 from monitor import Monitor
 from setting import Setting
 from tackle import Tackle

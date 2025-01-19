@@ -118,7 +118,9 @@ def start_app(app: object, results: tuple[tuple]) -> None:
         app.start()
     except KeyboardInterrupt:
         pass
-    display_running_results(app, results)
+
+    if results is not None:
+        display_running_results(app, results)
     app.setting.window_controller.activate_script_window()
 
 
