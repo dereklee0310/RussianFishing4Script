@@ -187,7 +187,10 @@ class Player:
             self._refill_user_stats()
             self._harvesting_stage()
             if rod_count > 1:
-                rod_idx = (rod_idx + random.randint(1, rod_count - 1)) % rod_count
+                if self.setting.use_random_rod_selection:
+                    rod_idx = (rod_idx + random.randint(1, rod_count - 1)) % rod_count
+                else:  # sequential
+                    rod_idx = (rod_idx + 1) % rod_count
             rod_key = self.setting.bottom_rods_shortcuts[rod_idx]
             logger.info("Checking rod %s", rod_idx + 1)
             pag.press(f"{rod_key}")
