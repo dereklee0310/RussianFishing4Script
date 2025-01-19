@@ -440,7 +440,6 @@ if __name__ == "__main__":
         pass
 
     # app.player.friction_brake_monitor_process.join()
-    script.release_keys()
     print(app.player.gen_result("Terminated by user"))
     if app.setting.plotting_enabled:
         app.player.plot_and_save()

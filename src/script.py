@@ -21,28 +21,19 @@ LOOP_DELAY = 2
 # ---------------------------------------------------------------------------- #
 
 
-def hold_left_click(duration: float = 1) -> None:
-    """Hold left mouse button.
+def hold_mouse_button(duration: float=1, button="left") -> None:
+    """Hold left or right mouse button.
 
     :param duration: hold time, defaults to 1
     :type duration: float, optional
+    :param button: button to click, defaults to "left"
+    :type button: str, optional
     """
-    pag.mouseDown()
+    pag.mouseDown(button=button)
     sleep(duration)
-    pag.mouseUp()
-    if duration >= 2.1:  # + 0.1 due to pag.mouseDown() delay
+    pag.mouseUp(button=button)
+    if button == "left" and duration >= 2.1:  # + 0.1 due to pag.mouseDown() delay
         pag.click()
-
-
-def hold_right_click(duration: float = 1) -> None:
-    """Hold right mouse button.
-
-    :param duration: hold time, defaults to 1
-    :type duration: float, optional
-    """
-    pag.mouseDown(button="right")
-    sleep(duration)
-    pag.mouseUp(button="right")
 
 
 def sleep_and_decrease(num: int, delay: int) -> int:
@@ -181,30 +172,22 @@ def toggle_right_mouse_button(func):
 
     return wrapper
 
-
-def release_shift_key_after(func):
-    """Release Shift key after calling the function."""
-
-    def wrapper(self, *args):
-        try:
-            func(self, *args)
-            pag.keyUp("shift")
-        except Exception as e:
-            pag.keyUp("shift")
-            raise e
-
-    return wrapper
-
-
-def release_ctrl_key_after(func):
-    """Release ctrl key after calling the function."""
+def release_keys_after(func):
+    """Release keys that might have been holding down."""
+    def release_keys():
+        pag.keyUp("ctrl")
+        pag.keyUp("ctrl")
+        pag.keyUp("shift")
+        pag.keyUp("w")
+        pag.keyUp("a")
+        pag.keyUp("d")
 
     def wrapper(self, *args):
         try:
             func(self, *args)
-            pag.keyUp("ctrl")
+            release_keys()
         except Exception as e:
-            pag.keyUp("ctrl")
+            release_keys()
             raise e
 
     return wrapper
@@ -225,10 +208,3 @@ def reset_friction_brake_after(func):
                 self.setting.initial_friction_brake)
 
     return wrapper
-
-
-def release_keys():
-    """Release keys that might be holding down."""
-    pag.keyUp("shift")
-    pag.keyUp("a")
-    pag.keyUp("d")

@@ -110,6 +110,7 @@ class Player:
         self.total_coffee_count = 0
         self.harvest_count = 0
 
+    @script.release_keys_after
     def start_fishing(self) -> None:
         """Start main fishing loop with specified fishing strategt."""
         if self.setting.friction_brake_changing_enabled:
@@ -152,7 +153,7 @@ class Player:
 
             if spin_with_pause:
                 if self.setting.tighten_duration > 0:
-                    script.hold_left_click(self.setting.tighten_duration)
+                    script.hold_mouse_button(self.setting.tighten_duration)
                 self.tackle.retrieve_with_pause()
             self._retrieving_stage()
 
@@ -268,7 +269,7 @@ class Player:
                 continue
 
             sleep(self.setting.pull_delay)
-            script.hold_left_click(PRE_RETRIEVAL_DURATION)
+            script.hold_mouse_button(PRE_RETRIEVAL_DURATION)
             if self.monitor.is_fish_hooked():
                 self._drink_alcohol()
                 self._pulling_stage()
@@ -488,6 +489,7 @@ class Player:
             case _:
                 raise ValueError
 
+    @script.release_keys_after
     def _handle_termination(self, msg: str, shutdown: bool) -> None:
         """Send email and plot diagram, quit the game if necessary
 
@@ -496,7 +498,6 @@ class Player:
         :param shutdown: whether to shutdown the computer or not
         :type shutdown: bool
         """
-        script.release_keys()
         result = self.gen_result(msg)
         if self.setting.email_sending_enabled:
             self.send_email(result)
@@ -561,7 +562,7 @@ class Player:
                     logger.info("Adjusting lure depth")
                     pag.press("enter")  # open reel
                     sleep(LURE_ADJUST_DELAY)
-                    script.hold_left_click(self.setting.tighten_duration)
+                    script.hold_mouse_button(self.setting.tighten_duration)
                 # TODO: setting saturation
                 # TODO: improve dedicated miss count for marine fishing
                 self.cast_miss_count += 1

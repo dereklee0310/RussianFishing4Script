@@ -101,11 +101,11 @@ class Tackle:
                 pag.click()
             case 5:  # power cast
                 with pag.hold("shift"):
-                    script.hold_left_click(1)
+                    script.hold_mouse_button(1)
             case _:
                 # level -1 for backward compatibility
                 duration = CAST_SCALE * (self.setting.cast_power_level - 1)
-                script.hold_left_click(duration)
+                script.hold_mouse_button(duration)
 
         sleep(self.setting.cast_delay)
         if update:
@@ -130,7 +130,7 @@ class Tackle:
                 pag.click()
                 return
 
-        script.hold_left_click(self.setting.tighten_duration)
+        script.hold_mouse_button(self.setting.tighten_duration)
 
     def is_fish_hooked_twice(self) -> bool:
         """Check if the fish is still hooked after a short delay.
@@ -148,7 +148,7 @@ class Tackle:
         return False
 
     @script.toggle_clicklock
-    @script.release_shift_key_after
+    @script.release_keys_after
     def retrieve(self, first: bool = True) -> None:
         """Retrieve the line till the end is reached and detect unexpected events.
 
@@ -169,7 +169,7 @@ class Tackle:
                     pag.keyDown("shift")
 
                 if self.setting.lifting_enabled:
-                    script.hold_right_click(LIFT_DURATION)
+                    script.hold_mouse_button(LIFT_DURATION, button="right")
 
             if self.monitor.is_retrieval_finished():
                 finish_delay = 0 if self.setting.rainbow_line_enabled else 2
@@ -185,7 +185,7 @@ class Tackle:
 
         raise TimeoutError
 
-    @script.release_shift_key_after
+    @script.release_keys_after
     def retrieve_with_pause(self) -> None:
         """Retreive the line, pause periodically."""
         logger.info("Retrieving with pause")
@@ -195,12 +195,12 @@ class Tackle:
 
         i = RETRIEVAL_WITH_PAUSE_TIMEOUT
         while i > 0:
-            script.hold_left_click(self.setting.retrieval_duration)
+            script.hold_mouse_button(self.setting.retrieval_duration)
             i = script.sleep_and_decrease(i, self.setting.retrieval_delay)
             if self.monitor.is_fish_hooked() or self.monitor.is_retrieval_finished():
                 return
 
-    @script.release_ctrl_key_after
+    @script.release_keys_after
     def pirk(self, ctrl_enabled: bool) -> None:
         """Start pirking until a fish is hooked.
 
@@ -221,7 +221,7 @@ class Tackle:
             if lift_enabled:
                 if ctrl_enabled:
                     pag.keyDown("ctrl")
-                script.hold_right_click(self.setting.pirk_duration)
+                script.hold_mouse_button(self.setting.pirk_duration, button="right")
                 i = script.sleep_and_decrease(i, self.setting.pirk_delay)
             else:
                 i = script.sleep_and_decrease(i, LOOP_DELAY)
@@ -254,7 +254,7 @@ class Tackle:
                 if lock:
                     i = script.sleep_and_decrease(i, self.setting.lock_delay)
                 else:
-                    script.hold_left_click(self.setting.lock_duration)
+                    script.hold_mouse_button(self.setting.lock_duration)
                     i -= self.setting.lock_duration
             lock = not lock
 

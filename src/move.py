@@ -14,7 +14,6 @@ import pyautogui as pag
 from pynput import keyboard
 
 import script
-from script import release_shift_key_after
 
 # ------------------ flag name, attribute name, description ------------------ #
 ARGS = (("shift", "shift_key_holding_enabled", "_"),)
@@ -67,7 +66,7 @@ class App:
         pag.keyDown("w")
         self.w_key_pressed = True
 
-    @release_shift_key_after
+    @script.release_keys_after
     def start(self):
         if self.setting.shift_key_holding_enabled:
             pag.keyDown("shift")
@@ -76,8 +75,6 @@ class App:
         # blocking listener loop
         with keyboard.Listener(self.on_press, self.on_release) as listener:
             listener.join()
-
-        pag.keyUp("w")
 
 
 if __name__ == "__main__":
