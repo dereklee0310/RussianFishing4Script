@@ -3,6 +3,7 @@ Some helper functions.
 """
 
 import sys
+import logging
 from time import sleep
 
 import pyautogui as pag
@@ -15,6 +16,8 @@ from setting import Setting
 # BASE_DELAY + LOOP_DELAY >= 2.2 to trigger clicklock
 BASE_DELAY = 1
 LOOP_DELAY = 2
+
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------- #
 #                            common functionalities                            #
@@ -208,3 +211,35 @@ def reset_friction_brake_after(func):
                 self.setting.initial_friction_brake)
 
     return wrapper
+
+
+def verify_window_size(setting) -> bool:
+        """Check if the window size is supported.
+
+        :return: True if supported, False otherwise
+        :rtype: bool
+        """
+        if setting.window_controller.is_title_bar_exist():
+            # logger.error("Invalid display mode: window mode")
+            logger.info("Window mode detected, if you want to move the game window, " +
+                        "please restart the script after moving it.")
+        window_size = setting.window_size
+        if window_size in ((2560, 1440), (1920, 1080), (1600, 900)):
+            return True
+
+        logger.warning(
+            "Window size %s not supported, must be 2560x1440, 1920x1080 or 1600x900",
+            window_size,
+        )
+        logger.warning('Window mode must be "Borderless windowed" or "Window mode"')
+        logger.warning("Snag detection and friction brake changing will be disabled")
+        setting.snag_detection_enabled = False
+        setting.friction_brake_changing_enabled = False
+
+        if setting.fishing_strategy == "float":
+            logger.error(
+                "Float fishing mode doesn't support window size %s", window_size
+            )
+            sys.exit()
+
+        return False

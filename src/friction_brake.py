@@ -60,8 +60,23 @@ class FrictionBrake:
                 self.cur_friction_brake.value -= 1
         sleep(0.04)
 
+    def unlimited_change(self, increase: bool) -> None:
+        """Increae or decrease friction without checking boundaries.
 
-def monitor_friction_brake(friction_brake):
+        :param increase: increae or decreae the friction brake
+        :type increase: bool
+        """
+        if increase:
+            pag.scroll(UP, _pause=False)
+            self.cur_friction_brake.value += 1
+        else:
+            pag.scroll(DOWN, _pause=False)
+            self.cur_friction_brake.value -= 1
+        sleep(0.04)
+
+
+
+def monitor_friction_brake(friction_brake: FrictionBrake, bound: bool=False):
     """Monitor friction brake bar and change it accordingly.
 
     This is used as target function in multiprocess.Process and must be pickable,
@@ -69,24 +84,27 @@ def monitor_friction_brake(friction_brake):
 
     :param friction_brake: friction brake controller
     :type friction_brake: FrictionBrake
+    :param bound: whether to check bounardies, defaults to False
+    :type bound: bool, optional
     """
     logger.info("Monitoring friction brake")
 
     pre_time = time()
     fish_hooked = False
+
+    change = friction_brake.change if bound else friction_brake.unlimited_change
     try:
         while True:
             if not friction_brake.monitor.is_fish_hooked_pixel():
                 sleep(FRICTION_BRAKE_MONITOR_DELAY)
                 fish_hooked = False
                 continue
-            else:
-                if not fish_hooked:
-                    sleep(friction_brake.setting.friction_brake_adjust_delay)
-                    fish_hooked = True
+            elif not fish_hooked:
+                sleep(friction_brake.setting.friction_brake_adjust_delay)
+                fish_hooked = True
             with friction_brake.lock:
                 if friction_brake.monitor.is_friction_brake_high():
-                    friction_brake.change(increase=False)
+                    change(increase=False)
                 else:
                     cur_time = time()
                     if (
@@ -95,6 +113,6 @@ def monitor_friction_brake(friction_brake):
                     ):
                         continue
                     pre_time = cur_time
-                    friction_brake.change(increase=True)
+                    change(increase=True)
     except KeyboardInterrupt:
         pass

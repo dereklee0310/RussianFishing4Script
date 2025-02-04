@@ -379,37 +379,6 @@ class App:
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
             sys.exit()
 
-    def verify_window_size(self) -> bool:
-        """Check if the window size is supported.
-
-        :return: True if supported, False otherwise
-        :rtype: bool
-        """
-        if self.setting.window_controller.is_title_bar_exist():
-            # logger.error("Invalid display mode: window mode")
-            logger.info("Window mode detected, if you want to move the game window, " +
-                        "please restart the script after moving it.")
-        window_size = self.setting.window_size
-        if window_size in ((2560, 1440), (1920, 1080), (1600, 900)):
-            return True
-
-        logger.warning(
-            "Window size %s not supported, must be 2560x1440, 1920x1080 or 1600x900",
-            window_size,
-        )
-        logger.warning('Window mode must be "Borderless windowed" or "Window mode"')
-        logger.warning("Snag detection and friction brake changing will be disabled")
-        self.setting.snag_detection_enabled = False
-        self.setting.friction_brake_changing_enabled = False
-
-        if self.setting.fishing_strategy == "float":
-            logger.error(
-                "Float fishing mode doesn't support window size %s", window_size
-            )
-            sys.exit()
-
-        return False
-
 
 if __name__ == "__main__":
     app = App()
@@ -423,7 +392,7 @@ if __name__ == "__main__":
     app.create_player()
     app.display_settings()
 
-    if app.verify_window_size():
+    if script.verify_window_size():
         app.setting.set_absolute_coords()
 
     if app.setting.confirmation_enabled:
