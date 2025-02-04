@@ -3,77 +3,77 @@ Calculate the maximum friction brake you can use on your tackle.
 
 Usage: calculate.py
 """
+import sys
+from prettytable import PrettyTable
 
-import logging
+BIAS = 1e-6
 
 def get_tackle_stats():
     """Get actual stats of reel and leader based on their wears."""
+    prompts = (
+        "Reel's max drag (kg): ",
+        "Reel's friction brake wear (%): ",
+        "Leader's load capacity (kg): ",
+        "Leader's wear (%): "
+    )
+
     while True:
-        # Get max drag input
-        max_drag = input("Reel's max drag (kg): ").strip()
-        if not max_drag.replace('.', '', 1).isdigit() or float(max_drag) <= 0:
-            print("Max drag should be a positive number.")
-            continue
-        max_drag = float(max_drag)
+        restart = False
+        stats = []
+        for prompt in prompts:
+            validated_input = get_validated_input(prompt)
+            if validated_input is None:
+                restart = True
+                break
+            stats.append(validated_input)
 
-        # Get friction brake wear input
-        friction_brake_wear = input("Reel's friction brake wear (%): ").strip()
-        if not friction_brake_wear.replace('.', '', 1).isdigit() or not (0 <= float(friction_brake_wear) <= 100):
-            print("Friction brake wear should be between 0 and 100.")
+        if restart:
             continue
-        friction_brake_wear = float(friction_brake_wear)
 
-        # Get leader load capacity input
-        leader_load_capacity = input("Leader's load capacity (kg): ").strip()
-        if not leader_load_capacity.replace('.', '', 1).isdigit() or float(leader_load_capacity) <= 0:
-            print("Leader's load capacity should be a positive number.")
-            continue
-        leader_load_capacity = float(leader_load_capacity)
-
-        # Get leader wear input
-        leader_wear = input("Leader's wear (%): ").strip()
-        if not leader_wear.replace('.', '', 1).isdigit() or not (0 <= float(leader_wear) <= 100):
-            print("Leader's wear should be between 0 and 100.")
-            continue
-        leader_wear = float(leader_wear)
-
-        # If all inputs are valid, calculate and return
+        max_drag, friction_brake_wear, leader_load_capacity, leader_wear = stats
         true_max_drag = max_drag * (100 - friction_brake_wear) / 100
         true_load_capacity = leader_load_capacity * (100 - leader_wear) / 100
         return true_max_drag, true_load_capacity
 
-def calculate_friction_brake(true_max_drag, true_load_capacity):
+
+
+def get_validated_input(prompt):
+    """Get validated input from the user."""
+    while True:
+        user_input = input(prompt).strip()
+        if user_input == "q":
+            print("Bye.")
+            sys.exit()
+        if user_input == "r":
+            return None
+
+        try:
+            return float(user_input)
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+
+def get_max_friction_brake(max_drag, load_capacity):
     """Calculate the maximum friction brake you can use and its tension."""
-    # Adjust the max friction brake calculation to ensure a safety margin
-    max_friction_brake = int(min(true_load_capacity * 30 / true_max_drag - 1, 29))
-    friction_brake_tension = true_max_drag * max_friction_brake / 100
-    return max_friction_brake, friction_brake_tension
+    return int(min(load_capacity * 30 / (max_drag + BIAS) - 1, 29))
+
+def get_max_tension(max_drag, max_friction_brake):
+    return max_drag * max_friction_brake / 30
 
 def main():
-    # Set up logging configuration once at the beginning
-    logging.basicConfig(level=logging.WARNING)
-
+    print("Please enter your tackle's stats, type q to quit, r to restart. ")
     while True:
-        # Get the true max drag and true load capacity
-        print("--- Input Your Tackle Stats ---")
-        true_max_drag, true_load_capacity = get_tackle_stats()
+        max_drag, load_capacity = get_tackle_stats()
+        max_friction_brake = get_max_friction_brake(max_drag, load_capacity)
+        max_tension = get_max_tension(max_drag, max_friction_brake)
 
-        # Calculate the maximum friction brake and its tension
-        max_friction_brake, friction_brake_tension = calculate_friction_brake(true_max_drag, true_load_capacity)
+        table = PrettyTable(header=False, align="l", title="Results")
+        table.add_row(["Reel's true max drag", f"{max_drag:.2f} kg"])
+        table.add_row(["Leader's true load capacity", f"{load_capacity:.2f} kg"])
+        table.add_row(["Friction brake tension", f"{max_tension:.2f} kg"])
+        table.add_row(["Maximum friction brake to use", max_friction_brake])
+        print(table)
 
-        # Display results
-        print(f"\nReel's true max drag: {true_max_drag:.2f} kg")
-        print(f"Leader's true load capacity: {true_load_capacity:.2f} kg")
-        print(f"Friction brake tension: {friction_brake_tension:.2f} kg")
-        print(f"Maximum friction brake setting: {max_friction_brake}")
-    
-        # Optional message
-        print("\nThank you for using the Friction Brake Calculator!\n")
-
-        # Ask if the user wants to restart or exit
-        ans = input("Would you like to restart the calculation? [Y/n] ").strip().lower()
-        if ans == "n":
-            break  # Exiting the loop
 
 if __name__ == "__main__":
     main()
