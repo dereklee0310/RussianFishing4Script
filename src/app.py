@@ -392,7 +392,7 @@ if __name__ == "__main__":
     app.create_player()
     app.display_settings()
 
-    if script.verify_window_size():
+    if script.verify_window_size(app.setting):
         app.setting.set_absolute_coords()
 
     if app.setting.confirmation_enabled:

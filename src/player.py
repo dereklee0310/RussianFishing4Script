@@ -36,7 +36,6 @@ from timer import Timer
 logger = logging.getLogger(__name__)
 random.seed(datetime.now().timestamp())
 
-CHECK_MISS_LIMIT = 16
 PRE_RETRIEVAL_DURATION = 1
 PULL_OUT_DELAY = 3
 DIG_DELAY = 5
@@ -1008,7 +1007,7 @@ class Player:
         :type rod_idx: int
         """
         check_miss_counts[rod_idx] += 1
-        if check_miss_counts[rod_idx] > CHECK_MISS_LIMIT:
+        if check_miss_counts[rod_idx] >= self.setting.check_miss_limit:
             check_miss_counts[rod_idx] = 0
             self._resetting_stage()
             self.tackle.cast()
