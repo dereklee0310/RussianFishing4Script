@@ -5,11 +5,13 @@ Module for pyautogui.locateOnScreen and pag.pixel wrappers.
 # pylint: disable=missing-function-docstring
 # docstring for every functions? u serious?
 
+import sys
 import logging
 
 import pyautogui as pag
 from pyscreeze import Box
 from pathlib import Path
+from window import Window
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +23,80 @@ RED_FRICTION_BRAKE = (206, 56, 21)
 COLOR_TOLERANCE = 64
 
 ROOT = Path(__file__).resolve().parents[1]
+
+# ---------------------------------------------------------------------------- #
+#                     friction brake coordinates and colors                    #
+# ---------------------------------------------------------------------------- #
+
+# ----------------------------- 16x9 - 1080p - 2k ---------------------------- #
+# "bases": ((480, 270), (320, 180), (0, 0)),
+# ------ left - red - yellow - center(left + 424) - yellow - red - right ----- #
+# absolute coordinates, should subtract x_base from them according to window size
+# "x": (855, 960, 1066, 1279, 1491, 1598, 1702),
+# "y": (1146, 1236, 1412),
+
+# ------------ left - red - yellow - center - yellow - red - right ----------- #
+# "1600x900": {"x": (375, 480, 586, 799, 1011, 1118, 1222), "y": 876},
+# "1920x1080": {"x": (535, 640, 746, 959, 1171, 1278, 1382), "y": 1056},
+# "2560x1440": {"x": (855, 960, 1066, 1279, 1491, 1598, 1702), "y": 1412},
+
+# 70%: center + 297 (1279 + 297 = 1576)
+# 80%: center + 340 (1279 + 340 = 1619)
+# 90%: center + 382 (1279 + 382 = 1661)
+# 95%: center + 382 (1279 + 403 = 1682)
+# 100%: center + 424 (1279 + 424 = 1703)
+
+COORD_OFFSETS = {
+    "1600x900": {
+        "friction_brake": (
+            # {
+            #     0.7: (502, 799, 1096),
+            #     0.8: (459, 799, 1139),
+            #     0.9: (417, 799, 1181),
+            #     0.95: (396, 799, 1202),
+            # },
+            799,
+            876,
+        ),
+        "fish_icon": (389, 844),
+        "snag_icon": (1132 + 15, 829),
+        "float_camera": (720, 654),
+    },
+    "1920x1080": {
+        "friction_brake": (
+            # {
+            #     0.7: (662, 959, 1256),
+            #     0.8: (619, 959, 1299),
+            #     0.9: (577, 959, 1341),
+            #     0.95: (556, 959, 1362),
+            # },
+            959,
+            1056,
+        ),
+        "fish_icon": (549, 1024),
+        "snag_icon": (1292 + 15, 1009),
+        "float_camera": (880, 834),
+    },
+    "2560x1440": {
+        "friction_brake": (
+            # {
+            #     0.7: (982, 1279, 1576),
+            #     0.8: (939, 1279, 1619),
+            #     0.9: (897, 1279, 1661),
+            #     0.95: (876, 1279, 1682),
+            # },
+            1279,
+            1412,
+        ),
+        "fish_icon": (869, 1384),
+        "snag_icon": (1612 + 15, 1369),
+        "float_camera": (1200, 1194),
+    },
+}
+
+CAMERA_OFFSET = 40
+SIDE_LENGTH = 160
+SIDE_LENGTH_HALF = 80
 
 
 class Monitor:
@@ -35,7 +111,10 @@ class Monitor:
         :type setting: Setting
         """
         self.cfg = cfg
+        self.window_box = Window().get_box()
         self.image_dir = ROOT / "static" / cfg.SCRIPT.LANGUAGE
+
+        self._set_absolute_coords()
 
     def _get_image_box(self, image: str, confidence: float, multiple: bool=False) -> Box | None:
         """A wrapper for locateOnScreen method and path resolving.
@@ -51,6 +130,47 @@ class Monitor:
         if multiple:
             return pag.locateAllOnScreen(image_path, confidence=confidence)
         return pag.locateOnScreen(image_path, confidence=confidence)
+
+    def _set_absolute_coords(self) -> None:
+        """Add offsets to the base coordinates to get absolute ones."""
+        window_size_key = f"{self.window_box[2]}x{self.window_box[3]}"
+        self.coord_offsets = COORD_OFFSETS[window_size_key]
+
+        self.fish_icon_coord = self._get_absolute_coord("fish_icon")
+        self.snag_icon_coord = self._get_absolute_coord("snag_icon")
+        self.friction_brake_coord = self._get_absolute_coord("friction_brake")
+
+        bases = self._get_absolute_coord("float_camera")
+        if self.cfg.SELECTED_PROFILE.MODE == "float":
+            match self.cfg.SELECTED_PROFILE.CAMERA_SHAPE:
+                case "tall":
+                    bases[0] += CAMERA_OFFSET
+                    width, height = SIDE_LENGTH_HALF, SIDE_LENGTH
+                case "wide":
+                    bases[1] += CAMERA_OFFSET
+                    width, height = SIDE_LENGTH, SIDE_LENGTH_HALF
+                case "square":
+                    width, height = SIDE_LENGTH, SIDE_LENGTH
+                case _:
+                    logger.critical(
+                        "Invalid camera shape: '%s'",
+                        self.cfg.SELECTED_PROFILE.CAMERA_SHAPE
+                    )
+                    sys.exit(1)
+            self.float_camera_rect = (*bases, width, height)  # (left, top, w, h)
+
+    def _get_absolute_coord(self, offset_key: str) -> list[int]:
+        """Calculate absolute coordinate based on given key.
+
+        :param offset_key: a key in offset dictionary
+        :type offset_key: str
+        :return: converted absolute coordinate
+        :rtype: list[int]
+        """
+        return [
+            self.window_box[0] + self.coord_offsets[offset_key][0],
+            self.window_box[1] + self.coord_offsets[offset_key][1],
+        ]
 
     # ------------------------ unmarked release whitelist ------------------------ #
     def is_fish_species_matched(self, species: str) -> Box | None:
@@ -242,7 +362,7 @@ class Monitor:
         :rtype: bool
         """
         #TODO
-        return pag.pixel(*self.setting.snag_icon_position) == SNAG_ICON_COLOR
+        return pag.pixel(*self.snag_icon_coord) == SNAG_ICON_COLOR
 
     def is_friction_brake_high(self) -> bool:
         """Check if the friction brake is too high using friction brake bar center.
@@ -252,22 +372,22 @@ class Monitor:
         """
         #TODO
         return pag.pixelMatchesColor(
-            *self.setting.friction_brake_position, RED_FRICTION_BRAKE, COLOR_TOLERANCE
+            *self.friction_brake_coord, RED_FRICTION_BRAKE, COLOR_TOLERANCE
         )
 
     def is_fish_hooked_pixel(self) -> bool:
         #TODO
         return all(
             c > MIN_GRAY_SCALE_LEVEL
-            for c in pag.pixel(*self.setting.fish_icon_position)
+            for c in pag.pixel(*self.fish_icon_coord)
         )
 
     def is_float_state_changed(self, reference_img):
         #TODO
-        current_img = pag.screenshot(region=self.setting.float_camera_rect)
+        current_img = pag.screenshot(region=self.float_camera_rect)
         return not pag.locate(
             current_img,
             reference_img,
             grayscale=True,
-            confidence=self.setting.float_confidence,
+            confidence=self.cfg.SELECTED_PROFILE.FLOAT_SENSITIVITY,
         )

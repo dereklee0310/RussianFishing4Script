@@ -25,6 +25,8 @@ from pynput import keyboard
 import script
 from player import Player
 from setting import COMMON_CONFIGS, SPECIAL_CONFIGS, Setting
+from window import Window
+from monitor import Monitor
 
 from yacs.config import CfgNode as CN
 from config import config
@@ -92,7 +94,8 @@ ASCII_LOGO = """
 ██████╔╝█████╗  ███████║███████╗
 ██╔══██╗██╔══╝  ╚════██║╚════██║
 ██║  ██║██║          ██║███████║
-╚═╝  ╚═╝╚═╝          ╚═╝╚══════╝"""
+╚═╝  ╚═╝╚═╝          ╚═╝╚══════╝
+https://github.com/dereklee0310/RussianFishing4Script"""
 # https://patorjk.com/software/taag/#p=testall&f=3D-ASCII&t=RF4S%0A, ANSI Shadow
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -102,12 +105,9 @@ class App:
 
     def __init__(self):
         """Merge args into setting node."""
-        self.pid = None
-        self.player = None
-        self.table = None
-
         self.cfg = config.setup_cfg()
         self.cfg.merge_from_file(ROOT / "config.yaml")
+        self.window = self.setup_window()
 
         # Parser will use the last occurence if the arguments are duplicated,
         # so put argv at the end to overwrite launch options.
@@ -117,7 +117,6 @@ class App:
             sys.exit(1)
         args_cfg = CN({"ARGS": config.dict_to_cfg(vars(args))})
         self.cfg.merge_from_other_cfg(args_cfg)
-
         if not self._is_smtp_valid() or not self._is_images_valid():
             sys.exit(1)
 
@@ -301,13 +300,32 @@ class App:
                 return False
         return True
 
-    def set_user_profile(self):
+    def _display_available_profiles(self) -> None:
+        """List available user profiles from setting node."""
+        table = PrettyTable(header=False, align="l")
+        table.title = "Welcome! Select a profile to start"
+        for i, profile in enumerate(self.cfg.PROFILE):
+            table.add_row([f"{i:>2}. {profile}"])
+        print(table)
+
+    def _ask_for_pid(self) -> None:
+        """Get and validate user profile id from user input."""
+        print("Enter profile id to use it, q to exit.")
+        pid = input(">>> ")
+        while not self._is_pid_valid(pid):
+            if pid.strip() == "q":
+                sys.exit()
+            print("Invalid profile id, please try again.")
+            pid = input(">>> ")
+        self.cfg.ARGS.PID = int(pid)
+
+    def setup_user_profile(self):
         if self.cfg.ARGS.PNAME is not None:
             profile_name = self.cfg.ARGS.PNAME
         else:
             if self.cfg.ARGS.PID is None:
-                self.display_available_profiles()
-                self.ask_for_pid()
+                self._display_available_profiles()
+                self._ask_for_pid()
             profile_name = list(self.cfg.PROFILE)[self.cfg.ARGS.PID]
 
         if not self._is_profile_valid(profile_name):
@@ -319,24 +337,22 @@ class App:
         self.cfg.freeze()
         config.print_cfg(self.cfg) # cfg.dump() doesn't keep the declared order
 
-    def display_available_profiles(self) -> None:
-        """List available user profiles from setting node."""
-        table = PrettyTable(header=False, align="l")
-        table.title = "Welcome! Select a profile to start"
-        for i, profile in enumerate(self.cfg.PROFILE):
-            table.add_row([f"{i:>2}. {profile}"])
-        print(table)
+    def setup_window(self):
+        self.window = Window()
+        if not self.window.is_size_valid():
+            self.cfg.SCRIPT.SNAG_DETECTION = False
+            self.cfg.ARGS.FRICTION_BRAKE = False
 
-    def ask_for_pid(self) -> None:
-        """Get and validate user profile id from user input."""
-        print("Enter profile id to use it, q to exit.")
-        pid = input(">>> ")
-        while not self._is_pid_valid(pid):
-            if pid.strip() == "q":
-                sys.exit()
-            print("Invalid profile id, please try again.")
-            pid = input(">>> ")
-        self.cfg.ARGS.PID = int(pid)
+            if self.cfg.SELECTED_PROFILE.MODE == "float":
+                width, height = self.window.get_box()[2:]
+                logger.critical(
+                    "Float fishing mode doesn't support window size '%s'",
+                    f"{width}x{height}"
+                )
+                sys.exit(1)
+
+    def setup_player(self):
+        self.player = Player(self.cfg)
 
     def on_release(self, key: keyboard.KeyCode) -> None:
         """Callback for button release.
@@ -344,24 +360,19 @@ class App:
         :param key: key code used by OS
         :type key: keyboard.KeyCode
         """
-        if key == keyboard.KeyCode.from_char(self.setting.quitting_shortcut):
+        if key == keyboard.KeyCode.from_char(self.cfg.KEY.QUIT):
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
             sys.exit()
 
 
 if __name__ == "__main__":
     print(ASCII_LOGO)
-    print("https://github.com/dereklee0310/RussianFishing4Script")
     app = App()
-    app.set_user_profile()
-    exit()
-    app.player = Player(app.cfg)
-
-
-    #TODO: Update coords and Window()
-    if script.verify_window_size(app.setting):
-        app.setting.set_absolute_coords()
-    app.setting.window_controller.activate_game_window()
+    app.setup_user_profile()
+    app.setup_window()
+    app.cfg.freeze()
+    app.setup_player()
+    app.window.activate_game_window()
 
     if app.cfg.KEY.QUIT != "CTRL-C":
         listener = keyboard.Listener(on_release=app.on_release)
@@ -374,7 +385,7 @@ if __name__ == "__main__":
 
     # app.player.friction_brake_monitor_process.join()
     print(app.player.gen_result("Terminated by user"))
-    if app.setting.plotting_enabled:
+    if app.cfg.ARGS.PLOT:
         app.player.plot_and_save()
 
     # CTRL_C_EVENT: https://stackoverflow.com/questions/58455684/
