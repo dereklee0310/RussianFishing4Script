@@ -24,39 +24,15 @@ def dict_to_cfg(args):
             cfg[k] = v
     return cfg
 
-# def merge_from_file(cfg: CN, profile_name) -> CN:
-#     with open(Path(__file__).resolve().parents[2] / "config.yaml") as f:
-#         user_cfg = yaml.safe_load(f)
-
-#     if not is_profile_name_valid(profile_name, user_cfg):
-#         sys.exit(1)
-
-#     user_profile = user_cfg[profile_name.upper()]
-#     if not is_profile_valid(user_profile, cfg):
-#         sys.exit(1)
-
-#     cfg[user_profile["MODE"].upper()].merge_from_list(to_list(user_profile))
-#     cfg["SCRIPT"]["MODE"] = user_profile["MODE"].upper()
-#     return cfg
-
-def is_profile_name_valid(profile_name, user_cfg):
-    if profile_name.upper() not in user_cfg:
-        logger.critical("Invalid profile name: '%s'", profile_name)
-        return False
-    return True
-
-def is_profile_valid(user_profile, orig_cfg):
-    mode = user_profile["MODE"].upper()
-    if mode not in ("SPIN", "BOTTOM", "PIRK", "ELEVATOR", "FLOAT"):
-        logger.critical("Invalid mode: '%s'", user_profile["MODE"])
-        return False
-
-    template = orig_cfg[mode]
-    for key in user_profile:
-        if key not in template:
-            logger.critical("Invalid setting: '%s'", key)
-            return False
-    return True
+def print_cfg(cfg, level: int=0):
+    cfg = dict(cfg)
+    indent = "  " * level if level > 0 else ""
+    for k, v in cfg.items():
+        if isinstance(v, CN):
+            print(f"{indent}{k}:")
+            print_cfg(v, level + 1)
+        else:
+            print(f"{indent}{k}: {v}")
 
 def to_list(profile):
     pairs = []

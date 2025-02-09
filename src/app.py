@@ -27,7 +27,7 @@ from player import Player
 from setting import COMMON_CONFIGS, SPECIAL_CONFIGS, Setting
 
 from yacs.config import CfgNode as CN
-from config.config import setup_cfg, dict_to_cfg
+from config import config
 
 format = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
 datefmt = "%Y-%m-%d %H:%M:%S"
@@ -106,7 +106,7 @@ class App:
         self.player = None
         self.table = None
 
-        self.cfg = setup_cfg()
+        self.cfg = config.setup_cfg()
         self.cfg.merge_from_file(ROOT / "config.yaml")
 
         # Parser will use the last occurence if the arguments are duplicated,
@@ -115,13 +115,11 @@ class App:
         args = self._setup_parser().parse_args(args_list)
         if not self._is_args_valid(args):
             sys.exit(1)
-        args_cfg = CN()
-        args_cfg["ARGS"] = dict_to_cfg(vars(args)) # Avoid naming confliction
+        args_cfg = CN({"ARGS": config.dict_to_cfg(vars(args))})
         self.cfg.merge_from_other_cfg(args_cfg)
 
         if not self._is_smtp_valid() or not self._is_images_valid():
             sys.exit(1)
-        self.cfg.freeze()
 
     def _setup_parser(self) -> ArgumentParser:
         """Configure argparser."""
@@ -287,6 +285,40 @@ class App:
             print(table)
             return False
 
+    def _is_profile_valid(self, profile_name):
+        if profile_name not in self.cfg.PROFILE:
+            logger.critical("Invalid profile name: '%s'", profile_name)
+            return False
+
+        mode = self.cfg.PROFILE[profile_name].MODE
+        if mode.upper() not in ("SPIN", "BOTTOM", "PIRK", "ELEVATOR", "FLOAT"):
+            logger.critical("Invalid mode: '%s'", mode)
+            return False
+
+        for key in self.cfg.PROFILE[profile_name]:
+            if key not in self.cfg.PROFILE[mode.upper()]:
+                logger.critical("Invalid setting: '%s'", key)
+                return False
+        return True
+
+    def set_user_profile(self):
+        if self.cfg.ARGS.PNAME is not None:
+            profile_name = self.cfg.ARGS.PNAME
+        else:
+            if self.cfg.ARGS.PID is None:
+                self.display_available_profiles()
+                self.ask_for_pid()
+            profile_name = list(self.cfg.PROFILE)[self.cfg.ARGS.PID]
+
+        if not self._is_profile_valid(profile_name):
+            sys.exit(1)
+
+        self.cfg.SELECTED_PROFILE = CN({"NAME": profile_name})
+        self.cfg.SELECTED_PROFILE.set_new_allowed(True)
+        self.cfg.SELECTED_PROFILE.merge_from_other_cfg(self.cfg.PROFILE[profile_name])
+        self.cfg.freeze()
+        config.print_cfg(self.cfg) # cfg.dump() doesn't keep the declared order
+
     def display_available_profiles(self) -> None:
         """List available user profiles from setting node."""
         table = PrettyTable(header=False, align="l")
@@ -304,7 +336,7 @@ class App:
                 sys.exit()
             print("Invalid profile id, please try again.")
             pid = input(">>> ")
-        self.pid = int(pid)
+        self.cfg.ARGS.PID = int(pid)
 
     def on_release(self, key: keyboard.KeyCode) -> None:
         """Callback for button release.
@@ -321,11 +353,10 @@ if __name__ == "__main__":
     print(ASCII_LOGO)
     print("https://github.com/dereklee0310/RussianFishing4Script")
     app = App()
-    if app.pid is None:
-        app.display_available_profiles()
-        app.ask_for_pid()
+    app.set_user_profile()
+    exit()
     app.player = Player(app.cfg)
-    print(app.cfg) # cfg.dump() doesn't preserve order, but idgaf
+
 
     #TODO: Update coords and Window()
     if script.verify_window_size(app.setting):
