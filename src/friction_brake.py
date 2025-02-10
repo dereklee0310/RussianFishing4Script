@@ -8,10 +8,13 @@ from time import sleep, time
 
 import pyautogui as pag
 
+from detection import Detection
+
 MAX_FRICTION_BRAKE = 30
 UP = 1
 DOWN = -1
 FRICTION_BRAKE_MONITOR_DELAY = 2
+LOOP_DELAY = 0.04
 
 logger = logging.getLogger(__name__)
 
@@ -19,16 +22,16 @@ logger = logging.getLogger(__name__)
 class FrictionBrake:
     """Friction brake controller."""
 
-    def __init__(self, setting, monitor, lock) -> None:
-        self.setting = setting
-        self.monitor = monitor
-        self.cur_friction_brake = Value("i", setting.initial_friction_brake)
+    def __init__(self, cfg, lock) -> None:
+        self.cfg = cfg
+        self.detection = Detection(cfg)
+        self.cur = Value("i", cfg.FRICTION_BRAKE.INITIAL)
         self.lock = lock
         self.monitor_process = Process(target=monitor_friction_brake, args=(self,))
 
     def reset(
         self,
-        target_friction_brake: int,
+        target: int,
     ) -> None:
         """Reset to the target friction brake.
 
@@ -39,41 +42,26 @@ class FrictionBrake:
         for _ in range(MAX_FRICTION_BRAKE):
             pag.scroll(UP)
 
-        diff = MAX_FRICTION_BRAKE - target_friction_brake
+        diff = MAX_FRICTION_BRAKE - target
         for _ in range(abs(diff)):
             pag.scroll(DOWN)
-        self.cur_friction_brake.value = target_friction_brake
+        self.cur.value = target
 
-    def change(self, increase: bool) -> None:
+    def change(self, increase: bool, bound: bool=True) -> None:
         """Increae or decrease friction.
 
         :param increase: increae or decreae the friction brake
         :type increase: bool
         """
         if increase:
-            if self.cur_friction_brake.value < self.setting.max_friction_brake:
+            if not bound or self.cur.value < self.cfg.FRICTION_BRAKE.MAX:
                 pag.scroll(UP, _pause=False)
-                self.cur_friction_brake.value += 1
+                self.cur.value += 1
         else:
-            if self.cur_friction_brake.value > 0:
+            if self.cur.value > 0:
                 pag.scroll(DOWN, _pause=False)
-                self.cur_friction_brake.value -= 1
-        sleep(0.04)
-
-    def unlimited_change(self, increase: bool) -> None:
-        """Increae or decrease friction without checking boundaries.
-
-        :param increase: increae or decreae the friction brake
-        :type increase: bool
-        """
-        if increase:
-            pag.scroll(UP, _pause=False)
-            self.cur_friction_brake.value += 1
-        else:
-            pag.scroll(DOWN, _pause=False)
-            self.cur_friction_brake.value -= 1
-        sleep(0.04)
-
+                self.cur.value -= 1
+        sleep(LOOP_DELAY)
 
 
 def monitor_friction_brake(friction_brake: FrictionBrake, bound: bool=False):
@@ -92,27 +80,26 @@ def monitor_friction_brake(friction_brake: FrictionBrake, bound: bool=False):
     pre_time = time()
     fish_hooked = False
 
-    change = friction_brake.change if bound else friction_brake.unlimited_change
     try:
         while True:
-            if not friction_brake.monitor.is_fish_hooked_pixel():
+            if not friction_brake.detection.is_fish_hooked_pixel():
                 sleep(FRICTION_BRAKE_MONITOR_DELAY)
                 fish_hooked = False
                 continue
             elif not fish_hooked:
-                sleep(friction_brake.setting.friction_brake_adjust_delay)
+                sleep(friction_brake.cfg.FRICTION_BRAKE.START_DELAY)
                 fish_hooked = True
             with friction_brake.lock:
-                if friction_brake.monitor.is_friction_brake_high():
-                    change(increase=False)
+                if friction_brake.detection.is_friction_brake_high():
+                    friction_brake.change(increase=False, bound=bound)
                 else:
                     cur_time = time()
                     if (
                         cur_time - pre_time
-                        < friction_brake.setting.friction_brake_increase_delay
+                        < friction_brake.cfg.FRICTION_BRAKE.INCREASE_DELAY
                     ):
                         continue
                     pre_time = cur_time
-                    change(increase=True)
+                    friction_brake.change(increase=True, bound=bound)
     except KeyboardInterrupt:
         pass
