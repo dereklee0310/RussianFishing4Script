@@ -17,16 +17,12 @@ from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from socket import gaierror
 
-import pyautogui as pag
 from dotenv import load_dotenv
 from prettytable import PrettyTable
 from pynput import keyboard
 
-import script
 from player import Player
-from setting import COMMON_CONFIGS, SPECIAL_CONFIGS, Setting
 from window import Window
-from monitor import Monitor
 
 from yacs.config import CfgNode as CN
 from config import config
@@ -37,55 +33,25 @@ logging.basicConfig(level=logging.INFO, format=format, datefmt=datefmt)
 logger = logging.getLogger(__name__)
 
 # ------------------------- flag name 1, help message ------------------------ #
-HELP = (
-    ("c", "drink coffee if retrieval takes longer than 2 minutes"),
-    ("A", "regularly drink alcohol before keeping the fish"),
-    ("r", "refill hunger and comfort by consuming tea and carrot"),
-    ("H", "harvest baits before casting, support mode: bottom, spin, and float"),
-    ("g", "switch the gear ratio after the retrieval timed out"),
-    ("P", "save a chart of catch logs in logs/"),
-    ("s", "shutdown computer after terminated without user interruption"),
-    ("l", "lift the tackle constantly while pulling a fish"),
-    ("e", "send email to yourself after terminated without user interruption"),
-    ("M", "send miaotixing notification after terminated without user interruption"),
-    ("S", "take screenshots of every fish you catch and save them in screenshots/"),
-    ("C", "skip rod casting for the first fish, support mode: spin, marine, wakey_rig"),
-    ("f", "change friction brake automatically"),
-    ("o", "recast the spod rod automatically"),
-    ("L", "change current lure with a random one automatically"),
-    ("x", "move mouse randomly before casting the rod"),
-    ("X", "pause the script after catchig a fish regularly"),
-    ("b", "take a screenshot when a fish bites and save it in screenshots/"),
-)
-
-# ----------------- flag name 2, attribute name, description ----------------- #
-COMMON_ARGS = (
-    ("coffee", "coffee_drinking_enabled", "Coffee drinking"),
-    ("alcohol", "alcohol_drinking_enabled", "Alcohol drinking"),
-    ("refill", "player_stat_refill_enabled", "Player stat refill"),
-    ("harvest", "baits_harvesting_enabled", "Baits harvesting"),
-    ("gear_ratio", "gr_switching_enabled", "Gear ratio switching"),
-    ("plot", "plotting_enabled", "Plotting"),
-    ("shutdown", "shutdown_enabled", "Shutdown"),
-    ("lift", "lifting_enabled", "Lifting"),
-    ("email", "email_sending_enabled", "Email sending"),
-    ("miaotixing", "miaotixing_sending_enabled", "miaotixing sending"),
-    ("result_screenshot", "result_screenshot_enabled", "Result screenshot"),
-    ("cast", "cast_skipping_enabled", "Cast skipping"),
-    ("friction_brake", "friction_brake_changing_enabled", "Friction brake changing"),
-    ("spod_rod", "spod_rod_recast_enabled", "Spod rod recast"),
-    ("lure", "lure_changing_enabled", "Lure changing"),
-    ("mouse", "mouse_moving_enabled", "Mouse moving"),
-    ("pause", "pause_enabled", "Pause"),
-    ("bite_screenshot", "bite_screenshot_enabled", "Bite screenshot"),
-)
-
-# ----------------- flag name 2, attribute name, description ----------------- #
-SPECIAL_ARGS = (
-    ("marked", "unmarked_release_enabled", "Unmarked release"),
-    ("rainbow_line", "rainbow_line_enabled", "Rainbow line"),
-    ("fishes_in_keepnet", "fishes_in_keepnet", "Fishes in keepnet"),
-    ("boat_ticket_duration", "boat_ticket_duration", "Boat ticket duratioin"),
+ARGUMENTS = (
+    ("c", "coffee", "drink coffee if retrieval takes longer than 2 minutes"),
+    ("A", "alcohol", "regularly drink alcohol before keeping the fish"),
+    ("r", "refill", "refill hunger and comfort by consuming tea and carrot"),
+    ("H", "harvest", "harvest baits before casting, support mode: bottom, spin, and float"),
+    ("g", "gear_ratio", "switch the gear ratio after the retrieval timed out"),
+    ("P", "plot", "save a chart of catch logs in logs/"),
+    ("s", "shutdown", "shutdown computer after terminated without user interruption"),
+    ("l", "lift", "lift the tackle constantly while pulling a fish"),
+    ("e", "email", "send email to yourself after terminated without user interruption"),
+    ("M", "miaotixing", "send miaotixing notification after terminated without user interruption"),
+    ("S", "screenshot", "take screenshots of every fish you catch and save them in screenshots/"),
+    ("C", "cast", "skip rod casting for the first fish, support mode: spin, marine, wakey_rig"),
+    ("f", "friction_brake", "change friction brake automatically"),
+    ("o", "spod_rod", "recast the spod rod automatically"),
+    ("L", "lure", "change current lure with a random one automatically"),
+    ("x", "mouse", "move mouse randomly before casting the rod"),
+    ("X", "pause", "pause the script after catchig a fish regularly"),
+    ("b", "bite", "take a screenshot when a fish bites and save it in screenshots/"),
 )
 
 ASCII_LOGO = """
@@ -107,12 +73,12 @@ class App:
         """Merge args into setting node."""
         self.cfg = config.setup_cfg()
         self.cfg.merge_from_file(ROOT / "config.yaml")
-        self.window = self.setup_window()
 
         # Parser will use the last occurence if the arguments are duplicated,
         # so put argv at the end to overwrite launch options.
         args_list = shlex.split(self.cfg.SCRIPT.LAUNCH_OPTIONS) + sys.argv[1:]
         args = self._setup_parser().parse_args(args_list)
+        self.window = self.setup_window()
         if not self._is_args_valid(args):
             sys.exit(1)
         args_cfg = CN({"ARGS": config.dict_to_cfg(vars(args))})
@@ -124,11 +90,11 @@ class App:
         """Configure argparser."""
         parser = ArgumentParser(description="Start AFK script for Russian Fishing 4")
 
-        for arg_help, common_arg in zip(HELP, COMMON_ARGS):
-            flag1 = f"-{arg_help[0]}"
-            flag2 = f"--{common_arg[0]}"
-            help_msg = arg_help[1]
-            parser.add_argument(flag1, flag2, action="store_true", help=help_msg)
+        for argument in ARGUMENTS:
+            flag1 = f"-{argument[0]}"
+            flag2 = f"--{argument[1]}"
+            help = argument[2]
+            parser.add_argument(flag1, flag2, action="store_true", help=help)
 
         # ----------------------------- release strategy ----------------------------- #
         release_strategy = parser.add_mutually_exclusive_group()
@@ -164,14 +130,14 @@ class App:
             "--pid",
             metavar="PID",
             type=int,
-            help="Id of the profile you want to use",
+            help="id of the profile you want to use",
         )
         profile_selection_strategy.add_argument(
             "-N",
             "--pname",
             metavar="PROFILE_NAME",
             type=str,
-            help="Name of the profile you want to use",
+            help="name of the profile you want to use",
         )
         parser.add_argument(
             "-n",
@@ -179,7 +145,7 @@ class App:
             metavar="FISH_COUNT",
             type=int,
             default=0,
-            help="Number of fishes in your keepnet, 0 if not specified",
+            help="number of fishes in your keepnet, 0 if not specified",
         )
         parser.add_argument(
             "-t",
@@ -188,7 +154,7 @@ class App:
             type=int,
             choices=[1, 2, 3, 5],
             help=(
-                "Enable boat ticket auto renewal, "
+                "enable boat ticket auto renewal, "
                 "use 1, 2, 3, or 5 to speicfy the ticket duration"
             ),
         )
@@ -366,12 +332,12 @@ class App:
 
 
 if __name__ == "__main__":
-    print(ASCII_LOGO)
     app = App()
     app.setup_user_profile()
+    print(ASCII_LOGO)
     app.setup_window()
-    app.cfg.freeze()
     app.setup_player()
+    app.cfg.freeze()
     app.window.activate_game_window()
 
     if app.cfg.KEY.QUIT != "CTRL-C":
