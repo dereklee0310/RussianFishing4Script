@@ -297,9 +297,9 @@ class App:
         if not self._is_profile_valid(profile_name):
             sys.exit(1)
 
-        self.cfg.SELECTED_PROFILE = CN({"NAME": profile_name})
-        self.cfg.SELECTED_PROFILE.set_new_allowed(True)
-        self.cfg.SELECTED_PROFILE.merge_from_other_cfg(self.cfg.PROFILE[profile_name])
+        self.cfg.SELECTED = CN({"NAME": profile_name})
+        self.cfg.SELECTED.set_new_allowed(True)
+        self.cfg.SELECTED.merge_from_other_cfg(self.cfg.PROFILE[profile_name])
         self.cfg.freeze()
         config.print_cfg(self.cfg) # cfg.dump() doesn't keep the declared order
 
@@ -309,7 +309,7 @@ class App:
             self.cfg.SCRIPT.SNAG_DETECTION = False
             self.cfg.ARGS.FRICTION_BRAKE = False
 
-            if self.cfg.SELECTED_PROFILE.MODE == "float":
+            if self.cfg.SELECTED.MODE == "float":
                 width, height = self.window.get_box()[2:]
                 logger.critical(
                     "Float fishing mode doesn't support window size '%s'",

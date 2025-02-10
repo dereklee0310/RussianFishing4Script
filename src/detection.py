@@ -141,8 +141,8 @@ class Detection:
         self.friction_brake_coord = self._get_absolute_coord("friction_brake")
 
         bases = self._get_absolute_coord("float_camera")
-        if self.cfg.SELECTED_PROFILE.MODE == "float":
-            match self.cfg.SELECTED_PROFILE.CAMERA_SHAPE:
+        if self.cfg.SELECTED.MODE == "float":
+            match self.cfg.SELECTED.CAMERA_SHAPE:
                 case "tall":
                     bases[0] += CAMERA_OFFSET
                     width, height = SIDE_LENGTH_HALF, SIDE_LENGTH
@@ -154,7 +154,7 @@ class Detection:
                 case _:
                     logger.critical(
                         "Invalid camera shape: '%s'",
-                        self.cfg.SELECTED_PROFILE.CAMERA_SHAPE
+                        self.cfg.SELECTED.CAMERA_SHAPE
                     )
                     sys.exit(1)
             self.float_camera_rect = (*bases, width, height)  # (left, top, w, h)
@@ -389,5 +389,5 @@ class Detection:
             current_img,
             reference_img,
             grayscale=True,
-            confidence=self.cfg.SELECTED_PROFILE.FLOAT_SENSITIVITY,
+            confidence=self.cfg.SELECTED.FLOAT_SENSITIVITY,
         )
