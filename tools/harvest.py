@@ -8,12 +8,15 @@ Usage: harvest.py
 # setting node's attributes will be merged on the fly
 
 import argparse
+import sys
 import time
 
 import pyautogui as pag
 
-import script
-from timer import Timer
+sys.path.append(".")
+
+from rf4s import utils
+from rf4s.controller.timer import Timer
 
 # ------------------ flag name, attribute name, description ------------------ #
 ARGS = (
@@ -34,7 +37,7 @@ ANIMATION_DELAY = 0.25
 class App:
     """Main application class."""
 
-    @script.initialize_setting_and_monitor(ARGS)
+    @utils.initialize_setting_and_monitor(ARGS)
     def __init__(self):
         """Initialize counters and merge args into setting node."""
         self.timer = Timer()
@@ -98,7 +101,7 @@ class App:
 
         i = 64
         while i > 0 and not self.monitor.is_harvest_success():
-            i = script.sleep_and_decrease(i, 2)
+            i = utils.sleep_and_decrease(i, 2)
 
         # accept result
         pag.press("space")
@@ -118,4 +121,4 @@ class App:
 
 
 if __name__ == "__main__":
-    script.start_app(App(), RESULTS)
+    utils.start_app(App(), RESULTS)

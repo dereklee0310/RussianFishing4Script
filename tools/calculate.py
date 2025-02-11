@@ -4,6 +4,7 @@ Calculate the maximum friction brake you can use on your tackle.
 Usage: calculate.py
 """
 import sys
+
 from prettytable import PrettyTable
 
 BIAS = 1e-6

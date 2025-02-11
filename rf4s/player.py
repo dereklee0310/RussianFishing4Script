@@ -12,7 +12,6 @@ from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from multiprocessing import Lock
-
 # from email.mime.image import MIMEImage
 from pathlib import Path
 from time import sleep, time
@@ -25,8 +24,7 @@ from matplotlib.ticker import MaxNLocator
 from playsound import playsound
 from prettytable import PrettyTable
 
-from rf4s import exceptions
-from rf4s import utils
+from rf4s import exceptions, utils
 from rf4s.component.friction_brake import FrictionBrake
 from rf4s.component.tackle import Tackle
 from rf4s.controller.detection import Detection

@@ -13,8 +13,7 @@ import pyautogui as pag
 import win32api
 import win32con
 
-from rf4s import exceptions
-from rf4s import utils
+from rf4s import exceptions, utils
 from rf4s.controller.detection import Detection
 from rf4s.controller.timer import Timer
 

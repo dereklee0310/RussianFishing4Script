@@ -5,12 +5,13 @@ Module for pyautogui.locateOnScreen and pag.pixel wrappers.
 # pylint: disable=missing-function-docstring
 # docstring for every functions? u serious?
 
-import sys
 import logging
+import sys
+from pathlib import Path
 
 import pyautogui as pag
 from pyscreeze import Box
-from pathlib import Path
+
 from rf4s.controller.window import Window
 
 logger = logging.getLogger(__name__)

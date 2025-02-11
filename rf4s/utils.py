@@ -2,8 +2,8 @@
 Some helper functions.
 """
 
-import sys
 import logging
+import sys
 from time import sleep
 
 import pyautogui as pag

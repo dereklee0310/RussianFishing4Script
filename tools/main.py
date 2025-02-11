@@ -23,12 +23,11 @@ from pynput import keyboard
 
 sys.path.append(".") # python -m module -> python file
 
-from rf4s.player import Player
-from rf4s.controller.window import Window
-
-
 from yacs.config import CfgNode as CN
+
 from rf4s.config import config
+from rf4s.controller.window import Window
+from rf4s.player import Player
 
 format = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
 datefmt = "%Y-%m-%d %H:%M:%S"

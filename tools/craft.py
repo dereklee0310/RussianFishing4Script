@@ -6,15 +6,18 @@ Usage: craft.py
 
 # pylint: disable=no-member
 # setting node's attributes will be merged on the fly
-import logging
+
 import argparse
+import logging
 import random
+import sys
 from datetime import datetime
 from time import sleep
 
 import pyautogui as pag
 
-import script
+sys.path.append(".")
+from rf4s import utils
 
 logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -43,7 +46,7 @@ RESULTS = (
 class App:
     """Main application class."""
 
-    @script.initialize_setting_and_monitor(ARGS)
+    @utils.initialize_setting_and_monitor(ARGS)
     def __init__(self):
         """Initialize counters and merge args into setting node."""
         self.success_count = 0
@@ -121,4 +124,4 @@ class App:
 
 
 if __name__ == "__main__":
-    script.start_app(App(), RESULTS)
+    utils.start_app(App(), RESULTS)

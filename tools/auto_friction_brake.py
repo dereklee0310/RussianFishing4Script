@@ -1,12 +1,12 @@
-from friction_brake import FrictionBrake
-import script
+sys.path.append(".")
 import argparse
-from multiprocessing import Lock
 import sys
-from pynput import keyboard
-import pyautogui as pag
+from multiprocessing import Lock
 
-import script
+from pynput import keyboard
+
+from rf4s import utils
+from rf4s.component.friction_brake import FrictionBrake
 
 ARGS = ()
 EXIT = "'h'"
@@ -15,10 +15,10 @@ RESET = "'g'"
 class App:
     """Main application class."""
 
-    @script.initialize_setting_and_monitor(ARGS)
+    @utils.initialize_setting_and_monitor(ARGS)
     def __init__(self):
         self.setting.fishing_strategy = None
-        if not script.verify_window_size(self.setting):
+        if not utils.verify_window_size(self.setting):
             sys.exit()
 
         self.setting.set_absolute_coords()
@@ -52,4 +52,4 @@ class App:
 
 if __name__ == "__main__":
     app = App()
-    script.start_app(app, None)
+    utils.start_app(app, None)

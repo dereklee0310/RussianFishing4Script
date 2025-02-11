@@ -13,7 +13,9 @@ import sys
 import pyautogui as pag
 from pynput import keyboard
 
-import script
+sys.path.append9(".")
+
+from rf4s import utils
 
 # ------------------ flag name, attribute name, description ------------------ #
 ARGS = (("shift", "shift_key_holding_enabled", "_"),)
@@ -22,7 +24,7 @@ ARGS = (("shift", "shift_key_holding_enabled", "_"),)
 class App:
     """Main application class."""
 
-    @script.initialize_setting_and_monitor(ARGS)
+    @utils.initialize_setting_and_monitor(ARGS)
     def __init__(self):
         """Initialize moving flag."""
         self.w_key_pressed = True
@@ -66,7 +68,7 @@ class App:
         pag.keyDown("w")
         self.w_key_pressed = True
 
-    @script.release_keys_after
+    @utils.release_keys_after
     def start(self):
         if self.setting.shift_key_holding_enabled:
             pag.keyDown("shift")
@@ -78,7 +80,7 @@ class App:
 
 
 if __name__ == "__main__":
-    script.start_app(App(), None)
+    utils.start_app(App(), None)
 
 # press/release detection
 # https://stackoverflow.com/questions/65890326/keyboard-press-detection-with-pynput
