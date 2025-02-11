@@ -10,8 +10,7 @@ import pyautogui as pag
 from prettytable import PrettyTable
 from pyscreeze import Box
 
-from detection import Detection
-from setting import Setting
+from rf4s.controller.detection import Detection
 
 # BASE_DELAY + LOOP_DELAY >= 2.2 to trigger clicklock
 BASE_DELAY = 1
@@ -32,6 +31,9 @@ def hold_mouse_button(duration: float=1, button="left") -> None:
     :param button: button to click, defaults to "left"
     :type button: str, optional
     """
+    if duration == 0:
+        return
+
     pag.mouseDown(button=button)
     sleep(duration)
     pag.mouseUp(button=button)
@@ -131,7 +133,7 @@ def initialize_setting_and_monitor(args_map: tuple[tuple]):
     :param args_map: args lookup table
     :type args_map: tuple[tuple]
     """
-
+    #TODO
     def func_wrapper(func):
         def args_wrapper(caller):
             args = caller.parse_args()
@@ -203,12 +205,12 @@ def reset_friction_brake_after(func):
 
     def wrapper(self, *args):
         func(self, *args)
-        if not self.setting.friction_brake_changing_enabled:
+        if not self.cfg.ARGS.FRICTION_BRAKE:
             return
 
         with self.friction_brake_lock:
             self.friction_brake.reset(
-                self.setting.initial_friction_brake)
+                self.cfg.FRICTION_BRAKE.INITIAL)
 
     return wrapper
 

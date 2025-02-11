@@ -8,7 +8,7 @@ from time import sleep, time
 
 import pyautogui as pag
 
-from detection import Detection
+from rf4s.controller.detection import Detection
 
 MAX_FRICTION_BRAKE = 30
 UP = 1

@@ -11,7 +11,7 @@ import logging
 import pyautogui as pag
 from pyscreeze import Box
 from pathlib import Path
-from window import Window
+from rf4s.controller.window import Window
 
 logger = logging.getLogger(__name__)
 
@@ -126,7 +126,7 @@ class Detection:
         :return: image box, None if not found
         :rtype: Box
         """
-        image_path = self.image_dir / f"{image}.png"
+        image_path = str(self.image_dir / f"{image}.png")
         if multiple:
             return pag.locateAllOnScreen(image_path, confidence=confidence)
         return pag.locateOnScreen(image_path, confidence=confidence)
@@ -198,16 +198,21 @@ class Detection:
         return self._get_image_box("keep", 0.9)
 
     # ---------------------------- retrieval detection --------------------------- #
+    def is_retrieval_finished(self):
+        if self.cfg.ARGS.RAINBOW_LINE:
+            return self._is_rainbow_line_0or5m()
+        return self._is_spool_full()
+
     def _is_rainbow_line_0or5m(self):
         return self._get_image_box(
-            "5m", self.cfg.SPOOL_CONFIDENCE
+            "5m", self.cfg.SCRIPT.SPOOL_CONFIDENCE
         ) or self._get_image_box(
-            "0m", self.cfg.SPOOL_CONFIDENCE
+            "0m", self.cfg.SCRIPT.SPOOL_CONFIDENCE
         )
 
     def _is_spool_full(self):
         return self._get_image_box(
-            "wheel", self.cfg.SPOOL_CONFIDENCE
+            "wheel", self.cfg.SCRIPT.SPOOL_CONFIDENCE
         )
 
     # ------------------------------ hint detection ------------------------------ #

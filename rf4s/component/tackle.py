@@ -13,11 +13,10 @@ import pyautogui as pag
 import win32api
 import win32con
 
-import exceptions
-import utils
-from detection import Detection
-from setting import Setting
-from timer import Timer
+from rf4s import exceptions
+from rf4s import utils
+from rf4s.controller.detection import Detection
+from rf4s.controller.timer import Timer
 
 logger = logging.getLogger(__name__)
 
@@ -71,7 +70,9 @@ class Tackle:
         """
         logger.info("Resetting")
         i = RESET_TIMEOUT
-        while i > 0 and not self.detection.is_tackle_ready():
+        while i > 0:
+            if self.detection.is_tackle_ready():
+                return
             if self.detection.is_fish_hooked():
                 raise exceptions.FishHookedError
             if self.detection.is_fish_captured():
@@ -91,7 +92,7 @@ class Tackle:
         logger.info("Casting")
         if self.cfg.ARGS.MOUSE:
             self.move_mouse_randomly()
-        match self.cfg.SELECTED.CAST_POWE_LEVEL:
+        match self.cfg.SELECTED.CAST_POWER_LEVEL:
             case 1:  # 0%
                 pag.click()
             case 5:  # power cast
@@ -167,7 +168,7 @@ class Tackle:
                     utils.hold_mouse_button(LIFT_DURATION, button="right")
 
             if self.detection.is_retrieval_finished():
-                sleep(0 if self.cfg.RAINBOW_LINE else 2)
+                sleep(0 if self.cfg.ARGS.RAINBOW_LINE else 2)
                 return
 
             elif self.detection.is_fish_captured():
@@ -252,6 +253,13 @@ class Tackle:
             lock = not lock
 
         raise TimeoutError
+
+
+    def pull(self) -> None:
+        if self.cfg.SELECTED.MODE == "float":
+            self.telescopic_pull()
+        else:
+            self.general_pull()
 
     @utils.toggle_right_mouse_button
     @utils.toggle_clicklock

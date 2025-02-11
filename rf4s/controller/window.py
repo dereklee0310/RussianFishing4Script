@@ -86,9 +86,7 @@ class Window:
 
     def is_size_valid(self) -> bool:
         if self.is_title_bar_exist():
-            # logger.error("Invalid display mode: window mode")
-            logger.info("Window mode detected, if you want to move the game window, " +
-                        "please restart the script after moving it.")
+            logger.info("Window mode detected. Please don't move the game window")
         width, height = self.get_box()[2:]
         if (width, height) in ((2560, 1440), (1920, 1080), (1600, 900)):
             return True
@@ -100,6 +98,14 @@ class Window:
         logger.error('Window mode must be "Borderless windowed" or "Window mode"')
         logger.info("Snag detection and friction brake changing will be disabled")
         return False
+
+    def save_screenshot(self, time) -> None:
+        """Save screenshot to screenshots/."""
+        # datetime.now().strftime("%H:%M:%S")
+        pag.screenshot(
+            imageFilename=rf"../screenshots/{time}.png",
+            region=self.get_box(),
+        )
 
 
 if __name__ == "__main__":

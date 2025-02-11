@@ -6,19 +6,10 @@ SCRIPT:
   SNAG_DETECTION: true
   RANDOM_ROD_SELECTION: true
   SPOOL_CONFIDENCE: 0.985
-  KEEPNET_CAPACITY: 100
-  KEEP_FISH_DELAY: 1.0
   SPOD_ROD_RECAST_DELAY: 1800
   LURE_CHANGE_DELAY: 1800
-  KEEPNET_FULL_ACTION: "quit"
+  LURE_BROKEN_ACTION: "quit"
   ALARM_SOUND: "../static/sound/guitar.wav"
-  RELEASE_WHITELIST:
-    - "mackerel"
-    - "saithe"
-    - "herring"
-    - "squid"
-    - "scallop"
-    - "mussel"
 
 KEY:
   TEA: -1
@@ -46,6 +37,18 @@ FRICTION_BRAKE:
   START_DELAY: 2.0
   INCREASE_DELAY: 1.0
 
+KEEPNET:
+  CAPACITY: 100
+  DELAY: 1.0
+  FULL_ACTION: "quit"
+  RELEASE_WHITELIST:
+    - "mackerel"
+    - "saithe"
+    - "herring"
+    - "squid"
+    - "scallop"
+    - "mussel"
+
 PAUSE:
   DELAY: 1800
   DURATION: 600
@@ -55,7 +58,17 @@ PROFILE:
     MODE: "spin"
     CAST_POWER_LEVEL: 5.0
     CAST_DELAY: 6.0
-    TIGHTENING_DURATION: 1.0
+    TIGHTEN_DURATION: 0.0
+    RETRIEVE_DURATION: 0.0
+    RETRIEVE_DELAY: 0.0
+    PRE_ACCELERATION: false
+    POST_ACCELERATION: "off"
+
+  SPECIAL_SPIN:
+    MODE: "spin"
+    CAST_POWER_LEVEL: 5.0
+    CAST_DELAY: 6.0
+    TIGHTEN_DURATION: 1.0
     RETRIEVE_DURATION: 1.1
     RETRIEVE_DELAY: 3.0
     PRE_ACCELERATION: false
@@ -67,6 +80,7 @@ PROFILE:
     CAST_DELAY: 4.0
     POST_ACCELERATION: "off"
     CHECK_DELAY: 32.0
+    CHECK_MISS_LIMIT: 16
 
   PIRK:
     MODE: "pirk"
@@ -102,7 +116,7 @@ PROFILE:
     FLOAT_SENSITIVITY: 0.65
     CHECK_DELAY: 1.0
     PULL_DELAY: 0.5
-    DRIFTING_TIMEOUT: 16.0
+    DRIFT_TIMEOUT: 16.0
     CAMERA_SHAPE: "square"
 
   TEST:
@@ -113,5 +127,5 @@ PROFILE:
     FLOAT_SENSITIVITY: 1.23
     CHECK_DELAY: 1.23
     PULL_DELAY: 1.23
-    DRIFTING_TIMEOUT: 1.23
+    DRIFT_TIMEOUT: 1.23
     CAMERA_SHAPE: "square"
