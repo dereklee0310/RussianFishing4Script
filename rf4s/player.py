@@ -105,7 +105,7 @@ class Player:
     # ---------------------------------------------------------------------------- #
     def start_spin_mode(self) -> None:
         """Main spin fishing loop for "spin" and "spin_with_pause"."""
-        lure_changing_delay = self.cfg.SCRIPT.LURE_CHANGE_DELAY
+        lure_changing_delay = self.cfg.LURE.CHANGE_DELAY
         skip_cast = self.cfg.ARGS.SKIP_CAST
         while True:
             if not skip_cast:
@@ -117,7 +117,7 @@ class Player:
                     and time() - self.timer.start_time > lure_changing_delay
                 ):
                     self._change_lure_randomly()
-                    lure_changing_delay += self.cfg.SCRIPT.LURE_CHANGE_DELAY
+                    lure_changing_delay += self.cfg.LURE.CHANGE_DELAY
                 self.tackle.cast()
             skip_cast = False
 
@@ -448,7 +448,7 @@ class Player:
         """Handle the broken lure event according to the settings."""
         msg = "Lure is broken"
         logger.warning(msg)
-        match self.cfg.SCRIPT.LURE_BROKEN_ACTION:
+        match self.cfg.LURE.BROKEN_ACTION:
             case "alarm":
                 self._handle_termination(msg, shutdown=False)
             case "replace":
