@@ -29,31 +29,32 @@ from rf4s.config import config
 from rf4s.controller.window import Window
 from rf4s.player import Player
 
-format = "%(asctime)s - %(levelname)s - %(name)s - %(message)s"
+# Ignore %(name)s because it's verbose
+format = "%(asctime)s - %(levelname)s - %(message)s"
 datefmt = "%Y-%m-%d %H:%M:%S"
 logging.basicConfig(level=logging.INFO, format=format, datefmt=datefmt)
 logger = logging.getLogger(__name__)
 
 # ------------------------- flag name 1, help message ------------------------ #
 ARGUMENTS = (
-    ("c", "coffee", "drink coffee if retrieval takes longer than 2 minutes"),
+    ("c", "coffee", "drink coffee if the stamina is low"),
     ("A", "alcohol", "regularly drink alcohol before keeping the fish"),
     ("r", "refill", "refill hunger and comfort by consuming tea and carrot"),
     ("H", "harvest", "harvest baits before casting, support mode: bottom, spin, and float"),
     ("g", "gear_ratio", "switch the gear ratio after the retrieval timed out"),
-    ("P", "plot", "save a chart of catch logs in logs/"),
-    ("s", "shutdown", "shutdown computer after terminated without user interruption"),
-    ("l", "lift", "lift the tackle constantly while pulling a fish"),
-    ("e", "email", "send email to yourself after terminated without user interruption"),
-    ("M", "miaotixing", "send miaotixing notification after terminated without user interruption"),
-    ("S", "screenshot", "take screenshots of every fish you catch and save them in screenshots/"),
-    ("C", "skip_cast", "skip rod casting for the first fish, support mode: spin, marine, wakey_rig"),
     ("f", "friction_brake", "change friction brake automatically"),
-    ("o", "spod_rod", "recast the spod rod automatically"),
-    ("L", "lure", "change current lure with a random one automatically"),
+    ("l", "lift", "lift the tackle constantly while pulling a fish"), #TODO
+    ("C", "skip_cast", "skip casting for the first fish, support mode: spin, marine"),
+    ("o", "spod_rod", "recast spod rod regularly"),
+    ("L", "lure", "change current lure with a random one regularly"),
     ("x", "mouse", "move mouse randomly before casting the rod"),
-    ("X", "pause", "pause the script after catchig a fish regularly"),
-    ("b", "bite", "take a screenshot when a fish bites and save it in screenshots/"),
+    ("X", "pause", "pause the script after keeping a fish regularly"),
+    ("b", "bite", "take a screenshot after casting in screenshots/ (for fish spot)"),
+    ("S", "screenshot", "take a screenshot of every fish you caught in screenshots/"),
+    ("e", "email", "send email noticication afterward"),
+    ("P", "plot", "save fishing data in /logs"),
+    ("M", "miaotixing", "send miaotixing notification afterward"),
+    ("s", "shutdown", "shutdown computer afterward"),
 )
 
 ASCII_LOGO = """
@@ -107,7 +108,7 @@ class App:
             help="Keep all captured fishes, used by default",
         )
         release_strategy.add_argument(
-            "-m", "--marked", action="store_true", help="Keep only the marked fishes"
+            "-m", "--marked", action="store_true", help="keep only the marked fishes"
         )
 
         # ----------------------- retrieval detection strategy ----------------------- #
@@ -116,13 +117,13 @@ class App:
             "-d",
             "--default-spool",
             action="store_true",
-            help="Use default spool icon for retrieval detection, used by default",
+            help="use default spool icon for retrieval detection, used by default",
         )
         retrieval_detecton_strategy.add_argument(
             "-R",
             "--rainbow-line",
             action="store_true",
-            help="Use rainbow line meter for retrieval detection",
+            help="use rainbow line meter for retrieval detection",
         )
 
         # -------------------------- arguments with metavar -------------------------- #
@@ -141,6 +142,7 @@ class App:
             type=str,
             help="name of the profile you want to use",
         )
+
         parser.add_argument(
             "-n",
             "--fishes_in_keepnet",
@@ -156,8 +158,7 @@ class App:
             type=int,
             choices=[1, 2, 3, 5],
             help=(
-                "enable boat ticket auto renewal, "
-                "use 1, 2, 3, or 5 to speicfy the ticket duration"
+                "enable boat ticket auto renewal, duration could be 1, 2, 3 or 5"
             ),
         )
 

@@ -187,9 +187,9 @@ def release_keys_after(func):
         pag.keyUp("a")
         pag.keyUp("d")
 
-    def wrapper(self, *args):
+    def wrapper(self, *args, **kwargs):
         try:
-            func(self, *args)
+            func(self, *args, **kwargs)
             release_keys()
         except Exception as e:
             release_keys()

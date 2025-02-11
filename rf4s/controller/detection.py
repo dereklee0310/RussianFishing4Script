@@ -23,7 +23,7 @@ ORANGE_FRICTION_BRAKE = (229, 188, 0)
 RED_FRICTION_BRAKE = (206, 56, 21)
 COLOR_TOLERANCE = 64
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 
 # ---------------------------------------------------------------------------- #
 #                     friction brake coordinates and colors                    #

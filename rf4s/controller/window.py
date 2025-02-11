@@ -5,6 +5,7 @@ Module for window controller.
 import logging
 import sys
 from time import sleep
+from pathlib import Path
 
 # import win32api, win32con
 import pyautogui as pag
@@ -13,6 +14,7 @@ import win32gui
 
 logger = logging.getLogger(__name__)
 
+ROOT = Path(__file__).resolve().parents[2]
 
 class Window:
     """Controller for terminal and game windows management."""
@@ -103,7 +105,8 @@ class Window:
         """Save screenshot to screenshots/."""
         # datetime.now().strftime("%H:%M:%S")
         pag.screenshot(
-            imageFilename=rf"../screenshots/{time}.png",
+            # imageFilename=rf"../screenshots/{time}.png",
+            imageFilename=ROOT / "screenshots" / f"{time}.png",
             region=self.get_box(),
         )
 
