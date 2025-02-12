@@ -8,7 +8,6 @@ screenshots/
 logs/
 tests/
 
-.env
-config.ini
 TODO.md
 中文版教程.md
+config.yaml

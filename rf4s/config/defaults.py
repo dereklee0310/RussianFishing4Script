@@ -45,6 +45,7 @@ _C.FRICTION_BRAKE.MAX = 30
 _C.FRICTION_BRAKE.START_DELAY = 2.0
 _C.FRICTION_BRAKE.INCREASE_DELAY = 1.0
 
+
 _C.LURE = CN()
 _C.LURE.CHANGE_DELAY = 1800 # 30 minutes
 _C.LURE.BROKEN_ACTION = "quit"
@@ -59,9 +60,17 @@ _C.KEEPNET.RELEASE_WHITELIST = (
 )
 
 
+_C.NOTIFICATION = CN()
+_C.EMAIL = "email@example.com"
+_C.PASSWORD = "password"
+_C.SMTP_SERVER = "smtp.example.com"
+_C.MIAO_CODE = "example"
+
+
 _C.PAUSE = CN()
 _C.PAUSE.DELAY = 1800 # 30 minutes
 _C.PAUSE.DURATION = 600 # 10 minutes
+
 
 _C.PROFILE = CN()
 # ---------------------------------------------------------------------------- #

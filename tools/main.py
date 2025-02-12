@@ -74,6 +74,7 @@ class App:
 
     def __init__(self):
         """Merge args into setting node."""
+        print(ASCII_LOGO)
         self.cfg = config.setup_cfg()
         self.cfg.merge_from_file(ROOT / "config.yaml")
 
@@ -81,7 +82,6 @@ class App:
         # so put argv at the end to overwrite launch options.
         args_list = shlex.split(self.cfg.SCRIPT.LAUNCH_OPTIONS) + sys.argv[1:]
         args = self._setup_parser().parse_args(args_list)
-        self.window = self.setup_window()
         if not self._is_args_valid(args):
             sys.exit(1)
         args_cfg = CN({"ARGS": config.dict_to_cfg(vars(args))})
@@ -105,7 +105,7 @@ class App:
             "-a",
             "--all",
             action="store_true",
-            help="Keep all captured fishes, used by default",
+            help="keep all captured fishes, used by default",
         )
         release_strategy.add_argument(
             "-m", "--marked", action="store_true", help="keep only the marked fishes"
@@ -181,7 +181,6 @@ class App:
             return False
 
         # boat_ticket_duration already checked by choices[...]
-
         return True
 
     def _is_pid_valid(self, pid: str) -> bool:
@@ -193,14 +192,13 @@ class App:
         if not self.cfg.ARGS.EMAIL or not self.cfg.SCRIPT.SMTP_VERIFICATION:
             return True
 
-        logger.debug("Verifying SMTP connection...")
+        logger.info("Verifying SMTP connection...")
 
-        load_dotenv()
-        email = os.getenv("EMAIL")
-        password = os.getenv("PASSWORD")
-        smtp_server_name = os.getenv("SMTP_SERVER")
+        email = self.cfg.NOTIFICATION.EMAIL
+        password = self.cfg.NOTIFICATION.PASSWORD
+        smtp_server_name = self.cfg.NOTIFICATION.SMTP_SERVER
 
-        if not smtp_server_name:
+        if self.cfg.NOTIFICATION.SMTP_SERVER == "smtp.example.com":
             logger.critical("SMTP_SERVER is not specified")
             return False
 
@@ -208,13 +206,13 @@ class App:
             with smtplib.SMTP_SSL(smtp_server_name, 465) as smtp_server:
                 smtp_server.login(email, password)
         except smtplib.SMTPAuthenticationError:
-            logger.critical("Email address or password not accepted")
+            logger.critical("Email address or app password not accepted")
             print(
                 (
-                    "Please configure your email address and password in .env\n"
+                    "Please check your email address and password.\n"
                     "If Gmail is used, please refer to "
                     "https://support.google.com/accounts/answer/185833 \n"
-                    "to get more information about app password authentication"
+                    "to get more information about app password authentication."
                 )
             )
             return False
@@ -232,18 +230,18 @@ class App:
         if not self.cfg.SCRIPT.IMAGE_VERIFICATION:
             return True
 
-        logger.debug("Verifying image files...")
+        logger.info("Verifying image files...")
         if self.cfg.SCRIPT.LANGUAGE == "en":
             return True
 
         image_dir = ROOT / "static" / self.cfg.SCRIPT.LANGUAGE
         try:
-            current_images = [f for f in image_dir.iterdir() if f.is_file()]
+            current_images = [f.name for f in image_dir.iterdir() if f.is_file()]
         except FileNotFoundError:
             logger.critical("Invalid language: '%s'", self.cfg.SCRIPT.LANGUAGE)
             return False
         template_dir = ROOT / "static" / "en"
-        target_images = [f for f in template_dir.iterdir() if f.is_file()]
+        target_images = [f.name for f in template_dir.iterdir() if f.is_file()]
         missing_images = set(target_images) - set(current_images)
         if len(missing_images) > 0:
             logger.critical("Integrity check failed")
@@ -304,7 +302,6 @@ class App:
         self.cfg.SELECTED.set_new_allowed(True)
         self.cfg.SELECTED.merge_from_other_cfg(self.cfg.PROFILE[profile_name])
         self.cfg.freeze()
-        config.print_cfg(self.cfg) # cfg.dump() doesn't keep the declared order
 
     def setup_window(self):
         self.window = Window()
@@ -333,28 +330,32 @@ class App:
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
             sys.exit()
 
+    def start(self):
+        self.setup_user_profile()
+        self.setup_window()
+        self.setup_player()
+        config.print_cfg(app.cfg.SELECTED) # cfg.dump() doesn't keep the order
+        config.print_cfg(app.cfg)
+        self.cfg.freeze()
+        self.window.activate_game_window()
+
+        if self.cfg.KEY.QUIT != "CTRL-C":
+            listener = keyboard.Listener(on_release=self.on_release)
+            listener.start()
+
+        try:
+            self.player.start_fishing()
+        except KeyboardInterrupt:
+            pass
+
+        # self.player.friction_brake_monitor_process.join()
+        print(self.player.gen_result("Terminated by user"))
+        if self.cfg.ARGS.PLOT:
+            self.player.plot_and_save()
+
 
 if __name__ == "__main__":
     app = App()
-    app.setup_user_profile()
-    print(ASCII_LOGO)
-    app.setup_window()
-    app.setup_player()
-    app.cfg.freeze()
-    app.window.activate_game_window()
-
-    if app.cfg.KEY.QUIT != "CTRL-C":
-        listener = keyboard.Listener(on_release=app.on_release)
-        listener.start()
-
-    try:
-        app.player.start_fishing()
-    except KeyboardInterrupt:
-        pass
-
-    # app.player.friction_brake_monitor_process.join()
-    print(app.player.gen_result("Terminated by user"))
-    if app.cfg.ARGS.PLOT:
-        app.player.plot_and_save()
+    app.start()
 
     # CTRL_C_EVENT: https://stackoverflow.com/questions/58455684/

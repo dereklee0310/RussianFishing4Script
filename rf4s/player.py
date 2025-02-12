@@ -639,7 +639,7 @@ class Player:
                 raise ValueError
 
     def _is_fish_whitelisted(self):
-        if self.cfg.KEEPNET.RELEASE_WHITELIST[0] == "None":
+        if self.cfg.KEEPNET.RELEASE_WHITELIST is None:
             return False
 
         for species in self.cfg.KEEPNET.RELEASE_WHITELIST:
