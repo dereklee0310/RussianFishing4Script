@@ -363,7 +363,7 @@ class App:
 
     def display_settings(self) -> None:
         """Display args and user profile."""
-        self.table = PrettyTable(header=False, align="l", title="Setings")
+        self.table = PrettyTable(header=False, align="l", title="Settings")
         self._build_args_table()
         self._build_user_config_table()
         print(self.table)
@@ -416,7 +416,7 @@ if __name__ == "__main__":
     app = App()
 
     print(ASCII_LOGO)
-    print("https://github.com/dereklee0310/RussianFishing4Script")
+    print("https://github.com/pwnyprod/RussianFishing4Script")
 
     if app.pid is None:
         app.display_available_profiles()

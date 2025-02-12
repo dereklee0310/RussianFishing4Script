@@ -7,7 +7,7 @@ opencv-python==4.8.0.76
 Pillow==10.0.0
 PyScreeze==0.1.29
 python-dotenv==1.0.1
-prettytable==3.9.0 # for add_rows() support
+prettytable==3.14.0 # for add_rows() support
 PTable==0.9.2
 matplotlib==3.8.0
 playsound==1.2.2 # downgrade to avoid bug

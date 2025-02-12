@@ -87,6 +87,9 @@ def monitor_friction_brake(friction_brake):
             with friction_brake.lock:
                 if friction_brake.monitor.is_friction_brake_high():
                     friction_brake.change(increase=False)
+                if friction_brake.monitor.is_reel_burning() is not None:
+                    logger.info("Reel burning detected, decreasing friction brake")
+                    friction_brake.change(increase=False)
                 else:
                     cur_time = time()
                     if (
