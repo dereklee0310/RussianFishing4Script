@@ -148,7 +148,7 @@ COORD_OFFSETS = {
         ),
         "fish_icon": (389, 844),
         "snag_icon": (1132 + 15, 829),
-        "reel_burning_icon": (1110, 830),
+        "reel_burning_icon": (1031, 831),
         "float_camera": (720, 654),
     },
     "1920x1080": {
@@ -164,7 +164,7 @@ COORD_OFFSETS = {
         ),
         "fish_icon": (549, 1024),
         "snag_icon": (1292 + 15, 1009),
-        "reel_burning_icon": (1269, 1011),
+        "reel_burning_icon": (1199, 1011),
         "float_camera": (880, 834),
     },
     "2560x1440": {
@@ -180,7 +180,7 @@ COORD_OFFSETS = {
         ),
         "fish_icon": (869, 1384),
         "snag_icon": (1612 + 15, 1369),
-        "reel_burning_icon": (1590, 1371),
+        "reel_burning_icon": (1519, 1371),
         "float_camera": (1200, 1194),
     },
 }
