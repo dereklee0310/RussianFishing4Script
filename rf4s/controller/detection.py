@@ -14,7 +14,7 @@ from pyscreeze import Box
 
 from rf4s.controller.window import Window
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("rich")
 
 SNAG_ICON_COLOR = (206, 56, 21)
 MIN_GRAY_SCALE_LEVEL = 150
@@ -367,7 +367,6 @@ class Detection:
         :return: True if snagged, False otherwise
         :rtype: bool
         """
-        #TODO
         return pag.pixel(*self.snag_icon_coord) == SNAG_ICON_COLOR
 
     def is_friction_brake_high(self) -> bool:
@@ -376,20 +375,17 @@ class Detection:
         :return: True if pixel color matched, False otherwise
         :rtype: bool
         """
-        #TODO
         return pag.pixelMatchesColor(
             *self.friction_brake_coord, RED_FRICTION_BRAKE, COLOR_TOLERANCE
         )
 
     def is_fish_hooked_pixel(self) -> bool:
-        #TODO
         return all(
             c > MIN_GRAY_SCALE_LEVEL
             for c in pag.pixel(*self.fish_icon_coord)
         )
 
     def is_float_state_changed(self, reference_img):
-        #TODO
         current_img = pag.screenshot(region=self.float_camera_rect)
         return not pag.locate(
             current_img,

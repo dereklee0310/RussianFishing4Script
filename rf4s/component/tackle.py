@@ -17,7 +17,7 @@ from rf4s import exceptions, utils
 from rf4s.controller.detection import Detection
 from rf4s.controller.timer import Timer
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("rich")
 
 RESET_TIMEOUT = 16
 CAST_SCALE = 0.4  # 25% / 0.4s
@@ -308,7 +308,6 @@ class Tackle:
             if self.detection.is_fish_captured():
                 self.landing_net_out = False
                 return
-
         raise TimeoutError()
 
     def switch_gear_ratio(self) -> None:

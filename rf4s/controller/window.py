@@ -12,7 +12,7 @@ import pyautogui as pag
 import win32con
 import win32gui
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("rich")
 
 ROOT = Path(__file__).resolve().parents[2]
 

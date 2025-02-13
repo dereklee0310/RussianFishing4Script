@@ -22,7 +22,9 @@ from dotenv import load_dotenv
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from playsound import playsound
-from prettytable import PrettyTable
+from rich.table import Table
+from rich import box
+
 
 from rf4s import exceptions, utils
 from rf4s.component.friction_brake import FrictionBrake
@@ -30,10 +32,10 @@ from rf4s.component.tackle import Tackle
 from rf4s.controller.detection import Detection
 from rf4s.controller.timer import Timer
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("rich")
 random.seed(datetime.now().timestamp())
 
-PRE_RETRIEVAL_DURATION = 1
+PRE_RETRIEVAL_DURATION = 0.5
 PULL_OUT_DELAY = 3
 DIG_DELAY = 5
 DIG_TIMEOUT = 32
@@ -44,6 +46,7 @@ LURE_ADJUST_DELAY = 4
 DISCONNECTED_DELAY = 8
 WEAR_TEXT_UPDATE_DELAY = 2
 BOUND = 2
+PUT_DOWN_DELAY = 4
 
 SCREENSHOT_DELAY = 2
 
@@ -572,6 +575,7 @@ class Player:
             except TimeoutError:
                 self._handle_timeout()
                 if self.cfg.SELECTED.MODE == "float":
+                    sleep(PUT_DOWN_DELAY)
                     continue
                 self._retrieving_stage()
 
@@ -687,14 +691,8 @@ class Player:
 
         self._handle_termination("Game disconnected", shutdown=True)
 
-    def gen_result(self, msg: str) -> PrettyTable:
-        """Generate a PrettyTable object for display and email based on running results.
-
-        :param msg: cause of termination
-        :type msg: str
-        :return: table consisting cause of termination and run-time records
-        :rtype: PrettyTable
-        """
+    def gen_result(self, msg: str):
+        #TODO
         fish_count_total = self.marked_count + self.unmarked_count
         cast_count = self.cast_miss_count + fish_count_total
 
@@ -705,9 +703,8 @@ class Player:
         mum_desc = f"{self.marked_count} / {self.unmarked_count} / {marked_ratio}%"
 
         bite_ratio = int(fish_count_total / cast_count * 100) if cast_count != 0 else 0
-        hmb_desc = f"{fish_count_total} / {cast_count} / {bite_ratio}%"
+        cfb_desc = f"{fish_count_total} / {cast_count} / {bite_ratio}%"
 
-        # display_running_results() not applicable for some of the records
         results = (
             ("Cause of termination", msg),
             ("Start time", self.timer.get_start_datetime()),
@@ -715,58 +712,57 @@ class Player:
             ("Running time", self.timer.get_duration()),
             ("Fish caught", self.keep_fish_count),
             ("Marked / Unmarked / Mark ratio", mum_desc),
-            ("Hit / Miss / Bite ratio", hmb_desc),
+            ("Hit / Miss / Bite ratio", cfb_desc),
             ("Alcohol consumed", self.alcohol_count),
             ("Coffee consumed", self.total_coffee_count),
             ("Tea consumed", self.tea_count),
             ("Carrot consumed", self.carrot_count),
             ("Harvest baits count", self.harvest_count),
         )
+        self.results = results
 
-        table = PrettyTable(header=False, align="l")
-        table.title = "Running Results"
-        for column_name, attribute_value in results:
-            table.add_row([column_name, attribute_value])
+        table = Table(
+            "Field",
+            "Value",
+            title="Running Results",
+            box = box.DOUBLE,
+            show_header=False
+        )
+
+        for k, v in results:
+            table.add_row(k, str(v))
         return table
 
-    def send_email(self, table: PrettyTable) -> None:
-        """Send a notification email to the user's email address.
+    def send_email(self, table) -> None:
+        """Send a notification email to the user's email address."""
+        sender = self.cfg.NOTIFICATION.EMAIL
+        password = self.cfg.NOTIFICATION.PASSWORD
+        smtp_server = self.cfg.NOTIFICATION.SMTP_SERVER
 
-        :param table: table consisting cause of termination and run-time records
-        :type table: PrettyTable
-        """
-        # get environment variables
-        load_dotenv()
-        sender = os.getenv("EMAIL")
-        password = os.getenv("PASSWORD")
-        smtp_server_name = os.getenv("SMTP_SERVER")
-
-        # configure mail info
         msg = MIMEMultipart()
         msg["Subject"] = "RussianFishing4Script: Notice of Program Termination"
         msg["From"] = sender
         recipients = [sender]
         msg["To"] = ", ".join(recipients)
-        msg.attach(MIMEText(table.get_html_string(), "html"))
 
-        # send email with SMTP
-        with smtplib.SMTP_SSL(smtp_server_name, 465) as smtp_server:
+        results = ""
+        for k, v in self.results:
+            results += f"{k}: {v}\n"
+        msg.attach(MIMEText(results))
+
+        with smtplib.SMTP_SSL(smtp_server, 465) as server:
             # smtp_server.ehlo()
-            smtp_server.login(sender, password)
-            smtp_server.sendmail(sender, recipients, msg.as_string())
-        print("A notification email has been sent to your email address")
+            server.login(sender, password)
+            server.sendmail(sender, recipients, msg.as_string())
+        logger.info("Email sent successfully")
 
-    def send_miaotixing(self, table: PrettyTable) -> None:
+    def send_miaotixing(self, table) -> None:
         """Send a notification Message to the user's miaotixing service."""
 
         # Prepare the data to be sent as query parameters
-        data_dict = {}
-        for row in table.rows:
-            column_name, attribute_value = row
-            data_dict[column_name] = attribute_value
+        data_dict = self.results
 
-        load_dotenv()
-        miao_code = os.getenv("MIAO_CODE")
+        miao_code = self.cfg.NOTIFICATION.MIAO_CODE
 
         # Customizable Text Prompt Message
         text = (
@@ -809,7 +805,7 @@ class Player:
                 print(
                     "Sending failed with error code:"
                     + str(json_object["code"])
-                    + ", Deutilsion:"
+                    + ", Description:"
                     + json_object["msg"]
                 )
 

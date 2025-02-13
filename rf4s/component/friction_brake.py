@@ -16,7 +16,7 @@ DOWN = -1
 FRICTION_BRAKE_MONITOR_DELAY = 2
 LOOP_DELAY = 0.04
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("rich")
 
 
 class FrictionBrake:

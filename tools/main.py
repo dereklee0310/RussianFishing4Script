@@ -17,9 +17,11 @@ from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from socket import gaierror
 
-from dotenv import load_dotenv
-from prettytable import PrettyTable
 from pynput import keyboard
+from rich.logging import RichHandler
+from rich import print, box
+from rich.panel import Panel
+from rich.table import Table, Column
 
 sys.path.append(".") # python -m module -> python file
 
@@ -30,10 +32,14 @@ from rf4s.controller.window import Window
 from rf4s.player import Player
 
 # Ignore %(name)s because it's verbose
-format = "%(asctime)s - %(levelname)s - %(message)s"
-datefmt = "%Y-%m-%d %H:%M:%S"
-logging.basicConfig(level=logging.INFO, format=format, datefmt=datefmt)
-logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    handlers=[RichHandler(rich_tracebacks=True)]
+)
+logger = logging.getLogger("rich")
+# Reference: https://rich.readthedocs.io/en/latest/logging.html
 
 # ------------------------- flag name 1, help message ------------------------ #
 ARGUMENTS = (
@@ -57,14 +63,14 @@ ARGUMENTS = (
     ("s", "shutdown", "shutdown computer afterward"),
 )
 
-ASCII_LOGO = """
+LOGO = """
 ██████╗ ███████╗██╗  ██╗███████╗
 ██╔══██╗██╔════╝██║  ██║██╔════╝
 ██████╔╝█████╗  ███████║███████╗
 ██╔══██╗██╔══╝  ╚════██║╚════██║
 ██║  ██║██║          ██║███████║
-╚═╝  ╚═╝╚═╝          ╚═╝╚══════╝
-https://github.com/dereklee0310/RussianFishing4Script"""
+╚═╝  ╚═╝╚═╝          ╚═╝╚══════╝"""
+LINK = "https://github.com/dereklee0310/RussianFishing4Script"
 # https://patorjk.com/software/taag/#p=testall&f=3D-ASCII&t=RF4S%0A, ANSI Shadow
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -74,7 +80,8 @@ class App:
 
     def __init__(self):
         """Merge args into setting node."""
-        print(ASCII_LOGO)
+        print(Panel.fit(LOGO, box=box.HEAVY))
+        print(LINK)
         self.cfg = config.setup_cfg()
         self.cfg.merge_from_file(ROOT / "config.yaml")
 
@@ -245,9 +252,16 @@ class App:
         missing_images = set(target_images) - set(current_images)
         if len(missing_images) > 0:
             logger.critical("Integrity check failed")
-            table = PrettyTable(header=False, align="l", title="Missing Images")
+            from rich.style import Style
+            table = Table(
+                # "Filename",
+                Column("Filename", style=Style(color="red")),
+                title="Missing Images",
+                box=box.DOUBLE,
+                show_header=False
+            )
             for filename in missing_images:
-                table.add_row([filename])
+                table.add_row(f"static/{self.cfg.SCRIPT.LANGUAGE}/{filename}")
             print(table)
             return False
 
@@ -269,10 +283,14 @@ class App:
 
     def _display_available_profiles(self) -> None:
         """List available user profiles from setting node."""
-        table = PrettyTable(header=False, align="l")
-        table.title = "Welcome! Select a profile to start"
+        table = Table(
+            "Profile",
+            title="Select a profile to start :rocket:",
+            show_header=False,
+            min_width=36,
+        )
         for i, profile in enumerate(self.cfg.PROFILE):
-            table.add_row([f"{i:>2}. {profile}"])
+            table.add_row(f"{i:>2}. {profile}")
         print(table)
 
     def _ask_for_pid(self) -> None:
@@ -335,7 +353,6 @@ class App:
         self.setup_window()
         self.setup_player()
         config.print_cfg(app.cfg.SELECTED) # cfg.dump() doesn't keep the order
-        config.print_cfg(app.cfg)
         self.cfg.freeze()
         self.window.activate_game_window()
 

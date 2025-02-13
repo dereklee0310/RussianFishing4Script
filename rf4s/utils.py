@@ -16,7 +16,7 @@ from rf4s.controller.detection import Detection
 BASE_DELAY = 1
 LOOP_DELAY = 2
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("rich")
 
 # ---------------------------------------------------------------------------- #
 #                            common functionalities                            #
