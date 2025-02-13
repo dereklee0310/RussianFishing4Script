@@ -22,6 +22,9 @@ from rich.logging import RichHandler
 from rich import print, box
 from rich.panel import Panel
 from rich.table import Table, Column
+from rich.console import Console
+from rich.prompt import Prompt
+from rich.text import Text
 
 sys.path.append(".") # python -m module -> python file
 
@@ -41,7 +44,6 @@ logging.basicConfig(
 logger = logging.getLogger("rich")
 # Reference: https://rich.readthedocs.io/en/latest/logging.html
 
-# ------------------------- flag name 1, help message ------------------------ #
 ARGUMENTS = (
     ("c", "coffee", "drink coffee if the stamina is low"),
     ("A", "alcohol", "regularly drink alcohol before keeping the fish"),
@@ -49,7 +51,7 @@ ARGUMENTS = (
     ("H", "harvest", "harvest baits before casting, support mode: bottom, spin, and float"),
     ("g", "gear_ratio", "switch the gear ratio after the retrieval timed out"),
     ("f", "friction_brake", "change friction brake automatically"),
-    ("l", "lift", "lift the tackle constantly while pulling a fish"), #TODO
+    ("l", "lift", "lift the tackle constantly while pulling a fish"),
     ("C", "skip_cast", "skip casting for the first fish, support mode: spin, marine"),
     ("o", "spod_rod", "recast spod rod regularly"),
     ("L", "lure", "change current lure with a random one regularly"),
@@ -75,6 +77,9 @@ LINK = "https://github.com/dereklee0310/RussianFishing4Script"
 
 ROOT = Path(__file__).resolve().parents[1]
 
+class NoColonPrompt(Prompt):
+        prompt_suffix = " "
+
 class App:
     """Main application class."""
 
@@ -95,6 +100,8 @@ class App:
         self.cfg.merge_from_other_cfg(args_cfg)
         if not self._is_smtp_valid() or not self._is_images_valid():
             sys.exit(1)
+
+        self.console = Console()
 
     def _setup_parser(self) -> ArgumentParser:
         """Configure argparser."""
@@ -293,24 +300,32 @@ class App:
             table.add_row(f"{i:>2}. {profile}")
         print(table)
 
-    def _ask_for_pid(self) -> None:
+    def _get_pid(self) -> None:
         """Get and validate user profile id from user input."""
-        print("Enter profile id to use it, q to exit.")
-        pid = input(">>> ")
-        while not self._is_pid_valid(pid):
-            if pid.strip() == "q":
+        print("Enter profile id to use, q to exit:")
+
+        while True:
+            pid = NoColonPrompt.ask(prompt=">>>")
+            if self._is_pid_valid(pid):
+                break
+            if pid == "q":
                 sys.exit()
-            print("Invalid profile id, please try again.")
-            pid = input(">>> ")
+            self._print_error("Invalid profile id, please try again.")
+
         self.cfg.ARGS.PID = int(pid)
 
-    def setup_user_profile(self):
+    def _print_error(self, msg):
+        text = Text(msg)
+        text.stylize("red")
+        self.console.print(text)
+
+    def _setup_user_profile(self):
         if self.cfg.ARGS.PNAME is not None:
             profile_name = self.cfg.ARGS.PNAME
         else:
             if self.cfg.ARGS.PID is None:
                 self._display_available_profiles()
-                self._ask_for_pid()
+                self._get_pid()
             profile_name = list(self.cfg.PROFILE)[self.cfg.ARGS.PID]
 
         if not self._is_profile_valid(profile_name):
@@ -335,10 +350,10 @@ class App:
                 )
                 sys.exit(1)
 
-    def setup_player(self):
+    def _setup_player(self):
         self.player = Player(self.cfg, self.window)
 
-    def on_release(self, key: keyboard.KeyCode) -> None:
+    def _on_release(self, key: keyboard.KeyCode) -> None:
         """Callback for button release.
 
         :param key: key code used by OS
@@ -349,15 +364,14 @@ class App:
             sys.exit()
 
     def start(self):
-        self.setup_user_profile()
+        self._setup_user_profile()
         self.setup_window()
-        self.setup_player()
-        config.print_cfg(app.cfg.SELECTED) # cfg.dump() doesn't keep the order
+        self._setup_player()
         self.cfg.freeze()
         self.window.activate_game_window()
 
         if self.cfg.KEY.QUIT != "CTRL-C":
-            listener = keyboard.Listener(on_release=self.on_release)
+            listener = keyboard.Listener(on_release=self._on_release)
             listener.start()
 
         try:
@@ -369,6 +383,7 @@ class App:
         print(self.player.gen_result("Terminated by user"))
         if self.cfg.ARGS.PLOT:
             self.player.plot_and_save()
+
 
 
 if __name__ == "__main__":
