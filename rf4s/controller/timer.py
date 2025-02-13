@@ -5,17 +5,15 @@ Module for Timer class.
 import datetime
 import time
 
-TEA_DRINK_DELAY = 300
-
-
 class Timer:
     """Class for calculating and generatiing timestamps for logs."""
 
     # pylint: disable=too-many-instance-attributes
     # there are too many counters...
 
-    def __init__(self):
+    def __init__(self, cfg):
         """Constructor method."""
+        self.cfg = cfg
         self.start_time = time.time()
         self.start_datetime = time.strftime("%m/%d %H:%M:%S", time.localtime())
 
@@ -24,8 +22,10 @@ class Timer:
         self.cast_rhour_list = []
         self.cast_ghour_list = []
 
-        self.last_tea = 0
-        self.last_alcohol = 0
+        self.last_tea_drink = 0
+        self.last_alcohol_drink = 0
+        self.last_lure_change = self.start_time
+        self.last_spod_rod_recast = self.start_time
 
         self.last_pause = 0
 
@@ -89,19 +89,34 @@ class Timer:
         :rtype: bool
         """
         cur_time = time.time()
-        if cur_time - self.last_tea > TEA_DRINK_DELAY:
-            self.last_tea = cur_time
+        if cur_time - self.last_tea_drink > self.cfg.STAT.TEA_DELAY:
+            self.last_tea_drink = cur_time
             return True
         return False
 
-    def is_alcohol_drinkable(self, alcohol_drink_delay) -> bool:
+    def is_alcohol_drinkable(self) -> bool:
         """Check if it has been a long time since the last alcohol consumption.
 
         :return: True if long enough, False otherwise
         :rtype: bool
         """
-        if time.time() - self.last_alcohol > alcohol_drink_delay:
-            self.last_alcohol = time.time()
-            self.last_tea = time.time()  # no need to drink tea so fast
+        cur_time = time.time()
+        if cur_time - self.last_alcohol_drink > self.cfg.STAT.ALCOHOL_DELAY:
+            self.last_alcohol_drink = cur_time
+            self.last_tea_drink = cur_time  # Alcohol also refill comfort
+            return True
+        return False
+
+    def is_lure_changeable(self):
+        cur_time = time.time()
+        if cur_time - self.last_lure_change > self.cfg.LURE.CHANGE_DELAY:
+            self.last_lure_change = cur_time
+            return True
+        return False
+
+    def is_spod_rod_recastable(self):
+        cur_time = time.time()
+        if cur_time - self.last_spod_rod_recast > self.cfg.SCRIPT.SPOD_ROD_RECAST_DELAY:
+            self.last_spod_rod_recast = cur_time
             return True
         return False

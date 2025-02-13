@@ -18,7 +18,6 @@ from time import sleep, time
 from urllib import parse, request
 
 import pyautogui as pag
-from dotenv import load_dotenv
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from playsound import playsound
@@ -31,6 +30,7 @@ from rf4s.component.friction_brake import FrictionBrake
 from rf4s.component.tackle import Tackle
 from rf4s.controller.detection import Detection
 from rf4s.controller.timer import Timer
+from rf4s.config import config
 
 logger = logging.getLogger("rich")
 random.seed(datetime.now().timestamp())
@@ -47,6 +47,7 @@ DISCONNECTED_DELAY = 8
 WEAR_TEXT_UPDATE_DELAY = 2
 BOUND = 2
 PUT_DOWN_DELAY = 4
+PICK_UP_DELAY = 1
 
 SCREENSHOT_DELAY = 2
 
@@ -73,7 +74,7 @@ class Player:
         self.cfg = cfg
         self.window = window
         self.detection = Detection(cfg)
-        self.timer = Timer()
+        self.timer = Timer(cfg)
         self.tackle = Tackle(cfg, self.timer)
         self.special_cast_miss = self.cfg.SELECTED.MODE in ["bottom", "marine"]
         self.friction_brake_lock = Lock()
@@ -96,8 +97,11 @@ class Player:
     def start_fishing(self) -> None:
         """Start main fishing loop with specified fishing strategt."""
         if self.cfg.ARGS.FRICTION_BRAKE:
-            logger.info("Spawing new process, do not quit the utils")
+            logger.info("Spawing new process, do not quit the script")
             self.friction_brake.monitor_process.start()
+
+        config.print_cfg(self.cfg.SELECTED) # cfg.dump() doesn't keep the order
+        logger.info("Starting fishing mode: '%s'", self.cfg.SELECTED.MODE)
         getattr(self, f"start_{self.cfg.SELECTED.MODE}_mode")()
 
     # ---------------------------------------------------------------------------- #
@@ -105,32 +109,25 @@ class Player:
     # ---------------------------------------------------------------------------- #
     def start_spin_mode(self) -> None:
         """Main spin fishing loop for "spin" and "spin_with_pause"."""
-        lure_changing_delay = self.cfg.LURE.CHANGE_DELAY
         skip_cast = self.cfg.ARGS.SKIP_CAST
         while True:
             if not skip_cast:
-                self._refill_user_stats()
-                self._harvesting_stage(pickup=True)
-                self._resetting_stage()
-                if (
-                    self.cfg.ARGS.LURE
-                    and time() - self.timer.start_time > lure_changing_delay
-                ):
-                    self._change_lure_randomly()
-                    lure_changing_delay += self.cfg.LURE.CHANGE_DELAY
-                self._casting_stage()
+                self._refill_stats()
+                self._harvest_baits(pickup=True)
+                self._reset_tackle()
+                self._change_lure()
+                self._cast_tackle()
             skip_cast = False
 
             if self.cfg.SELECTED.RETRIEVE_DURATION > 0:
                 utils.hold_mouse_button(self.cfg.SELECTED.TIGHTEN_DURATION)
-                self.tackle.retrieve_with_pause()
+                getattr(self.tackle, f"retrieve_with_{self.cfg.SELECTED.TYPE}")()
             self._retrieving_stage()
 
-            if not self.detection.is_fish_hooked():
+            if self.detection.is_fish_hooked():
+                self._pull_fish()
+            else:
                 self.cast_miss_count += 1
-                continue
-            self._drink_alcohol()
-            self._pulling_stage()
 
     def start_bottom_mode(self) -> None:
         """Main bottom fishing loop."""
@@ -138,47 +135,26 @@ class Player:
         rod_idx = 0
         check_miss_counts = [0] * rod_count
 
-        spod_rod_recast_delay = self.cfg.SCRIPT.SPOD_ROD_RECAST_DELAY
         while True:
-            if (
-                self.cfg.ARGS.SPOD_ROD
-                and time() - self.timer.start_time > spod_rod_recast_delay
-            ):
-                logger.info("Recasting spod rod")
-                spod_rod_recast_delay += self.cfg.SCRIPT.SPOD_ROD_RECAST_DELAY
-                self._access_item("spod_rod")
-                sleep(1)
-                self._resetting_stage()
-                self._casting_stage(update=False)
-                pag.click()
-                pag.press("0")
-                sleep(ANIMATION_DELAY)
+            if self.cfg.ARGS.SPOD_ROD and self.timer.is_spod_rod_recastable():
+                self._cast_spod_rod()
+            self._refill_stats()
+            self._harvest_baits()
 
-            self._refill_user_stats()
-            self._harvesting_stage()
-            if rod_count > 1:
-                if self.cfg.SCRIPT.RANDOM_ROD_SELECTION:
-                    rod_idx = (rod_idx + random.randint(1, rod_count - 1)) % rod_count
-                else:  # sequential
-                    rod_idx = (rod_idx + 1) % rod_count
-            rod_key = self.cfg.KEY.RODS[rod_idx]
+            rod_idx = self._get_next_rod_idx(rod_idx, rod_count)
             logger.info("Checking rod %s", rod_idx + 1)
-            pag.press(f"{rod_key}")
-            sleep(1)  # wait for pick up animation
-
-            if not self.detection.is_fish_hooked():
-                self._put_tackle_back(check_miss_counts, rod_idx)
-                self.cast_miss_count += 1
-                continue
-
-            check_miss_counts[rod_idx] = 0
-            self._retrieving_stage()
+            pag.press(str(self.cfg.KEY.RODS[rod_idx]))
+            sleep(PICK_UP_DELAY)
             if self.detection.is_fish_hooked():
-                self._drink_alcohol()
-                self._pulling_stage()
-            self._resetting_stage()
-            self._casting_stage()
-            pag.click()
+                check_miss_counts[rod_idx] = 0
+                self._retrieving_stage()
+                if self.detection.is_fish_hooked():
+                    self._pull_fish()
+                self._reset_tackle()
+                self._cast_tackle()
+                pag.click()
+            else:
+                self._put_down_tackle(check_miss_counts, rod_idx)
 
     def start_pirk_mode(self) -> None:
         """Main marine fishing loop."""
@@ -186,9 +162,9 @@ class Player:
 
         while True:
             if not self.cfg.ARGS.SKIP_CAST:
-                self._refill_user_stats()
-                self._resetting_stage()
-                self._casting_stage()
+                self._refill_stats()
+                self._reset_tackle()
+                self._cast_tackle()
                 self.tackle.sink()
             self.cfg.ARGS.SKIP_CAST = False
 
@@ -199,7 +175,7 @@ class Player:
 
             if self.detection.is_fish_hooked():
                 self._drink_alcohol()
-                self._pulling_stage()
+                self._pull_fish()
 
     def start_elevator_mode(self) -> None:
         """Main marine fishing loop."""
@@ -207,9 +183,9 @@ class Player:
 
         while True:
             if not self.cfg.ARGS.SKIP_CAST:
-                self._refill_user_stats()
-                self._resetting_stage()
-                self._casting_stage()
+                self._refill_stats()
+                self._reset_tackle()
+                self._cast_tackle()
                 self.tackle.sink()
             self.cfg.ARGS.SKIP_CAST = False
 
@@ -220,15 +196,15 @@ class Player:
 
             if self.detection.is_fish_hooked():
                 self._drink_alcohol()
-                self._pulling_stage()
+                self._pull_fish()
 
     def start_float_mode(self) -> None:
         """Main float fishing loop."""
         while True:
-            self._refill_user_stats()
-            self._harvesting_stage(pickup=True)
-            self._resetting_stage()
-            self._casting_stage()
+            self._refill_stats()
+            self._harvest_baits(pickup=True)
+            self._reset_tackle()
+            self._cast_tackle()
 
             logger.info("Checking float status")
             try:
@@ -241,15 +217,15 @@ class Player:
             utils.hold_mouse_button(PRE_RETRIEVAL_DURATION)
             if self.detection.is_fish_hooked():
                 self._drink_alcohol()
-                self._pulling_stage()
+                self._pull_fish()
 
     def wakey_rig_fishing(self) -> None:
         """Main wakey rig fishing loop."""
         while True:
             if not self.cfg.ARGS.SKIP_CAST:
-                self._refill_user_stats()
-                self._resetting_stage()
-                self._casting_stage()
+                self._refill_stats()
+                self._reset_tackle()
+                self._cast_tackle()
                 self.tackle.sink(marine=False)
             self.cfg.ARGS.SKIP_CAST = False
 
@@ -260,7 +236,7 @@ class Player:
 
             if self.detection.is_fish_hooked():
                 self._drink_alcohol()
-                self._pulling_stage()
+                self._pull_fish()
 
     # this is not done yet :(
     # def trolling_fishing(self) -> None:
@@ -298,7 +274,17 @@ class Player:
     # ---------------------------------------------------------------------------- #
     #            stages and their helper functions in main fishing loops           #
     # ---------------------------------------------------------------------------- #
-    def _harvesting_stage(self, pickup=False) -> None:
+    def _get_next_rod_idx(self, rod_idx, rod_count) -> int:
+        if rod_count == 1:
+            return rod_idx
+
+        if self.cfg.SCRIPT.RANDOM_ROD_SELECTION:
+            return (rod_idx + random.randint(1, rod_count - 1)) % rod_count
+        else:
+            return (rod_idx + 1) % rod_count
+
+
+    def _harvest_baits(self, pickup=False) -> None:
         """Harvest the bait."""
         if not self.cfg.ARGS.HARVEST:
             return
@@ -328,7 +314,7 @@ class Player:
 
         # when timed out, do not raise a TimeoutError but defer it to resetting stage
 
-    def _refill_user_stats(self) -> None:
+    def _refill_stats(self) -> None:
         """Refill player stats using tea and carrot."""
         if not self.cfg.ARGS.REFILL:
             return
@@ -351,7 +337,7 @@ class Player:
         if not self.cfg.ARGS.ALCOHOL:
             return
 
-        if not self.timer.is_alcohol_drinkable(self.cfg.STAT.ALCOHOL_DELAY):
+        if not self.timer.is_alcohol_drinkable():
             return
 
         logger.info("Drinking alcohol")
@@ -400,7 +386,7 @@ class Player:
             pag.click()
 
     @utils.reset_friction_brake_after
-    def _resetting_stage(self) -> None:
+    def _reset_tackle(self) -> None:
         """Reset the tackle till it's ready."""
         sleep(ANIMATION_DELAY)
         if self.detection.is_tackle_ready():
@@ -416,7 +402,7 @@ class Player:
                 return
             except exceptions.FishHookedError:
                 try:
-                    self._pulling_stage()  # do a complete stage
+                    self._pull_fish()  # do a complete stage
                 except TimeoutError:
                     pass
                 return  # whether success or not, back to main fishing loop
@@ -430,7 +416,21 @@ class Player:
             except TimeoutError:  # rare events
                 self._handle_timeout()
 
-    def _casting_stage(self, update=True):
+    def _change_lure(self):
+        if self.cfg.ARGS.LURE and self.timer.is_lure_changeable():
+            self.tackle.change_lure()
+
+    def _cast_spod_rod(self):
+        logger.info("Recasting spod rod")
+        self._access_item("spod_rod")
+        sleep(PICK_UP_DELAY)
+        self._reset_tackle()
+        self._cast_tackle(update=False)
+        pag.click() # Lock the reel
+        pag.press("0")
+        sleep(ANIMATION_DELAY)
+
+    def _cast_tackle(self, update=True):
         if self.cfg.ARGS.BITE:
             self.window.save_screenshot(self.timer.get_cur_timestamp())
         self.tackle.cast(update)
@@ -487,7 +487,7 @@ class Player:
 
     def _retrieving_stage(self) -> None:
         """Retrieve the line till it's fully retrieved with timeout handling."""
-        if self.detection.is_retrieval_finished():
+        if self.detection.is_retrieve_finished():
             return
 
         first = True
@@ -525,8 +525,8 @@ class Player:
             except TimeoutError:
                 self._handle_timeout()
                 if self.cfg.PIRK_TIMEOUT_ACTION == "recast":
-                    self._resetting_stage()
-                    self._casting_stage()
+                    self._reset_tackle()
+                    self._cast_tackle()
                     self.tackle.sink()
                 elif self.cfg.PIRK_TIMEOUT_ACTION == "adjust":
                     # adjust lure depth if no fish is hooked
@@ -563,8 +563,9 @@ class Player:
 
         raise TimeoutError
 
-    def _pulling_stage(self) -> None:
+    def _pull_fish(self) -> None:
         """Pull the fish up, then handle it."""
+        self._drink_alcohol()
         while True:
             try:
                 self.tackle.pull()
@@ -937,26 +938,7 @@ class Player:
 
             logger.warning("Lure for replacement found but already broken")
 
-    def _change_lure_randomly(self) -> None:
-        """Open menu, select a random lure and replace the current one."""
-        logger.info("Search for favorite items")
-        with pag.hold("b"):
-            sleep(ANIMATION_DELAY)
-            favorite_item_positions = list(self.detection.get_favorite_item_positions())
-            random.shuffle(favorite_item_positions)
-            for favorite_item_position in favorite_item_positions:
-                # check if the lure for replacement is already broken
-                x, y = utils.get_box_center(favorite_item_position)
-                if pag.pixel(x - 75, y + 190) != (178, 59, 30):  # magic value
-                    logger.info("The lure has been replaced")
-                    pag.moveTo(x - 75, y + 190)
-                    pag.click()
-                    break
-                logger.warning("Lure for replacement found but already broken")
-            logger.warning("Lure for replacement not found, stay unchanged")
-        sleep(ANIMATION_DELAY)
-
-    def _put_tackle_back(self, check_miss_counts: list[int], rod_idx: int) -> None:
+    def _put_down_tackle(self, check_miss_counts: list[int], rod_idx: int) -> None:
         """Update counters, put down the tackle and wait for a while.
 
         :param check_miss_counts: miss counts of all rods
@@ -964,11 +946,12 @@ class Player:
         :param rod_idx: current index of the rod
         :type rod_idx: int
         """
+        self.cast_miss_count += 1
         check_miss_counts[rod_idx] += 1
         if check_miss_counts[rod_idx] >= self.cfg.SELECTED.CHECK_MISS_LIMIT:
             check_miss_counts[rod_idx] = 0
-            self._resetting_stage()
-            self._casting_stage()
+            self._reset_tackle()
+            self._cast_tackle()
             pag.click()
 
         pag.press("0")

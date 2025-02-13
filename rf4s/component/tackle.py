@@ -120,27 +120,13 @@ class Tackle:
                 logger.info("Lure reached bottom layer")
                 break
 
-            if self.is_fish_hooked_twice():
+            if self.detection.is_fish_hooked_twice():
                 logger.info("Fish hooked")
                 pag.click()
                 return
 
         utils.hold_mouse_button(self.cfg.SELECTED.TIGHTEN_DURATION)
 
-    def is_fish_hooked_twice(self) -> bool:
-        """Check if the fish is still hooked after a short delay.
-
-        :return: True if the fish is still hooked, False otherwise
-        :rtype: bool
-        """
-        if not self.detection.is_fish_hooked():
-            return False
-
-        # check if the fish got away after a short delay
-        sleep(self.cfg.SELECTED.HOOK_DELAY)
-        if self.detection.is_fish_hooked():
-            return True
-        return False
 
     @utils.toggle_clicklock
     @utils.release_keys_after
@@ -166,7 +152,7 @@ class Tackle:
                 if self.cfg.ARGS.LIFT:
                     utils.hold_mouse_button(LIFT_DURATION, button="right")
 
-            if self.detection.is_retrieval_finished():
+            if self.detection.is_retrieve_finished():
                 sleep(0 if self.cfg.ARGS.RAINBOW_LINE else 2)
                 return
 
@@ -179,20 +165,28 @@ class Tackle:
 
         raise TimeoutError
 
-    @utils.release_keys_after
     def retrieve_with_pause(self) -> None:
         """Retreive the line, pause periodically."""
         logger.info("Retrieving with pause")
+        self._special_retrieve(button="left")
 
+    @utils.toggle_clicklock
+    def retrieve_with_lift(self) -> None:
+        """Retreive the line, pause periodically."""
+        logger.info("Retrieving with lift")
+        self._special_retrieve(button="right")
+
+    @utils.release_keys_after
+    def _special_retrieve(self, button: str) -> None:
         if self.cfg.SELECTED.PRE_ACCELERATION:
             pag.keyDown("shift")
-
         i = RETRIEVAL_WITH_PAUSE_TIMEOUT
         while i > 0:
-            utils.hold_mouse_button(self.cfg.SELECTED.RETRIEVE_DURATION)
+            utils.hold_mouse_button(self.cfg.SELECTED.RETRIEVE_DURATION, button)
             i = utils.sleep_and_decrease(i, self.cfg.SELECTED.RETRIEVE_DELAY)
-            if self.detection.is_fish_hooked() or self.detection.is_retrieval_finished():
+            if self.detection.is_fish_hooked() or self.detection.is_retrieve_finished():
                 return
+
 
     @utils.release_keys_after
     def pirk(self, ctrl_enabled: bool) -> None:
@@ -206,7 +200,7 @@ class Tackle:
 
         i = self.cfg.SELECTED.PIRK_TIMEOUT
         while i > 0:
-            if self.is_fish_hooked_twice():
+            if self.detection.is_fish_hooked_twice():
                 logger.info("Fish hooked")
                 pag.click()
                 return
@@ -232,7 +226,7 @@ class Tackle:
         lock = True  # reel is locked after tackle.sink()
         i = self.cfg.SELECTED.ELEVATE_TIMEOUT
         while i > 0:
-            if self.is_fish_hooked_twice():
+            if self.detection.is_fish_hooked_twice():
                 logger.info("Fish hooked")
                 pag.click()
                 return
@@ -326,3 +320,22 @@ class Tackle:
         for x, y in coords:
             win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, x, y, 0, 0)
             sleep(ANIMATION_DELAY)
+
+    def change_lure(self) -> None:
+        """Open menu, select a random lure and replace the current one."""
+        logger.info("Search for favorite items")
+        with pag.hold("b"):
+            sleep(ANIMATION_DELAY)
+            favorite_item_positions = list(self.detection.get_favorite_item_positions())
+            random.shuffle(favorite_item_positions)
+            for favorite_item_position in favorite_item_positions:
+                # check if the lure for replacement is already broken
+                x, y = utils.get_box_center(favorite_item_position)
+                if pag.pixel(x - 75, y + 190) != (178, 59, 30):  # magic value
+                    logger.info("The lure has been replaced")
+                    pag.moveTo(x - 75, y + 190)
+                    pag.click()
+                    break
+                logger.warning("Lure for replacement found but already broken")
+            logger.warning("Lure for replacement not found, stay unchanged")
+        sleep(ANIMATION_DELAY)

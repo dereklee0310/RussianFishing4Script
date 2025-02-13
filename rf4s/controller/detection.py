@@ -7,6 +7,7 @@ Module for pyautogui.locateOnScreen and pag.pixel wrappers.
 
 import logging
 import sys
+import time
 from pathlib import Path
 
 import pyautogui as pag
@@ -195,11 +196,21 @@ class Detection:
     def is_fish_hooked(self):
         return self._get_image_box("get", 0.9)
 
+    def is_fish_hooked_twice(self) -> bool:
+        if not self.is_fish_hooked():
+            return False
+
+        # check if the fish got away after a short delay
+        time.sleep(self.cfg.SELECTED.HOOK_DELAY)
+        if self.is_fish_hooked():
+            return True
+        return False
+
     def is_fish_captured(self):
         return self._get_image_box("keep", 0.9)
 
     # ---------------------------- retrieval detection --------------------------- #
-    def is_retrieval_finished(self):
+    def is_retrieve_finished(self):
         if self.cfg.ARGS.RAINBOW_LINE:
             return self._is_rainbow_line_0or5m()
         return self._is_spool_full()
