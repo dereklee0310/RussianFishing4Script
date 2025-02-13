@@ -416,7 +416,7 @@ if __name__ == "__main__":
     app = App()
 
     print(ASCII_LOGO)
-    print("https://github.com/pwnyprod/RussianFishing4Script")
+    print("https://github.com/dereklee0310/RussianFishing4Script")
 
     if app.pid is None:
         app.display_available_profiles()
