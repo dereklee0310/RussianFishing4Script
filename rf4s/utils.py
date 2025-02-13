@@ -13,7 +13,7 @@ from pyscreeze import Box
 from rf4s.controller.detection import Detection
 
 # BASE_DELAY + LOOP_DELAY >= 2.2 to trigger clicklock
-BASE_DELAY = 1
+BASE_DELAY = 0.2
 LOOP_DELAY = 2
 
 logger = logging.getLogger("rich")
