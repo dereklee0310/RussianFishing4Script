@@ -26,8 +26,7 @@ class Timer:
         self.last_alcohol_drink = 0
         self.last_lure_change = self.start_time
         self.last_spod_rod_recast = self.start_time
-
-        self.last_pause = 0
+        self.last_pause = self.start_time
 
     def get_running_time(self) -> str:
         """Calculate the execution time of the program.
@@ -118,5 +117,12 @@ class Timer:
         cur_time = time.time()
         if cur_time - self.last_spod_rod_recast > self.cfg.SCRIPT.SPOD_ROD_RECAST_DELAY:
             self.last_spod_rod_recast = cur_time
+            return True
+        return False
+
+    def is_script_pausable(self):
+        cur_time = time.time()
+        if cur_time - self.last_pause > self.cfg.PAUSE.DELAY:
+            self.last_pause = cur_time
             return True
         return False

@@ -114,7 +114,8 @@ class Player:
                 self._refill_stats()
                 self._harvest_baits(pickup=True)
                 self._reset_tackle()
-                self._change_lure()
+                if self.cfg.ARGS.LURE and self.timer.is_lure_changeable():
+                    self.tackle.change_lure()
                 self._cast_tackle()
             skip_cast = False
 
@@ -155,22 +156,13 @@ class Player:
 
     def start_pirk_mode(self) -> None:
         """Main marine fishing loop."""
-        self._start_trolling()
-
-        while True:
-            if not self.cfg.ARGS.SKIP_CAST:
-                self._refill_stats()
-                self._reset_tackle()
-                self._cast_tackle()
-                self.tackle.sink()
-            self.cfg.ARGS.SKIP_CAST = False
-
-            self._do_pirking()
-            self._retrieve_line()
-            self._pull_fish()
+        self._start_sink_mode(pirk=True)
 
     def start_elevator_mode(self) -> None:
         """Main marine fishing loop."""
+        self._start_sink_mode(pirk=False)
+
+    def _start_sink_mode(self, pirk: bool):
         self._start_trolling()
 
         while True:
@@ -181,7 +173,10 @@ class Player:
                 self.tackle.sink()
             self.cfg.ARGS.SKIP_CAST = False
 
-            self._do_elevating()
+            if pirk:
+                self._do_pirking()
+            else:
+                self._do_elevating()
             self._retrieve_line()
             self._pull_fish()
 
@@ -252,12 +247,8 @@ class Player:
 
     def _harvest_baits(self, pickup=False) -> None:
         """Harvest the bait."""
-        if not self.cfg.ARGS.HARVEST:
+        if not self.cfg.ARGS.HARVEST or not self.detection.is_energy_high():
             return
-
-        if not self.detection.is_energy_high():
-            return
-
         logger.info("Harvesting baits")
         self._access_item("digging_tool")
         sleep(PULL_OUT_DELAY)
@@ -267,7 +258,6 @@ class Player:
         while i > 0:
             i = utils.sleep_and_decrease(i, DIG_DELAY)
             if self.detection.is_harvest_success():
-                # accept result and hide the tool
                 pag.press("space")
                 pag.press("backspace")
                 sleep(ANIMATION_DELAY)
@@ -275,10 +265,10 @@ class Player:
                 break
 
         if pickup:
-            self._access_item("main_rod")  # pick up again
-            sleep(1)
+            self._access_item("main_rod")
+            sleep(PICK_UP_DELAY)
 
-        # when timed out, do not raise a TimeoutError but defer it to resetting stage
+        # When timed out, do not raise a TimeoutError but defer it to resetting stage
 
     def _refill_stats(self) -> None:
         """Refill player stats using tea and carrot."""
@@ -286,13 +276,12 @@ class Player:
             return
 
         logger.info("Refilling player stats")
-        # comfort is affected by weather, add a check to avoid over drink
+        # Comfort is affected by weather, add a check to avoid over drink
         if self.detection.is_comfort_low() and self.timer.is_tea_drinkable():
             self._access_item("tea")
             self.tea_count += 1
             sleep(ANIMATION_DELAY)
 
-        # refill food level
         if self.detection.is_hunger_low():
             self._access_item("carrot")
             self.carrot_count += 1
@@ -300,36 +289,30 @@ class Player:
 
     def _drink_alcohol(self) -> None:
         """Drink alcohol with given quantity."""
-        if not self.cfg.ARGS.ALCOHOL:
-            return
-
-        if not self.timer.is_alcohol_drinkable():
+        if not self.cfg.ARGS.ALCOHOL or not self.timer.is_alcohol_drinkable():
             return
 
         logger.info("Drinking alcohol")
         for _ in range(self.cfg.STAT.ALCOHOL_PER_DRINK):
             self._access_item("alcohol")
-            self.alcohol_count += 1
             sleep(ANIMATION_DELAY)
+        self.alcohol_count += self.cfg.STAT.ALCOHOL_PER_DRINK
 
     def _drink_coffee(self) -> None:
         """Drink coffee."""
-        if not self.cfg.ARGS.COFFEE:
-            return
-
-        if self.detection.is_energy_high():
+        if not self.cfg.ARGS.COFFEE or self.detection.is_energy_high():
             return
 
         if self.cur_coffee_count > self.cfg.STAT.COFFEE_LIMIT:
-            pag.press("esc")  # back to control panel to reduce power usage
+            pag.press("esc")  # Just back to control panel to reduce power usage
             self._handle_termination("Coffee limit reached", shutdown=False)
 
         logger.info("Drinking coffee")
         for _ in range(self.cfg.COFFEE_PER_DRINK):
             self._access_item("coffee")
-            self.cur_coffee_count += 1
-            self.total_coffee_count += 1
             sleep(ANIMATION_DELAY)
+        self.cur_coffee_count += self.cfg.COFFEE_PER_DRINK
+        self.total_coffee_count += self.cfg.COFFEE_PER_DRINK
 
 
     def _access_item(self, item: str) -> None:
@@ -338,13 +321,12 @@ class Player:
         :param item: the name of the item
         :type item: str
         """
-        # key = getattr(self.cfg, f"{item}_shortcut")
         key = str(self.cfg.KEY[item.upper()])
         if key != "-1":
             pag.press(key)
             return
 
-        # key = 1, item is a food
+        # Open food menu
         with pag.hold("t"):
             sleep(ANIMATION_DELAY)
             food_position = self.detection.get_food_position(item)
@@ -367,24 +349,17 @@ class Player:
                 self.tackle.reset()
                 return
             except exceptions.FishHookedError:
-                try:
-                    self._pull_fish()  # do a complete stage
-                except TimeoutError:
-                    pass
-                return  # whether success or not, back to main fishing loop
+                self._pull_fish()
+                return
             except exceptions.FishCapturedError:
                 self._handle_fish()
                 return
             except exceptions.GroundbaitNotChosenError:
-                # trick to avoid invalid cast
+                # Put tackle down to avoid invalid cast
                 pag.press("0")
                 return
             except TimeoutError:  # rare events
                 self._handle_timeout()
-
-    def _change_lure(self):
-        if self.cfg.ARGS.LURE and self.timer.is_lure_changeable():
-            self.tackle.change_lure()
 
     def _cast_spod_rod(self):
         logger.info("Recasting spod rod")
@@ -396,11 +371,21 @@ class Player:
         sleep(ANIMATION_DELAY)
 
     def _cast_tackle(self, lock=False, update=True):
+        if self.cfg.ARGS.PAUSE and self.timer.is_script_pausable():
+            self._pause_script()
+
         if self.cfg.ARGS.BITE:
             self.window.save_screenshot(self.timer.get_cur_timestamp())
         self.tackle.cast(lock, update)
         if update:
             self.timer.update_cast_time()
+
+    def _pause_script(self):
+        pag.press("esc")
+        bound = self.cfg.PAUSE.DURATION // 20
+        offset = random.randint(-bound, bound)
+        sleep(self.cfg.PAUSE.DURATION + offset)
+        pag.press("esc")
 
     def _handle_timeout(self) -> None:
         """Handle common timeout events."""
@@ -552,7 +537,6 @@ class Player:
         !! a trophy ruffe will break the checking mechanism?
         """
         logger.info("Handling fish")
-
         if self.cfg.ARGS.SCREENSHOT:
             self.window.save_screenshot(self.timer.get_cur_timestamp())
 
@@ -562,41 +546,21 @@ class Player:
             self.unmarked_count += 1
             if self.cfg.ARGS.MARKED and not self._is_fish_whitelisted():
                 pag.press("backspace")
-                if (
-                    self.cfg.ARGS.PAUSE
-                    and time() - self.timer.last_pause > self.cfg.PAUSE.DELAY
-                ):
-                    pag.press("esc")
-                    bound = self.cfg.PAUSE.DURATION // 20
-                    offset = random.randint(-bound, bound)
-                    self.cfg.PAUSE.DURATION = self.cfg.PAUSE.DURATION + offset
-                    pag.press("esc")
-                    self.timer.last_pause = time()
                 return
 
-        # fish is marked, unmarked release is disabled, or fish is in whitelist
+        # Fish is marked, unmarked release is disabled, or fish is in whitelist
         sleep(self.cfg.KEEPNET.DELAY)
         pag.press("space")
 
         self.keep_fish_count += 1
-        if self.keep_fish_count == self.cfg.KEEPNET.CAPACITY - self.cfg.ARGS.FISHES_IN_KEEPNET:
+        limit = self.cfg.KEEPNET.CAPACITY - self.cfg.ARGS.FISHES_IN_KEEPNET
+        if self.keep_fish_count == limit:
             self._handle_full_keepnet()
 
-        # avoid wrong cast hour
+        # Avoid wrong cast hour
         if self.special_cast_miss:
             self.timer.update_cast_time()
         self.timer.add_cast_time()
-
-        if (
-            self.cfg.ARGS.PAUSE
-            and time() - self.timer.last_pause > self.cfg.PAUSE.DELAY
-        ):
-            pag.press("esc")
-            bound = self.cfg.PAUSE.DURATION // 20
-            offset = random.randint(-bound, bound)
-            sleep(self.cfg.PAUSE.DURATION + offset)
-            pag.press("esc")
-            self.timer.last_pause = time()
 
     def _handle_full_keepnet(self):
         msg = "Keepnet is full"
@@ -604,6 +568,7 @@ class Player:
             case "alarm":
                 logger.warning(msg)
                 playsound(str(Path(self.cfg.SCRIPT.ALARM_SOUND).resolve()))
+                #TODO: ask a prompt?
             case "quit":
                 self.general_quit(msg)
             case _:
@@ -628,9 +593,9 @@ class Player:
         :param msg: the cause of the termination
         :type msg: str
         """
-        sleep(ANIMATION_DELAY)  # pre-delay
+        sleep(ANIMATION_DELAY)
         pag.press("esc")
-        pag.click()  # prevent possible stuck
+        pag.click()  # Avoid possible ClickLock stuck
         sleep(ANIMATION_DELAY)
         pag.moveTo(self.detection.get_quit_position())
         pag.click()
@@ -642,9 +607,9 @@ class Player:
 
     def disconnected_quit(self) -> None:
         """Quit the game through main menu."""
-        pag.click()  # release possible clicklock
+        pag.click()  # Avoid possible ClickLock stuck
         pag.press("space")
-        # sleep to bypass the black screen (experimental)
+        # Sleep to bypass the black screen (experimental)
         sleep(DISCONNECTED_DELAY)
 
         pag.press("space")
@@ -670,7 +635,7 @@ class Player:
         mum_desc = f"{self.marked_count} / {self.unmarked_count} / {marked_ratio}%"
 
         bite_ratio = int(fish_count_total / cast_count * 100) if cast_count != 0 else 0
-        cfb_desc = f"{fish_count_total} / {cast_count} / {bite_ratio}%"
+        hmb_desc = f"{fish_count_total} / {cast_count} / {bite_ratio}%"
 
         results = (
             ("Cause of termination", msg),
@@ -679,7 +644,7 @@ class Player:
             ("Running time", self.timer.get_running_time()),
             ("Fish caught", self.keep_fish_count),
             ("Marked / Unmarked / Mark ratio", mum_desc),
-            ("Hit / Miss / Bite ratio", cfb_desc),
+            ("Hit / Miss / Bite ratio", hmb_desc),
             ("Alcohol consumed", self.alcohol_count),
             ("Coffee consumed", self.total_coffee_count),
             ("Tea consumed", self.tea_count),
@@ -786,8 +751,8 @@ class Player:
         # _.canvas.manager.set_window_title('Record')
         ax[0].set_ylabel("Fish")
 
-        last_rhour = cast_rhour_list[-1]  # hour: 0, 1, 2, 3, 4, "5"
-        fish_per_rhour = [0] * (last_rhour + 1)  # idx: #(0, 1, 2, 3, 4, 5) = 6
+        last_rhour = cast_rhour_list[-1]  # Hour: 0, 1, 2, 3, 4, "5"
+        fish_per_rhour = [0] * (last_rhour + 1)  # Idx: (0, 1, 2, 3, 4, 5) = 6
         for hour in cast_rhour_list:
             fish_per_rhour[hour] += 1
         ax[0].plot(range(last_rhour + 1), fish_per_rhour)
@@ -819,7 +784,7 @@ class Player:
         logger.info("Renewing boat ticket")
         ticket_loc = self.detection.get_ticket_position(self.cfg.ARGS.BOAT_TICKET)
         if ticket_loc is None:
-            pag.press("esc")  # quit ticket menu
+            pag.press("esc")  # Close ticket menu
             sleep(ANIMATION_DELAY)
             self.general_quit("Boat ticket not found")
         pag.moveTo(ticket_loc)
@@ -829,7 +794,6 @@ class Player:
     def _replace_broken_lures(self):
         """Replace multiple broken items (lures)."""
         logger.info("Replacing broken lures")
-        # open tackle menu
         pag.press("v")
         sleep(ANIMATION_DELAY)
 
@@ -893,9 +857,9 @@ class Player:
                 sleep(ANIMATION_DELAY)
                 self.general_quit(msg)
 
-            # check if the lure for replacement is already broken
+            # Check if the lure for replacement is already broken
             x, y = utils.get_box_center(favorite_item_position)
-            if pag.pixel(x - 75, y + 190) != (178, 59, 30):  # magic value
+            if pag.pixel(x - 75, y + 190) != (178, 59, 30):  # Magic value
                 logger.info("The broken lure has been replaced")
                 pag.moveTo(x - 75, y + 190)
                 pag.click(clicks=2, interval=0.1)
