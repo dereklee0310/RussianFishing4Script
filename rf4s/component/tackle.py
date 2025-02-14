@@ -222,27 +222,27 @@ class Tackle:
         """
         logger.info("Dropping" if drop else "Rising")
 
-        lock = True  # reel is locked after tackle.sink()
+        locked = True  # Reel is locked after tackle.sink()
         i = self.cfg.SELECTED.ELEVATE_TIMEOUT
         while i > 0:
             if self.detection.is_fish_hooked_twice():
-                logger.info("Fish hooked")
                 pag.click()
                 return
 
-            if drop:
+            if self.cfg.SELECTED.DROP and drop:
                 pag.press("enter")
-                if lock:
-                    i = utils.sleep_and_decrease(i, self.cfg.SELECTED.ELEVATE_DELAY)
+                if locked:
+                    delay = self.cfg.SELECTED.ELEVATE_DELAY
                 else:
-                    i = utils.sleep_and_decrease(i, self.cfg.SELECTED.ELEVATE_DURATION)
+                    delay = self.cfg.SELECTED.ELEVATE_DURATION
+                i = utils.sleep_and_decrease(i, delay)
             else:
-                if lock:
+                if locked:
                     i = utils.sleep_and_decrease(i, self.cfg.SELECTED.ELEVATE_DELAY)
                 else:
                     utils.hold_mouse_button(self.cfg.SELECTED.ELEVATE_DURATION)
                     i -= self.cfg.SELECTED.ELEVATE_DURATION
-            lock = not lock
+            locked = not locked
 
         raise TimeoutError
 

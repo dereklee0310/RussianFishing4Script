@@ -181,9 +181,7 @@ class Player:
                 self.tackle.sink()
             self.cfg.ARGS.SKIP_CAST = False
 
-            if not self.detection.is_fish_hooked():
-                self._elevating_stage()
-
+            self._do_elevating()
             self._retrieve_line()
             self._pull_fish()
 
@@ -492,18 +490,18 @@ class Player:
                 break
             except TimeoutError:
                 self._handle_timeout()
-                if self.cfg.PIRK_TIMEOUT_ACTION == "recast":
+                if self.cfg.SELECTED.ADJUST:
+                    logger.info("Adjusting lure depth")
+                    pag.press("enter")  # Open reel
+                    sleep(self.cfg.SELECTED.DEPTH_ADJUST_DELAY)
+                    utils.hold_mouse_button(self.cfg.SELECTED_TIGHTEN_DURATION)
+                else:
                     self._reset_tackle()
                     self._cast_tackle()
                     self.tackle.sink()
-                else:
-                    logger.info("Adjusting lure depth")
-                    pag.press("enter")  # Open reel
-                    sleep(self.cfg.SELECTED.DEPTH_ADJUST_DURATION)
-                    utils.hold_mouse_button(self.cfg.SELECTED_TIGHTEN_DURATION)
                 self.cast_miss_count += 1
 
-    def _elevating_stage(self) -> None:
+    def _do_elevating(self) -> None:
         """Perform elevating till a fish hooked with timeout handling."""
         drop = False
         while True:
