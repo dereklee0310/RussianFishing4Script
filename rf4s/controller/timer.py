@@ -29,7 +29,7 @@ class Timer:
 
         self.last_pause = 0
 
-    def get_duration(self) -> str:
+    def get_running_time(self) -> str:
         """Calculate the execution time of the program.
 
         :return: formatted execution time (hh:mm:ss)
@@ -63,18 +63,18 @@ class Timer:
         """
         return time.strftime("%m/%d %H:%M:%S", time.localtime())
 
-    def update_cast_hour(self) -> None:
+    def update_cast_time(self) -> None:
         """Update latest real and in-game hour of casting."""
         dt = datetime.datetime.now()
         self.cast_rhour = int((time.time() - self.start_time) // 3600)
         self.cast_ghour = int((dt.minute / 60 + dt.second / 3600) * 24 % 24)
 
-    def add_cast_hour(self) -> None:
+    def add_cast_time(self) -> None:
         """Record latest real and in-game hour"""
         self.cast_rhour_list.append(self.cast_rhour)
         self.cast_ghour_list.append(self.cast_ghour)
 
-    def get_cast_hour_list(self) -> tuple[list[int]]:
+    def get_cast_time_list(self) -> tuple[list[int]]:
         """Getter.
 
         :return: lists of real and in-game hours

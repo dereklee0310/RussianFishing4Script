@@ -42,7 +42,6 @@ DIG_TIMEOUT = 32
 LOOP_DELAY = 2
 ANIMATION_DELAY = 0.5
 TICKET_EXPIRE_DELAY = 16
-LURE_ADJUST_DELAY = 4
 DISCONNECTED_DELAY = 8
 WEAR_TEXT_UPDATE_DELAY = 2
 BOUND = 2
@@ -122,7 +121,7 @@ class Player:
             if self.cfg.SELECTED.RETRIEVE_DURATION > 0:
                 utils.hold_mouse_button(self.cfg.SELECTED.TIGHTEN_DURATION)
                 getattr(self.tackle, f"retrieve_with_{self.cfg.SELECTED.TYPE}")()
-            self._retrieving_stage()
+            self._retrieve_line()
 
             if self.detection.is_fish_hooked():
                 self._pull_fish()
@@ -147,18 +146,16 @@ class Player:
             sleep(PICK_UP_DELAY)
             if self.detection.is_fish_hooked():
                 check_miss_counts[rod_idx] = 0
-                self._retrieving_stage()
-                if self.detection.is_fish_hooked():
-                    self._pull_fish()
+                self._retrieve_line()
+                self._pull_fish()
                 self._reset_tackle()
-                self._cast_tackle()
-                pag.click()
+                self._cast_tackle(lock=True)
             else:
                 self._put_down_tackle(check_miss_counts, rod_idx)
 
     def start_pirk_mode(self) -> None:
         """Main marine fishing loop."""
-        self._trolling_stage()
+        self._start_trolling()
 
         while True:
             if not self.cfg.ARGS.SKIP_CAST:
@@ -168,18 +165,13 @@ class Player:
                 self.tackle.sink()
             self.cfg.ARGS.SKIP_CAST = False
 
-            if not self.detection.is_fish_hooked():
-                self._pirking_stage()
-
-            self._retrieving_stage()
-
-            if self.detection.is_fish_hooked():
-                self._drink_alcohol()
-                self._pull_fish()
+            self._do_pirking()
+            self._retrieve_line()
+            self._pull_fish()
 
     def start_elevator_mode(self) -> None:
         """Main marine fishing loop."""
-        self._trolling_stage()
+        self._start_trolling()
 
         while True:
             if not self.cfg.ARGS.SKIP_CAST:
@@ -192,11 +184,8 @@ class Player:
             if not self.detection.is_fish_hooked():
                 self._elevating_stage()
 
-            self._retrieving_stage()
-
-            if self.detection.is_fish_hooked():
-                self._drink_alcohol()
-                self._pull_fish()
+            self._retrieve_line()
+            self._pull_fish()
 
     def start_float_mode(self) -> None:
         """Main float fishing loop."""
@@ -215,28 +204,7 @@ class Player:
 
             sleep(self.cfg.SELECTED.PULL_DELAY)
             utils.hold_mouse_button(PRE_RETRIEVAL_DURATION)
-            if self.detection.is_fish_hooked():
-                self._drink_alcohol()
-                self._pull_fish()
-
-    def wakey_rig_fishing(self) -> None:
-        """Main wakey rig fishing loop."""
-        while True:
-            if not self.cfg.ARGS.SKIP_CAST:
-                self._refill_stats()
-                self._reset_tackle()
-                self._cast_tackle()
-                self.tackle.sink(marine=False)
-            self.cfg.ARGS.SKIP_CAST = False
-
-            if self.cfg.SELECTED.PIRK_TIMEOUT > 0:
-                self._pirking_stage()
-
-            self._retrieving_stage()
-
-            if self.detection.is_fish_hooked():
-                self._drink_alcohol()
-                self._pull_fish()
+            self._pull_fish()
 
     # this is not done yet :(
     # def trolling_fishing(self) -> None:
@@ -425,15 +393,16 @@ class Player:
         self._access_item("spod_rod")
         sleep(PICK_UP_DELAY)
         self._reset_tackle()
-        self._cast_tackle(update=False)
-        pag.click() # Lock the reel
+        self._cast_tackle(lock=True, update=False)
         pag.press("0")
         sleep(ANIMATION_DELAY)
 
-    def _cast_tackle(self, update=True):
+    def _cast_tackle(self, lock=False, update=True):
         if self.cfg.ARGS.BITE:
             self.window.save_screenshot(self.timer.get_cur_timestamp())
-        self.tackle.cast(update)
+        self.tackle.cast(lock, update)
+        if update:
+            self.timer.update_cast_time()
 
     def _handle_timeout(self) -> None:
         """Handle common timeout events."""
@@ -485,7 +454,7 @@ class Player:
         print(result)
         sys.exit()
 
-    def _retrieving_stage(self) -> None:
+    def _retrieve_line(self) -> None:
         """Retrieve the line till it's fully retrieved with timeout handling."""
         if self.detection.is_retrieve_finished():
             return
@@ -515,12 +484,11 @@ class Player:
         if gr_switched:
             self.tackle.switch_gear_ratio()
 
-    def _pirking_stage(self) -> None:
+    def _do_pirking(self) -> None:
         """Perform pirking till a fish hooked with timeout handling."""
-        ctrl_enabled = self.cfg.SELECTED.MODE == "wakey_rig"
         while True:
             try:
-                self.tackle.pirk(ctrl_enabled)
+                self.tackle.pirk()
                 break
             except TimeoutError:
                 self._handle_timeout()
@@ -528,14 +496,11 @@ class Player:
                     self._reset_tackle()
                     self._cast_tackle()
                     self.tackle.sink()
-                elif self.cfg.PIRK_TIMEOUT_ACTION == "adjust":
-                    # adjust lure depth if no fish is hooked
+                else:
                     logger.info("Adjusting lure depth")
-                    pag.press("enter")  # open reel
-                    sleep(LURE_ADJUST_DELAY)
+                    pag.press("enter")  # Open reel
+                    sleep(self.cfg.SELECTED.DEPTH_ADJUST_DURATION)
                     utils.hold_mouse_button(self.cfg.SELECTED_TIGHTEN_DURATION)
-                # TODO: setting saturation
-                # TODO: improve dedicated miss count for marine fishing
                 self.cast_miss_count += 1
 
     def _elevating_stage(self) -> None:
@@ -565,6 +530,9 @@ class Player:
 
     def _pull_fish(self) -> None:
         """Pull the fish up, then handle it."""
+        if not self.detection.is_fish_hooked():
+            return
+
         self._drink_alcohol()
         while True:
             try:
@@ -578,7 +546,7 @@ class Player:
                 if self.cfg.SELECTED.MODE == "float":
                     sleep(PUT_DOWN_DELAY)
                     continue
-                self._retrieving_stage()
+                self._retrieve_line()
 
     def _handle_fish(self) -> None:
         """Keep or release the fish and record the fish count.
@@ -618,8 +586,8 @@ class Player:
 
         # avoid wrong cast hour
         if self.special_cast_miss:
-            self.timer.update_cast_hour()
-        self.timer.add_cast_hour()
+            self.timer.update_cast_time()
+        self.timer.add_cast_time()
 
         if (
             self.cfg.ARGS.PAUSE
@@ -710,7 +678,7 @@ class Player:
             ("Cause of termination", msg),
             ("Start time", self.timer.get_start_datetime()),
             ("Finish time", self.timer.get_cur_datetime()),
-            ("Running time", self.timer.get_duration()),
+            ("Running time", self.timer.get_running_time()),
             ("Fish caught", self.keep_fish_count),
             ("Marked / Unmarked / Mark ratio", mum_desc),
             ("Hit / Miss / Bite ratio", cfb_desc),
@@ -815,7 +783,7 @@ class Player:
         if self.keep_fish_count == 0:
             return
 
-        cast_rhour_list, cast_ghour_list = self.timer.get_cast_hour_list()
+        cast_rhour_list, cast_ghour_list = self.timer.get_cast_time_list()
         _, ax = plt.subplots(nrows=1, ncols=2)
         # _.canvas.manager.set_window_title('Record')
         ax[0].set_ylabel("Fish")
@@ -951,15 +919,14 @@ class Player:
         if check_miss_counts[rod_idx] >= self.cfg.SELECTED.CHECK_MISS_LIMIT:
             check_miss_counts[rod_idx] = 0
             self._reset_tackle()
-            self._cast_tackle()
-            pag.click()
+            self._cast_tackle(lock=True)
 
         pag.press("0")
         random_offset = random.uniform(-BOUND, BOUND)
         sleep(self.cfg.SELECTED.CHECK_DELAY + random_offset)
 
 
-    def _trolling_stage(self):
+    def _start_trolling(self):
         """Start trolling and change moving direction based on trolling setting.
 
         Available options: never, forward, left, right.

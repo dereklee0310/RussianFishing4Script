@@ -82,7 +82,7 @@ class Tackle:
 
         raise TimeoutError
 
-    def cast(self, update=True) -> None:
+    def cast(self, lock) -> None:
         """Cast the rod, then wait for the lure/bait to fly and sink.
 
         :param update: update the record or not (for spod rod), defaults to True
@@ -103,20 +103,20 @@ class Tackle:
                 utils.hold_mouse_button(duration)
 
         sleep(self.cfg.SELECTED.CAST_DELAY)
-        if update:
-            self.timer.update_cast_hour()
+        if lock:
+            pag.click()
 
-    def sink(self, marine: bool = True) -> None:
+    def sink(self) -> None:
         """Sink the lure until an event happend, designed for marine and wakey rig.
 
         :param marine: whether to check is lure moving in bottom layer, defaults to True
         :type marine: bool, optional
         """
-        logger.info("Sinking Lure")
+        logger.info("Sinking")
         i = self.cfg.SELECTED.SINK_TIMEOUT
         while i > 0:
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
-            if marine and self.detection.is_moving_in_bottom_layer():
+            if self.detection.is_moving_in_bottom_layer():
                 logger.info("Lure reached bottom layer")
                 break
 
@@ -189,7 +189,7 @@ class Tackle:
 
 
     @utils.release_keys_after
-    def pirk(self, ctrl_enabled: bool) -> None:
+    def pirk(self) -> None:
         """Start pirking until a fish is hooked.
 
         :param ctrl_enabled: whether to hold ctrl key during pirking
@@ -201,12 +201,11 @@ class Tackle:
         i = self.cfg.SELECTED.PIRK_TIMEOUT
         while i > 0:
             if self.detection.is_fish_hooked_twice():
-                logger.info("Fish hooked")
                 pag.click()
                 return
 
-            if not self.cfg.SELECTED.PIRK_DURATION and not self.cfg.SELECTED.PIRK_DELAY:
-                if ctrl_enabled:
+            if self.cfg.SELECTED.PIRK_DURATION > 0:
+                if self.cfg.SELECTED.CTRL:
                     pag.keyDown("ctrl")
                 utils.hold_mouse_button(self.cfg.SELECTED.PIRK_DURATION, button="right")
                 i = utils.sleep_and_decrease(i, self.cfg.SELECTED.PIRK_DELAY)
