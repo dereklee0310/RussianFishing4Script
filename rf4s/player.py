@@ -23,6 +23,7 @@ from matplotlib.ticker import MaxNLocator
 from playsound import playsound
 from rich.table import Table
 from rich import box
+from pynput import keyboard
 
 
 from rf4s import exceptions, utils
@@ -566,13 +567,19 @@ class Player:
         msg = "Keepnet is full"
         match self.cfg.KEEPNET.FULL_ACTION:
             case "alarm":
-                logger.warning(msg)
+                logger.error(msg)
                 playsound(str(Path(self.cfg.SCRIPT.ALARM_SOUND).resolve()))
-                #TODO: ask a prompt?
+                print(input("Press any key to continue..."))
+                with keyboard.Listener(on_release=self._on_release) as listner:
+                    listner.join()
+                logger.info("Continue running script")
             case "quit":
                 self.general_quit(msg)
             case _:
                 raise ValueError
+
+    def _on_release(self, _: keyboard.KeyCode) -> None:
+        sys.exit()
 
     def _is_fish_whitelisted(self):
         if self.cfg.KEEPNET.RELEASE_WHITELIST is None:
