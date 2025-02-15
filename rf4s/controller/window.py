@@ -94,7 +94,7 @@ class Window:
             return True
 
         logger.warning(
-            "Window size %s not supported, must be 2560x1440, 1920x1080 or 1600x900",
+            "Invalid window size '%s', use '2560x1440', '1920x1080' or '1600x900'",
             f"{width}x{height}",
         )
         logger.warning('Window mode must be "Borderless windowed" or "Window mode"')

@@ -65,7 +65,7 @@ class Player:
     # there are too many counters...
     # setting node's attributes will be merged on the fly
 
-    def __init__(self, cfg, window):
+    def __init__(self, cfg, window, window_is_valid):
         """Initialize monitor, timer, timer and some trivial counters.
 
         :param setting: universal setting node, initialized in App()
@@ -73,12 +73,13 @@ class Player:
         """
         self.cfg = cfg
         self.window = window
-        self.detection = Detection(cfg)
+        self.window_is_valid = window_is_valid
+        self.detection = Detection(cfg, window_is_valid)
         self.timer = Timer(cfg)
-        self.tackle = Tackle(cfg, self.timer)
+        self.tackle = Tackle(cfg, self.timer, window_is_valid)
         self.special_cast_miss = self.cfg.SELECTED.MODE in ["bottom", "marine"]
         self.friction_brake_lock = Lock()
-        self.friction_brake = FrictionBrake(cfg, self.friction_brake_lock)
+        self.friction_brake = FrictionBrake(cfg, self.friction_brake_lock, window_is_valid)
 
         # fish count and bite rate
         self.cast_miss_count = 0
@@ -96,7 +97,7 @@ class Player:
 
     def start_fishing(self) -> None:
         """Start main fishing loop with specified fishing strategt."""
-        if self.cfg.ARGS.FRICTION_BRAKE:
+        if self.cfg.ARGS.FRICTION_BRAKE and self.window_is_valid:
             logger.info("Spawing new process, do not quit the script")
             self.friction_brake.monitor_process.start()
 

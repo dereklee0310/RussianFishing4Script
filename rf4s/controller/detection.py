@@ -114,7 +114,7 @@ class Detection:
 
     # pylint: disable=too-many-public-methods
 
-    def __init__(self, cfg):
+    def __init__(self, cfg, window_is_valid):
         """Initialize setting.
 
         :param setting: general setting node
@@ -124,7 +124,8 @@ class Detection:
         self.window_box = Window().get_box()
         self.image_dir = ROOT / "static" / cfg.SCRIPT.LANGUAGE
 
-        self._set_absolute_coords()
+        if window_is_valid:
+            self._set_absolute_coords()
 
     def _get_image_box(self, image: str, confidence: float, multiple: bool=False) -> Box | None:
         """A wrapper for locateOnScreen method and path resolving.

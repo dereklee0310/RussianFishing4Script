@@ -22,9 +22,9 @@ logger = logging.getLogger("rich")
 class FrictionBrake:
     """Friction brake controller."""
 
-    def __init__(self, cfg, lock) -> None:
+    def __init__(self, cfg, lock, window_is_valid) -> None:
         self.cfg = cfg
-        self.detection = Detection(cfg)
+        self.detection = Detection(cfg, window_is_valid)
         self.cur = Value("i", cfg.FRICTION_BRAKE.INITIAL)
         self.lock = lock
         self.monitor_process = Process(target=monitor_friction_brake, args=(self,))

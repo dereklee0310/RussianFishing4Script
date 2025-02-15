@@ -44,7 +44,7 @@ NUM_OF_MOVEMENT = 4
 class Tackle:
     """Class for all tackle dependent methods."""
 
-    def __init__(self, cfg, timer: Timer):
+    def __init__(self, cfg, timer: Timer, window_is_valid):
         """Get timer and setting from caller (Player).
 
         :param setting: universal setting node
@@ -55,7 +55,7 @@ class Tackle:
         :type timer: Timer
         """
         self.cfg = cfg
-        self.detection = Detection(cfg)
+        self.detection = Detection(cfg, window_is_valid)
         self.timer = timer
         self.landing_net_out = False  # for telescopic_pull()
 

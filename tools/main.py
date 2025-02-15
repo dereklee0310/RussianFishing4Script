@@ -101,6 +101,7 @@ class App:
         if not self._is_smtp_valid() or not self._is_images_valid():
             sys.exit(1)
 
+        self.window_is_valid = True
         self.console = Console()
 
     def _setup_parser(self) -> ArgumentParser:
@@ -334,25 +335,28 @@ class App:
         self.cfg.SELECTED = CN({"NAME": profile_name})
         self.cfg.SELECTED.set_new_allowed(True)
         self.cfg.SELECTED.merge_from_other_cfg(self.cfg.PROFILE[profile_name])
-        self.cfg.freeze()
 
     def setup_window(self):
         self.window = Window()
-        if not self.window.is_size_valid():
-            self.cfg.ARGS.FRICTION_BRAKE = False
-            self.cfg.SCRIPT.SNAG_DETECTION = False
-            self.cfg.SCRIPT.SPOOLING_DETECTION = False
+        if self.window.is_size_valid():
+            self.window_is_valid = True
+            return
 
-            if self.cfg.SELECTED.MODE == "float":
-                width, height = self.window.get_box()[2:]
-                logger.critical(
-                    "Float fishing mode doesn't support window size '%s'",
-                    f"{width}x{height}"
-                )
-                sys.exit(1)
+        self.window_is_valid = False
+        self.cfg.ARGS.FRICTION_BRAKE = False
+        self.cfg.SCRIPT.SNAG_DETECTION = False
+        self.cfg.SCRIPT.SPOOLING_DETECTION = False
+
+        if self.cfg.SELECTED.MODE == "float":
+            width, height = self.window.get_box()[2:]
+            logger.critical(
+                "Float fishing mode doesn't support window size '%s'",
+                f"{width}x{height}"
+            )
+            sys.exit(1)
 
     def _setup_player(self):
-        self.player = Player(self.cfg, self.window)
+        self.player = Player(self.cfg, self.window, self.window_is_valid)
 
     def _on_release(self, key: keyboard.KeyCode) -> None:
         """Callback for button release.
