@@ -97,8 +97,10 @@ class Window:
             "Window size %s not supported, must be 2560x1440, 1920x1080 or 1600x900",
             f"{width}x{height}",
         )
-        logger.error('Window mode must be "Borderless windowed" or "Window mode"')
-        logger.info("Snag detection and friction brake changing will be disabled")
+        logger.warning('Window mode must be "Borderless windowed" or "Window mode"')
+        logger.error("Snag detection will be disabled")
+        logger.error("Spooling detection will be disabled")
+        logger.error("Auto friction brake will be disabled")
         return False
 
     def save_screenshot(self, time) -> None:
@@ -114,8 +116,6 @@ class Window:
 if __name__ == "__main__":
     w = Window("Russian Fishing 4")
     w.activate_game_window()
-    print(w.get_window_size())
-    print(w.get_coord_bases())
 
 # SetForegroundWindow bug reference :
 # https://stackoverflow.com/questions/56857560/win32gui-setforegroundwindowhandle-not-working-in-loop

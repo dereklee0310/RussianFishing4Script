@@ -21,6 +21,7 @@ import pyautogui as pag
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from playsound import playsound
+from rich import print
 from rich.table import Table
 from rich import box
 from pynput import keyboard
@@ -41,13 +42,12 @@ PULL_OUT_DELAY = 3
 DIG_DELAY = 5
 DIG_TIMEOUT = 32
 LOOP_DELAY = 2
-ANIMATION_DELAY = 0.5
+ANIMATION_DELAY = 1
 TICKET_EXPIRE_DELAY = 16
 DISCONNECTED_DELAY = 8
 WEAR_TEXT_UPDATE_DELAY = 2
 BOUND = 2
 PUT_DOWN_DELAY = 4
-PICK_UP_DELAY = 1
 
 SCREENSHOT_DELAY = 2
 
@@ -145,7 +145,7 @@ class Player:
             rod_idx = self._get_next_rod_idx(rod_idx, rod_count)
             logger.info("Checking rod %s", rod_idx + 1)
             pag.press(str(self.cfg.KEY.RODS[rod_idx]))
-            sleep(PICK_UP_DELAY)
+            sleep(ANIMATION_DELAY)
             if self.detection.is_fish_hooked():
                 check_miss_counts[rod_idx] = 0
                 self._retrieve_line()
@@ -267,7 +267,7 @@ class Player:
 
         if pickup:
             self._access_item("main_rod")
-            sleep(PICK_UP_DELAY)
+            sleep(ANIMATION_DELAY)
 
         # When timed out, do not raise a TimeoutError but defer it to resetting stage
 
@@ -355,6 +355,8 @@ class Player:
             except exceptions.FishCapturedError:
                 self._handle_fish()
                 return
+            except exceptions.LineAtEndError:
+                self.general_quit("Fishing line is at its end")
             except exceptions.GroundbaitNotChosenError:
                 # Put tackle down to avoid invalid cast
                 pag.press("0")
@@ -365,7 +367,7 @@ class Player:
     def _cast_spod_rod(self):
         logger.info("Recasting spod rod")
         self._access_item("spod_rod")
-        sleep(PICK_UP_DELAY)
+        sleep(ANIMATION_DELAY)
         self._reset_tackle()
         self._cast_tackle(lock=True, update=False)
         pag.press("0")
@@ -377,7 +379,7 @@ class Player:
 
         if self.cfg.ARGS.BITE:
             self.window.save_screenshot(self.timer.get_cur_timestamp())
-        self.tackle.cast(lock, update)
+        self.tackle.cast(lock)
         if update:
             self.timer.update_cast_time()
 
@@ -602,7 +604,7 @@ class Player:
         """
         sleep(ANIMATION_DELAY)
         pag.press("esc")
-        pag.click()  # Avoid possible ClickLock stuck
+        # pag.click()  # Avoid possible ClickLock stuck
         sleep(ANIMATION_DELAY)
         pag.moveTo(self.detection.get_quit_position())
         pag.click()

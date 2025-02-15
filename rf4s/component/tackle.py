@@ -76,6 +76,8 @@ class Tackle:
                 raise exceptions.FishHookedError
             if self.detection.is_fish_captured():
                 raise exceptions.FishCapturedError
+            if self.cfg.SCRIPT.SPOOLING_DETECTION and self.detection.is_line_at_end():
+                raise exceptions.LineAtEndError
             if self.detection.is_groundbait_not_chosen():
                 raise exceptions.GroundbaitNotChosenError
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
@@ -158,7 +160,7 @@ class Tackle:
 
             elif self.detection.is_fish_captured():
                 raise exceptions.FishCapturedError
-            if self.detection.is_line_at_end():
+            if self.cfg.SCRIPT.SPOOLING_DETECTION and self.detection.is_line_at_end():
                 raise exceptions.LineAtEndError
 
             i = utils.sleep_and_decrease(i, LOOP_DELAY)

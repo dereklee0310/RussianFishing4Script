@@ -17,7 +17,9 @@ from rf4s.controller.window import Window
 
 logger = logging.getLogger("rich")
 
-SNAG_ICON_COLOR = (206, 56, 21)
+CRITICAL_COLOR = (206, 56, 21)
+WARNING_COLOR = (227, 149, 23)
+
 MIN_GRAY_SCALE_LEVEL = 150
 YELLOW_FRICTION_BRAKE = (200, 214, 63)
 ORANGE_FRICTION_BRAKE = (229, 188, 0)
@@ -48,6 +50,9 @@ ROOT = Path(__file__).resolve().parents[2]
 # 95%: center + 382 (1279 + 403 = 1682)
 # 100%: center + 424 (1279 + 424 = 1703)
 
+# snag: x + 15, y
+# spool: x + 15, y + 15
+
 COORD_OFFSETS = {
     "1600x900": {
         "friction_brake": (
@@ -61,7 +66,8 @@ COORD_OFFSETS = {
             876,
         ),
         "fish_icon": (389, 844),
-        "snag_icon": (1132 + 15, 829),
+        "spool_icon": (1077, 844),
+        "snag_icon": (1147, 829),
         "float_camera": (720, 654),
     },
     "1920x1080": {
@@ -76,7 +82,8 @@ COORD_OFFSETS = {
             1056,
         ),
         "fish_icon": (549, 1024),
-        "snag_icon": (1292 + 15, 1009),
+        "spool_icon": (1237, 1024),
+        "snag_icon": (1307, 1009),
         "float_camera": (880, 834),
     },
     "2560x1440": {
@@ -91,7 +98,8 @@ COORD_OFFSETS = {
             1412,
         ),
         "fish_icon": (869, 1384),
-        "snag_icon": (1612 + 15, 1369),
+        "spool_icon": (1557, 1384),
+        "snag_icon": (1627, 1369),
         "float_camera": (1200, 1194),
     },
 }
@@ -139,6 +147,7 @@ class Detection:
         self.coord_offsets = COORD_OFFSETS[window_size_key]
 
         self.fish_icon_coord = self._get_absolute_coord("fish_icon")
+        self.spool_icon_coord = self._get_absolute_coord("spool_icon")
         self.snag_icon_coord = self._get_absolute_coord("snag_icon")
         self.friction_brake_coord = self._get_absolute_coord("friction_brake")
 
@@ -246,9 +255,6 @@ class Detection:
     # ------------------------------ hint detection ------------------------------ #
     def is_disconnected(self):
         return self._get_image_box("disconnected", 0.9)
-
-    def is_line_at_end(self):
-        return self._get_image_box("spooling", 0.98)
 
     def is_ticket_expired(self):
         return self._get_image_box("ticket", 0.9)
@@ -378,7 +384,11 @@ class Detection:
         :return: True if snagged, False otherwise
         :rtype: bool
         """
-        return pag.pixel(*self.snag_icon_coord) == SNAG_ICON_COLOR
+        return pag.pixel(*self.snag_icon_coord) == CRITICAL_COLOR
+
+    def is_line_at_end(self):
+        return (pag.pixel(*self.spool_icon_coord) == WARNING_COLOR
+            or pag.pixel(*self.spool_icon_coord) == CRITICAL_COLOR)
 
     def is_friction_brake_high(self) -> bool:
         """Check if the friction brake is too high using friction brake bar center.

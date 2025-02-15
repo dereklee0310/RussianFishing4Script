@@ -339,8 +339,9 @@ class App:
     def setup_window(self):
         self.window = Window()
         if not self.window.is_size_valid():
-            self.cfg.SCRIPT.SNAG_DETECTION = False
             self.cfg.ARGS.FRICTION_BRAKE = False
+            self.cfg.SCRIPT.SNAG_DETECTION = False
+            self.cfg.SCRIPT.SPOOLING_DETECTION = False
 
             if self.cfg.SELECTED.MODE == "float":
                 width, height = self.window.get_box()[2:]
