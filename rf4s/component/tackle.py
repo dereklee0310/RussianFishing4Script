@@ -58,7 +58,21 @@ class Tackle:
         self.detection = Detection(cfg, window_is_valid)
         self.timer = timer
         self.landing_net_out = False  # for telescopic_pull()
+        self.available = True
 
+    @staticmethod
+    def _check_status(func):
+        def wrapper(self, *args, **kwargs):
+            if not self.available:
+                return
+            try:
+                func(self, *args)
+            except Exception as e:
+                raise e
+
+        return wrapper
+
+    @_check_status
     @utils.toggle_clicklock
     def reset(self) -> None:
         """Reset the tackle till ready and detect unexpected events.
@@ -78,12 +92,15 @@ class Tackle:
                 raise exceptions.FishCapturedError
             if self.cfg.SCRIPT.SPOOLING_DETECTION and self.detection.is_line_at_end():
                 raise exceptions.LineAtEndError
+            elif self.cfg.SCRIPT.SNAG_DETECTION and self.detection.is_line_snagged():
+                raise exceptions.LineSnaggedError
             if self.detection.is_groundbait_not_chosen():
                 raise exceptions.GroundbaitNotChosenError
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
 
         raise TimeoutError
 
+    @_check_status
     def cast(self, lock) -> None:
         """Cast the rod, then wait for the lure/bait to fly and sink.
 
@@ -130,6 +147,7 @@ class Tackle:
         utils.hold_mouse_button(self.cfg.SELECTED.TIGHTEN_DURATION)
 
 
+    @_check_status
     @utils.toggle_clicklock
     @utils.release_keys_after
     def retrieve(self, first: bool = True) -> None:
@@ -160,9 +178,10 @@ class Tackle:
 
             elif self.detection.is_fish_captured():
                 raise exceptions.FishCapturedError
-            if self.cfg.SCRIPT.SPOOLING_DETECTION and self.detection.is_line_at_end():
+            elif self.cfg.SCRIPT.SPOOLING_DETECTION and self.detection.is_line_at_end():
                 raise exceptions.LineAtEndError
-
+            elif self.cfg.SCRIPT.SNAG_DETECTION and self.detection.is_line_snagged():
+                raise exceptions.LineSnaggedError
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
 
         raise TimeoutError
@@ -248,8 +267,9 @@ class Tackle:
 
         raise TimeoutError
 
-
+    @_check_status
     def pull(self) -> None:
+        logger.info("Pulling")
         if self.cfg.SELECTED.MODE == "float":
             self.telescopic_pull()
         else:
@@ -263,12 +283,13 @@ class Tackle:
         :raises exceptions.FishGotAwayError: fish got away during pulling
         :raises TimeoutError: loop timed out
         """
-        logger.info("Pulling")
         i = PULL_TIMEOUT
         while i > 0:
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
             if self.detection.is_fish_captured():
                 return
+            elif self.cfg.SCRIPT.SNAG_DETECTION and self.detection.is_line_snagged():
+                raise exceptions.LineSnaggedError
 
         # try using landing net
         pag.press("space")
@@ -288,7 +309,6 @@ class Tackle:
 
         :raises TimeoutError: loop timed out
         """
-        logger.info("Pulling")
         # check false postive first
         if not self.detection.is_fish_hooked():
             return

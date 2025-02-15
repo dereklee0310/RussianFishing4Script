@@ -133,9 +133,10 @@ class Player:
 
     def start_bottom_mode(self) -> None:
         """Main bottom fishing loop."""
-        rod_count = len(self.cfg.KEY.RODS)
-        rod_idx = 0
-        check_miss_counts = [0] * rod_count
+        self.rod_count = len(self.cfg.KEY.RODS)
+        self.rod_idx = 0
+        self.available_rods = [True] * self.rod_count
+        check_miss_counts = [0] * self.rod_count
 
         while True:
             if self.cfg.ARGS.SPOD_ROD and self.timer.is_spod_rod_recastable():
@@ -143,18 +144,22 @@ class Player:
             self._refill_stats()
             self._harvest_baits()
 
-            rod_idx = self._get_next_rod_idx(rod_idx, rod_count)
-            logger.info("Checking rod %s", rod_idx + 1)
-            pag.press(str(self.cfg.KEY.RODS[rod_idx]))
+            if self._update_rod_idx():
+                self.tackle.available = True
+            else:
+                self.general_quit("Line is snagged")
+
+            logger.info("Checking rod %s", self.rod_idx + 1)
+            pag.press(str(self.cfg.KEY.RODS[self.rod_idx]))
             sleep(ANIMATION_DELAY)
             if self.detection.is_fish_hooked():
-                check_miss_counts[rod_idx] = 0
+                check_miss_counts[self.rod_idx] = 0
                 self._retrieve_line()
                 self._pull_fish()
                 self._reset_tackle()
                 self._cast_tackle(lock=True)
             else:
-                self._put_down_tackle(check_miss_counts, rod_idx)
+                self._put_down_tackle(check_miss_counts)
 
     def start_pirk_mode(self) -> None:
         """Main marine fishing loop."""
@@ -237,15 +242,22 @@ class Player:
     # ---------------------------------------------------------------------------- #
     #            stages and their helper functions in main fishing loops           #
     # ---------------------------------------------------------------------------- #
-    def _get_next_rod_idx(self, rod_idx, rod_count) -> int:
-        if rod_count == 1:
-            return rod_idx
+    def _update_rod_idx(self) -> int:
+        if self.rod_count == 1 and self.available_rods[0]:
+            return True
 
+        candidates = [i for i, status in enumerate(self.available_rods) if status]
+        if len(candidates) > 1 and self.rod_idx in candidates:
+            #  Exclude current rod only if there's another available rod
+            candidates.remove(self.rod_idx)
+
+        if not candidates:
+            return False
         if self.cfg.SCRIPT.RANDOM_ROD_SELECTION:
-            return (rod_idx + random.randint(1, rod_count - 1)) % rod_count
+            self.rod_idx = random.choice(candidates)
         else:
-            return (rod_idx + 1) % rod_count
-
+            self.rod_idx = (candidates.index(self.rod_idx) + 1) % len(candidates)
+        return True
 
     def _harvest_baits(self, pickup=False) -> None:
         """Harvest the bait."""
@@ -358,6 +370,8 @@ class Player:
                 return
             except exceptions.LineAtEndError:
                 self.general_quit("Fishing line is at its end")
+            except exceptions.LineSnaggedError:
+                self._handle_snagged_line()
             except exceptions.GroundbaitNotChosenError:
                 # Put tackle down to avoid invalid cast
                 pag.press("0")
@@ -365,11 +379,22 @@ class Player:
             except TimeoutError:  # rare events
                 self._handle_timeout()
 
+    def _handle_snagged_line(self):
+        if self.cfg.SELECTED.MODE != "bottom":
+            self.general_quit("Line is snagged")
+        self.available_rods[self.rod_idx] = False
+        self.tackle.available = False
+
     def _cast_spod_rod(self):
         logger.info("Recasting spod rod")
         self._access_item("spod_rod")
         sleep(ANIMATION_DELAY)
         self._reset_tackle()
+
+        # Just skip it
+        if not self.available_rods[self.rod_idx]:
+            self.available_rods[self.rod_idx] = True
+            return
         self._cast_tackle(lock=True, update=False)
         pag.press("0")
         sleep(ANIMATION_DELAY)
@@ -401,9 +426,6 @@ class Player:
 
         if self.detection.is_ticket_expired():
             self._handle_expired_ticket()
-
-        if self.cfg.SCRIPT.SNAG_DETECTION and self.detection.is_line_snagged():
-            self.general_quit("Line is snagged")
 
     def _handle_broken_lure(self):
         """Handle the broken lure event according to the settings."""
@@ -458,6 +480,8 @@ class Player:
                 break
             except exceptions.LineAtEndError:
                 self.general_quit("Fishing line is at its end")
+            except exceptions.LineSnaggedError:
+                self._handle_snagged_line()
             except TimeoutError:
                 self._handle_timeout()
                 first = False
@@ -528,6 +552,8 @@ class Player:
                 return
             except exceptions.FishGotAwayError:
                 return
+            except exceptions.LineSnaggedError:
+                self._handle_snagged_line()
             except TimeoutError:
                 self._handle_timeout()
                 if self.cfg.SELECTED.MODE == "float":
@@ -540,6 +566,8 @@ class Player:
 
         !! a trophy ruffe will break the checking mechanism?
         """
+        if not self.detection.is_fish_captured():
+            return
         logger.info("Handling fish")
         if self.cfg.ARGS.SCREENSHOT:
             self.window.save_screenshot(self.timer.get_cur_timestamp())
@@ -878,7 +906,7 @@ class Player:
 
             logger.warning("Lure for replacement found but already broken")
 
-    def _put_down_tackle(self, check_miss_counts: list[int], rod_idx: int) -> None:
+    def _put_down_tackle(self, check_miss_counts: list[int]) -> None:
         """Update counters, put down the tackle and wait for a while.
 
         :param check_miss_counts: miss counts of all rods
@@ -887,9 +915,9 @@ class Player:
         :type rod_idx: int
         """
         self.cast_miss_count += 1
-        check_miss_counts[rod_idx] += 1
-        if check_miss_counts[rod_idx] >= self.cfg.SELECTED.CHECK_MISS_LIMIT:
-            check_miss_counts[rod_idx] = 0
+        check_miss_counts[self.rod_idx] += 1
+        if check_miss_counts[self.rod_idx] >= self.cfg.SELECTED.CHECK_MISS_LIMIT:
+            check_miss_counts[self.rod_idx] = 0
             self._reset_tackle()
             self._cast_tackle(lock=True)
 

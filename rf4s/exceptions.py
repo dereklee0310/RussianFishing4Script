@@ -12,7 +12,7 @@ class FishCapturedError(Exception):
 
 
 class LineAtEndError(Exception):
-    """The line is at the end during retrieval."""
+    """Fishing line is at the end during retrieval."""
 
 
 class FishGotAwayError(Exception):
@@ -21,3 +21,6 @@ class FishGotAwayError(Exception):
 
 class GroundbaitNotChosenError(Exception):
     """Run out of groundbait on spod rod."""
+
+class LineSnaggedError(Exception):
+    """Fishing line is snagged."""
