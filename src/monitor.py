@@ -276,7 +276,7 @@ class Monitor:
         :return: True if pixel color matched, False otherwise
         :rtype: bool
         """
-        return pag.pixel(*self.setting.reel_burning_icon_position) in (ORANGE_REEL, RED_REEL)
+        return pag.pixelMatchesColor(*self.setting.reel_burning_icon_position, ORANGE_REEL, COLOR_TOLERANCE) or pag.pixelMatchesColor(*self.setting.reel_burning_icon_position, RED_REEL, COLOR_TOLERANCE)
 
     def is_fish_hooked_pixel(self) -> bool:
         return all(
