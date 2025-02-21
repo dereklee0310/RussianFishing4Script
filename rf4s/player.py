@@ -175,7 +175,7 @@ class Player:
 
     def _start_sink_mode(self, pirk: bool):
         self._start_trolling()
-
+        perform_technique = self._do_pirking if pirk else self._do_elevating
         while True:
             if not self.cfg.ARGS.SKIP_CAST:
                 self._refill_stats()
@@ -184,10 +184,7 @@ class Player:
                 self.tackle.sink()
             self.cfg.ARGS.SKIP_CAST = False
 
-            if pirk:
-                self._do_pirking()
-            else:
-                self._do_elevating()
+            perform_technique()
             self._retrieve_line()
             self._pull_fish()
 
@@ -231,7 +228,6 @@ class Player:
             hold_mouse_button = utils.hold_mouse_buttons
 
         return monitor, hold_mouse_button
-
 
 
     def _monitor_clip_state(self) -> None:

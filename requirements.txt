@@ -12,4 +12,5 @@ playsound==1.2.2 # downgrade to avoid bug
 pyyaml==6.0.2
 yacs==0.1.8
 rich==13.9.4
+bump-my-version==0.32.1
 # reference: https://stackoverflow.com/questions/68704443/python-playsound-error-261-for-command-the-driver-cannot-recognize-the-specifie

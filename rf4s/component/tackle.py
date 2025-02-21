@@ -60,6 +60,11 @@ class Tackle:
         self.landing_net_out = False  # for telescopic_pull()
         self.available = True
 
+        if self.cfg.SELECTED.MODE == "telescopic":
+            self._pull = self.telescopic_pull
+        else:
+            self._pull = self.general_pull
+
     @staticmethod
     def _check_status(func):
         def wrapper(self, *args, **kwargs):
@@ -270,10 +275,7 @@ class Tackle:
     @_check_status
     def pull(self) -> None:
         logger.info("Pulling")
-        if self.cfg.SELECTED.MODE == "telescopic":
-            self.telescopic_pull()
-        else:
-            self.general_pull()
+        self._pull()
 
     @utils.toggle_right_mouse_button
     @utils.toggle_clicklock
