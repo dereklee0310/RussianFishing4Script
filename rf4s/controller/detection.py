@@ -229,6 +229,9 @@ class Detection:
     def is_groundbait_not_chosen(self):
         return self._get_image_box("groundbait", 0.7)
 
+    def is_bait_not_chosen(self):
+        return self._get_image_box("bait_is_not_chosen", 0.7)
+
     # ------------------------------ hint detection ------------------------------ #
     def is_disconnected(self):
         return self._get_image_box("disconnected", 0.9)

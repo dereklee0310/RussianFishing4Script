@@ -92,7 +92,7 @@ class Tackle:
                 raise exceptions.FishCapturedError
             if self.cfg.SCRIPT.SPOOLING_DETECTION and self.detection.is_line_at_end():
                 raise exceptions.LineAtEndError
-            elif self.cfg.SCRIPT.SNAG_DETECTION and self.detection.is_line_snagged():
+            if self.cfg.SCRIPT.SNAG_DETECTION and self.detection.is_line_snagged():
                 raise exceptions.LineSnaggedError
             if self.detection.is_groundbait_not_chosen():
                 raise exceptions.GroundbaitNotChosenError

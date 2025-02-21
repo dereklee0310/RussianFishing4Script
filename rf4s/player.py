@@ -101,7 +101,7 @@ class Player:
             logger.info("Spawing new process, do not quit the script")
             self.friction_brake.monitor_process.start()
 
-        if (self.cfg.SELECTED.MODE != "telesopic" and
+        if (self.cfg.SELECTED.MODE not in ("telesopic", "bottom") and
             not self.detection.is_retrieve_finished()):
             logger.critical("The spool is not fully loaded with fishing line")
             sys.exit(1)
@@ -151,7 +151,7 @@ class Player:
             if self._update_rod_idx():
                 self.tackle.available = True
             else:
-                self.general_quit("Line is snagged")
+                self.general_quit("All rods are unavailable")
 
             logger.info("Checking rod %s", self.rod_idx + 1)
             pag.press(str(self.cfg.KEY.RODS[self.rod_idx]))
@@ -290,6 +290,7 @@ class Player:
             candidates.remove(self.rod_idx)
 
         if not candidates:
+            logger.critical("All rods are unavailable")
             return False
         if self.cfg.SCRIPT.RANDOM_ROD_SELECTION:
             self.rod_idx = random.choice(candidates)
@@ -396,6 +397,11 @@ class Player:
             self._handle_broken_lure()
             return
 
+        if self.detection.is_bait_not_chosen():
+            if self.cfg.SELECTED.MODE != "bottom":
+                self.general_quit("Run out of bait")
+            self.available_rods[self.rod_idx] = False
+            self.tackle.available = False
         while True:
             try:
                 self.tackle.reset()
