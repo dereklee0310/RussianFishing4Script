@@ -29,7 +29,7 @@ LOOP_DELAY = 2
 ANIMATION_DELAY = 0.5
 
 RETRIEVAL_TIMEOUT = 32
-PULL_TIMEOUT = 32
+PULL_TIMEOUT = 16
 RETRIEVAL_WITH_PAUSE_TIMEOUT = 128
 LIFT_DURATION = 3
 TELESCOPIC_RETRIEVAL_TIMEOUT = 8
@@ -270,7 +270,7 @@ class Tackle:
     @_check_status
     def pull(self) -> None:
         logger.info("Pulling")
-        if self.cfg.SELECTED.MODE == "float":
+        if self.cfg.SELECTED.MODE == "telescopic":
             self.telescopic_pull()
         else:
             self.general_pull()
@@ -291,7 +291,11 @@ class Tackle:
             elif self.cfg.SCRIPT.SNAG_DETECTION and self.detection.is_line_snagged():
                 raise exceptions.LineSnaggedError
 
-        # try using landing net
+        # Skip landing net if the retrieval is not finished yet
+        if (self.cfg.SELECTED.MODE != "telescopic" and
+            not self.detection.is_retrieve_finished()):
+            return
+
         pag.press("space")
         sleep(LANDING_NET_DURATION)
         if self.detection.is_fish_captured():

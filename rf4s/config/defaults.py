@@ -3,7 +3,7 @@
 from yacs.config import CfgNode as CN
 
 _C = CN()
-_C.VERSION = 1.0
+_C.VERSION = "0.1.0"
 
 _C.SCRIPT = CN()
 _C.SCRIPT.LANGUAGE = "en"
@@ -152,15 +152,28 @@ _C.PROFILE.ELEVATOR.TROLLING = "off"
 # ---------------------------------------------------------------------------- #
 #                             Float Fishing Profile                            #
 # ---------------------------------------------------------------------------- #
-_C.PROFILE.FLOAT = CN()
-_C.PROFILE.FLOAT.MODE = "float"
-_C.PROFILE.FLOAT.CAST_POWER_LEVEL = 5.0
-_C.PROFILE.FLOAT.CAST_DELAY = 4.0
-_C.PROFILE.FLOAT.FLOAT_SENSITIVITY = 0.65
-_C.PROFILE.FLOAT.CHECK_DELAY = 1.0
-_C.PROFILE.FLOAT.PULL_DELAY = 0.5
-_C.PROFILE.FLOAT.DRIFT_TIMEOUT = 16.0
-_C.PROFILE.FLOAT.CAMERA_SHAPE = "square"
+_C.PROFILE.TELESCOPIC = CN()
+_C.PROFILE.TELESCOPIC.MODE = "telescopic"
+_C.PROFILE.TELESCOPIC.CAST_POWER_LEVEL = 5.0
+_C.PROFILE.TELESCOPIC.CAST_DELAY = 4.0
+_C.PROFILE.TELESCOPIC.FLOAT_SENSITIVITY = 0.68
+_C.PROFILE.TELESCOPIC.CHECK_DELAY = 1.0
+_C.PROFILE.TELESCOPIC.PULL_DELAY = 0.5
+_C.PROFILE.TELESCOPIC.DRIFT_TIMEOUT = 16.0
+_C.PROFILE.TELESCOPIC.CAMERA_SHAPE = "square"
+
+# ---------------------------------------------------------------------------- #
+#                           Bolognese Fishing Profile                          #
+# ---------------------------------------------------------------------------- #
+_C.PROFILE.BOLOGNESE = CN()
+_C.PROFILE.BOLOGNESE.MODE = "bolognese"
+_C.PROFILE.BOLOGNESE.CAST_POWER_LEVEL = 5.0
+_C.PROFILE.BOLOGNESE.CAST_DELAY = 4.0
+_C.PROFILE.BOLOGNESE.FLOAT_SENSITIVITY = 0.68
+_C.PROFILE.BOLOGNESE.CHECK_DELAY = 1.0
+_C.PROFILE.BOLOGNESE.PULL_DELAY = 0.5
+_C.PROFILE.BOLOGNESE.DRIFT_TIMEOUT = 32.0
+_C.PROFILE.BOLOGNESE.CAMERA_SHAPE = "square"
 
 
 

@@ -40,6 +40,20 @@ def hold_mouse_button(duration: float=1, button="left") -> None:
     if button == "left" and duration >= 2.1:  # + 0.1 due to pag.mouseDown() delay
         pag.click()
 
+def hold_mouse_buttons(duration: float = 1) -> None:
+    """Hold left mouse button.
+
+    :param duration: hold time, defaults to 1
+    :type duration: float, optional
+    """
+    pag.mouseDown()
+    pag.mouseDown(button="right")
+    sleep(duration)
+    pag.mouseUp()
+    pag.mouseUp(button="right")
+    if duration >= 2.1:  # + 0.1 due to pag.mouseDown() delay
+        pag.click()
+
 
 def sleep_and_decrease(num: int, delay: int) -> int:
     """Self-decrement with a delay.

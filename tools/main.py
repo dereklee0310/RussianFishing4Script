@@ -48,7 +48,7 @@ ARGUMENTS = (
     ("c", "coffee", "drink coffee if the stamina is low"),
     ("A", "alcohol", "regularly drink alcohol before keeping the fish"),
     ("r", "refill", "refill hunger and comfort by consuming tea and carrot"),
-    ("H", "harvest", "harvest baits before casting, support mode: bottom, spin, and float"),
+    ("H", "harvest", "harvest baits before casting"),
     ("g", "gear_ratio", "switch the gear ratio after the retrieval timed out"),
     ("f", "friction_brake", "change friction brake automatically"),
     ("l", "lift", "lift the tackle constantly while pulling a fish"),
@@ -279,7 +279,7 @@ class App:
             return False
 
         mode = self.cfg.PROFILE[profile_name].MODE
-        if mode.upper() not in ("SPIN", "BOTTOM", "PIRK", "ELEVATOR", "FLOAT"):
+        if mode.upper() not in self.cfg.PROFILE:
             logger.critical("Invalid mode: '%s'", mode)
             return False
 
@@ -335,6 +335,7 @@ class App:
         self.cfg.SELECTED = CN({"NAME": profile_name})
         self.cfg.SELECTED.set_new_allowed(True)
         self.cfg.SELECTED.merge_from_other_cfg(self.cfg.PROFILE[profile_name])
+        config.print_cfg(self.cfg.SELECTED)
 
     def setup_window(self):
         self.window = Window()
@@ -347,10 +348,11 @@ class App:
         self.cfg.SCRIPT.SNAG_DETECTION = False
         self.cfg.SCRIPT.SPOOLING_DETECTION = False
 
-        if self.cfg.SELECTED.MODE == "float":
+        if self.cfg.SELECTED.MODE in ("telescopic", "bolognese"):
             width, height = self.window.get_box()[2:]
             logger.critical(
-                "Float fishing mode doesn't support window size '%s'",
+                "Fishing mode '%s' doesn't support window size '%s'",
+                self.cfg.SELECTED.MODE,
                 f"{width}x{height}"
             )
             sys.exit(1)

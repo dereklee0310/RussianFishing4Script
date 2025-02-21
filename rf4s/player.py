@@ -101,7 +101,11 @@ class Player:
             logger.info("Spawing new process, do not quit the script")
             self.friction_brake.monitor_process.start()
 
-        config.print_cfg(self.cfg.SELECTED) # cfg.dump() doesn't keep the order
+        if (self.cfg.SELECTED.MODE != "telesopic" and
+            not self.detection.is_retrieve_finished()):
+            logger.critical("The spool is not fully loaded with fishing line")
+            sys.exit(1)
+
         logger.info("Starting fishing mode: '%s'", self.cfg.SELECTED.MODE)
         getattr(self, f"start_{self.cfg.SELECTED.MODE}_mode")()
 
@@ -187,24 +191,58 @@ class Player:
             self._retrieve_line()
             self._pull_fish()
 
-    def start_float_mode(self) -> None:
+    def start_telescopic_mode(self) -> None:
+        self._start_float_mode(telescopic=True)
+
+    def start_bolognese_mode(self) -> None:
+        """Main bolognese fishing loop."""
+        self._start_float_mode(telescopic=False)
+
+    def _start_float_mode(self, telescopic) -> None:
         """Main float fishing loop."""
+        monitor, hold_mouse_button = self._get_controllers(telescopic)
+
         while True:
             self._refill_stats()
             self._harvest_baits(pickup=True)
             self._reset_tackle()
             self._cast_tackle()
 
-            logger.info("Checking float status")
             try:
-                self._monitor_float_state()
+                monitor()
             except TimeoutError:
                 self.cast_miss_count += 1
                 continue
 
             sleep(self.cfg.SELECTED.PULL_DELAY)
-            utils.hold_mouse_button(PRE_RETRIEVAL_DURATION)
+            hold_mouse_button(PRE_RETRIEVAL_DURATION)
             self._pull_fish()
+
+    def _get_controllers(self, telescopic):
+        if telescopic:
+            hold_mouse_button = utils.hold_mouse_button
+            monitor = self._monitor_float_state
+        else:
+            if self.detection.is_clip_open():
+                logger.warning("Clip is not set, fall back to camera mode")
+                monitor = self._monitor_float_state
+            else:
+                monitor = self._monitor_clip_state
+            hold_mouse_button = utils.hold_mouse_buttons
+
+        return monitor, hold_mouse_button
+
+
+
+    def _monitor_clip_state(self) -> None:
+        """Monitor the state of the bolognese."""
+        i = self.cfg.SELECTED.DRIFT_TIMEOUT
+        while i > 0:
+            i = utils.sleep_and_decrease(i, self.cfg.SELECTED.CHECK_DELAY)
+            if self.detection.is_clip_open():
+                return
+
+        raise TimeoutError
 
     # this is not done yet :(
     # def trolling_fishing(self) -> None:
@@ -529,10 +567,11 @@ class Player:
 
     def _monitor_float_state(self) -> None:
         """Monitor the state of the float."""
+        logger.info("Monitoring float state")
         reference_img = pag.screenshot(region=self.detection.float_camera_rect)
         i = self.cfg.SELECTED.DRIFT_TIMEOUT
         while i > 0:
-            i = utils.sleep_and_decrease(i, self.cfg.SELECTED.DRIFT_TIMEOUT)
+            i = utils.sleep_and_decrease(i, self.cfg.SELECTED.CHECK_DELAY)
             if self.detection.is_float_state_changed(reference_img):
                 logger.info("Float status changed")
                 return

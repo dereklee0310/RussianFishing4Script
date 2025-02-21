@@ -66,6 +66,7 @@ COORD_OFFSETS = {
             876,
         ),
         "fish_icon": (389, 844),
+        "clip_icon": (1042, 844),
         "spool_icon": (1077, 844),
         "snag_icon": (1147, 829),
         "float_camera": (720, 654),
@@ -82,6 +83,7 @@ COORD_OFFSETS = {
             1056,
         ),
         "fish_icon": (549, 1024),
+        "clip_icon": (1202, 1024),
         "spool_icon": (1237, 1024),
         "snag_icon": (1307, 1009),
         "float_camera": (880, 834),
@@ -98,6 +100,7 @@ COORD_OFFSETS = {
             1412,
         ),
         "fish_icon": (869, 1384),
+        "clip_icon": (1522, 1384),
         "spool_icon": (1557, 1384),
         "snag_icon": (1627, 1369),
         "float_camera": (1200, 1194),
@@ -150,10 +153,11 @@ class Detection:
         self.fish_icon_coord = self._get_absolute_coord("fish_icon")
         self.spool_icon_coord = self._get_absolute_coord("spool_icon")
         self.snag_icon_coord = self._get_absolute_coord("snag_icon")
+        self.clip_icon_coord = self._get_absolute_coord("clip_icon")
         self.friction_brake_coord = self._get_absolute_coord("friction_brake")
 
         bases = self._get_absolute_coord("float_camera")
-        if self.cfg.SELECTED.MODE == "float":
+        if self.cfg.SELECTED.MODE in ("telescopic", "bolognese"):
             match self.cfg.SELECTED.CAMERA_SHAPE:
                 case "tall":
                     bases[0] += CAMERA_OFFSET
@@ -388,8 +392,7 @@ class Detection:
         return pag.pixel(*self.snag_icon_coord) == CRITICAL_COLOR
 
     def is_line_at_end(self):
-        return (pag.pixel(*self.spool_icon_coord) == WARNING_COLOR
-            or pag.pixel(*self.spool_icon_coord) == CRITICAL_COLOR)
+        return pag.pixel(*self.spool_icon_coord) in (WARNING_COLOR, CRITICAL_COLOR)
 
     def is_friction_brake_high(self) -> bool:
         """Check if the friction brake is too high using friction brake bar center.
@@ -414,4 +417,10 @@ class Detection:
             reference_img,
             grayscale=True,
             confidence=self.cfg.SELECTED.FLOAT_SENSITIVITY,
+        )
+
+    def is_clip_open(self) -> bool:
+        return not all(
+            c > MIN_GRAY_SCALE_LEVEL
+            for c in pag.pixel(*self.clip_icon_coord)
         )
