@@ -96,6 +96,13 @@ class App:
         args = self._setup_parser().parse_args(args_list)
         if not self._is_args_valid(args):
             sys.exit(1)
+
+        # Process list-like values if possible
+        if "KEY.RODS" in args.opts:
+            value_idx = args.opts.index("KEY.RODS") + 1
+            args.opts[value_idx] = [x.strip() for x in args.opts[value_idx].split(",")]
+        self.cfg.merge_from_list(args.opts)
+
         args_cfg = CN({"ARGS": config.dict_to_cfg(vars(args))})
         self.cfg.merge_from_other_cfg(args_cfg)
         if not self._is_smtp_valid() or not self._is_images_valid():
@@ -107,6 +114,8 @@ class App:
     def _setup_parser(self) -> ArgumentParser:
         """Configure argparser."""
         parser = ArgumentParser(description="Start AFK script for Russian Fishing 4")
+        parser.add_argument("opts", nargs="*", help="modify config options using the command-line")
+
 
         for argument in ARGUMENTS:
             flag1 = f"-{argument[0]}"
@@ -283,10 +292,18 @@ class App:
             logger.critical("Invalid mode: '%s'", mode)
             return False
 
-        for key in self.cfg.PROFILE[profile_name]:
-            if key not in self.cfg.PROFILE[mode.upper()]:
+        expected_keys = set(self.cfg.PROFILE[mode.upper()])
+        actual_keys = set(self.cfg.PROFILE[profile_name])
+
+        invalid_keys = actual_keys - expected_keys
+        missing_keys = expected_keys - actual_keys
+
+        if invalid_keys or missing_keys:
+            for key in invalid_keys:
                 logger.critical("Invalid setting: '%s'", key)
-                return False
+            for key in missing_keys:
+                logger.critical("Missing setting: '%s'", key)
+            return False
         return True
 
     def _display_available_profiles(self) -> None:

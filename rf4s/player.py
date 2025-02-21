@@ -142,6 +142,7 @@ class Player:
         self.available_rods = [True] * self.rod_count
         check_miss_counts = [0] * self.rod_count
 
+        self._start_trolling()
         while True:
             if self.cfg.ARGS.SPOD_ROD and self.timer.is_spod_rod_recastable():
                 self._cast_spod_rod()
@@ -972,7 +973,7 @@ class Player:
 
         Available options: never, forward, left, right.
         """
-        if self.cfg.SELECTED.TROLLING == "never":
+        if self.cfg.SELECTED.TROLLING == "off":
             return
         pag.press(TROLLING_KEY)
         if self.cfg.SELECTED.TROLLING not in ("left", "right"):

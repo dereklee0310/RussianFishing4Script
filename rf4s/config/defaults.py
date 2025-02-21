@@ -110,7 +110,7 @@ _C.PROFILE.BOTTOM.CAST_DELAY = 4.0
 _C.PROFILE.BOTTOM.POST_ACCELERATION = "off"
 _C.PROFILE.BOTTOM.CHECK_DELAY = 32.0
 _C.PROFILE.BOTTOM.CHECK_MISS_LIMIT = 16
-
+_C.PROFILE.BOTTOM.TROLLING = "off"
 
 # ---------------------------------------------------------------------------- #
 #                      Marine / Wakey Rig Pirking Profile                      #
@@ -128,8 +128,8 @@ _C.PROFILE.PIRK.PIRK_TIMEOUT = 32.0
 _C.PROFILE.PIRK.ADJUST = True
 _C.PROFILE.PIRK.POST_ACCELERATION = "auto"
 _C.PROFILE.PIRK.HOOK_DELAY = 0.0
-_C.PROFILE.PIRK.TROLLING = "off"
 _C.PROFILE.PIRK.DEPTH_ADJUST_DELAY = 4.0
+_C.PROFILE.PIRK.TROLLING = "off"
 
 
 # ---------------------------------------------------------------------------- #
