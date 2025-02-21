@@ -28,43 +28,26 @@ COLOR_TOLERANCE = 64
 
 ROOT = Path(__file__).resolve().parents[2]
 
-# ---------------------------------------------------------------------------- #
-#                     friction brake coordinates and colors                    #
-# ---------------------------------------------------------------------------- #
 
-# ----------------------------- 16x9 - 1080p - 2k ---------------------------- #
-# "bases": ((480, 270), (320, 180), (0, 0)),
+# ------------------------ Friction brake coordinates ------------------------ #
+# ----------------------------- 900p - 1080p - 2k ---------------------------- #
 # ------ left - red - yellow - center(left + 424) - yellow - red - right ----- #
-# absolute coordinates, should subtract x_base from them according to window size
-# "x": (855, 960, 1066, 1279, 1491, 1598, 1702),
-# "y": (1146, 1236, 1412),
-
-# ------------ left - red - yellow - center - yellow - red - right ----------- #
+# "bases": ((480, 270), (320, 180), (0, 0))
+# "absolute": {"x": (855, 960, 1066, 1279, 1491, 1598, 1702, "y": (1146, 1236, 1412)}
 # "1600x900": {"x": (375, 480, 586, 799, 1011, 1118, 1222), "y": 876},
 # "1920x1080": {"x": (535, 640, 746, 959, 1171, 1278, 1382), "y": 1056},
 # "2560x1440": {"x": (855, 960, 1066, 1279, 1491, 1598, 1702), "y": 1412},
 
-# 70%: center + 297 (1279 + 297 = 1576)
-# 80%: center + 340 (1279 + 340 = 1619)
-# 90%: center + 382 (1279 + 382 = 1661)
-# 95%: center + 382 (1279 + 403 = 1682)
-# 100%: center + 424 (1279 + 424 = 1703)
-
 # snag: x + 15, y
 # spool: x + 15, y + 15
 
+# For friction brake bar, check the left point only
 COORD_OFFSETS = {
     "1600x900": {
-        "friction_brake": (
-            # {
-            #     0.7: (502, 799, 1096),
-            #     0.8: (459, 799, 1139),
-            #     0.9: (417, 799, 1181),
-            #     0.95: (396, 799, 1202),
-            # },
-            799,
-            876,
-        ),
+        "friction_brake_very_high": (502, 799, 1096),
+        "friction_brake_high": (459, 799, 1139),
+        "friction_brake_medium": (417, 799, 1181),
+        "friction_brake_low": (396, 799, 1202),
         "fish_icon": (389, 844),
         "clip_icon": (1042, 844),
         "spool_icon": (1077, 844),
@@ -72,16 +55,10 @@ COORD_OFFSETS = {
         "float_camera": (720, 654),
     },
     "1920x1080": {
-        "friction_brake": (
-            # {
-            #     0.7: (662, 959, 1256),
-            #     0.8: (619, 959, 1299),
-            #     0.9: (577, 959, 1341),
-            #     0.95: (556, 959, 1362),
-            # },
-            959,
-            1056,
-        ),
+        "friction_brake_very_high": (662, 959, 1256),
+        "friction_brake_high": (619, 959, 1299),
+        "friction_brake_medium": (577, 959, 1341),
+        "friction_brake_low": (556, 959, 1362),
         "fish_icon": (549, 1024),
         "clip_icon": (1202, 1024),
         "spool_icon": (1237, 1024),
@@ -89,16 +66,10 @@ COORD_OFFSETS = {
         "float_camera": (880, 834),
     },
     "2560x1440": {
-        "friction_brake": (
-            # {
-            #     0.7: (982, 1279, 1576),
-            #     0.8: (939, 1279, 1619),
-            #     0.9: (897, 1279, 1661),
-            #     0.95: (876, 1279, 1682),
-            # },
-            1279,
-            1412,
-        ),
+        "friction_brake_very_high": (982, 1279, 1576),
+        "friction_brake_high": (939, 1279, 1619),
+        "friction_brake_medium": (897, 1279, 1661),
+        "friction_brake_low": (876, 1279, 1682),
         "fish_icon": (869, 1384),
         "clip_icon": (1522, 1384),
         "spool_icon": (1557, 1384),
@@ -154,7 +125,8 @@ class Detection:
         self.spool_icon_coord = self._get_absolute_coord("spool_icon")
         self.snag_icon_coord = self._get_absolute_coord("snag_icon")
         self.clip_icon_coord = self._get_absolute_coord("clip_icon")
-        self.friction_brake_coord = self._get_absolute_coord("friction_brake")
+        friction_brake_key = f"friction_brake_{self.cfg.FRICTION_BRAKE.SENSITIVITY}"
+        self.friction_brake_coord = self._get_absolute_coord(friction_brake_key)
 
         bases = self._get_absolute_coord("float_camera")
         if self.cfg.SELECTED.MODE in ("telescopic", "bolognese"):
