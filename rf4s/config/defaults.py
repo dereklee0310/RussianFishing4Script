@@ -14,7 +14,8 @@ _C.SCRIPT.SNAG_DETECTION = True
 _C.SCRIPT.SPOOLING_DETECTION = True
 _C.SCRIPT.RANDOM_ROD_SELECTION = True
 _C.SCRIPT.SPOOL_CONFIDENCE = 0.985
-_C.SCRIPT.SPOD_ROD_RECAST_DELAY = 1800 # 30 minutes
+_C.SCRIPT.GROUNDBAIT_REFILL_DELAY = 1800 # 30 minutes
+_C.SCRIPT.LURE_CHANGE_DELAY = 1800
 _C.SCRIPT.ALARM_SOUND = "../static/sound/guitar.wav"
 
 
@@ -47,11 +48,6 @@ _C.FRICTION_BRAKE.MAX = 30
 _C.FRICTION_BRAKE.START_DELAY = 2.0
 _C.FRICTION_BRAKE.INCREASE_DELAY = 1.0
 _C.FRICTION_BRAKE.SENSITIVITY = "medium"
-
-
-_C.LURE = CN()
-_C.LURE.CHANGE_DELAY = 1800 # 30 minutes
-_C.LURE.BROKEN_ACTION = "quit"
 
 
 _C.KEEPNET = CN()
@@ -110,7 +106,7 @@ _C.PROFILE.BOTTOM.CAST_DELAY = 4.0
 _C.PROFILE.BOTTOM.POST_ACCELERATION = "off"
 _C.PROFILE.BOTTOM.CHECK_DELAY = 32.0
 _C.PROFILE.BOTTOM.CHECK_MISS_LIMIT = 16
-_C.PROFILE.BOTTOM.TROLLING = "off"
+
 
 # ---------------------------------------------------------------------------- #
 #                      Marine / Wakey Rig Pirking Profile                      #
@@ -129,7 +125,6 @@ _C.PROFILE.PIRK.ADJUST = True
 _C.PROFILE.PIRK.POST_ACCELERATION = "auto"
 _C.PROFILE.PIRK.HOOK_DELAY = 0.0
 _C.PROFILE.PIRK.DEPTH_ADJUST_DELAY = 4.0
-_C.PROFILE.PIRK.TROLLING = "off"
 
 
 # ---------------------------------------------------------------------------- #
@@ -147,7 +142,6 @@ _C.PROFILE.ELEVATOR.ELEVEATE_TIMEOUT = 40.0
 _C.PROFILE.ELEVATOR.DROP = False
 _C.PROFILE.ELEVATOR.POST_ACCELERATION = "auto"
 _C.PROFILE.ELEVATOR.HOOK_DELAY = 0.0
-_C.PROFILE.ELEVATOR.TROLLING = "off"
 
 
 # ---------------------------------------------------------------------------- #
@@ -162,6 +156,7 @@ _C.PROFILE.TELESCOPIC.CHECK_DELAY = 1.0
 _C.PROFILE.TELESCOPIC.PULL_DELAY = 0.5
 _C.PROFILE.TELESCOPIC.DRIFT_TIMEOUT = 16.0
 _C.PROFILE.TELESCOPIC.CAMERA_SHAPE = "square"
+
 
 # ---------------------------------------------------------------------------- #
 #                           Bolognese Fishing Profile                          #

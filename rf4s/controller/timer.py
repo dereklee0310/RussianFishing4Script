@@ -108,14 +108,14 @@ class Timer:
 
     def is_lure_changeable(self):
         cur_time = time.time()
-        if cur_time - self.last_lure_change > self.cfg.LURE.CHANGE_DELAY:
+        if cur_time - self.last_lure_change > self.cfg.SCRIPT.LURE_CHANGE_DELAY:
             self.last_lure_change = cur_time
             return True
         return False
 
     def is_spod_rod_recastable(self):
         cur_time = time.time()
-        if cur_time - self.last_spod_rod_recast > self.cfg.SCRIPT.SPOD_ROD_RECAST_DELAY:
+        if cur_time - self.last_spod_rod_recast > self.cfg.SCRIPT.GROUNDBAIT_REFILL_DELAY:
             self.last_spod_rod_recast = cur_time
             return True
         return False

@@ -107,6 +107,7 @@ class Player:
             sys.exit(1)
 
         logger.info("Starting fishing mode: '%s'", self.cfg.SELECTED.MODE)
+        self._start_trolling()
         getattr(self, f"start_{self.cfg.SELECTED.MODE}_mode")()
 
     # ---------------------------------------------------------------------------- #
@@ -142,7 +143,6 @@ class Player:
         self.available_rods = [True] * self.rod_count
         check_miss_counts = [0] * self.rod_count
 
-        self._start_trolling()
         while True:
             if self.cfg.ARGS.SPOD_ROD and self.timer.is_spod_rod_recastable():
                 self._cast_spod_rod()
@@ -175,7 +175,6 @@ class Player:
         self._start_sink_mode(pirk=False)
 
     def _start_sink_mode(self, pirk: bool):
-        self._start_trolling()
         perform_technique = self._do_pirking if pirk else self._do_elevating
         while True:
             if not self.cfg.ARGS.SKIP_CAST:
@@ -973,10 +972,13 @@ class Player:
 
         Available options: never, forward, left, right.
         """
-        if self.cfg.SELECTED.TROLLING == "off":
+        if self.cfg.ARGS.TROLLING is None:
             return
-        pag.press(TROLLING_KEY)
-        if self.cfg.SELECTED.TROLLING not in ("left", "right"):
+        logger.info("Starting trolling")
+        print(self.cfg.ARGS.TROLLING)
+        # pag.press(TROLLING_KEY)
+        pag.keyDown("w")
+        if self.cfg.ARGS.TROLLING not in ("left", "right"): # Forward
             return
-        pag.keyDown(LEFT_KEY if self.cfg.SELECTED.TROLLING == "left" else RIGHT_KEY)
+        pag.keyDown(LEFT_KEY if self.cfg.ARGS.TROLLING == "left" else RIGHT_KEY)
 

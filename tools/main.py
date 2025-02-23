@@ -45,24 +45,28 @@ logger = logging.getLogger("rich")
 # Reference: https://rich.readthedocs.io/en/latest/logging.html
 
 ARGUMENTS = (
-    ("c", "coffee", "drink coffee if the stamina is low"),
-    ("A", "alcohol", "regularly drink alcohol before keeping the fish"),
+    ("c", "coffee", "drink coffee if stamina is low"),
+    ("A", "alcohol", "drink alcohol before keeping the fish regularly"),
     ("r", "refill", "refill hunger and comfort by consuming tea and carrot"),
     ("H", "harvest", "harvest baits before casting"),
     ("g", "gear_ratio", "switch the gear ratio after the retrieval timed out"),
-    ("f", "friction_brake", "change friction brake automatically"),
+    ("f", "friction_brake", "enable auto friction brake"),
     ("l", "lift", "lift the tackle constantly while pulling a fish"),
-    ("C", "skip_cast", "skip casting for the first fish, support mode: spin, marine"),
+    ("C", "skip_cast", "skip casting for the first fish, mode: spin, marine"), # TODO
     ("o", "spod_rod", "recast spod rod regularly"),
     ("L", "lure", "change current lure with a random one regularly"),
     ("x", "mouse", "move mouse randomly before casting the rod"),
-    ("X", "pause", "pause the script after keeping a fish regularly"),
+    ("X", "pause", "pause the script before casting the rod regularly"),
     ("b", "bite", "take a screenshot after casting in screenshots/ (for fish spot)"),
     ("S", "screenshot", "take a screenshot of every fish you caught in screenshots/"),
     ("e", "email", "send email noticication afterward"),
     ("P", "plot", "save fishing data in /logs"),
     ("M", "miaotixing", "send miaotixing notification afterward"),
     ("s", "shutdown", "shutdown computer afterward"),
+    ("gb", "groundbait", "enable groundbait refill, mode: bottom"),
+    ("dm", "dry_mix", "enable dry mix refill, mode: bottom"),
+    ("pva", "pva", "enable pva refill, mode: bottom"),
+    ("bl", "broken_lure", "enable broken lure auto-replace, mode: spin, marine"), # TODO
 )
 
 LOGO = """
@@ -155,35 +159,51 @@ class App:
         profile_selection_strategy.add_argument(
             "-p",
             "--pid",
-            metavar="PID",
             type=int,
             help="id of the profile you want to use",
+            metavar="PID",
         )
         profile_selection_strategy.add_argument(
             "-N",
             "--pname",
-            metavar="PROFILE_NAME",
             type=str,
             help="name of the profile you want to use",
+            metavar="PROFILE_NAME",
         )
 
         parser.add_argument(
             "-n",
             "--fishes_in_keepnet",
-            metavar="FISH_COUNT",
-            type=int,
             default=0,
-            help="number of fishes in your keepnet, 0 if not specified",
+            type=int,
+            help="number of fishes in your keepnet, 0 by default",
+            metavar="FISH_COUNT",
         )
         parser.add_argument(
             "-t",
             "--boat_ticket",
-            metavar="DURATION",
+            nargs="?",
+            const=5,
             type=int,
             choices=[1, 2, 3, 5],
             help=(
-                "enable boat ticket auto renewal, duration could be 1, 2, 3 or 5"
+                "enable boat ticket auto renewal, duration could be 1, 2, 3 or 5, "
+                "will use a 5 hour ticket if duration is not specified"
             ),
+            metavar="DURATION",
+        )
+
+        parser.add_argument(
+            "-T",
+            "--trolling",
+            nargs="?",
+            const="forward",
+            type=str,
+            choices=["forward", "left", "right"],
+            help=("enable trolling mode, direction could be forward, left, or right, "
+                  "will only move forward by press 'j' "
+                  "if direction is not specified"),
+            metavar="DIRECTION",
         )
 
         return parser
