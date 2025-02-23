@@ -148,7 +148,7 @@ COORD_OFFSETS = {
         ),
         "fish_icon": (389, 844),
         "snag_icon": (1132 + 15, 829),
-        "reel_burning_icon": (1031, 831),
+        "reel_burning_icon": (1112, 842),
         "float_camera": (720, 654),
     },
     "1920x1080": {
@@ -164,7 +164,7 @@ COORD_OFFSETS = {
         ),
         "fish_icon": (549, 1024),
         "snag_icon": (1292 + 15, 1009),
-        "reel_burning_icon": (1199, 1011),
+        "reel_burning_icon": (1271, 1023),
         "float_camera": (880, 834),
     },
     "2560x1440": {
@@ -180,7 +180,7 @@ COORD_OFFSETS = {
         ),
         "fish_icon": (869, 1384),
         "snag_icon": (1612 + 15, 1369),
-        "reel_burning_icon": (1519, 1371),
+        "reel_burning_icon": (1593, 1383),
         "float_camera": (1200, 1194),
     },
 }
@@ -190,6 +190,11 @@ CAMERA_W = CAMERA_H = 160
 
 class Setting:
     """Universal setting node."""
+    reel_burning_icon_position: tuple[int, int]
+    friction_brake_position: tuple[int, int]
+    snag_icon_position: tuple[int, int]
+    fish_icon_position: tuple[int, int]
+    retrieval_detect_confidence: float
 
     # pylint: disable=too-many-instance-attributes, disable=maybe-no-member
     # it's a cfg node,
@@ -201,10 +206,6 @@ class Setting:
         self.window_size = self.window_controller.get_window_size()
         self.coord_offsets = None
         self.float_camera_rect = None
-        self.fish_icon_position = None
-        self.snag_icon_position = None
-        self.friction_brake_position = None
-        self.reel_burning_icon_position = None
 
         self.config = self._build_config()
         # build available profile table

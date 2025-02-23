@@ -19,7 +19,7 @@ MIN_GRAY_SCALE_LEVEL = 150
 YELLOW_FRICTION_BRAKE = (200, 214, 63)
 ORANGE_FRICTION_BRAKE = (229, 188, 0)
 RED_FRICTION_BRAKE = (206, 56, 21)
-ORANGE_REEL = (209, 151, 88)
+ORANGE_REEL = (227, 149, 23)
 RED_REEL = (206, 56, 21)
 COLOR_TOLERANCE = 64
 
@@ -276,7 +276,7 @@ class Monitor:
         :return: True if pixel color matched, False otherwise
         :rtype: bool
         """
-        return pag.pixelMatchesColor(*self.setting.reel_burning_icon_position, ORANGE_REEL, 32) or pag.pixelMatchesColor(*self.setting.reel_burning_icon_position, RED_REEL, 32)
+        return pag.pixel(*self.setting.reel_burning_icon_position) in [ORANGE_REEL, RED_REEL]
 
     def is_fish_hooked_pixel(self) -> bool:
         return all(
