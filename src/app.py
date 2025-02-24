@@ -363,7 +363,7 @@ class App:
 
     def display_settings(self) -> None:
         """Display args and user profile."""
-        self.table = PrettyTable(header=False, align="l", title="Setings")
+        self.table = PrettyTable(header=False, align="l", title="Settings")
         self._build_args_table()
         self._build_user_config_table()
         print(self.table)

@@ -19,6 +19,7 @@ MIN_GRAY_SCALE_LEVEL = 150
 YELLOW_FRICTION_BRAKE = (200, 214, 63)
 ORANGE_FRICTION_BRAKE = (229, 188, 0)
 RED_FRICTION_BRAKE = (206, 56, 21)
+ORANGE_REEL = (227, 149, 23)
 COLOR_TOLERANCE = 64
 
 
@@ -267,6 +268,14 @@ class Monitor:
         return pag.pixelMatchesColor(
             *self.setting.friction_brake_position, RED_FRICTION_BRAKE, COLOR_TOLERANCE
         )
+
+    def is_reel_burning(self) -> bool:
+        """Check if the reel is burning in the fire icon.
+
+        :return: True if pixel color matched, False otherwise
+        :rtype: bool
+        """
+        return pag.pixel(*self.setting.reel_burning_icon_position) == ORANGE_REEL
 
     def is_fish_hooked_pixel(self) -> bool:
         return all(
