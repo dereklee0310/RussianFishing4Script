@@ -405,7 +405,7 @@ class App:
         self.cfg.SCRIPT.SNAG_DETECTION = False
         self.cfg.SCRIPT.SPOOLING_DETECTION = False
 
-        if self.cfg.SELECTED.MODE in ("telescopic", "bolognese"):
+        if self.cfg.SELECTED.MODE in ("telescopic", "bolognese") and not self.window.supported:
             logger.critical(
                 "Fishing mode '%s' doesn't support window size '%s'",
                 self.cfg.SELECTED.MODE,

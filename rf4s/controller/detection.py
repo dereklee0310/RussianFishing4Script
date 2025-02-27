@@ -12,6 +12,7 @@ from pathlib import Path
 
 import pyautogui as pag
 from pyscreeze import Box
+from PIL import Image
 
 from rf4s.controller.window import Window
 
@@ -54,6 +55,7 @@ COORD_OFFSETS = {
         "spool_icon": (1077, 844),
         "snag_icon": (1147, 829),
         "float_camera": (720, 654),
+        "bait_icon": (35, 125),
     },
     "1920x1080": {
         "friction_brake_very_high": (662, 959, 1256),
@@ -65,6 +67,7 @@ COORD_OFFSETS = {
         "spool_icon": (1237, 1024),
         "snag_icon": (1307, 1009),
         "float_camera": (880, 834),
+        "bait_icon": (35, 125),
     },
     "2560x1440": {
         "friction_brake_very_high": (982, 1279, 1576),
@@ -76,6 +79,7 @@ COORD_OFFSETS = {
         "spool_icon": (1557, 1384),
         "snag_icon": (1627, 1369),
         "float_camera": (1200, 1194),
+        "bait_icon": (35, 125),
     },
 }
 
@@ -102,6 +106,9 @@ class Detection:
         if window_is_supported:
             self._set_absolute_coords()
 
+        self.bait_icon_reference_img = Image.open(self.image_dir / "bait_icon.png")
+        self.bait_chosen_threshold = 1 if self.cfg.SELECTED.MODE not in ("telescopic" , "bolognese") else 2
+
     def _get_image_box(self, image: str, confidence: float, multiple: bool=False) -> Box | None:
         """A wrapper for locateOnScreen method and path resolving.
 
@@ -125,6 +132,7 @@ class Detection:
         for key in self.coord_offsets:
             setattr(self, f"{key}_coord", self._get_absolute_coord(key))
 
+        self.bait_icon_coord = self._get_absolute_coord("bait_icon") + [44, 52]
         friction_brake_key = f"friction_brake_{self.cfg.FRICTION_BRAKE.SENSITIVITY}"
         self.friction_brake_coord = self._get_absolute_coord(friction_brake_key)
 
@@ -401,10 +409,15 @@ class Detection:
     def is_groundbait_chosen(self):
         return self._get_image_box("groundbait_icon", 0.6) is None
 
-    # TODO: duplicated?
     def is_bait_chosen(self):
+        # Two bait slots
+        if self.cfg.SELECTED.MODE in ("telescopic", "bolognese"):
+            return pag.locate(
+                pag.screenshot(region=self.bait_icon_coord),
+                self.bait_icon_reference_img,
+                confidence=0.6
+            )
         return self._get_image_box("bait_icon", 0.6) is None
-
 
     def get_groundbait_position(self):
         return self._get_image_box("classic_feed_mix", 0.98)

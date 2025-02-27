@@ -116,11 +116,11 @@ class Player:
             logger.info("Spawing new process, do not quit the script")
             self.friction_brake.monitor_process.start()
 
-        if (self.cfg.SELECTED.MODE not in ("telesopic", "bottom") and
+        if (self.cfg.SELECTED.MODE not in ("telescopic", "bottom") and
             not self.cfg.ARGS.SKIP_CAST and
             not self.detection.is_retrieve_finished()):
             logger.critical("The spool is not fully loaded")
-            logger.critical("Please change your game window size or fishing line")
+            logger.critical("Try moveing your camera, changing your game window size or fishing line")
             sys.exit(1)
 
         logger.info("Starting fishing mode: '%s'", self.cfg.SELECTED.MODE)
