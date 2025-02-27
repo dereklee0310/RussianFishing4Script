@@ -117,8 +117,10 @@ class Player:
             self.friction_brake.monitor_process.start()
 
         if (self.cfg.SELECTED.MODE not in ("telesopic", "bottom") and
+            not self.cfg.ARGS.SKIP_CAST and
             not self.detection.is_retrieve_finished()):
-            logger.critical("The spool is not fully loaded with fishing line")
+            logger.critical("The spool is not fully loaded")
+            logger.critical("Please change your game window size or fishing line")
             sys.exit(1)
 
         logger.info("Starting fishing mode: '%s'", self.cfg.SELECTED.MODE)
@@ -262,13 +264,14 @@ class Player:
 
     def _start_sink_mode(self, pirk: bool):
         perform_technique = self._do_pirking if pirk else self._do_elevating
+        skip_cast = self.cfg.ARGS.SKIP_CAST
         while True:
-            if not self.cfg.ARGS.SKIP_CAST:
+            if not skip_cast:
                 self._refill_stats()
                 self._reset_tackle()
                 self._cast_tackle()
                 self.tackle.sink()
-            self.cfg.ARGS.SKIP_CAST = False
+            skip_cast = False
 
             perform_technique()
             self._retrieve_line()
@@ -611,11 +614,11 @@ class Player:
                 break
             except TimeoutError:
                 self._handle_timeout()
-                if self.cfg.SELECTED.ADJUST:
+                if self.cfg.SELECTED.DEPTH_ADJUST_DELAY > 0:
                     logger.info("Adjusting lure depth")
                     pag.press("enter")  # Open reel
                     sleep(self.cfg.SELECTED.DEPTH_ADJUST_DELAY)
-                    utils.hold_mouse_button(self.cfg.SELECTED_TIGHTEN_DURATION)
+                    utils.hold_mouse_button(self.cfg.SELECTED.TIGHTEN_DURATION)
                 else:
                     self._reset_tackle()
                     self._cast_tackle()
@@ -624,11 +627,11 @@ class Player:
 
     def _do_elevating(self) -> None:
         """Perform elevating till a fish hooked with timeout handling."""
-        drop = False
+        dropped = False
         while True:
             try:
-                drop = not drop
-                self.tackle.elevate(drop)
+                dropped = not dropped
+                self.tackle.elevate(dropped)
                 break
             except TimeoutError:
                 self._handle_timeout()

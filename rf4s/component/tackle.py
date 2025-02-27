@@ -208,6 +208,7 @@ class Tackle:
         i = RETRIEVAL_WITH_PAUSE_TIMEOUT
         while i > 0:
             utils.hold_mouse_button(self.cfg.SELECTED.RETRIEVE_DURATION, button)
+            i -= self.cfg.SELECTED.RETRIEVE_DURATION
             i = utils.sleep_and_decrease(i, self.cfg.SELECTED.RETRIEVE_DELAY)
             if self.detection.is_fish_hooked() or self.detection.is_retrieve_finished():
                 return
@@ -233,19 +234,23 @@ class Tackle:
                 if self.cfg.SELECTED.CTRL:
                     pag.keyDown("ctrl")
                 utils.hold_mouse_button(self.cfg.SELECTED.PIRK_DURATION, button="right")
+                i -= self.cfg.SELECTED.PIRK_DURATION
                 i = utils.sleep_and_decrease(i, self.cfg.SELECTED.PIRK_DELAY)
             else:
                 i = utils.sleep_and_decrease(i, LOOP_DELAY)
 
         raise TimeoutError
 
-    def elevate(self, drop: bool) -> None:
+    def elevate(self, dropped: bool) -> None:
         """Perform elevator tactic (drop/rise) until a fish is hooked.
 
         :param drop: whether to drop or rise the lure
         :type drop: bool
         """
-        logger.info("Dropping" if drop else "Rising")
+        logger.info("Rising" if dropped else "Dropping")
+
+        if self.cfg.SELECTED.TYPE == "lift":
+            pag.mouseDown()
 
         locked = True  # Reel is locked after tackle.sink()
         i = self.cfg.SELECTED.ELEVATE_TIMEOUT
@@ -254,7 +259,20 @@ class Tackle:
                 pag.click()
                 return
 
-            if self.cfg.SELECTED.DROP and drop:
+
+            if self.cfg.SELECTED.TYPE == "lift":
+                if self.cfg.SELECTED.ELEVATE_DURATION > 0:
+                    if self.cfg.SELECTED.CTRL:
+                        pag.keyDown("ctrl")
+                    utils.hold_mouse_button(self.cfg.SELECTED.ELEVATE_DURATION, button="right")
+                    i -= self.cfg.SELECTED.ELEVATE_DURATION
+                    i = utils.sleep_and_decrease(i, self.cfg.SELECTED.ELEVATE_DELAY)
+                else:
+                    i = utils.sleep_and_decrease(i, LOOP_DELAY)
+                continue
+
+
+            if self.cfg.SELECTED.DROP and not dropped:
                 pag.press("enter")
                 if locked:
                     delay = self.cfg.SELECTED.ELEVATE_DELAY
