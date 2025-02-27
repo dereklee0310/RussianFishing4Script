@@ -16,6 +16,8 @@ from rf4s.controller.detection import Detection
 BASE_DELAY = 0.2
 LOOP_DELAY = 2
 
+ANIMATION_DELAY = 1
+
 logger = logging.getLogger("rich")
 
 # ---------------------------------------------------------------------------- #
@@ -139,57 +141,55 @@ def start_app(app: object, results: tuple[tuple]) -> None:
 # ---------------------------------------------------------------------------- #
 
 
-def initialize_setting_and_monitor(args_map: tuple[tuple]):
-    """Initialize a setting node and a screen monitor for given application.
+def toggle_clicklock(func):
+    """Toggle clicklock before and after calling the function."""
 
-    This is a simple decorator that used for constructors in harvest and craft modules.
+    def wrapper(*args, **kwargs):
+        pag.mouseDown()
+        sleep(BASE_DELAY + LOOP_DELAY)
+        try:
+            func(*args, **kwargs)
+        except Exception as e:
+            raise e
+        finally:
+            pag.click()
 
-    :param args_map: args lookup table
-    :type args_map: tuple[tuple]
-    """
-    #TODO
+    return wrapper
+
+
+def toggle_right_mouse_button(func):
+    """Toggle right mouse button before and after calling the function."""
+
+    def wrapper(*args, **kwargs):
+        pag.mouseDown(button="right")
+        try:
+            func(*args, **kwargs)
+        except Exception as e:
+            raise e
+        finally:
+            pag.mouseUp(button="right")
+
+    return wrapper
+
+
+def press_before_and_after(key):
     def func_wrapper(func):
-        def args_wrapper(caller):
-            args = caller.parse_args()
-            caller.setting = Setting()
-            caller.setting.merge_args(args, args_map)
-            caller.monitor = Detection(caller.setting)
-            func(caller)
+        def args_wrapper(self, *args):
+            pag.press(key)
+            sleep(ANIMATION_DELAY)
+            try:
+                func(self, *args)
+            except Exception as e:
+                raise e
+            finally:
+                pag.press(key)
+                sleep(ANIMATION_DELAY)
 
         return args_wrapper
 
     return func_wrapper
 
 
-def toggle_clicklock(func):
-    """Toggle clicklock before and after calling the function."""
-
-    def wrapper(self, *args):
-        pag.mouseDown()
-        sleep(BASE_DELAY + LOOP_DELAY)
-        try:
-            func(self, *args)
-            pag.click()
-        except Exception as e:
-            pag.click()
-            raise e
-
-    return wrapper
-
-
-def toggle_right_mouse_button(func):
-    """Toggle clicklock before and after calling the function."""
-
-    def wrapper(self, *args):
-        pag.mouseDown(button="right")
-        try:
-            func(self, *args)
-            pag.mouseUp(button="right")
-        except Exception as e:
-            pag.mouseUp(button="right")
-            raise e
-
-    return wrapper
 
 def release_keys_after(func):
     """Release keys that might have been holding down."""
@@ -201,13 +201,14 @@ def release_keys_after(func):
         pag.keyUp("a")
         pag.keyUp("d")
 
-    def wrapper(self, *args, **kwargs):
+    def wrapper(*args, **kwargs):
         try:
-            func(self, *args, **kwargs)
+            func(*args, **kwargs)
             release_keys()
         except Exception as e:
-            release_keys()
             raise e
+        finally:
+            release_keys()
 
     return wrapper
 
@@ -216,9 +217,8 @@ def release_keys_after(func):
 # so use a decorator here to simplify the code
 def reset_friction_brake_after(func):
     """Reset friction brake after calling the function."""
-
-    def wrapper(self, *args):
-        func(self, *args)
+    def wrapper(self, *args, **kwargs):
+        func(self, *args, **kwargs)
         if not self.cfg.ARGS.FRICTION_BRAKE:
             return
 
@@ -227,35 +227,3 @@ def reset_friction_brake_after(func):
                 self.cfg.FRICTION_BRAKE.INITIAL)
 
     return wrapper
-
-
-# def verify_window_size(setting) -> bool:
-#         """Check if the window size is supported.
-
-#         :return: True if supported, False otherwise
-#         :rtype: bool
-#         """
-#         if setting.window_controller.is_title_bar_exist():
-#             # logger.error("Invalid display mode: window mode")
-#             logger.info("Window mode detected, if you want to move the game window, " +
-#                         "please restart the script after moving it.")
-#         window_size = setting.window_size
-#         if window_size in ((2560, 1440), (1920, 1080), (1600, 900)):
-#             return True
-
-#         logger.warning(
-#             "Window size %s not supported, must be 2560x1440, 1920x1080 or 1600x900",
-#             window_size,
-#         )
-#         logger.warning('Window mode must be "Borderless windowed" or "Window mode"')
-#         logger.warning("Snag detection and friction brake changing will be disabled")
-#         setting.snag_detection_enabled = False
-#         setting.friction_brake_changing_enabled = False
-
-#         if setting.fishing_strategy == "float":
-#             logger.error(
-#                 "Float fishing mode doesn't support window size %s", window_size
-#             )
-#             sys.exit()
-
-#         return False

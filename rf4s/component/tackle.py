@@ -8,6 +8,7 @@ Module for Tackle class and some decorators.
 import logging
 import random
 from time import sleep
+from typing import Literal
 
 import pyautogui as pag
 import win32api
@@ -26,7 +27,7 @@ CAST_SCALE = 0.4  # 25% / 0.4s
 BASE_DELAY = 1
 LOOP_DELAY = 2
 
-ANIMATION_DELAY = 0.5
+ANIMATION_DELAY = 1
 
 RETRIEVAL_TIMEOUT = 32
 PULL_TIMEOUT = 16
@@ -44,7 +45,7 @@ NUM_OF_MOVEMENT = 4
 class Tackle:
     """Class for all tackle dependent methods."""
 
-    def __init__(self, cfg, timer: Timer, window_is_valid):
+    def __init__(self, cfg, timer: Timer, detection: Detection):
         """Get timer and setting from caller (Player).
 
         :param setting: universal setting node
@@ -55,8 +56,8 @@ class Tackle:
         :type timer: Timer
         """
         self.cfg = cfg
-        self.detection = Detection(cfg, window_is_valid)
         self.timer = timer
+        self.detection = detection
         self.landing_net_out = False  # for telescopic_pull()
         self.available = True
 
@@ -99,8 +100,6 @@ class Tackle:
                 raise exceptions.LineAtEndError
             if self.cfg.SCRIPT.SNAG_DETECTION and self.detection.is_line_snagged():
                 raise exceptions.LineSnaggedError
-            if self.detection.is_groundbait_not_chosen():
-                raise exceptions.GroundbaitNotChosenError
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
 
         raise TimeoutError
@@ -348,21 +347,68 @@ class Tackle:
             win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, x, y, 0, 0)
             sleep(ANIMATION_DELAY)
 
-    def change_lure(self) -> None:
-        """Open menu, select a random lure and replace the current one."""
-        logger.info("Search for favorite items")
-        with pag.hold("b"):
-            sleep(ANIMATION_DELAY)
-            favorite_item_positions = list(self.detection.get_favorite_item_positions())
-            random.shuffle(favorite_item_positions)
-            for favorite_item_position in favorite_item_positions:
-                # check if the lure for replacement is already broken
-                x, y = utils.get_box_center(favorite_item_position)
-                if pag.pixel(x - 75, y + 190) != (178, 59, 30):  # magic value
-                    logger.info("The lure has been replaced")
-                    pag.moveTo(x - 75, y + 190)
-                    pag.click()
-                    break
-                logger.warning("Lure for replacement found but already broken")
-            logger.warning("Lure for replacement not found, stay unchanged")
+
+    def equip_item(self, item) -> None:
+        if item in ("lure", "pva"):
+            return self._equip_item_from_menu(item)
+        else: # dry_mix, groundbait
+            return self._equip_item_from_inventory(item)
+
+
+    def _equip_item_from_menu(self, item: Literal["lure", "pva"] ) -> None:
+        logger.info("Looking for a new %s in menu", item)
+        menu_key = "h" if item == "pva" else "b"
+        with pag.hold(menu_key):
+            self._equip_favorite_item(item)
         sleep(ANIMATION_DELAY)
+
+    @utils.press_before_and_after("v")
+    def _equip_item_from_inventory(self, item: Literal["dry_mix", "groundbait"]) -> None:
+        logger.info("Looking for a new %s in inventory", item)
+        scrollbar_position = self.detection.get_scrollbar_position()
+        if scrollbar_position is None:
+            if item == "groundbait":
+                groundbait_position = self.detection.get_groundbait_position()
+                pag.click(utils.get_box_center(groundbait_position))
+                self._equip_favorite_item(item)
+            else:
+                dry_mix_position = self.detection.get_dry_mix_position()
+                pag.click(utils.get_box_center(dry_mix_position))
+                self._equip_favorite_item(item)
+
+        pag.moveTo(scrollbar_position)
+        for _ in range(5):
+            sleep(ANIMATION_DELAY)
+            pag.drag(xOffset=0, yOffset=125, duration=0.5, button="left")
+
+            if item == "groundbait":
+                position = self.detection.get_groundbait_position()
+            else:
+                position = self.detection.get_dry_mix_position()
+
+            if position is not None:
+                pag.click(utils.get_box_center(position))
+                self._equip_favorite_item(item)
+                break
+
+    def _equip_favorite_item(self, item: bool):
+        """Select a favorite item for replacement and replace the broken one."""
+        sleep(ANIMATION_DELAY)
+        logger.info("Searching favorite items")
+
+        favorite_item_positions = list(self.detection.get_favorite_item_positions())
+        if item == "lure":
+            random.shuffle(favorite_item_positions)
+
+        for favorite_item_position in favorite_item_positions:
+            x, y = utils.get_box_center(favorite_item_position)
+            if item == "lure" and pag.pixel(x - 70, y + 190) == (178, 59, 30):
+                continue
+            pag.click(x - 70, y + 190, clicks=2, interval=0.1)
+            # pag.click(x - 70, y + 190)
+            logger.info("New %s has been equiped", item)
+            return
+
+        if item in ("dry_mix", "groundbait"):
+            pag.press("esc")
+        raise exceptions.ItemNotFoundError
