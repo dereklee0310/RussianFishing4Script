@@ -177,7 +177,7 @@ class Detection:
 
     # -------------------------------- fish status ------------------------------- #
     def is_fish_hooked(self):
-        return self._get_image_box("get", 0.9)
+        return self._get_image_box("fish_icon", 0.9)
 
     def is_fish_hooked_twice(self) -> bool:
         if not self.is_fish_hooked():
@@ -256,8 +256,8 @@ class Detection:
     def get_exit_icon_position(self):
         return self._get_image_box("exit", 0.8)
 
-    def get_confirm_exit_icon_position(self):
-        return self._get_image_box("confirm_exit", 0.8)
+    def get_confirm_button_position(self):
+        return self._get_image_box("confirm", 0.8)
 
     # ----------------------------- baits harvesting ----------------------------- #
     def is_harvest_success(self):

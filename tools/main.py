@@ -272,7 +272,9 @@ class App:
         logger.info("Verifying image files")
         if self.cfg.SCRIPT.LANGUAGE == "en":
             return True
-
+        logger.warning("Language '%s' is not fully supported, "
+                       "consider using EN version",
+                       self.cfg.SCRIPT.LANGUAGE)
         image_dir = ROOT / "static" / self.cfg.SCRIPT.LANGUAGE
         try:
             current_images = [f.name for f in image_dir.iterdir() if f.is_file()]
@@ -283,7 +285,9 @@ class App:
         target_images = [f.name for f in template_dir.iterdir() if f.is_file()]
         missing_images = set(target_images) - set(current_images)
         if len(missing_images) > 0:
-            logger.critical("Integrity check failed")
+            logger.critical(
+                "Some images are missing, please add them manually"
+            )
             table = Table(
                 # "Filename",
                 Column("Filename", style=Style(color="red")),
@@ -295,6 +299,7 @@ class App:
                 table.add_row(f"static/{self.cfg.SCRIPT.LANGUAGE}/{filename}")
             print(table)
             return False
+        return True
 
     def _is_profile_valid(self, profile_name):
         if profile_name not in self.cfg.PROFILE:

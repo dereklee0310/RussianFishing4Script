@@ -738,7 +738,7 @@ class Player:
         pag.moveTo(self.detection.get_exit_icon_position())
         pag.click()
         sleep(ANIMATION_DELAY)
-        pag.moveTo(self.detection.get_confirm_exit_icon_position())
+        pag.moveTo(self.detection.get_confirm_button_position())
         pag.click()
 
         self._handle_termination("Game disconnected", shutdown=True)
