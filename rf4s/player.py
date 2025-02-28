@@ -715,10 +715,13 @@ class Player:
         logger.critical(msg)
         sleep(ANIMATION_DELAY)
         pag.press("esc")
-        # pag.click()  # Avoid possible ClickLock stuck
         sleep(ANIMATION_DELAY)
+
+        if self.cfg.ARGS.SIGNOUT:
+            pag.keyDown("shift")
         pag.moveTo(self.detection.get_quit_position())
         pag.click()
+        pag.keyUp("shift")
         sleep(ANIMATION_DELAY)
         pag.moveTo(self.detection.get_yes_position())
         pag.click()
@@ -727,19 +730,17 @@ class Player:
 
     def disconnected_quit(self) -> None:
         """Quit the game through main menu."""
-        pag.click()  # Avoid possible ClickLock stuck
         pag.press("space")
         # Sleep to bypass the black screen (experimental)
         sleep(DISCONNECTED_DELAY)
-
         pag.press("space")
         sleep(ANIMATION_DELAY)
-
-        pag.moveTo(self.detection.get_exit_icon_position())
-        pag.click()
-        sleep(ANIMATION_DELAY)
-        pag.moveTo(self.detection.get_confirm_button_position())
-        pag.click()
+        if not self.cfg.ARGS.SIGNOUT:
+            pag.moveTo(self.detection.get_exit_icon_position())
+            pag.click()
+            sleep(ANIMATION_DELAY)
+            pag.moveTo(self.detection.get_confirm_button_position())
+            pag.click()
 
         self._handle_termination("Game disconnected", shutdown=True)
 
@@ -1015,6 +1016,7 @@ class Player:
 
     def test(self):
         """Boo!"""
+        self.disconnected_quit()
         while True:
             sleep(0.1)
             print(self.detection.is_pva_chosen())

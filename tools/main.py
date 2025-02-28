@@ -59,14 +59,15 @@ ARGUMENTS = (
     ("X", "pause", "pause the script before casting the rod regularly"),
     ("b", "bite", "take a screenshot after casting in screenshots/ (for fish spot)"),
     ("S", "screenshot", "take a screenshot of every fish you caught in screenshots/"),
-    ("e", "email", "send email noticication afterward"),
+    ("e", "email", "send email noticication after the script stop"),
     ("P", "plot", "save fishing data in /logs"),
-    ("M", "miaotixing", "send miaotixing notification afterward"),
-    ("s", "shutdown", "shutdown computer afterward"),
+    ("M", "miaotixing", "send miaotixing notification after the script stop"),
+    ("s", "shutdown", "shutdown computer after the script stop"),
+    ("so", "signout", "Sign out instead of closing the game"),
     ("gb", "groundbait", "enable groundbait refill, mode: bottom"),
     ("dm", "dry_mix", "enable dry mix refill, mode: bottom"),
     ("pva", "pva", "enable pva refill, mode: bottom"),
-    ("E", "electro", "enable electric mode for Electro Raptor series reel")
+    ("E", "electro", "enable electric mode for Electro Raptor series reel"),
 )
 
 LOGO = """
@@ -446,7 +447,7 @@ class App:
         if self.cfg.KEY.QUIT != "CTRL-C":
             listener = keyboard.Listener(on_release=self._on_release)
             listener.start()
-
+        self.player.test()
         try:
             self.player.start_fishing()
         except KeyboardInterrupt:
