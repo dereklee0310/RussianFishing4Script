@@ -145,11 +145,14 @@ def start_app(app: object, results: tuple[tuple]) -> None:
 def toggle_clicklock(func):
     """Toggle clicklock before and after calling the function."""
 
-    def wrapper(*args, **kwargs):
-        pag.mouseDown()
+    def wrapper(self, *args, **kwargs):
+        if self.cfg.ARGS.ELECTRO:
+            pag.click(clicks=2, interval=0.1)
+        else:
+            pag.mouseDown()
         sleep(BASE_DELAY + LOOP_DELAY)
         try:
-            func(*args, **kwargs)
+            func(self, *args, **kwargs)
         except Exception as e:
             raise e
         finally:

@@ -66,6 +66,7 @@ ARGUMENTS = (
     ("gb", "groundbait", "enable groundbait refill, mode: bottom"),
     ("dm", "dry_mix", "enable dry mix refill, mode: bottom"),
     ("pva", "pva", "enable pva refill, mode: bottom"),
+    ("E", "electro", "enable electric mode for Electro Raptor series reel")
 )
 
 LOGO = """
@@ -403,6 +404,21 @@ class App:
     def _setup_player(self):
         self.player = Player(self.cfg, self.window)
 
+    def _print_hints(self):
+        if self.cfg.ARGS.ELECTRO:
+            if self.cfg.SELECTED.MODE not in ("pirk", "elevator"):
+                logger.error(
+                    "Electric mode is not compatible with mode '%s'",
+                    self.cfg.SELECTED.MODE
+                )
+                logger.error("Electric mode will be disabled")
+                self.cfg.ARGS.ELECTRO = False
+            else:
+                logger.info(
+                    "Electric mode is enabled, make sure you're using\n"
+                    "Electro Raptor and EL mode at the same time."
+                )
+
     def _on_release(self, key: keyboard.KeyCode) -> None:
         """Callback for button release.
 
@@ -418,6 +434,7 @@ class App:
         self._setup_user_profile()
         self.setup_window()
         self._setup_player()
+        self._print_hints()
         self.cfg.freeze()
         self.window.activate_game_window()
 
