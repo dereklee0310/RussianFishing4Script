@@ -27,33 +27,22 @@ YELLOW_FRICTION_BRAKE = (200, 214, 63)
 ORANGE_FRICTION_BRAKE = (229, 188, 0)
 RED_FRICTION_BRAKE = (206, 56, 21)
 COLOR_TOLERANCE = 64
+CAMERA_OFFSET = 40
+SIDE_LENGTH = 160
+SIDE_LENGTH_HALF = 80
 
 ROOT = Path(__file__).resolve().parents[2]
 
-
-# ------------------------ Friction brake coordinates ------------------------ #
-# ----------------------------- 900p - 1080p - 2k ---------------------------- #
-# ------ left - red - yellow - center(left + 424) - yellow - red - right ----- #
-# "bases": ((480, 270), (320, 180), (0, 0))
-# "absolute": {"x": (855, 960, 1066, 1279, 1491, 1598, 1702, "y": (1146, 1236, 1412)}
-# "1600x900": {"x": (375, 480, 586, 799, 1011, 1118, 1222), "y": 876},
-# "1920x1080": {"x": (535, 640, 746, 959, 1171, 1278, 1382), "y": 1056},
-# "2560x1440": {"x": (855, 960, 1066, 1279, 1491, 1598, 1702), "y": 1412},
-
-# snag: x + 15, y
-# spool: x + 15, y + 15
-
-# For friction brake bar, check the left point only
 COORD_OFFSETS = {
     "1600x900": {
-        "friction_brake_very_high": (502, 799, 1096),
+        "friction_brake_very_high": (502, 799, 1096), # Left point only
         "friction_brake_high": (459, 799, 1139),
         "friction_brake_medium": (417, 799, 1181),
         "friction_brake_low": (396, 799, 1202),
         "fish_icon": (389, 844),
         "clip_icon": (1042, 844),
-        "spool_icon": (1077, 844),
-        "snag_icon": (1147, 829),
+        "spool_icon": (1077, 844), # x + 15, y + 15
+        "snag_icon": (1147, 829), # x + 15, y
         "float_camera": (720, 654),
         "bait_icon": (35, 125),
     },
@@ -83,9 +72,14 @@ COORD_OFFSETS = {
     },
 }
 
-CAMERA_OFFSET = 40
-SIDE_LENGTH = 160
-SIDE_LENGTH_HALF = 80
+# ------------------------ Friction brake coordinates ------------------------ #
+# ----------------------------- 900p - 1080p - 2k ---------------------------- #
+# ------ left - red - yellow - center(left + 424) - yellow - red - right ----- #
+# "bases": ((480, 270), (320, 180), (0, 0))
+# "absolute": {"x": (855, 960, 1066, 1279, 1491, 1598, 1702, "y": (1146, 1236, 1412)}
+# "1600x900": {"x": (375, 480, 586, 799, 1011, 1118, 1222), "y": 876},
+# "1920x1080": {"x": (535, 640, 746, 959, 1171, 1278, 1382), "y": 1056},
+# "2560x1440": {"x": (855, 960, 1066, 1279, 1491, 1598, 1702), "y": 1412},
 
 
 class Detection:
@@ -93,21 +87,20 @@ class Detection:
 
     # pylint: disable=too-many-public-methods
 
-    def __init__(self, cfg, window_is_supported):
+    def __init__(self, cfg, window: Window):
         """Initialize setting.
 
         :param setting: general setting node
         :type setting: Setting
         """
         self.cfg = cfg
-        self.window_box = Window().get_box()
+        self.window = window
         self.image_dir = ROOT / "static" / cfg.SCRIPT.LANGUAGE
 
-        if window_is_supported:
+        if window.supported:
             self._set_absolute_coords()
 
         self.bait_icon_reference_img = Image.open(self.image_dir / "bait_icon.png")
-        self.bait_chosen_threshold = 1 if self.cfg.SELECTED.MODE not in ("telescopic" , "bolognese") else 2
 
     def _get_image_box(self, image: str, confidence: float, multiple: bool=False) -> Box | None:
         """A wrapper for locateOnScreen method and path resolving.
@@ -126,7 +119,7 @@ class Detection:
 
     def _set_absolute_coords(self) -> None:
         """Add offsets to the base coordinates to get absolute ones."""
-        window_size = f"{self.window_box[2]}x{self.window_box[3]}"
+        window_size = f"{self.window.box[2]}x{self.window.box[3]}"
         self.coord_offsets = COORD_OFFSETS[window_size]
 
         for key in self.coord_offsets:
@@ -148,11 +141,7 @@ class Detection:
                 case "square":
                     width, height = SIDE_LENGTH, SIDE_LENGTH
                 case _:
-                    logger.critical(
-                        "Invalid camera shape: '%s'",
-                        self.cfg.SELECTED.CAMERA_SHAPE
-                    )
-                    sys.exit(1)
+                    raise ValueError(self.cfg.SELECTED.CAMERA_SHAPE)
             self.float_camera_rect = (*bases, width, height)  # (left, top, w, h)
 
     def _get_absolute_coord(self, offset_key: str) -> list[int]:
@@ -164,8 +153,8 @@ class Detection:
         :rtype: list[int]
         """
         return [
-            self.window_box[0] + self.coord_offsets[offset_key][0],
-            self.window_box[1] + self.coord_offsets[offset_key][1],
+            self.window.box[0] + self.coord_offsets[offset_key][0],
+            self.window.box[1] + self.coord_offsets[offset_key][1],
         ]
 
     # ------------------------ unmarked release whitelist ------------------------ #

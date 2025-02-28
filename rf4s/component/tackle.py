@@ -400,7 +400,7 @@ class Tackle:
             if item == "lure" and pag.pixel(x - 70, y + 190) == (178, 59, 30):
                 continue
             pag.click(x - 70, y + 190, clicks=2, interval=0.1)
-            logger.info("New %s has been equiped", item)
+            logger.info("New %s equiped successfully", item)
             return
 
         # Close selection window when equiping from inventory

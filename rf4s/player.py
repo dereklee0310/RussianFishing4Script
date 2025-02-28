@@ -75,7 +75,7 @@ class Player:
         self.cfg = cfg
         self.window = window
         self.timer = Timer(cfg)
-        self.detection = Detection(cfg, window.supported)
+        self.detection = Detection(cfg, window)
 
         self.tackle_idx = 0
         if self.cfg.SELECTED.MODE == "bottom":
@@ -120,7 +120,7 @@ class Player:
             not self.cfg.ARGS.SKIP_CAST and
             not self.detection.is_retrieve_finished()):
             logger.critical("The spool is not fully loaded")
-            logger.critical("Try moveing your camera, changing your game window size or fishing line")
+            logger.critical("Try moving your camera, changing your game window size or fishing line")
             sys.exit(1)
 
         logger.info("Starting fishing mode: '%s'", self.cfg.SELECTED.MODE)
@@ -189,8 +189,6 @@ class Player:
             except exceptions.ItemNotFoundError:
                 logger.error("New lure not found")
                 self.have_new_lure = False
-        else:
-            logger.info("Keep using the same lure")
 
     def _refill_pva(self) -> None:
         if not self.cfg.ARGS.PVA or not self.have_new_pva:
@@ -213,7 +211,7 @@ class Player:
             self.tackle.equip_item("dry_mix")
         except exceptions.ItemNotFoundError:
             logger.error("New dry mix not found")
-            self.tackle.available = False
+            self.tackle.available = False # Skip following stages
             self.have_new_dry_mix = False
 
     def _refill_groundbait(self) -> None:
@@ -329,39 +327,6 @@ class Player:
 
         raise TimeoutError
 
-    # this is not done yet :(
-    # def trolling_fishing(self) -> None:
-    #     # temp
-    #     rod_idx = -1
-    #     rod_count = len(self.bottom_rods_shortcuts) #!
-    #     base_waiting_time = 16
-
-    #     while True:
-    #         self.refilling_stage()
-    #         self.harvesting_stage()
-    #         # if there is a rod on hand
-    #         if rod_count == 3:
-    #             sleep(base_waiting_time)
-    #             logger.info(f'Checking rod {3}')
-    #             self.retrieving_stage()
-    #             if monitor.is_fish_hooked():
-    #                 self.pulling_stage()
-    #             else:
-    #                 self.resetting_stage()
-
-    #         for rod_key in self.bottom_rods_shortcuts[:-1]:
-    #             pag.press(rod_key)
-    #             if monitor.is_fish_hooked():
-    #                 self.retrieving_stage()
-    #                 if monitor.is_fish_hooked():
-    #                     self.pulling_stage()
-    #                     self.tackle.cast(self.cast_power_level)
-    #                 else:
-    #                     self.cast_miss_count += 1
-
-    #         # if both missed, recast the third rod
-    #         self.tackle.cast(self.cast_power_level)
-
     # ---------------------------------------------------------------------------- #
     #            stages and their helper functions in main fishing loops           #
     # ---------------------------------------------------------------------------- #
@@ -379,6 +344,7 @@ class Player:
         while i > 0:
             i = utils.sleep_and_decrease(i, DIG_DELAY)
             if self.detection.is_harvest_success():
+                logger.info("Baits harvested successfully")
                 pag.press("space")
                 pag.press("backspace")
                 sleep(ANIMATION_DELAY)
@@ -494,7 +460,7 @@ class Player:
 
 
     def _handle_snagged_line(self):
-        if len(self.tackles):
+        if len(self.tackles) == 1:
             self.general_quit("Line is snagged")
         self.tackle.available = False
 
@@ -522,6 +488,7 @@ class Player:
             self.timer.update_cast_time()
 
     def _pause_script(self):
+        logger.info("Pausing script")
         pag.press("esc")
         bound = self.cfg.PAUSE.DURATION // 20
         offset = random.randint(-bound, bound)
@@ -551,7 +518,7 @@ class Player:
                 print(input("Press enter to continue..."))
                 self.window.activate_game_window()
             case _:
-                self.general_quit("Broken lure auto-replace is disabled")
+                self.general_quit("Lure is broken")
 
     @utils.release_keys_after
     def _handle_termination(self, msg: str, shutdown: bool) -> None:
@@ -562,16 +529,16 @@ class Player:
         :param shutdown: whether to shutdown the computer or not
         :type shutdown: bool
         """
-        result = self.gen_result(msg)
+        table = self.gen_result(msg)
         if self.cfg.ARGS.EMAIL:
-            self.send_email(result)
+            self.send_email()
         if self.cfg.ARGS.MIAOTIXING:
-            self.send_miaotixing(result)
+            self.send_miaotixing()
         if self.cfg.ARGS.PLOT:
             self.plot_and_save()
         if shutdown and self.cfg.ARGS.SHUTDOWN:
             os.system("shutdown /s /t 5")
-        print(result)
+        print(table)
         sys.exit()
 
     def _retrieve_line(self) -> None:
@@ -776,6 +743,7 @@ class Player:
         self._handle_termination("Game disconnected", shutdown=True)
 
     def gen_result(self, msg: str):
+        logger.info("Generating running results")
         #TODO
         fish_count_total = self.marked_count + self.unmarked_count
         cast_count = self.cast_miss_count + fish_count_total
@@ -817,7 +785,8 @@ class Player:
             table.add_row(k, str(v))
         return table
 
-    def send_email(self, table) -> None:
+    def send_email(self) -> None:
+        logger.info("Sending email")
         """Send a notification email to the user's email address."""
         sender = self.cfg.NOTIFICATION.EMAIL
         password = self.cfg.NOTIFICATION.PASSWORD
@@ -840,44 +809,39 @@ class Player:
             server.sendmail(sender, recipients, msg.as_string())
         logger.info("Email sent successfully")
 
-    def send_miaotixing(self, table) -> None:
+    def send_miaotixing(self) -> None:
         """Send a notification Message to the user's miaotixing service."""
+        logger.info("Sending miaotixing notification")
 
-        # Prepare the data to be sent as query parameters
-        data_dict = self.results
-
-        miao_code = self.cfg.NOTIFICATION.MIAO_CODE
-
-        # Customizable Text Prompt Message
         text = (
             "Cause of termination:"
-            + data_dict["Cause of termination"]
+            + self.results["Cause of termination"]
             + "\nStart time:"
-            + data_dict["Start time"]
+            + self.results["Start time"]
             + "\nFinish time:"
-            + data_dict["Finish time"]
+            + self.results["Finish time"]
             + "\nRunning time:"
-            + data_dict["Running time"]
+            + self.results["Running time"]
             + "\nFish caught:"
-            + str(data_dict["Fish caught"])
+            + str(self.results["Fish caught"])
             + "\nMarked / Unmarked / Mark ratio:"
-            + data_dict["Marked / Unmarked / Mark ratio"]
+            + self.results["Marked / Unmarked / Mark ratio"]
             + "\nHit / Miss / Bite ratio:"
-            + data_dict["Hit / Miss / Bite ratio"]
+            + self.results["Hit / Miss / Bite ratio"]
             + "\nAlcohol consumed:"
-            + str(data_dict["Alcohol consumed"])
+            + str(self.results["Alcohol consumed"])
             + "\nCoffee consumed:"
-            + str(data_dict["Coffee consumed"])
+            + str(self.results["Coffee consumed"])
             + "\nTea consumed:"
-            + str(data_dict["Tea consumed"])
+            + str(self.results["Tea consumed"])
             + "\nCarrot consumed:"
-            + str(data_dict["Carrot consumed"])
+            + str(self.results["Carrot consumed"])
             + "\nHarvest baits count:"
-            + str(data_dict["Harvest baits count"])
+            + str(self.results["Harvest baits count"])
         )
 
         url = "http://miaotixing.com/trigger?" + parse.urlencode(
-            {"id": miao_code, "text": text, "type": "json"}
+            {"id": self.cfg.NOTIFICATION.MIAO_CODE, "text": text, "type": "json"}
         )
 
         with request.urlopen(url) as page:
@@ -895,6 +859,7 @@ class Player:
 
     def plot_and_save(self) -> None:
         """Plot and save an image using rhour and ghour list from timer object."""
+        logger.info("Plotting Curves")
         if self.keep_fish_count == 0:
             return
 
@@ -938,7 +903,7 @@ class Player:
         if ticket_loc is None:
             pag.press("esc")  # Close ticket menu
             sleep(ANIMATION_DELAY)
-            self.general_quit("Boat ticket not found")
+            self.general_quit("New boat ticket not found")
         pag.moveTo(ticket_loc)
         pag.click(clicks=2, interval=0.1)  # pag.doubleClick() not implemented
         sleep(ANIMATION_DELAY)
@@ -952,7 +917,7 @@ class Player:
         if scrollbar_position is None:
             logger.info("Scroll bar not found, changing lures for normal rig")
             while self._open_broken_lure_menu():
-                self._replace_item(lure=True)
+                self._replace_item()
             pag.press("v")
             return
 
@@ -964,7 +929,7 @@ class Player:
 
             replaced = False
             while self._open_broken_lure_menu():
-                self._replace_item(lure=True)
+                self._replace_item()
                 replaced = True
 
             if replaced:
@@ -976,7 +941,7 @@ class Player:
         :return: True if broken item is found, False otherwise
         :rtype: bool
         """
-        logger.info("Searching for broken lure")
+        logger.info("Looking for broken lure")
         broken_item_position = self.detection.get_100wear_position()
         if broken_item_position is None:
             logger.warning("Broken lure not found")
@@ -989,33 +954,28 @@ class Player:
         sleep(ANIMATION_DELAY)
         return True
 
-    def _replace_item(self, lure: bool) -> None:
+    def _replace_item(self) -> None:
         """Select a favorite item for replacement and replace the broken one."""
-        logger.info("Searching for favorite items")
+        logger.info("Looking for favorite items")
         favorite_item_positions = self.detection.get_favorite_item_positions()
         while True:
             favorite_item_position = next(favorite_item_positions, None)
             if favorite_item_position is None:
                 # TODO: different tackle?
-                msg = "Favorite item not found"
-                logger.critical(msg)
-                sys.exit(1)
-                # pag.press("esc")
-                # sleep(ANIMATION_DELAY)
-                # pag.press("esc")
-                # sleep(ANIMATION_DELAY)
-                # self.general_quit(msg)
+                pag.press("esc")
+                sleep(ANIMATION_DELAY)
+                pag.press("esc")
+                sleep(ANIMATION_DELAY)
+                self.general_quit("Favorite item not found")
 
             # Check if the lure for replacement is already broken
             x, y = utils.get_box_center(favorite_item_position)
-            if pag.pixel(x - 60, y + 190) != (178, 59, 30):  # Magic value
-                logger.info("Item has been replaced")
+            if pag.pixel(x - 60, y + 190) != (178, 59, 30):  # Magic value #TODO
+                logger.info("Lure replaced successfully")
                 pag.moveTo(x - 60, y + 190)
                 pag.click(clicks=2, interval=0.1)
                 sleep(WEAR_TEXT_UPDATE_DELAY)
                 break
-
-            logger.warning("Favorite item found but not available")
 
     def _put_down_tackle(self, check_miss_counts: list[int]) -> None:
         """Update counters, put down the tackle and wait for a while.
@@ -1054,14 +1014,8 @@ class Player:
             return
         pag.keyDown(LEFT_KEY if self.cfg.ARGS.TROLLING == "left" else RIGHT_KEY)
 
-
-
     def test(self):
         """Boo!"""
         while True:
             sleep(0.1)
             print(self.detection.is_pva_chosen())
-            print(self.detection.is_groundbait_chosen())
-            print(self.detection.is_bait_chosen())
-
-            # print(self.detection.get_groundbait_slot_position())

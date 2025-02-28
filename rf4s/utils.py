@@ -9,6 +9,8 @@ from time import sleep
 import pyautogui as pag
 from prettytable import PrettyTable
 from pyscreeze import Box
+from rich.text import Text
+from rich.console import Console
 
 from rf4s.controller.detection import Detection
 
@@ -211,6 +213,12 @@ def release_keys_after(func):
             release_keys()
 
     return wrapper
+
+
+def print_error(msg):
+    text = Text(msg)
+    text.stylize("red")
+    Console().print(text)
 
 
 # there's lots of early return in player._resetting_stage(),

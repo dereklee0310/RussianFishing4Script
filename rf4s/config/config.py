@@ -1,14 +1,5 @@
-import argparse
-import logging
-import sys
-from pathlib import Path
-
-import yaml
 from yacs.config import CfgNode as CN
-
 from rf4s.config.defaults import get_cfg_defaults
-
-logger = logging.getLogger("rich")
 
 def setup_cfg() -> CN:
     cfg = get_cfg_defaults()

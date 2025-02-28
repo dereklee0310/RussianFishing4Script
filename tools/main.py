@@ -23,7 +23,7 @@ from rich import print, box
 from rich.panel import Panel
 from rich.table import Table, Column
 from rich.console import Console
-from rich.text import Text
+from rich.style import Style
 
 sys.path.append(".") # python -m module -> python file
 
@@ -32,6 +32,7 @@ from yacs.config import CfgNode as CN
 from rf4s.config import config
 from rf4s.controller.window import Window
 from rf4s.player import Player
+from rf4s import utils
 
 # Ignore %(name)s because it's verbose
 logging.basicConfig(
@@ -102,7 +103,6 @@ class App:
             sys.exit(1)
 
         self.args = args
-        self.console = Console()
 
     def _setup_parser(self) -> ArgumentParser:
         """Configure argparser."""
@@ -233,32 +233,25 @@ class App:
         return pid.isdigit() and 0 <= int(pid) < len(self.cfg.PROFILE)
 
     def _is_smtp_valid(self) -> None:
-        """Validate email configuration in .env."""
+        """Validate email configuration."""
         if not self.cfg.ARGS.EMAIL or not self.cfg.SCRIPT.SMTP_VERIFICATION:
             return True
 
-        logger.info("Verifying SMTP connection...")
+        logger.info("Verifying SMTP connection")
 
         email = self.cfg.NOTIFICATION.EMAIL
         password = self.cfg.NOTIFICATION.PASSWORD
         smtp_server_name = self.cfg.NOTIFICATION.SMTP_SERVER
 
-        if self.cfg.NOTIFICATION.SMTP_SERVER == "smtp.example.com":
-            logger.critical("SMTP_SERVER is not specified")
-            return False
-
         try:
             with smtplib.SMTP_SSL(smtp_server_name, 465) as smtp_server:
                 smtp_server.login(email, password)
         except smtplib.SMTPAuthenticationError:
-            logger.critical("Email address or app password not accepted")
-            print(
-                (
-                    "Please check your email address and password.\n"
-                    "If Gmail is used, please refer to "
-                    "https://support.google.com/accounts/answer/185833 \n"
-                    "to get more information about app password authentication."
-                )
+            logger.critical(
+                "Email address or app password not accepted,\n"
+                "please check your email address and password.\n"
+                "Try another SMTP server and email or refer to\n"
+                "https://support.google.com/accounts/answer/185833\n"
             )
             return False
         except (TimeoutError, gaierror):
@@ -275,7 +268,7 @@ class App:
         if not self.cfg.SCRIPT.IMAGE_VERIFICATION:
             return True
 
-        logger.info("Verifying image files...")
+        logger.info("Verifying image files")
         if self.cfg.SCRIPT.LANGUAGE == "en":
             return True
 
@@ -290,7 +283,6 @@ class App:
         missing_images = set(target_images) - set(current_images)
         if len(missing_images) > 0:
             logger.critical("Integrity check failed")
-            from rich.style import Style
             table = Table(
                 # "Filename",
                 Column("Filename", style=Style(color="red")),
@@ -349,14 +341,9 @@ class App:
                 break
             if pid == "q":
                 sys.exit()
-            self._print_error("Invalid profile id, please try again.")
+            utils.print_error("Invalid profile id, please try again.")
 
         self.cfg.ARGS.PID = int(pid)
-
-    def _print_error(self, msg):
-        text = Text(msg)
-        text.stylize("red")
-        self.console.print(text)
 
     def _setup_user_profile(self):
         if self.cfg.ARGS.PNAME is not None:
@@ -388,7 +375,7 @@ class App:
 
     def setup_window(self):
         self.window = Window()
-        width, height = self.window.get_box()[2:]
+        width, height = self.window.box[:2]
         if self.window.title_bar_exist:
             logger.info("Window mode detected. Please don't move the game window")
         if not self.window.supported:
@@ -422,6 +409,7 @@ class App:
         :param key: key code used by OS
         :type key: keyboard.KeyCode
         """
+        # CTRL_C_EVENT: https://stackoverflow.com/questions/58455684/
         if key == keyboard.KeyCode.from_char(self.cfg.KEY.QUIT):
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
             sys.exit()
@@ -437,8 +425,6 @@ class App:
             listener = keyboard.Listener(on_release=self._on_release)
             listener.start()
 
-        # self.player.test()
-
         try:
             self.player.start_fishing()
         except KeyboardInterrupt:
@@ -450,9 +436,6 @@ class App:
             self.player.plot_and_save()
 
 
-
 if __name__ == "__main__":
     app = App()
     app.start()
-
-    # CTRL_C_EVENT: https://stackoverflow.com/questions/58455684/

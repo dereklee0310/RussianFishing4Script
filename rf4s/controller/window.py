@@ -28,6 +28,7 @@ class Window:
         self._title = game_window_title
         self._script_hwnd = self._get_cur_hwnd()
         self._game_hwnd = self._get_game_hwnd()
+        self.box = self._get_box()
         self.title_bar_exist = self._is_title_bar_exist()
         self.supported = self._is_size_supported()
 
@@ -61,7 +62,7 @@ class Window:
         style = win32gui.GetWindowLong(self._game_hwnd, win32con.GWL_STYLE)
         return style & win32con.WS_CAPTION
 
-    def get_box(self):
+    def _get_box(self):
         base_x, base_y, _, _ = win32gui.GetWindowRect(self._game_hwnd)
         if self._is_title_bar_exist():
             base_x += 8
@@ -89,8 +90,7 @@ class Window:
 
 
     def _is_size_supported(self) -> bool:
-        width, height = self.get_box()[2:]
-        if self.get_box()[2:] in ((2560, 1440), (1920, 1080), (1600, 900)):
+        if self.box[2:] in ((2560, 1440), (1920, 1080), (1600, 900)):
             return True
         return False
 
@@ -100,7 +100,7 @@ class Window:
         pag.screenshot(
             # imageFilename=rf"../screenshots/{time}.png",
             imageFilename=ROOT / "screenshots" / f"{time}.png",
-            region=self.get_box(),
+            region=self.box,
         )
 
 
