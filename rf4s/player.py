@@ -118,7 +118,7 @@ class Player:
 
         if (self.cfg.SELECTED.MODE not in ("telescopic", "bottom") and
             not self.cfg.ARGS.SKIP_CAST and
-            not self.detection.is_retrieve_finished()):
+            not self.detection.is_retrieval_finished()):
             logger.critical("The spool is not fully loaded")
             logger.critical("Try moving your camera, changing your game window size or fishing line")
             sys.exit(1)
@@ -544,7 +544,7 @@ class Player:
 
     def _retrieve_line(self) -> None:
         """Retrieve the line till it's fully retrieved with timeout handling."""
-        if self.detection.is_retrieve_finished():
+        if self.detection.is_retrieval_finished():
             return
 
         first = True

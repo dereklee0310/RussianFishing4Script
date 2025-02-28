@@ -170,7 +170,7 @@ class Tackle:
                 if self.cfg.ARGS.LIFT:
                     utils.hold_mouse_button(LIFT_DURATION, button="right")
 
-            if self.detection.is_retrieve_finished():
+            if self.detection.is_retrieval_finished():
                 sleep(0 if self.cfg.ARGS.RAINBOW_LINE else 2)
                 return
 
@@ -201,10 +201,10 @@ class Tackle:
             pag.keyDown("shift")
         i = RETRIEVAL_WITH_PAUSE_TIMEOUT
         while i > 0:
-            utils.hold_mouse_button(self.cfg.SELECTED.RETRIEVE_DURATION, button)
-            i -= self.cfg.SELECTED.RETRIEVE_DURATION
-            i = utils.sleep_and_decrease(i, self.cfg.SELECTED.RETRIEVE_DELAY)
-            if self.detection.is_fish_hooked() or self.detection.is_retrieve_finished():
+            utils.hold_mouse_button(self.cfg.SELECTED.RETRIEVAL_DURATION, button)
+            i -= self.cfg.SELECTED.RETRIEVAL_DURATION
+            i = utils.sleep_and_decrease(i, self.cfg.SELECTED.RETRIEVAL_DELAY)
+            if self.detection.is_fish_hooked() or self.detection.is_retrieval_finished():
                 return
 
     @utils.release_keys_after
@@ -298,7 +298,7 @@ class Tackle:
 
         if not self.detection.is_fish_hooked():
             raise exceptions.FishGotAwayError
-        if self.detection.is_retrieve_finished():
+        if self.detection.is_retrieval_finished():
             pag.press("space")
             sleep(LANDING_NET_DURATION)
             if self.detection.is_fish_captured():

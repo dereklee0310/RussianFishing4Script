@@ -193,7 +193,7 @@ class Detection:
         return self._get_image_box("keep", 0.9)
 
     # ---------------------------- retrieval detection --------------------------- #
-    def is_retrieve_finished(self):
+    def is_retrieval_finished(self):
         ready = self.is_tackle_ready()
         if self.cfg.ARGS.RAINBOW_LINE:
             return ready or self._is_rainbow_line_0or5m()
