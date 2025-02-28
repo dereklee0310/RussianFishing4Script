@@ -604,7 +604,7 @@ class Player:
             except TimeoutError:
                 self._handle_timeout()
                 self.cast_miss_count += 1
-                # lazy skip
+                # Lazy skip
 
     def _monitor_float_state(self) -> None:
         """Monitor the state of the float."""
