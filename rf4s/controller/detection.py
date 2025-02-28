@@ -44,7 +44,7 @@ COORD_OFFSETS = {
         "spool_icon": (1077, 844), # x + 15, y + 15
         "snag_icon": (1147, 829), # x + 15, y
         "float_camera": (720, 654),
-        "bait_icon": (35, 125),
+        "bait_icon": (35, 31),
     },
     "1920x1080": {
         "friction_brake_very_high": (662, 959, 1256),
@@ -56,7 +56,7 @@ COORD_OFFSETS = {
         "spool_icon": (1237, 1024),
         "snag_icon": (1307, 1009),
         "float_camera": (880, 834),
-        "bait_icon": (35, 125),
+        "bait_icon": (35, 31),
     },
     "2560x1440": {
         "friction_brake_very_high": (982, 1279, 1576),
@@ -68,7 +68,7 @@ COORD_OFFSETS = {
         "spool_icon": (1557, 1384),
         "snag_icon": (1627, 1369),
         "float_camera": (1200, 1194),
-        "bait_icon": (35, 125),
+        "bait_icon": (35, 31),
     },
 }
 
@@ -399,13 +399,13 @@ class Detection:
         return self._get_image_box("groundbait_icon", 0.6) is None
 
     def is_bait_chosen(self):
-        # Two bait slots
+        # Two bait slots, check only the first one
         if self.cfg.SELECTED.MODE in ("telescopic", "bolognese"):
             return pag.locate(
                 pag.screenshot(region=self.bait_icon_coord),
                 self.bait_icon_reference_img,
                 confidence=0.6
-            )
+            ) is None
         return self._get_image_box("bait_icon", 0.6) is None
 
     def get_groundbait_position(self):
