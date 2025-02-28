@@ -58,13 +58,8 @@ class Tackle:
         self.cfg = cfg
         self.timer = timer
         self.detection = detection
-        self.landing_net_out = False  # for telescopic_pull()
+        self.landing_net_out = False  # For telescopic pull
         self.available = True
-
-        if self.cfg.SELECTED.MODE == "telescopic":
-            self._pull = self.telescopic_pull
-        else:
-            self._pull = self.general_pull
 
     @staticmethod
     def _check_status(func):
@@ -87,7 +82,7 @@ class Tackle:
         :raises exceptions.FishCapturedError: a fish is captured
         :raises exceptions.TimeoutError: loop timed out
         """
-        logger.info("Resetting")
+        logger.info("Resetting tackle")
         i = RESET_TIMEOUT
         while i > 0:
             if self.detection.is_tackle_ready():
@@ -111,7 +106,7 @@ class Tackle:
         :param update: update the record or not (for spod rod), defaults to True
         :type update: bool, optional
         """
-        logger.info("Casting")
+        logger.info("Casting rod")
         if self.cfg.ARGS.MOUSE:
             self.move_mouse_randomly()
         match self.cfg.SELECTED.CAST_POWER_LEVEL:
@@ -135,17 +130,16 @@ class Tackle:
         :param marine: whether to check is lure moving in bottom layer, defaults to True
         :type marine: bool, optional
         """
-        logger.info("Sinking")
+        logger.info("Sinking lure")
         i = self.cfg.SELECTED.SINK_TIMEOUT
         while i > 0:
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
             if self.detection.is_moving_in_bottom_layer():
-                logger.info("Lure reached bottom layer")
+                logger.info("Lure has reached bottom layer")
                 break
 
             if self.detection.is_fish_hooked_twice():
-                logger.info("Fish hooked")
-                pag.click()
+                pag.click() # Lock reel
                 return
 
         utils.hold_mouse_button(self.cfg.SELECTED.TIGHTEN_DURATION)
@@ -163,7 +157,7 @@ class Tackle:
         :raises exceptions.LineAtEndError: line is at its end
         :raises exceptions.TimeoutError: loop timed out
         """
-        logger.info("Retrieving")
+        logger.info("Retrieving fishing line")
 
         i = RETRIEVAL_TIMEOUT
         while i > 0:
@@ -192,13 +186,13 @@ class Tackle:
 
     def retrieve_with_pause(self) -> None:
         """Retreive the line, pause periodically."""
-        logger.info("Retrieving with pause")
+        logger.info("Retrieving fishing line with pause")
         self._special_retrieve(button="left")
 
     @utils.toggle_clicklock
     def retrieve_with_lift(self) -> None:
         """Retreive the line, pause periodically."""
-        logger.info("Retrieving with lift")
+        logger.info("Retrieving fishing line with lift")
         self._special_retrieve(button="right")
 
     @utils.release_keys_after
@@ -213,15 +207,9 @@ class Tackle:
             if self.detection.is_fish_hooked() or self.detection.is_retrieve_finished():
                 return
 
-
     @utils.release_keys_after
-    def pirk(self) -> None:
-        """Start pirking until a fish is hooked.
-
-        :param ctrl_enabled: whether to hold ctrl key during pirking
-        :type ctrl_enabled: bool
-        :raises TimeoutError: loop timed out
-        """
+    def _pirk(self) -> None:
+        """Start pirking until a fish is hooked."""
         logger.info("Pirking")
 
         i = self.cfg.SELECTED.PIRK_TIMEOUT
@@ -241,36 +229,28 @@ class Tackle:
 
         raise TimeoutError
 
+    def pirk(self) -> None:
+        if self.cfg.SELECTED.PIRK_RETRIEVAL:
+            self._pirk_with_retrieval()
+        else:
+            self._pirk()
+
+    @utils.toggle_clicklock
+    def _pirk_with_retrieval(self):
+        self._pirk()
+
     def elevate(self, dropped: bool) -> None:
         """Perform elevator tactic (drop/rise) until a fish is hooked.
 
         :param drop: whether to drop or rise the lure
         :type drop: bool
         """
-        logger.info("Rising" if dropped else "Dropping")
-
-        if self.cfg.SELECTED.TYPE == "lift":
-            pag.mouseDown()
-
         locked = True  # Reel is locked after tackle.sink()
         i = self.cfg.SELECTED.ELEVATE_TIMEOUT
         while i > 0:
             if self.detection.is_fish_hooked_twice():
                 pag.click()
                 return
-
-
-            if self.cfg.SELECTED.TYPE == "lift":
-                if self.cfg.SELECTED.ELEVATE_DURATION > 0:
-                    if self.cfg.SELECTED.CTRL:
-                        pag.keyDown("ctrl")
-                    utils.hold_mouse_button(self.cfg.SELECTED.ELEVATE_DURATION, button="right")
-                    i -= self.cfg.SELECTED.ELEVATE_DURATION
-                    i = utils.sleep_and_decrease(i, self.cfg.SELECTED.ELEVATE_DELAY)
-                else:
-                    i = utils.sleep_and_decrease(i, LOOP_DELAY)
-                continue
-
 
             if self.cfg.SELECTED.DROP and not dropped:
                 pag.press("enter")
@@ -292,11 +272,14 @@ class Tackle:
     @_check_status
     def pull(self) -> None:
         logger.info("Pulling")
-        self._pull()
+        if self.cfg.SELECTED.MODE == "telescopic":
+            self._telescopic_pull()
+        else:
+            self._pull()
 
     @utils.toggle_right_mouse_button
     @utils.toggle_clicklock
-    def general_pull(self) -> None:
+    def _pull(self) -> None:
         """Pull the fish until it's captured.
 
         :raises exceptions.FishGotAwayError: fish got away during pulling
@@ -310,33 +293,28 @@ class Tackle:
             elif self.cfg.SCRIPT.SNAG_DETECTION and self.detection.is_line_snagged():
                 raise exceptions.LineSnaggedError
 
-        # Skip landing net if the retrieval is not finished yet
-        if (self.cfg.SELECTED.MODE != "telescopic" and
-            not self.detection.is_retrieve_finished()):
-            return
-
-        pag.press("space")
-        sleep(LANDING_NET_DURATION)
-        if self.detection.is_fish_captured():
-            return
-        pag.press("space")
-        sleep(LANDING_NET_DELAY)
-
         if not self.detection.is_fish_hooked():
             raise exceptions.FishGotAwayError
+        if self.detection.is_retrieve_finished():
+            pag.press("space")
+            sleep(LANDING_NET_DURATION)
+            if self.detection.is_fish_captured():
+                return
+            pag.press("space")
+            sleep(LANDING_NET_DELAY)
         raise TimeoutError
 
     @utils.toggle_clicklock
-    def telescopic_pull(self) -> None:
+    def _telescopic_pull(self) -> None:
         """Pull the fish until it's captured, designed for telescopic rod.
 
         :raises TimeoutError: loop timed out
         """
-        # check false postive first
+        # Check false postive first because it happens often
         if not self.detection.is_fish_hooked():
             return
 
-        # pull out landing net and check
+        # Toggle landing net when pull() is called for the first time
         if not self.landing_net_out:
             pag.press("space")
             self.landing_net_out = True
@@ -356,6 +334,7 @@ class Tackle:
 
     def move_mouse_randomly(self) -> None:
         """Randomly move the mouse for four times."""
+        logger.info("Moving mouse randomly")
         coords = []
         for _ in range(NUM_OF_MOVEMENT - 1):
             x, y = random.randint(-OFFSET, OFFSET), random.randint(-OFFSET, OFFSET)
@@ -372,9 +351,8 @@ class Tackle:
         else: # dry_mix, groundbait
             return self._equip_item_from_inventory(item)
 
-
     def _equip_item_from_menu(self, item: Literal["lure", "pva"] ) -> None:
-        logger.info("Looking for a new %s in menu", item)
+        logger.info("Equiping new %s from menu", item)
         menu_key = "h" if item == "pva" else "b"
         with pag.hold(menu_key):
             self._equip_favorite_item(item)
@@ -382,7 +360,7 @@ class Tackle:
 
     @utils.press_before_and_after("v")
     def _equip_item_from_inventory(self, item: Literal["dry_mix", "groundbait"]) -> None:
-        logger.info("Looking for a new %s in inventory", item)
+        logger.info("Equiping new %s from inventory", item)
         scrollbar_position = self.detection.get_scrollbar_position()
         if scrollbar_position is None:
             if item == "groundbait":
@@ -412,8 +390,7 @@ class Tackle:
     def _equip_favorite_item(self, item: bool):
         """Select a favorite item for replacement and replace the broken one."""
         sleep(ANIMATION_DELAY)
-        logger.info("Searching favorite items")
-
+        logger.info("Looking for favorite items")
         favorite_item_positions = list(self.detection.get_favorite_item_positions())
         if item == "lure":
             random.shuffle(favorite_item_positions)
@@ -423,10 +400,10 @@ class Tackle:
             if item == "lure" and pag.pixel(x - 70, y + 190) == (178, 59, 30):
                 continue
             pag.click(x - 70, y + 190, clicks=2, interval=0.1)
-            # pag.click(x - 70, y + 190)
             logger.info("New %s has been equiped", item)
             return
 
+        # Close selection window when equiping from inventory
         if item in ("dry_mix", "groundbait"):
             pag.press("esc")
         raise exceptions.ItemNotFoundError

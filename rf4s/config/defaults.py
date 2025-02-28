@@ -136,6 +136,7 @@ _C.PROFILE.PIRK.CTRL = False
 _C.PROFILE.PIRK.PIRK_DURATION = 0.5
 _C.PROFILE.PIRK.PIRK_DELAY = 2.0
 _C.PROFILE.PIRK.PIRK_TIMEOUT = 32.0
+_C.PROFILE.PIRK.PIRK_RETRIEVAL = False
 _C.PROFILE.PIRK.HOOK_DELAY = 0.0
 _C.PROFILE.PIRK.POST_ACCELERATION = "auto"
 
@@ -155,7 +156,6 @@ _C.PROFILE.ELEVATOR.ELEVATE_TIMEOUT = 40.0
 _C.PROFILE.ELEVATOR.DROP = False
 _C.PROFILE.ELEVATOR.POST_ACCELERATION = "auto"
 _C.PROFILE.ELEVATOR.HOOK_DELAY = 0.0
-_C.PROFILE.ELEVATOR.TYPE = "resink"
 
 # ---------------------------------------------------------------------------- #
 #                             Float Fishing Profile                            #
