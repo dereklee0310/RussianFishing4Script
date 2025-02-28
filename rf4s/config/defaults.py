@@ -52,7 +52,7 @@ _C.FRICTION_BRAKE.SENSITIVITY = "medium"
 
 _C.KEEPNET = CN()
 _C.KEEPNET.CAPACITY = 100
-_C.KEEPNET.DELAY = 1.0
+_C.KEEPNET.DELAY = 0.0
 _C.KEEPNET.FULL_ACTION = "quit"
 _C.KEEPNET.RELEASE_WHITELIST = (
     "mackerel", "saithe", "herring", "squid", "scallop", "mussel"

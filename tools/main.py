@@ -75,7 +75,8 @@ LOGO = """
 ██╔══██╗██╔══╝  ╚════██║╚════██║
 ██║  ██║██║          ██║███████║
 ╚═╝  ╚═╝╚═╝          ╚═╝╚══════╝"""
-LINK = "https://github.com/dereklee0310/RussianFishing4Script"
+GITHUB_LINK = "GitHub: https://github.com/dereklee0310/RussianFishing4Script"
+DISCORD_LINK = "Discord: https://discord.gg/BZQWQnAMbY"
 # https://patorjk.com/software/taag/#p=testall&f=3D-ASCII&t=RF4S%0A, ANSI Shadow
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -85,8 +86,7 @@ class App:
 
     def __init__(self):
         """Merge args into setting node."""
-        print(Panel.fit(LOGO, box=box.HEAVY))
-        print(LINK)
+        print(Panel.fit(LOGO, box=box.HEAVY), GITHUB_LINK, DISCORD_LINK, sep="\n")
         self.cfg = config.setup_cfg()
         self.cfg.merge_from_file(ROOT / "config.yaml")
 

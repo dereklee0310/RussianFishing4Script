@@ -443,8 +443,9 @@ class Player:
 
         while True:
             try:
-                self.tackle.reset()
-                return
+                with pag.hold("shift"): # Speed it up!
+                    self.tackle.reset()
+                    return
             except exceptions.FishHookedError:
                 self._pull_fish()
                 return
@@ -848,10 +849,10 @@ class Player:
             result = page.read()
             json_object = json.loads(result)
             if json_object["code"] == 0:
-                print("A notification message to the user's miaotixing service.")
+                logger.info("Miaotixing notification sent successfully")
             else:
-                print(
-                    "Sending failed with error code:"
+                logger.error(
+                    "Miaotixing notification with error code:"
                     + str(json_object["code"])
                     + ", Description:"
                     + json_object["msg"]
@@ -889,7 +890,7 @@ class Player:
 
         # plt.tight_layout()
         plt.savefig(f"../logs/{self.timer.get_cur_timestamp()}.png")
-        print("The Plot has been saved under logs/")
+        logger.info("Plot has been saved under logs/")
 
     def _handle_expired_ticket(self):
         """Select and use the ticket according to boat_ticket_duration argument."""
@@ -1007,9 +1008,7 @@ class Player:
         if self.cfg.ARGS.TROLLING is None:
             return
         logger.info("Starting trolling")
-        print(self.cfg.ARGS.TROLLING)
-        # pag.press(TROLLING_KEY)
-        pag.keyDown("w")
+        pag.press(TROLLING_KEY)
         if self.cfg.ARGS.TROLLING not in ("left", "right"): # Forward
             return
         pag.keyDown(LEFT_KEY if self.cfg.ARGS.TROLLING == "left" else RIGHT_KEY)

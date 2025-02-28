@@ -162,7 +162,7 @@ class Tackle:
         i = RETRIEVAL_TIMEOUT
         while i > 0:
             if self.detection.is_fish_hooked():
-                if self.cfg.SELECTED.POST_ACCELERATION == "always":
+                if self.cfg.SELECTED.POST_ACCELERATION == "on":
                     pag.keyDown("shift")
                 elif self.cfg.SELECTED.POST_ACCELERATION == "auto" and first:
                     pag.keyDown("shift")

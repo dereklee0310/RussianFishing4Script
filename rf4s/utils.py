@@ -11,8 +11,7 @@ from prettytable import PrettyTable
 from pyscreeze import Box
 from rich.text import Text
 from rich.console import Console
-
-from rf4s.controller.detection import Detection
+from rich import print
 
 # BASE_DELAY + LOOP_DELAY >= 2.2 to trigger clicklock
 BASE_DELAY = 0.2
