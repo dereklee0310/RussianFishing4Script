@@ -5,7 +5,12 @@ Usage: calculate.py
 """
 import sys
 
-from prettytable import PrettyTable
+from rich import print
+from rich.table import Table
+from rich.prompt import Prompt
+
+sys.path.append(".")
+from rf4s import utils
 
 BIAS = 1e-6
 
@@ -41,7 +46,7 @@ def get_tackle_stats():
 def get_validated_input(prompt):
     """Get validated input from the user."""
     while True:
-        user_input = input(prompt).strip()
+        user_input = Prompt.ask(prompt)
         if user_input == "q":
             print("Bye.")
             sys.exit()
@@ -51,7 +56,7 @@ def get_validated_input(prompt):
         try:
             return float(user_input)
         except ValueError:
-            print("Invalid input. Please enter a number.")
+            utils.print_error("Invalid input. Please enter a number.")
 
 
 def get_max_friction_brake(max_drag, load_capacity):
@@ -68,11 +73,16 @@ def main():
         max_friction_brake = get_max_friction_brake(max_drag, load_capacity)
         max_tension = get_max_tension(max_drag, max_friction_brake)
 
-        table = PrettyTable(header=False, align="l", title="Results")
-        table.add_row(["Reel's true max drag", f"{max_drag:.2f} kg"])
-        table.add_row(["Leader's true load capacity", f"{load_capacity:.2f} kg"])
-        table.add_row(["Friction brake tension", f"{max_tension:.2f} kg"])
-        table.add_row(["Maximum friction brake to use", max_friction_brake])
+        table = Table(
+            "Results",
+            title="Your tackle's real stats 🎣",
+            show_header=False,
+            min_width=36,
+        )
+        table.add_row("Reel's true max drag", f"{max_drag:.2f} kg")
+        table.add_row("Leader's true load capacity", f"{load_capacity:.2f} kg")
+        table.add_row("Friction brake tension", f"{max_tension:.2f} kg")
+        table.add_row("Maximum friction brake to use", f"{max_friction_brake}")
         print(table)
 
 

@@ -7,40 +7,65 @@ Usage: harvest.py
 # pylint: disable=no-member
 # setting node's attributes will be merged on the fly
 
+
 import argparse
+import logging
 import sys
 import time
+from pathlib import Path
 
 import pyautogui as pag
+from rich.logging import RichHandler
+from yacs.config import CfgNode as CN
 
 sys.path.append(".")
 
+import argparse
+import logging
+import sys
+
+from time import sleep
+
 from rf4s import utils
+from rf4s.config import config
+from rf4s.controller.detection import Detection
+from rf4s.controller.window import Window
 from rf4s.controller.timer import Timer
 
-# ------------------ flag name, attribute name, description ------------------ #
-ARGS = (
-    ("power_saving", "power_saving_enabled", "_"),
-    ("check_delay_second", "check_delay_second", "_"),
-)
+ROOT = Path(__file__).resolve().parents[1]
 
-# ------------------------ attribute name, description ----------------------- #
-RESULTS = (
-    ("tea_count", "Tea consumed"),
-    ("carrot_count", "Carrot consumed"),
-    ("harvest_count", "Number of harvests"),
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    handlers=[RichHandler(rich_tracebacks=True)],
 )
+logger = logging.getLogger("rich")
 
-ANIMATION_DELAY = 0.25
+ANIMATION_DELAY = 0.5
 
 
 class App:
     """Main application class."""
 
-    @utils.initialize_setting_and_monitor(ARGS)
     def __init__(self):
-        """Initialize counters and merge args into setting node."""
-        self.timer = Timer()
+        self.cfg = config.setup_cfg()
+        self.cfg.merge_from_file(ROOT / "config.yaml")
+        args = self.parse_args()
+        args_cfg = CN({"ARGS": config.dict_to_cfg(vars(args))})
+        self.cfg.merge_from_other_cfg(args_cfg)
+        self.cfg.merge_from_list(args.opts)
+
+        # Dummy mode
+        dummy = CN({"SELECTED": config.dict_to_cfg({"MODE": "spin"})})
+        self.cfg.merge_from_other_cfg(dummy)
+
+        self.cfg.freeze()
+
+        self.window = Window()
+        self.detection = Detection(self.cfg, self.window)
+        self.timer = Timer(self.cfg)
+
         self.tea_count = 0
         self.carrot_count = 0
         self.harvest_count = 0
@@ -54,58 +79,67 @@ class App:
         parser = argparse.ArgumentParser(
             description="Harvest baits and refill hunger/comfort automatically.",
         )
+        parser.add_argument("opts", nargs="*", help="overwrite configuration")
+        parser.add_argument(
+            "-r",
+            "--refill",
+            action="store_true",
+            help="refill hunger and comfort by consuming tea and carrot"
+        )
         parser.add_argument(
             "-s",
             "--power-saving",
             action="store_true",
-            help="Open control panel between checks to reduce power consumption",
+            help="open control panel between checks to reduce power consumption",
         )
         parser.add_argument(
             "-n",
-            "--check-delay-second",
+            "--check-delay",
             type=int,
             default=32,
-            help="The delay time between each checks, default to 32 (seconds)",
+            help="delay time between each checks, 32s by default",
         )
         return parser.parse_args()
 
     def start(self) -> None:
         """Main eating and harvesting loop."""
-        pag.press(self.setting.shovel_spoon_shortcut)
-        time.sleep(3)
+        pag.press(str(self.cfg.KEY.DIGGING_TOOL))
+        sleep(3)
         while True:
-            if self.monitor.is_comfort_low() and self.timer.is_tea_drinkable():
-                self._consume_food("tea")
-                self.tea_count += 1
+            if self.cfg.ARGS.REFILL:
+                if self.detection.is_comfort_low() and self.timer.is_tea_drinkable():
+                    self._consume_food("tea")
+                    self.tea_count += 1
 
-            if self.monitor.is_hunger_low():
-                self._consume_food("carrot")
-                self.carrot_count += 1
+                if self.detection.is_hunger_low():
+                    self._consume_food("carrot")
+                    self.carrot_count += 1
 
-            if self.monitor.is_energy_high():
-                self._harvest_baits()
-                self.harvest_count += 1
+            if not self.detection.is_energy_high():
+                logger.info("Energy is not high enough")
+            self._harvest_baits()
+            self.harvest_count += 1
 
-            if self.setting.power_saving_enabled:
+            if self.cfg.ARGS.POWER_SAVING:
                 pag.press("esc")
-            time.sleep(self.setting.check_delay_second)
-            if self.setting.power_saving_enabled:
+            sleep(self.cfg.ARGS.CHECK_DELAY)
+            if self.cfg.ARGS.POWER_SAVING:
                 pag.press("esc")
-            time.sleep(ANIMATION_DELAY)
+            sleep(ANIMATION_DELAY)
 
     def _harvest_baits(self) -> None:
         """Harvest baits, the tool should be pulled out in start_harvesting_loop()."""
-        # dig and wait (4 + 1)s
+        logger.info("Harvesting baits")
+        # Dig and wait (4 + 1)s
         pag.click()
-        time.sleep(5)
+        sleep(5)
 
         i = 64
-        while i > 0 and not self.monitor.is_harvest_success():
+        while i > 0 and not self.detection.is_harvest_success():
             i = utils.sleep_and_decrease(i, 2)
-
-        # accept result
         pag.press("space")
-        time.sleep(ANIMATION_DELAY)
+        logger.info("Baits harvested succussfully")
+        sleep(ANIMATION_DELAY)
 
     def _consume_food(self, food: str) -> None:
         """Open food menu, then click on the food icon to consume it.
@@ -113,12 +147,18 @@ class App:
         :param food: food name
         :type food: str
         """
+        logger.info("Consuming %s", food)
         with pag.hold("t"):
-            time.sleep(ANIMATION_DELAY)
-            pag.moveTo(self.monitor.get_food_position(food))
+            sleep(ANIMATION_DELAY)
+            pag.moveTo(self.detection.get_food_position(food))
             pag.click()
-            time.sleep(ANIMATION_DELAY)
+        sleep(ANIMATION_DELAY)
 
 
 if __name__ == "__main__":
-    utils.start_app(App(), RESULTS)
+    app = App()
+    utils.start_app(app, (
+    ("Tea consumed", app.tea_count),
+    ("Carrot consumed", app.carrot_count),
+    ("Number of harvests", app.harvest_count),
+))

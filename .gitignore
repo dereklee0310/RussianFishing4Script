@@ -8,4 +8,4 @@ static/tmp/
 tests/
 logs/
 
-config.yaml
+/config.yaml

@@ -6,7 +6,6 @@ Module for pyautogui.locateOnScreen and pag.pixel wrappers.
 # docstring for every functions? u serious?
 
 import logging
-import sys
 import time
 from pathlib import Path
 
@@ -15,8 +14,6 @@ from pyscreeze import Box
 from PIL import Image
 
 from rf4s.controller.window import Window
-
-logger = logging.getLogger("rich")
 
 CRITICAL_COLOR = (206, 56, 21)
 WARNING_COLOR = (227, 149, 23)

@@ -274,7 +274,7 @@ class Tackle:
 
     @_check_status
     def pull(self) -> None:
-        logger.info("Pulling")
+        logger.info("Pulling fish")
         if self.cfg.SELECTED.MODE == "telescopic":
             self._telescopic_pull()
         else:

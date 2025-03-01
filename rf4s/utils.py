@@ -11,6 +11,7 @@ from prettytable import PrettyTable
 from pyscreeze import Box
 from rich.text import Text
 from rich.console import Console
+from rich.table import Table
 from rich import print
 
 # BASE_DELAY + LOOP_DELAY >= 2.2 to trigger clicklock
@@ -94,11 +95,15 @@ def display_running_results(app: object, result_map: tuple[tuple]) -> None:
     :param result_map: attribute name - column name mapping
     :type result_map: tuple[tuple]
     """
-    table = PrettyTable(header=False, align="l")
+    table = Table(
+        "Results",
+        title="Running Results",
+        show_header=False,
+        # min_width=20,
+    )
     table.title = "Running Results"
-    # table.field_names = ['Record', 'Value']
-    for attribute_name, column_name in result_map:
-        table.add_row([column_name, getattr(app, attribute_name)])
+    for field, value in result_map:
+        table.add_row(str(field), str(value))
     print(table)
 
 
@@ -123,18 +128,14 @@ def start_app(app: object, results: tuple[tuple]) -> None:
     :param results: counter lookup table
     :type results: tuple[tuple]
     """
-
-    if app.setting.confirmation_enabled:
-        ask_for_confirmation()
-    app.setting.window_controller.activate_game_window()
+    app.window.activate_game_window()
     try:
         app.start()
     except KeyboardInterrupt:
         pass
-
     if results is not None:
         display_running_results(app, results)
-    app.setting.window_controller.activate_script_window()
+    app.window.activate_script_window()
 
 
 # ---------------------------------------------------------------------------- #

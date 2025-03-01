@@ -9,46 +9,63 @@ Usage: craft.py
 
 import argparse
 import logging
+import sys
+from pathlib import Path
+
+import pyautogui as pag
+from rich.logging import RichHandler
+from yacs.config import CfgNode as CN
+
+sys.path.append(".")
+
+import argparse
+import logging
 import random
 import sys
 from datetime import datetime
 from time import sleep
 
-import pyautogui as pag
-
-sys.path.append(".")
 from rf4s import utils
-
-logging.basicConfig(format="%(levelname)s: %(message)s", level=logging.INFO)
-logger = logging.getLogger(__name__)
+from rf4s.config import config
+from rf4s.controller.detection import Detection
+from rf4s.controller.window import Window
 
 CRAFT_DELAY = 4.0
 CRAFT_DELAY_2X = 8.0
 
 ANIMATION_DELAY = 0.5
 ANIMATION_DELAY_2X = 1.0
+ROOT = Path(__file__).resolve().parents[1]
 
-# ------------------ flag name, attribute name, description ------------------ #
-ARGS = (
-    ("discard", "discard_enabled", "_"),
-    ("craft_limit", "craft_limit", "_"),
-    ("fast", "fast_enabled", "_"),
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    handlers=[RichHandler(rich_tracebacks=True)],
 )
-
-# ------------------------ attribute_name, description ----------------------- #
-RESULTS = (
-    ("success_count", "Successful Crafts"),
-    ("fail_count", "Failed Attempts"),
-    ("craft_count", "Materials Used"),
-)
+logger = logging.getLogger("rich")
 
 
 class App:
     """Main application class."""
 
-    @utils.initialize_setting_and_monitor(ARGS)
     def __init__(self):
-        """Initialize counters and merge args into setting node."""
+        self.cfg = config.setup_cfg()
+        self.cfg.merge_from_file(ROOT / "config.yaml")
+        args = self.parse_args()
+        args_cfg = CN({"ARGS": config.dict_to_cfg(vars(args))})
+        self.cfg.merge_from_other_cfg(args_cfg)
+        self.cfg.merge_from_list(args.opts)
+
+        # Dummy mode
+        dummy = CN({"SELECTED": config.dict_to_cfg({"MODE": "spin"})})
+        self.cfg.merge_from_other_cfg(dummy)
+
+        self.cfg.freeze()
+
+        self.window = Window()
+        self.detection = Detection(self.cfg, self.window)
+
         self.success_count = 0
         self.fail_count = 0
         self.craft_count = 0
@@ -60,8 +77,12 @@ class App:
         :rtype: argparse.Namespace
         """
         parser = argparse.ArgumentParser(description="Craft items automatically.")
+        parser.add_argument("opts", nargs="*", help="overwrite configuration")
         parser.add_argument(
-            "-d", "--discard", action="store_true", help="discard all the crafted items"
+            "-d",
+            "--discard",
+            action="store_true",
+            help="discard all the crafted items (for groundbaits)",
         )
         parser.add_argument(
             "-f",
@@ -74,8 +95,8 @@ class App:
             "--craft-limit",
             type=int,
             default=-1,
-            help="number of items to craft, no limit if not specified",
-            metavar="LIMIT"
+            help="number of items to craft, no limit by default",
+            metavar="LIMIT",
         )
         return parser.parse_args()
 
@@ -85,43 +106,51 @@ class App:
         craft_delay = CRAFT_DELAY
         click_delay = ANIMATION_DELAY
 
-        # locate make button
-        make_btn_coord = self.monitor.get_make_position()
+        make_btn_coord = self.detection.get_make_position()
         if make_btn_coord is None:
-            logger.error("Make button not found, please set the interface scale to "
-                         "1x or move your mouse around")
-            self.setting.window_controller.activate_script_window()
+            logger.critical(
+                "Make button not found, please set the interface scale to "
+                "1x or move your mouse around"
+            )
+            self.window.activate_script_window()
             return
         pag.moveTo(make_btn_coord)
 
-
-        while self.monitor.is_material_complete():
+        while self.detection.is_material_complete():
+            logger.info("Crafting item")
             pag.click()
 
-            # crafting
-            if not self.setting.fast_enabled:
+            if not self.cfg.ARGS.FAST:
                 craft_delay = random.uniform(CRAFT_DELAY, CRAFT_DELAY_2X)
                 click_delay = random.uniform(ANIMATION_DELAY, ANIMATION_DELAY_2X)
             sleep(craft_delay)
 
-            # checking
             while True:
-                if self.monitor.is_operation_success():
+                if self.detection.is_operation_success():
+                    logger.info("Item crafted successfully")
                     self.success_count += 1
                     break
 
-                if self.monitor.is_operation_failed():
+                if self.detection.is_operation_failed():
+                    logger.warning("Failed to craft item")
                     self.fail_count += 1
                     break
                 sleep(ANIMATION_DELAY)
             self.craft_count += 1
 
-            # handle result
-            pag.press("backspace" if self.setting.discard_enabled else "space")
-            if self.craft_count == self.setting.craft_limit:
+            pag.press("backspace" if self.cfg.ARGS.DISCARD else "space")
+            if self.craft_count >= self.cfg.ARGS.CRAFT_LIMIT:
                 break
             sleep(click_delay)
 
 
 if __name__ == "__main__":
-    utils.start_app(App(), RESULTS)
+    app = App()
+    utils.start_app(
+        app,
+        (
+            ("Successful Crafts", app.success_count),
+            ("Failed Crafts", app.fail_count),
+            ("Materials Used", app.craft_count),
+        ),
+    )

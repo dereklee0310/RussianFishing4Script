@@ -109,7 +109,7 @@ class App:
     def _setup_parser(self) -> ArgumentParser:
         """Configure argparser."""
         parser = ArgumentParser(description="Start AFK script for Russian Fishing 4")
-        parser.add_argument("opts", nargs="*", help="modify config options using the command-line")
+        parser.add_argument("opts", nargs="*", help="overwrite configuration")
 
 
         for argument in ARGUMENTS:
@@ -347,6 +347,7 @@ class App:
             if self._is_pid_valid(pid):
                 break
             if pid == "q":
+                print("Bye.")
                 sys.exit()
             utils.print_error("Invalid profile id, please try again.")
 
@@ -386,11 +387,11 @@ class App:
         if self.window.title_bar_exist:
             logger.info("Window mode detected. Please don't move the game window")
         if not self.window.supported:
+            logger.warning('Window mode must be "Borderless windowed" or "Window mode"')
             logger.warning(
                 "Invalid window size '%s', use '2560x1440', '1920x1080' or '1600x900'",
                 f"{width}x{height}",
             )
-            logger.warning('Window mode must be "Borderless windowed" or "Window mode"')
             logger.error("Snag detection will be disabled")
             logger.error("Spooling detection will be disabled")
             logger.error("Auto friction brake will be disabled")
@@ -447,7 +448,6 @@ class App:
         if self.cfg.KEY.QUIT != "CTRL-C":
             listener = keyboard.Listener(on_release=self._on_release)
             listener.start()
-        self.player.test()
         try:
             self.player.start_fishing()
         except KeyboardInterrupt:
