@@ -174,6 +174,8 @@ class Detection:
 
     # -------------------------------- fish status ------------------------------- #
     def is_fish_hooked(self):
+        if self.window.supported:
+            return self.is_fish_hooked_pixel()
         return self._get_image_box("fish_icon", 0.9)
 
     def is_fish_hooked_twice(self) -> bool:
