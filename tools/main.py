@@ -54,9 +54,9 @@ ARGUMENTS = (
     ("g", "gear_ratio", "switch the gear ratio after the retrieval timed out"),
     ("f", "friction_brake", "enable auto friction brake"),
     ("l", "lift", "lift the tackle constantly while pulling a fish"),
-    ("C", "skip_cast", "Immediately start retrieving for the first fish , mode: spin, marine"), # TODO
+    ("C", "skip_cast", "Immediately start retrieving for the first fish"),
     ("o", "spod_rod", "recast spod rod regularly"),
-    ("L", "lure", "change current lure with a random one regularly"),
+    ("L", "lure", "change current lure with a random one regularly, mode: spin"),
     ("x", "mouse", "move mouse randomly before casting the rod"),
     ("X", "pause", "pause the script before casting the rod regularly"),
     ("b", "bite", "take a screenshot after casting in screenshots/ (for fish spot)"),
