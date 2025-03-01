@@ -1,5 +1,10 @@
-"""
-Some helper functions.
+"""Helper functions for automation scripts.
+
+This module provides utility functions for common tasks such as mouse control,
+keyboard input, and result display. It also includes decorators for managing
+key and mouse states during automation.
+
+.. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
 import logging
@@ -27,12 +32,12 @@ logger = logging.getLogger("rich")
 # ---------------------------------------------------------------------------- #
 
 
-def hold_mouse_button(duration: float=1, button="left") -> None:
+def hold_mouse_button(duration: float = 1, button: str = "left") -> None:
     """Hold left or right mouse button.
 
-    :param duration: hold time, defaults to 1
+    :param duration: Hold time, defaults to 1.
     :type duration: float, optional
-    :param button: button to click, defaults to "left"
+    :param button: Button to click, defaults to "left".
     :type button: str, optional
     """
     if duration == 0:
@@ -45,9 +50,9 @@ def hold_mouse_button(duration: float=1, button="left") -> None:
         pag.click()
 
 def hold_mouse_buttons(duration: float = 1) -> None:
-    """Hold left mouse button.
+    """Hold left and right mouse buttons simultaneously.
 
-    :param duration: hold time, defaults to 1
+    :param duration: Hold time, defaults to 1.
     :type duration: float, optional
     """
     pag.mouseDown()
@@ -62,11 +67,11 @@ def hold_mouse_buttons(duration: float = 1) -> None:
 def sleep_and_decrease(num: int, delay: int) -> int:
     """Self-decrement with a delay.
 
-    :param num: the variable to decrease
+    :param num: The variable to decrease.
     :type num: int
-    :param delay: sleep time
+    :param delay: Sleep time.
     :type delay: int
-    :return: decreased num
+    :return: Decreased num.
     :rtype: int
     """
     sleep(delay)
@@ -76,7 +81,7 @@ def sleep_and_decrease(num: int, delay: int) -> int:
 def ask_for_confirmation(msg: str = "Ready to start") -> None:
     """Ask for confirmation of user settings if it's enabled.
 
-    :param msg: confirmation message, defaults to "Ready to start"
+    :param msg: Confirmation message, defaults to "Ready to start".
     :type msg: str
     """
     while True:
@@ -87,13 +92,13 @@ def ask_for_confirmation(msg: str = "Ready to start") -> None:
             sys.exit()
 
 
-def display_running_results(app: object, result_map: tuple[tuple]) -> None:
+def display_running_results(app: object, result_map: tuple[tuple[str, str]]) -> None:
     """Display the running results of different apps.
 
-    :param app: caller object
+    :param app: Caller object.
     :type app: object
-    :param result_map: attribute name - column name mapping
-    :type result_map: tuple[tuple]
+    :param result_map: Attribute name - column name mapping.
+    :type result_map: tuple[tuple[str, str]]
     """
     table = Table(
         "Results",
@@ -112,21 +117,21 @@ def get_box_center(box: Box) -> tuple[int, int]:
 
     # (x, y, w, h) -> (x, y), np.int64 -> int
 
-    :param box: box coordinates (x, y, w, h)
+    :param box: Box coordinates (x, y, w, h).
     :type box: Box
-    :return: x and y coordinates of the center point
+    :return: x and y coordinates of the center point.
     :rtype: tuple[int, int]
     """
     return int(box.left + box.width // 2), int(box.top + box.height // 2)
 
 
-def start_app(app: object, results: tuple[tuple]) -> None:
-    """A wrapper for confirmation, window activatioin, and start.
+def start_app(app: object, results: tuple[tuple[str, str]] | None) -> None:
+    """A wrapper for confirmation, window activation, and start.
 
-    :param app: main application class
+    :param app: Main application class.
     :type app: object
-    :param results: counter lookup table
-    :type results: tuple[tuple]
+    :param results: Counter lookup table.
+    :type results: tuple[tuple[str, str]] | None
     """
     app.window.activate_game_window()
     try:
@@ -224,7 +229,7 @@ def print_error(msg):
     Console().print(text)
 
 
-# there's lots of early return in player._resetting_stage(),
+# There's lots of early return in player._resetting_stage(),
 # so use a decorator here to simplify the code
 def reset_friction_brake_after(func):
     """Reset friction brake after calling the function."""

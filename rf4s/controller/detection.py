@@ -1,17 +1,20 @@
-"""
-Module for pyautogui.locateOnScreen and pag.pixel wrappers.
+"""Module for pyautogui.locateOnScreen and pag.pixel wrappers.
+
+This module provides functionality for detecting in-game elements using image recognition
+and pixel color analysis. It is used for automating tasks in Russian Fishing 4.
+
+.. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
 # pylint: disable=missing-function-docstring
-# docstring for every functions? u serious?
 
-import logging
 import time
 from pathlib import Path
 
 import pyautogui as pag
 from pyscreeze import Box
 from PIL import Image
+from typing import Generator
 
 from rf4s.controller.window import Window
 
@@ -27,6 +30,7 @@ COLOR_TOLERANCE = 64
 CAMERA_OFFSET = 40
 SIDE_LENGTH = 160
 SIDE_LENGTH_HALF = 80
+ORANGE_REEL = (227, 149, 23)
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -83,15 +87,28 @@ COORD_OFFSETS = {
 
 
 class Detection:
-    """A class that holds different aliases of locateOnScreen(image)."""
+    """A class that holds different aliases of locateOnScreen(image).
+
+    This class provides methods for detecting various in-game elements such as fish,
+    icons, and UI components using image recognition and pixel color analysis.
+
+    Attributes:
+        cfg (CfgNode): Configuration node for the detection settings.
+        window (Window): Game window controller instance.
+        image_dir (Path): Directory containing reference images for detection.
+        coord_offsets (dict): Dictionary of coordinate offsets for different window sizes.
+        bait_icon_reference_img (Image): Reference image for bait icon detection.
+    """
 
     # pylint: disable=too-many-public-methods
 
     def __init__(self, cfg, window: Window):
-        """Initialize setting.
+        """Initialize the Detection class with configuration and window settings.
 
-        :param setting: general setting node
-        :type setting: Setting
+        :param cfg: Configuration node for detection settings.
+        :type cfg: CfgNode
+        :param window: Game window controller instance.
+        :type window: Window
         """
         self.cfg = cfg
         self.window = window
@@ -102,15 +119,17 @@ class Detection:
 
         self.bait_icon_reference_img = Image.open(self.image_dir / "bait_icon.png")
 
-    def _get_image_box(self, image: str, confidence: float, multiple: bool=False) -> Box | None:
+    def _get_image_box(self, image: str, confidence: float, multiple: bool = False) -> Box | Generator[Box, None, None] | None:
         """A wrapper for locateOnScreen method and path resolving.
 
-        :param image: base name of the image
+        :param image: Base name of the image.
         :type image: str
-        :param confidence: matching confidence for locateOnScreen
+        :param confidence: Matching confidence for locateOnScreen.
         :type confidence: float
-        :return: image box, None if not found
-        :rtype: Box
+        :param multiple: Whether to locate all matching images, defaults to False.
+        :type multiple: bool, optional
+        :return: Image box, None if not found.
+        :rtype: Box | None
         """
         image_path = str(self.image_dir / f"{image}.png")
         if multiple:
@@ -147,9 +166,9 @@ class Detection:
     def _get_absolute_coord(self, offset_key: str) -> list[int]:
         """Calculate absolute coordinate based on given key.
 
-        :param offset_key: a key in offset dictionary
+        :param offset_key: A key in the offset dictionary.
         :type offset_key: str
-        :return: converted absolute coordinate
+        :return: Converted absolute coordinate.
         :rtype: list[int]
         """
         return [
@@ -157,29 +176,24 @@ class Detection:
             self.window.box[1] + self.coord_offsets[offset_key][1],
         ]
 
-    # ------------------------ unmarked release whitelist ------------------------ #
-    def is_fish_species_matched(self, species: str) -> Box | None:
-        """Check if the captured fish match the given species.
-
-        :param species: mackerel, saithe, herring, squid, scallop, or mussel
-        :type species: str
-        :return: image box, None if not found
-        :rtype: Box
-        """
-        return self._get_image_box(species, 0.9)
-
-    # ----------------------------- unmarked release ----------------------------- #
+    # ----------------------------- Unmarked release ----------------------------- #
     def is_fish_marked(self):
         return self._get_image_box("mark", 0.7)
 
-    def is_fish_yellow_marked(self):
-        return self._get_image_box("trophy", 0.7)
+    def is_fish_species_matched(self, species: str):
+        return self._get_image_box(species, 0.9)
 
-    # -------------------------------- fish status ------------------------------- #
+    # -------------------------------- Fish status ------------------------------- #
     def is_fish_hooked(self):
         if self.window.supported:
             return self.is_fish_hooked_pixel()
         return self._get_image_box("fish_icon", 0.9)
+
+    def is_fish_hooked_pixel(self) -> bool:
+        return all(
+            c > MIN_GRAY_SCALE_LEVEL
+            for c in pag.pixel(*self.fish_icon_coord)
+        )
 
     def is_fish_hooked_twice(self) -> bool:
         if not self.is_fish_hooked():
@@ -194,7 +208,13 @@ class Detection:
     def is_fish_captured(self):
         return self._get_image_box("keep", 0.9)
 
-    # ---------------------------- retrieval detection --------------------------- #
+    def is_clip_open(self) -> bool:
+        return not all(
+            c > MIN_GRAY_SCALE_LEVEL
+            for c in pag.pixel(*self.clip_icon_coord)
+        )
+
+    # ---------------------------- Retrieval detection --------------------------- #
     def is_retrieval_finished(self):
         ready = self.is_tackle_ready()
         if self.cfg.ARGS.RAINBOW_LINE:
@@ -213,7 +233,13 @@ class Detection:
             "wheel", self.cfg.SCRIPT.SPOOL_CONFIDENCE
         )
 
-    # ------------------------------ hint detection ------------------------------ #
+    def is_line_snagged(self) -> bool:
+        return pag.pixel(*self.snag_icon_coord) == CRITICAL_COLOR
+
+    def is_line_at_end(self) -> bool:
+        return pag.pixel(*self.spool_icon_coord) in (WARNING_COLOR, CRITICAL_COLOR)
+
+    # ------------------------------ Text detection ------------------------------ #
     def is_tackle_ready(self):
         return self._get_image_box("ready", 0.6)
 
@@ -226,14 +252,14 @@ class Detection:
     def is_moving_in_bottom_layer(self):
         return self._get_image_box("movement", 0.7)
 
-    # ------------------------------ hint detection ------------------------------ #
+    # ------------------------------ Hint detection ------------------------------ #
     def is_disconnected(self):
         return self._get_image_box("disconnected", 0.9)
 
     def is_ticket_expired(self):
         return self._get_image_box("ticket", 0.9)
 
-    # ------------------------------- item crafting ------------------------------ #
+    # ------------------------------- Item crafting ------------------------------ #
     def is_operation_failed(self):
         return self._get_image_box("warning", 0.8)
 
@@ -244,7 +270,7 @@ class Detection:
     def is_material_complete(self):
         return not self._get_image_box("material_slot", 0.9)
 
-    # ---------------------- quiting game from control panel --------------------- #
+    # ---------------------- Quiting game from control panel --------------------- #
     def get_quit_position(self):
         return self._get_image_box("quit", 0.8)
 
@@ -254,18 +280,14 @@ class Detection:
     def get_make_position(self):
         return self._get_image_box("make", 0.9)
 
-    # ------------------------ quiting game from main menu ----------------------- #
+    # ------------------------ Quiting game from main menu ----------------------- #
     def get_exit_icon_position(self):
         return self._get_image_box("exit", 0.8)
 
     def get_confirm_button_position(self):
         return self._get_image_box("confirm", 0.8)
 
-    # ----------------------------- baits harvesting ----------------------------- #
-    def is_harvest_success(self):
-        return self._get_image_box("harvest_confirm", 0.8)
-
-    # ----------------------------- player stat icon ----------------------------- #
+    # ------------------------------- Player stats ------------------------------- #
     def _get_energy_icon_position(self):
         box = self._get_image_box("energy", 0.8)
         return box if box is None else pag.center(box)
@@ -278,46 +300,10 @@ class Detection:
         box = self._get_image_box("comfort", 0.8)
         return box if box is None else pag.center(box)
 
-    # -------------------------- player stat refill item ------------------------- #
-    def get_food_position(self, food: str) -> Box | None:
-        """Get the position of food in quick selection menu.
-
-        :param food: carrot, tea, or coffee
-        :type food: str
-        :return: image box, None if not found
-        :rtype: Box
-        """
+    def get_food_position(self, food: str):
         return self._get_image_box(food, 0.8)
 
-    def get_ticket_position(self, duration: int) -> Box | None:
-        """Locate the image of boat ticket according to the given duration.
-
-        :param duration: duration of boat ticket
-        :type duration: int
-        :return: image box, None if not found
-        :rtype: Box
-        """
-        return self._get_image_box(f"ticket_{duration}", 0.95)
-
-    # -------------------------- broken lure replacement ------------------------- #
-    def get_scrollbar_position(self):
-        return self._get_image_box("scrollbar", 0.97)
-
-    def get_100wear_position(self):
-        return self._get_image_box("100wear", 0.98)
-
-    def get_favorite_item_positions(self):
-        return self._get_image_box("favorite", 0.95, multiple=True)
-
-    # ---------------------------------------------------------------------------- #
-    #                               image analyzation                              #
-    # ---------------------------------------------------------------------------- #
     def is_energy_high(self) -> bool:
-        """Check if the energy level is high enough to harvest baits
-
-        :return: True if high enough, False otherwise
-        :rtype: bool
-        """
         pos = self._get_energy_icon_position()
         if not pos:
             return False
@@ -327,11 +313,6 @@ class Detection:
         return pag.pixel(x + 19, y) == pag.pixel(x + last_point, y)
 
     def is_hunger_low(self) -> bool:
-        """Check if hunger is low.
-
-        :return: True if low, False otherwise
-        :rtype: bool
-        """
         pos = self._get_food_icon_position()
         if not pos:
             return False
@@ -340,11 +321,6 @@ class Detection:
         return not pag.pixel(x + 18, y) == pag.pixel(x + last_point, y)
 
     def is_comfort_low(self) -> bool:
-        """Check if comfort is low.
-
-        :return: True if low, False otherwise
-        :rtype: bool
-        """
         pos = self._get_comfort_icon_position()
         if not pos:
             return False
@@ -352,54 +328,18 @@ class Detection:
         last_point = int(18 + 152 * self.cfg.STAT.COMFORT_THRESHOLD) - 1
         return not pag.pixel(x + 18, y) == pag.pixel(x + last_point, y)
 
-    def is_line_snagged(self) -> bool:
-        """Check the top of the snag icon to see if the line is snagged.
+    # ----------------------------- Item replacement ----------------------------- #
+    def get_scrollbar_position(self):
+        return self._get_image_box("scrollbar", 0.97)
 
-        :return: True if snagged, False otherwise
-        :rtype: bool
-        """
-        return pag.pixel(*self.snag_icon_coord) == CRITICAL_COLOR
+    def get_100wear_position(self):
+        return self._get_image_box("100wear", 0.98)
 
-    def is_line_at_end(self):
-        return pag.pixel(*self.spool_icon_coord) in (WARNING_COLOR, CRITICAL_COLOR)
-
-    def is_friction_brake_high(self) -> bool:
-        """Check if the friction brake is too high using friction brake bar center.
-
-        :return: True if pixel color matched, False otherwise
-        :rtype: bool
-        """
-        return pag.pixelMatchesColor(
-            *self.friction_brake_coord, RED_FRICTION_BRAKE, COLOR_TOLERANCE
-        )
-
-    def is_fish_hooked_pixel(self) -> bool:
-        return all(
-            c > MIN_GRAY_SCALE_LEVEL
-            for c in pag.pixel(*self.fish_icon_coord)
-        )
-
-    def is_float_state_changed(self, reference_img):
-        current_img = pag.screenshot(region=self.float_camera_rect)
-        return not pag.locate(
-            current_img,
-            reference_img,
-            grayscale=True,
-            confidence=self.cfg.SELECTED.FLOAT_SENSITIVITY,
-        )
-
-    def is_clip_open(self) -> bool:
-        return not all(
-            c > MIN_GRAY_SCALE_LEVEL
-            for c in pag.pixel(*self.clip_icon_coord)
-        )
+    def get_favorite_item_positions(self):
+        return self._get_image_box("favorite", 0.95, multiple=True)
 
     def is_pva_chosen(self):
-        # return pag.pixel(*self.pva_icon_coord) != WHITE
         return self._get_image_box("pva_icon", 0.6) is None
-
-    def is_groundbait_chosen(self):
-        return self._get_image_box("groundbait_icon", 0.6) is None
 
     def is_bait_chosen(self):
         # Two bait slots, check only the first one
@@ -411,6 +351,9 @@ class Detection:
             ) is None
         return self._get_image_box("bait_icon", 0.6) is None
 
+    def is_groundbait_chosen(self):
+        return self._get_image_box("groundbait_icon", 0.6) is None
+
     def get_groundbait_position(self):
         return self._get_image_box("classic_feed_mix", 0.98)
 
@@ -418,10 +361,26 @@ class Detection:
         return self._get_image_box("dry_feed_mix", 0.98)
 
 
-    def is_reel_burning(self) -> bool:
-        """Check if the reel is burning in the fire icon.
+    # ------------------------------ Friction brake ------------------------------ #
+    def is_friction_brake_high(self) -> bool:
+        return pag.pixelMatchesColor(
+            *self.friction_brake_coord, RED_FRICTION_BRAKE, COLOR_TOLERANCE
+        )
 
-        :return: True if pixel color matched, False otherwise
-        :rtype: bool
-        """
+    def is_reel_burning(self) -> bool:
         return pag.pixel(*self.setting.reel_burning_icon_coord) == ORANGE_REEL
+
+    def is_float_state_changed(self, reference_img):
+        current_img = pag.screenshot(region=self.float_camera_rect)
+        return not pag.locate(
+            current_img,
+            reference_img,
+            grayscale=True,
+            confidence=self.cfg.SELECTED.FLOAT_SENSITIVITY,
+        )
+
+    def get_ticket_position(self, duration: int):
+        return self._get_image_box(f"ticket_{duration}", 0.95)
+
+    def is_harvest_success(self):
+        return self._get_image_box("harvest_confirm", 0.8)

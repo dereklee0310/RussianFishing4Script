@@ -1,11 +1,13 @@
-"""
-Main CLI.
+"""Main CLI for Russian Fishing 4 Script.
 
-Usage: app.py
+This module provides the command-line interface and main execution logic
+for automating fishing in Russian Fishing 4. It handles configuration,
+argument parsing, window management, and fishing automation.
+
+.. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
 # pylint: disable=no-member
-# setting node's attributes will be merged on the fly
 
 import logging
 import os
@@ -83,11 +85,25 @@ DISCORD_LINK = "Discord: https://discord.gg/BZQWQnAMbY"
 
 ROOT = Path(__file__).resolve().parents[1]
 
+
 class App:
-    """Main application class."""
+    """Main application class for Russian Fishing 4 automation.
+
+    This class orchestrates the entire automation process, from parsing command-line
+    arguments to configuring the environment and executing the fishing routine.
+
+    Attributes:
+        cfg (CfgNode): Configuration node merged from YAML and CLI arguments.
+        args (Namespace): Parsed command-line arguments.
+        window (Window): Game window controller instance.
+        player (Player): Player instance for fishing automation.
+    """
 
     def __init__(self):
-        """Merge args into setting node."""
+        """Initialize the application.
+
+        Loads configuration, parses command-line arguments, and sets up the environment.
+        """
         print(Panel.fit(LOGO, box=box.HEAVY), GITHUB_LINK, DISCORD_LINK, sep="\n")
         self.cfg = config.setup_cfg()
         self.cfg.merge_from_file(ROOT / "config.yaml")
@@ -107,10 +123,13 @@ class App:
         self.args = args
 
     def _setup_parser(self) -> ArgumentParser:
-        """Configure argparser."""
+        """Configure the argument parser with all supported command-line options.
+
+        :return: Configured ArgumentParser instance with all options and flags.
+        :rtype: ArgumentParser
+        """
         parser = ArgumentParser(description="Start AFK script for Russian Fishing 4")
         parser.add_argument("opts", nargs="*", help="overwrite configuration")
-
 
         for argument in ARGUMENTS:
             flag1 = f"-{argument[0]}"
@@ -212,6 +231,13 @@ class App:
         return parser
 
     def _is_args_valid(self, args: Namespace) -> bool:
+        """Validate provided command-line arguments.
+
+        :param args: Parsed command-line arguments to validate.
+        :type args: Namespace
+        :return: Whether the arguments are valid.
+        :rtype: bool
+        """
         if not 0 <= args.fishes_in_keepnet < self.cfg.KEEPNET.CAPACITY:
             logger.critical(
                 "Invalid number of fishes in keepnet: '%s'",
@@ -231,11 +257,24 @@ class App:
         return True
 
     def _is_pid_valid(self, pid: str) -> bool:
-        """Validate the profile id."""
+        """Check if the profile ID is valid.
+
+        :param pid: Profile ID to validate.
+        :type pid: str
+        :return: Whether the profile ID is valid.
+        :rtype: bool
+        """
         return pid.isdigit() and 0 <= int(pid) < len(self.cfg.PROFILE)
 
-    def _is_smtp_valid(self) -> None:
-        """Validate email configuration."""
+    def _is_smtp_valid(self) -> bool:
+        """Verify SMTP server connection for email notifications.
+
+        Tests the connection to the configured SMTP server using stored
+        credentials if email notifications are enabled.
+
+        :return: Whether the SMTP configuration is valid or not needed.
+        :rtype: bool
+        """
         if not self.cfg.ARGS.EMAIL or not self.cfg.SCRIPT.SMTP_VERIFICATION:
             return True
 
@@ -261,11 +300,14 @@ class App:
             return False
         return True
 
-    def _is_images_valid(self) -> None:
-        """Verify the file integrity of static/{language}.
+    def _is_images_valid(self) -> bool:
+        """Verify that all required image files exist for the selected language.
 
-        Compare files in static/en and static/{language}
-        and print missing files in static/{language}.
+        Compares files in the reference 'en' directory with those in the current
+        language directory and reports any missing files.
+
+        :return: Whether all required image files are present.
+        :rtype: bool
         """
         if not self.cfg.SCRIPT.IMAGE_VERIFICATION:
             return True
@@ -302,7 +344,14 @@ class App:
             return False
         return True
 
-    def _is_profile_valid(self, profile_name):
+    def _is_profile_valid(self, profile_name: str) -> bool:
+        """Check if a profile configuration is valid and complete.
+
+        :param profile_name: Name of the profile to validate.
+        :type profile_name: str
+        :return: Whether the profile is valid.
+        :rtype: bool
+        """
         if profile_name not in self.cfg.PROFILE:
             logger.critical("Invalid profile name: '%s'", profile_name)
             return False
@@ -327,7 +376,10 @@ class App:
         return True
 
     def _display_available_profiles(self) -> None:
-        """List available user profiles from setting node."""
+        """Display a table of available profiles for user selection.
+
+        Shows a formatted table with profile IDs and names.
+        """
         table = Table(
             "Profile",
             title="Select a profile to start :rocket:",
@@ -339,7 +391,11 @@ class App:
         print(table)
 
     def _get_pid(self) -> None:
-        """Get and validate user profile id from user input."""
+        """Prompt the user to enter a profile ID and validate the input.
+
+        Continuously prompts until a valid profile ID is entered or the
+        user chooses to exit.
+        """
         print("Enter profile id to use, q to exit:")
 
         while True:
@@ -353,7 +409,12 @@ class App:
 
         self.cfg.ARGS.PID = int(pid)
 
-    def _setup_user_profile(self):
+    def setup_user_profile(self) -> None:
+        """Configure the user profile based on arguments or interactive selection.
+
+        Selects a profile based on command-line arguments or user input,
+        validates the profile, and merges it with the configuration.
+        """
         if self.cfg.ARGS.PNAME is not None:
             profile_name = self.cfg.ARGS.PNAME
         else:
@@ -380,8 +441,12 @@ class App:
         self.cfg.merge_from_list(self.args.opts)
         config.print_cfg(self.cfg.SELECTED)
 
+    def setup_window(self) -> None:
+        """Set up and validate the game window.
 
-    def setup_window(self):
+        Creates a Window object, checks if the window size is supported,
+        and disables incompatible features if needed.
+        """
         self.window = Window()
         width, height = self.window.box[:2]
         if self.window.title_bar_exist:
@@ -408,10 +473,19 @@ class App:
             )
             sys.exit(1)
 
-    def _setup_player(self):
+    def setup_player(self) -> None:
+        """Initialize the Player object with current configuration.
+
+        Creates a new Player instance using the current config and window.
+        """
         self.player = Player(self.cfg, self.window)
 
-    def _print_hints(self):
+    def print_hints(self):
+        """Display helpful information about the current configuration.
+
+        Checks configuration compatibility and prints warnings for
+        potential issues.
+        """
         if self.cfg.ARGS.ELECTRO:
             if self.cfg.SELECTED.MODE not in ("pirk", "elevator"):
                 logger.error(
@@ -427,21 +501,29 @@ class App:
                 )
 
     def _on_release(self, key: keyboard.KeyCode) -> None:
-        """Callback for button release.
+        """Handle key release events for application control.
 
-        :param key: key code used by OS
+        :param key: The key that was released.
         :type key: keyboard.KeyCode
+
+        Exits the application when the configured quit key is pressed.
         """
         # CTRL_C_EVENT: https://stackoverflow.com/questions/58455684/
         if key == keyboard.KeyCode.from_char(self.cfg.KEY.QUIT):
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
             sys.exit()
 
-    def start(self):
-        self._setup_user_profile()
+    def start(self) -> None:
+        """Start the fishing automation process.
+
+        Sets up all required components, activates the game window,
+        registers key listeners, and begins the fishing automation.
+        Handles termination and displays results.
+        """
+        self.setup_user_profile()
         self.setup_window()
-        self._setup_player()
-        self._print_hints()
+        self.setup_player()
+        self.print_hints()
         self.cfg.freeze()
         self.window.activate_game_window()
 

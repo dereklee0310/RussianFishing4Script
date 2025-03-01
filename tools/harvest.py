@@ -1,17 +1,18 @@
-"""
-Script for automatic baits harvesting and hunger/comfort refill.
+"""Script for automatic baits harvesting and hunger/comfort refill.
 
-Usage: harvest.py
+This module provides functionality to automate the harvesting of baits and refilling
+of hunger and comfort in Russian Fishing 4. It includes options for power-saving
+mode and configurable check delays.
+
+.. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
 # pylint: disable=no-member
 # setting node's attributes will be merged on the fly
 
-
 import argparse
 import logging
 import sys
-import time
 from pathlib import Path
 
 import pyautogui as pag
@@ -46,9 +47,27 @@ ANIMATION_DELAY = 0.5
 
 
 class App:
-    """Main application class."""
+    """Main application class for automating bait harvesting and hunger/comfort refill.
+
+    This class manages the configuration, detection, and execution of the harvesting
+    and refill processes. It also handles power-saving mode and check delays.
+
+    Attributes:
+        cfg (CfgNode): Configuration node merged from YAML and CLI arguments.
+        window (Window): Game window controller instance.
+        detection (Detection): Detection instance for in-game state checks.
+        timer (Timer): Timer instance for managing cooldowns.
+        tea_count (int): Number of tea consumed.
+        carrot_count (int): Number of carrots consumed.
+        harvest_count (int): Number of baits harvested.
+    """
 
     def __init__(self):
+        """Initialize the application.
+
+        Loads configuration, parses command-line arguments, and sets up the game window,
+        detection, and timer instances.
+        """
         self.cfg = config.setup_cfg()
         self.cfg.merge_from_file(ROOT / "config.yaml")
         args = self.parse_args()
@@ -71,9 +90,9 @@ class App:
         self.harvest_count = 0
 
     def parse_args(self) -> argparse.Namespace:
-        """Cofigure argparser and parse the command line arguments.
+        """Configure argument parser and parse command-line arguments.
 
-        :return dict-like parsed arguments
+        :return: Parsed command-line arguments.
         :rtype: argparse.Namespace
         """
         parser = argparse.ArgumentParser(
@@ -102,7 +121,11 @@ class App:
         return parser.parse_args()
 
     def start(self) -> None:
-        """Main eating and harvesting loop."""
+        """Main loop for eating and harvesting.
+
+        Executes the primary loop for checking hunger/comfort levels, consuming food,
+        and harvesting baits. Supports power-saving mode and configurable check delays.
+        """
         pag.press(str(self.cfg.KEY.DIGGING_TOOL))
         sleep(3)
         while True:
@@ -128,7 +151,11 @@ class App:
             sleep(ANIMATION_DELAY)
 
     def _harvest_baits(self) -> None:
-        """Harvest baits, the tool should be pulled out in start_harvesting_loop()."""
+        """Harvest baits from the game.
+
+        The digging tool should be pulled out before calling this method. Waits for
+        harvest success and presses the spacebar to complete the process.
+        """
         logger.info("Harvesting baits")
         # Dig and wait (4 + 1)s
         pag.click()
@@ -142,9 +169,11 @@ class App:
         sleep(ANIMATION_DELAY)
 
     def _consume_food(self, food: str) -> None:
-        """Open food menu, then click on the food icon to consume it.
+        """Consume a specific type of food.
 
-        :param food: food name
+        Opens the food menu, moves the cursor to the food's position, and clicks to consume it.
+
+        :param food: The type of food to consume (e.g., "tea" or "carrot").
         :type food: str
         """
         logger.info("Consuming %s", food)

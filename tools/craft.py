@@ -1,7 +1,9 @@
-"""
-Activate game window and start crafting things until running out of materials.
+"""Activate game window and start crafting things until running out of materials.
 
-Usage: craft.py
+This module automates the crafting process in Russian Fishing 4. It supports
+discarding crafted items, fast crafting mode, and a configurable crafting limit.
+
+.. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
 # pylint: disable=no-member
@@ -47,9 +49,27 @@ logger = logging.getLogger("rich")
 
 
 class App:
-    """Main application class."""
+    """Main application class for automating crafting.
+
+    This class manages the configuration, detection, and execution of the crafting
+    process. It tracks the number of successful and failed crafts, as well as the
+    total number of materials used.
+
+    Attributes:
+        cfg (CfgNode): Configuration node merged from YAML and CLI arguments.
+        window (Window): Game window controller instance.
+        detection (Detection): Detection instance for in-game state checks.
+        success_count (int): Number of successful crafts.
+        fail_count (int): Number of failed crafts.
+        craft_count (int): Total number of crafting attempts.
+    """
 
     def __init__(self):
+        """Initialize the application.
+
+        Loads configuration, parses command-line arguments, and sets up the game window
+        and detection instances.
+        """
         self.cfg = config.setup_cfg()
         self.cfg.merge_from_file(ROOT / "config.yaml")
         args = self.parse_args()
@@ -71,9 +91,9 @@ class App:
         self.craft_count = 0
 
     def parse_args(self) -> argparse.Namespace:
-        """Cofigure argparser and parse the command line arguments.
+        """Configure argument parser and parse command-line arguments.
 
-        :return parsed args
+        :return: Parsed command-line arguments.
         :rtype: argparse.Namespace
         """
         parser = argparse.ArgumentParser(description="Craft items automatically.")
@@ -101,7 +121,11 @@ class App:
         return parser.parse_args()
 
     def start(self) -> None:
-        """Main crafting loop."""
+        """Main loop for crafting items.
+
+        Executes the primary loop for crafting items until materials are exhausted or
+        the crafting limit is reached. Supports fast crafting mode and discarding items.
+        """
         random.seed(datetime.now().timestamp())
         craft_delay = CRAFT_DELAY
         click_delay = ANIMATION_DELAY

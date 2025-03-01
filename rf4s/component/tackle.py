@@ -1,6 +1,10 @@
-"""
-Module for Tackle class and some decorators.
+"""Module for Tackle class and some decorators.
 
+This module provides functionality for managing tackle-related actions in Russian Fishing 4,
+such as casting, retrieving, and pulling fish. It also includes decorators for handling
+common tasks like clicklock and key releases.
+
+.. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
 # pylint: disable=c-extension-no-member
@@ -43,17 +47,28 @@ NUM_OF_MOVEMENT = 4
 
 
 class Tackle:
-    """Class for all tackle dependent methods."""
+    """Class for all tackle-dependent methods.
+
+    This class handles actions related to the fishing tackle, such as casting,
+    retrieving, and pulling fish. It also manages tackle resetting and gear ratio switching.
+
+    Attributes:
+        cfg (CfgNode): Configuration node for tackle settings.
+        timer (Timer): Timer instance for timing actions.
+        detection (Detection): Detection instance for in-game state checks.
+        landing_net_out (bool): Whether the landing net is deployed.
+        available (bool): Whether the tackle is available for use.
+    """
 
     def __init__(self, cfg, timer: Timer, detection: Detection):
-        """Get timer and setting from caller (Player).
+        """Initialize the Tackle class with configuration, timer, and detection.
 
-        :param setting: universal setting node
-        :type setting: Setting
-        :param setting: universal detection node
-        :type setting: Monitor
-        :param timer: object for timing methods
+        :param cfg: Configuration node for tackle settings.
+        :type cfg: CfgNode
+        :param timer: Timer instance for timing actions.
         :type timer: Timer
+        :param detection: Detection instance for in-game state checks.
+        :type detection: Detection
         """
         self.cfg = cfg
         self.timer = timer
@@ -76,11 +91,13 @@ class Tackle:
     @_check_status
     @utils.toggle_clicklock
     def reset(self) -> None:
-        """Reset the tackle till ready and detect unexpected events.
+        """Reset the tackle until ready and detect unexpected events.
 
-        :raises exceptions.FishHookedError: a fish is hooked
-        :raises exceptions.FishCapturedError: a fish is captured
-        :raises exceptions.TimeoutError: loop timed out
+        :raises exceptions.FishHookedError: A fish is hooked.
+        :raises exceptions.FishCapturedError: A fish is captured.
+        :raises exceptions.LineAtEndError: The line is at its end.
+        :raises exceptions.LineSnaggedError: The line is snagged.
+        :raises TimeoutError: The loop timed out.
         """
         logger.info("Resetting tackle")
         i = RESET_TIMEOUT
@@ -100,11 +117,11 @@ class Tackle:
         raise TimeoutError
 
     @_check_status
-    def cast(self, lock) -> None:
+    def cast(self, lock: bool) -> None:
         """Cast the rod, then wait for the lure/bait to fly and sink.
 
-        :param update: update the record or not (for spod rod), defaults to True
-        :type update: bool, optional
+        :param lock: Whether to lock the reel after casting.
+        :type lock: bool
         """
         logger.info("Casting rod")
         if self.cfg.ARGS.MOUSE:
@@ -125,11 +142,7 @@ class Tackle:
             pag.click()
 
     def sink(self) -> None:
-        """Sink the lure until an event happend, designed for marine and wakey rig.
-
-        :param marine: whether to check is lure moving in bottom layer, defaults to True
-        :type marine: bool, optional
-        """
+        """Sink the lure until an event happens, designed for marine and wakey rig."""
         logger.info("Sinking lure")
         i = self.cfg.SELECTED.SINK_TIMEOUT
         while i > 0:
@@ -149,13 +162,15 @@ class Tackle:
     @utils.toggle_clicklock
     @utils.release_keys_after
     def retrieve(self, first: bool = True) -> None:
-        """Retrieve the line till the end is reached and detect unexpected events.
+        """Retrieve the line until the end is reached and detect unexpected events.
 
-        :param first: whether it's invoked for the first time, defaults to True
+        :param first: Whether it's invoked for the first time, defaults to True.
         :type first: bool, optional
-        :raises exceptions.FishCapturedError: a fish is captured
-        :raises exceptions.LineAtEndError: line is at its end
-        :raises exceptions.TimeoutError: loop timed out
+
+        :raises exceptions.FishCapturedError: A fish is captured.
+        :raises exceptions.LineAtEndError: The line is at its end.
+        :raises exceptions.LineSnaggedError: The line is snagged.
+        :raises TimeoutError: The loop timed out.
         """
         logger.info("Retrieving fishing line")
 
@@ -185,18 +200,23 @@ class Tackle:
         raise TimeoutError
 
     def retrieve_with_pause(self) -> None:
-        """Retreive the line, pause periodically."""
+        """Retrieve the line, pausing periodically."""
         logger.info("Retrieving fishing line with pause")
         self._special_retrieve(button="left")
 
     @utils.toggle_clicklock
     def retrieve_with_lift(self) -> None:
-        """Retreive the line, pause periodically."""
+        """Retrieve the line, lifting periodically."""
         logger.info("Retrieving fishing line with lift")
         self._special_retrieve(button="right")
 
     @utils.release_keys_after
     def _special_retrieve(self, button: str) -> None:
+        """Retrieve the line with special conditions (pause or lift).
+
+        :param button: The mouse button to use for retrieval.
+        :type button: str
+        """
         if self.cfg.SELECTED.PRE_ACCELERATION:
             pag.keyDown("shift")
         i = RETRIEVAL_WITH_PAUSE_TIMEOUT
@@ -209,7 +229,10 @@ class Tackle:
 
     @utils.release_keys_after
     def _pirk(self) -> None:
-        """Start pirking until a fish is hooked."""
+        """Start pirking until a fish is hooked.
+
+        :raises exceptions.TimeoutError: The loop timed out.
+        """
         logger.info("Pirking")
 
         i = self.cfg.SELECTED.PIRK_TIMEOUT
@@ -233,6 +256,7 @@ class Tackle:
         raise TimeoutError
 
     def pirk(self) -> None:
+        """Perform pirking with or without retrieval."""
         if self.cfg.SELECTED.PIRK_RETRIEVAL:
             self._pirk_with_retrieval()
         else:
@@ -240,13 +264,15 @@ class Tackle:
 
     @utils.toggle_clicklock
     def _pirk_with_retrieval(self):
+        """Perform pirking with retrieval."""
         self._pirk()
 
     def elevate(self, dropped: bool) -> None:
         """Perform elevator tactic (drop/rise) until a fish is hooked.
 
-        :param drop: whether to drop or rise the lure
-        :type drop: bool
+        :param dropped: Whether the lure is dropped.
+        :type dropped: bool
+        :raises exceptions.TimeoutError: The loop timed out.
         """
         locked = True  # Reel is locked after tackle.sink()
         i = self.cfg.SELECTED.ELEVATE_TIMEOUT
@@ -274,6 +300,7 @@ class Tackle:
 
     @_check_status
     def pull(self) -> None:
+        """Pull the fish until it's captured."""
         logger.info("Pulling fish")
         if self.cfg.SELECTED.MODE == "telescopic":
             self._telescopic_pull()
@@ -283,11 +310,7 @@ class Tackle:
     @utils.toggle_right_mouse_button
     @utils.toggle_clicklock
     def _pull(self) -> None:
-        """Pull the fish until it's captured.
-
-        :raises exceptions.FishGotAwayError: fish got away during pulling
-        :raises TimeoutError: loop timed out
-        """
+        """Pull the fish until it's captured."""
         i = PULL_TIMEOUT
         while i > 0:
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
@@ -311,7 +334,7 @@ class Tackle:
     def _telescopic_pull(self) -> None:
         """Pull the fish until it's captured, designed for telescopic rod.
 
-        :raises TimeoutError: loop timed out
+        :raises exceptions.TimeoutError: The loop timed out.
         """
         # Check false postive first because it happens often
         if not self.detection.is_fish_hooked():
@@ -349,12 +372,22 @@ class Tackle:
 
 
     def equip_item(self, item) -> None:
+        """Equip an item from the menu or inventory.
+
+        :param item: The item to equip (e.g., lure, pva, dry_mix, groundbait).
+        :type item: str
+        """
         if item in ("lure", "pva"):
             return self._equip_item_from_menu(item)
         else: # dry_mix, groundbait
             return self._equip_item_from_inventory(item)
 
     def _equip_item_from_menu(self, item: Literal["lure", "pva"] ) -> None:
+        """Equip an item from the menu.
+
+        :param item: The item to equip (e.g., lure, pva).
+        :type item: Literal["lure", "pva"]
+        """
         logger.info("Equiping new %s from menu", item)
         menu_key = "h" if item == "pva" else "b"
         with pag.hold(menu_key):
@@ -363,6 +396,11 @@ class Tackle:
 
     @utils.press_before_and_after("v")
     def _equip_item_from_inventory(self, item: Literal["dry_mix", "groundbait"]) -> None:
+        """Equip an item from the inventory.
+
+        :param item: The item to equip (e.g., dry_mix, groundbait).
+        :type item: Literal["dry_mix", "groundbait"]
+        """
         logger.info("Equiping new %s from inventory", item)
         scrollbar_position = self.detection.get_scrollbar_position()
         if scrollbar_position is None:
@@ -391,7 +429,12 @@ class Tackle:
                 break
 
     def _equip_favorite_item(self, item: bool):
-        """Select a favorite item for replacement and replace the broken one."""
+        """Select a favorite item for replacement and replace the broken one.
+
+        :param item: The item to equip (e.g., lure, pva, dry_mix, groundbait).
+        :type item: str
+        :raises exceptions.ItemNotFoundError: The item was not found.
+        """
         sleep(ANIMATION_DELAY)
         logger.info("Looking for favorite items")
         favorite_item_positions = list(self.detection.get_favorite_item_positions())

@@ -1,8 +1,11 @@
-"""
-Calculate the maximum friction brake you can use on your tackle.
+"""Calculate the maximum friction brake you can use on your tackle.
 
-Usage: calculate.py
+This module provides functionality to calculate the maximum friction brake and tension
+based on the reel's max drag, friction brake wear, leader's load capacity, and wear.
+
+.. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
+
 import sys
 
 from rich import print
@@ -15,7 +18,14 @@ from rf4s import utils
 BIAS = 1e-6
 
 def get_tackle_stats():
-    """Get actual stats of reel and leader based on their wears."""
+    """Get actual stats of reel and leader based on their wears.
+
+    Prompts the user for input and calculates the true max drag and load capacity
+    after accounting for wear.
+
+    :return: A tuple containing the true max drag and true load capacity.
+    :rtype: tuple[float, float]
+    """
     prompts = (
         "Reel's max drag (kg): ",
         "Reel's friction brake wear (%): ",
@@ -43,8 +53,16 @@ def get_tackle_stats():
 
 
 
-def get_validated_input(prompt):
-    """Get validated input from the user."""
+def get_validated_input(prompt: str) -> float | None:
+    """Get validated input from the user.
+
+    Prompts the user for input and validates it. Supports quitting and restarting.
+
+    :param prompt: The prompt message to display to the user.
+    :type prompt: str
+    :return: The validated input as a float, or None if the user chooses to restart.
+    :rtype: float or None
+    """
     while True:
         user_input = Prompt.ask(prompt)
         if user_input == "q":
@@ -58,20 +76,16 @@ def get_validated_input(prompt):
         except ValueError:
             utils.print_error("Invalid input. Please enter a number.")
 
-
-def get_max_friction_brake(max_drag, load_capacity):
-    """Calculate the maximum friction brake you can use and its tension."""
-    return int(min(load_capacity * 30 / (max_drag + BIAS) - 1, 29))
-
-def get_max_tension(max_drag, max_friction_brake):
-    return max_drag * max_friction_brake / 30
-
 def main():
+    """Main function to run the friction brake calculation.
+
+    Prompts the user for input, calculates the results, and displays them in a table.
+    """
     print("Please enter your tackle's stats, type q to quit, r to restart. ")
     while True:
         max_drag, load_capacity = get_tackle_stats()
-        max_friction_brake = get_max_friction_brake(max_drag, load_capacity)
-        max_tension = get_max_tension(max_drag, max_friction_brake)
+        max_friction_brake = int(min(load_capacity * 30 / (max_drag + BIAS) - 1, 29))
+        max_tension = max_drag * max_friction_brake / 30
 
         table = Table(
             "Results",

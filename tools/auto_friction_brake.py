@@ -1,3 +1,12 @@
+"""Automate friction brake adjustments in Russian Fishing 4.
+
+This module provides functionality to automatically adjust the friction brake
+based on in-game conditions. It supports key bindings for exiting the script
+and resetting the friction brake.
+
+.. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
+"""
+
 import argparse
 import sys
 import shlex
@@ -33,9 +42,25 @@ logger = logging.getLogger("rich")
 
 
 class App:
-    """Main application class."""
+    """Main application class for automating friction brake adjustments.
+
+    This class manages the configuration, detection, and execution of the friction
+    brake automation process. It also handles key bindings for exiting and resetting.
+
+    Attributes:
+        cfg (CfgNode): Configuration node merged from YAML and CLI arguments.
+        window (Window): Game window controller instance.
+        detection (Detection): Detection instance for in-game state checks.
+        friction_brake_lock (Lock): Dummy lock for thread synchronization.
+        friction_brake (FrictionBrake): Friction brake controller instance.
+    """
 
     def __init__(self):
+        """Initialize the application.
+
+        Loads configuration, parses command-line arguments, sets up the game window,
+        and initializes the friction brake controller.
+        """
         self.cfg = config.setup_cfg()
         self.cfg.merge_from_file(ROOT / "config.yaml")
         args = self.parse_args()
@@ -73,7 +98,12 @@ class App:
             self.cfg, self.friction_brake_lock, self.detection
         )
 
-    def parse_args(self):
+    def parse_args(self) -> argparse.Namespace:
+        """Configure argument parser and parse command-line arguments.
+
+        :return: Parsed command-line arguments.
+        :rtype: argparse.Namespace
+        """
         parser = argparse.ArgumentParser(description="Automate friction brake.")
         parser.add_argument("opts", nargs="*", help="overwrite configuration")
         parser.add_argument(
@@ -96,9 +126,11 @@ class App:
         return parser.parse_args(args_list)
 
     def on_release(self, key: keyboard.KeyCode) -> None:
-        """Callback for releasing button, including w key toggle control.
+        """Handle key release events for controlling the application.
 
-        :param key: key code used by OS
+        Exits the script or resets the friction brake based on the key pressed.
+
+        :param key: The key that was released.
         :type key: keyboard.KeyCode
         """
         keystroke = str(key).lower()
@@ -109,6 +141,11 @@ class App:
             self.friction_brake.reset(self.cfg.FRICTION_BRAKE.INITIAL)
 
     def start(self):
+        """Start the friction brake automation process.
+
+        Begins the friction brake monitoring process and starts a keyboard listener
+        to handle control keys.
+        """
         self.friction_brake.monitor_process.start()
         with keyboard.Listener(on_release=self.on_release) as listener:
             listener.join()

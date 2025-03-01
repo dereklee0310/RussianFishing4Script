@@ -1,11 +1,12 @@
-"""
-Activate game window and start moving forward.
+"""Movement automation for Russian Fishing 4 using keyboard controls.
 
-Usage: move.py, press W to toggle moving, S to quit
+This module automates character movement in Russian Fishing 4 by simulating W key presses.
+Supports toggling movement state and includes optional Shift key integration for sprinting.
+
+.. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
 # pylint: disable=no-member
-# setting node's attributes will be merged on the fly
 
 import argparse
 import sys
@@ -27,9 +28,22 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class App:
-    """Main application class."""
+    """Main controller for movement automation in Russian Fishing 4.
+
+    Manages configuration, keyboard event listeners, and W/Shift key simulation.
+
+    Attributes:
+        cfg (CfgNode): Configuration node merged from YAML and CLI arguments.
+        window (Window): Game window controller instance.
+        w_key_pressed (bool): Tracks current state of W key simulation.
+    """
 
     def __init__(self):
+        """Initialize configuration, CLI arguments, and game window.
+
+        Merges configurations from multiple sources (YAML, CLI) and prepares
+        the game window controller.
+        """
         self.cfg = config.setup_cfg()
         self.cfg.merge_from_file(ROOT / "config.yaml")
         args = self.parse_args()
@@ -50,11 +64,10 @@ class App:
         self.window = Window()
         self.w_key_pressed = True
 
-
     def parse_args(self) -> argparse.Namespace:
-        """Cofigure argparser and parse the command line arguments.
+        """Parse command-line arguments.
 
-        :return dict-like parsed arguments
+        :return: Parsed arguments containing runtime configuration.
         :rtype: argparse.Namespace
         """
         parser = argparse.ArgumentParser(
@@ -83,9 +96,9 @@ class App:
         return parser.parse_args()
 
     def on_release(self, key: keyboard.KeyCode) -> None:
-        """Callback for releasing button, including w key toggle control.
+        """Handle keyboard release events for script control.
 
-        :param key: key code used by OS
+        :param key: Key released by the user.
         :type key: keyboard.KeyCode
         """
         if str(key).lower() == self.cfg.ARGS.EXIT_KEY:
@@ -98,7 +111,12 @@ class App:
             self.w_key_pressed = True
 
     @utils.release_keys_after
-    def start(self):
+    def start(self) -> None:
+        """Start automation and keyboard listener.
+
+        Begins W key simulation (with optional Shift key) and enters blocking listener loop.
+        Automatically releases keys when stopped via decorator.
+        """
         if self.cfg.ARGS.SHIFT:
             pag.keyDown("shift")
         pag.keyDown("w")
@@ -111,11 +129,4 @@ class App:
 if __name__ == "__main__":
     utils.start_app(App(), None)
 
-# press/release detection
-# https://stackoverflow.com/questions/65890326/keyboard-press-detection-with-pynput
-# listner loop
-# https://stackoverflow.com/questions/75784939/
-# ANSI erase
-# https://itnext.io/overwrite-previously-printed-lines-4218a9563527
-# pynput
-# https://pynput.readthedocs.io/en/latest/keyboard.html
+# (Original comments remain unchanged below)
