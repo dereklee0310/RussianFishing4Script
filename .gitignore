@@ -1,4 +1,5 @@
 build/
+.idea/
 .vscode/
 __pycache__/
 src/__pycache__/

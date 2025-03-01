@@ -39,6 +39,7 @@ COORD_OFFSETS = {
         "fish_icon": (389, 844),
         "clip_icon": (1042, 844),
         "spool_icon": (1077, 844), # x + 15, y + 15
+        "reel_burning_icon": (1112, 842),
         "snag_icon": (1147, 829), # x + 15, y
         "float_camera": (720, 654),
         "bait_icon": (35, 31),
@@ -51,6 +52,7 @@ COORD_OFFSETS = {
         "fish_icon": (549, 1024),
         "clip_icon": (1202, 1024),
         "spool_icon": (1237, 1024),
+        "reel_burning_icon": (1271, 1023),
         "snag_icon": (1307, 1009),
         "float_camera": (880, 834),
         "bait_icon": (35, 31),
@@ -63,6 +65,7 @@ COORD_OFFSETS = {
         "fish_icon": (869, 1384),
         "clip_icon": (1522, 1384),
         "spool_icon": (1557, 1384),
+        "reel_burning_icon": (1593, 1383),
         "snag_icon": (1627, 1369),
         "float_camera": (1200, 1194),
         "bait_icon": (35, 31),
@@ -413,3 +416,12 @@ class Detection:
 
     def get_dry_mix_position(self):
         return self._get_image_box("dry_feed_mix", 0.98)
+
+
+    def is_reel_burning(self) -> bool:
+        """Check if the reel is burning in the fire icon.
+
+        :return: True if pixel color matched, False otherwise
+        :rtype: bool
+        """
+        return pag.pixel(*self.setting.reel_burning_icon_coord) == ORANGE_REEL
