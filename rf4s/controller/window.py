@@ -8,8 +8,8 @@ and terminal window in Russian Fishing 4.
 
 import logging
 import sys
-from time import sleep
 from pathlib import Path
+from time import sleep
 
 # import win32api, win32con
 import pyautogui as pag
@@ -19,6 +19,7 @@ import win32gui
 logger = logging.getLogger("rich")
 
 ROOT = Path(__file__).resolve().parents[2]
+
 
 class Window:
     """Controller for terminal and game windows management.
@@ -108,7 +109,6 @@ class Window:
             self._game_hwnd
         )  # fullscreen mode is not supported
         sleep(0.25)
-
 
     def _is_size_supported(self) -> bool:
         """Check if the game window size is supported.

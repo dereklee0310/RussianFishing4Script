@@ -18,8 +18,6 @@ from yacs.config import CfgNode as CN
 
 sys.path.append(".")
 
-import argparse
-
 from rf4s import utils
 from rf4s.config import config
 from rf4s.controller.window import Window

@@ -17,27 +17,25 @@ from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from multiprocessing import Lock
+
 # from email.mime.image import MIMEImage
 from pathlib import Path
-from time import sleep, time
+from time import sleep
 from urllib import parse, request
 
 import pyautogui as pag
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from playsound import playsound
-from rich import print
-from rich.table import Table
-from rich import box
 from pynput import keyboard
-
+from rich import box, print
+from rich.table import Table
 
 from rf4s import exceptions, utils
 from rf4s.component.friction_brake import FrictionBrake
 from rf4s.component.tackle import Tackle
 from rf4s.controller.detection import Detection
 from rf4s.controller.timer import Timer
-from rf4s.config import config
 from rf4s.controller.window import Window
 
 logger = logging.getLogger("rich")
@@ -100,8 +98,7 @@ class Player:
         else:
             self.num_tackle = 1
         self.tackles = [
-            Tackle(cfg, self.timer, self.detection)
-            for _ in range(self.num_tackle)
+            Tackle(cfg, self.timer, self.detection) for _ in range(self.num_tackle)
         ]
         self.tackle = self.tackles[self.tackle_idx]
 
@@ -109,6 +106,8 @@ class Player:
         self.friction_brake = FrictionBrake(
             cfg, self.friction_brake_lock, self.detection
         )
+
+        self.results = None
 
         self.cast_miss_count = 0
         self.keep_fish_count = 0
@@ -133,17 +132,21 @@ class Player:
             logger.info("Spawing new process, do not quit the script")
             self.friction_brake.monitor_process.start()
 
-        if (self.cfg.SELECTED.MODE not in ("telescopic", "bottom") and
-            not self.cfg.ARGS.SKIP_CAST and
-            not self.detection.is_retrieval_finished()):
-            logger.critical("The spool is not fully loaded")
-            logger.critical("Try moving your camera, changing your game window size or fishing line")
+        if (
+            self.cfg.SELECTED.MODE not in ("telescopic", "bottom")
+            and not self.cfg.ARGS.SKIP_CAST
+            and not self.detection.is_retrieval_finished()
+        ):
+            logger.critical(
+                "The spool is not fully loaded, "
+                "try moving your camera, "
+                "changing your game window size or fishing line"
+            )
             sys.exit(1)
 
         logger.info("Starting fishing mode: '%s'", self.cfg.SELECTED.MODE)
         self._start_trolling()
         getattr(self, f"start_{self.cfg.SELECTED.MODE}_mode")()
-
 
     # ---------------------------------------------------------------------------- #
     #                              main fishing loops                              #
@@ -276,7 +279,6 @@ class Player:
 
         return monitor, hold_mouse_button
 
-
     def _monitor_clip_state(self) -> None:
         """Monitor the state of the bolognese clip."""
         i = self.cfg.SELECTED.DRIFT_TIMEOUT
@@ -286,7 +288,6 @@ class Player:
                 return
 
         raise TimeoutError
-
 
     def _harvest_baits(self, pickup: bool = False) -> None:
         """Harvest baits if energy is high.
@@ -362,7 +363,6 @@ class Player:
         self.cur_coffee_count += self.cfg.COFFEE_PER_DRINK
         self.total_coffee_count += self.cfg.COFFEE_PER_DRINK
 
-
     def _access_item(self, item: str) -> None:
         """Access an item by name using quick selection shortcut or menu.
 
@@ -404,7 +404,7 @@ class Player:
 
         while True:
             try:
-                with pag.hold("shift"): # Speed it up!
+                with pag.hold("shift"):  # Speed it up!
                     self.tackle.reset()
                     return
             except exceptions.FishHookedError:
@@ -419,7 +419,6 @@ class Player:
                 self._handle_snagged_line()
             except TimeoutError:  # rare events
                 self._handle_timeout()
-
 
     def _cast_spod_rod(self) -> None:
         """Cast the spod rod if dry mix is available."""
@@ -680,7 +679,6 @@ class Player:
                 return True
         return False
 
-
     def general_quit(self, msg: str) -> None:
         """Quit the game through the control panel.
 
@@ -740,7 +738,7 @@ class Player:
         bite_ratio = int(fish_count_total / cast_count * 100) if cast_count != 0 else 0
         hmb_desc = f"{fish_count_total} / {cast_count} / {bite_ratio}%"
 
-        #TODO
+        # TODO
         results = (
             ("Cause of termination", msg),
             ("Start time", self.timer.get_start_datetime()),
@@ -758,11 +756,7 @@ class Player:
         self.results = results
 
         table = Table(
-            "Field",
-            "Value",
-            title="Running Results",
-            box = box.DOUBLE,
-            show_header=False
+            "Field", "Value", title="Running Results", box=box.DOUBLE, show_header=False
         )
 
         for k, v in results:
@@ -797,32 +791,9 @@ class Player:
         """Send a notification to the user's miaotixing service."""
         logger.info("Sending miaotixing notification")
 
-        text = (
-            "Cause of termination:"
-            + self.results["Cause of termination"]
-            + "\nStart time:"
-            + self.results["Start time"]
-            + "\nFinish time:"
-            + self.results["Finish time"]
-            + "\nRunning time:"
-            + self.results["Running time"]
-            + "\nFish caught:"
-            + str(self.results["Fish caught"])
-            + "\nMarked / Unmarked / Mark ratio:"
-            + self.results["Marked / Unmarked / Mark ratio"]
-            + "\nHit / Miss / Bite ratio:"
-            + self.results["Hit / Miss / Bite ratio"]
-            + "\nAlcohol consumed:"
-            + str(self.results["Alcohol consumed"])
-            + "\nCoffee consumed:"
-            + str(self.results["Coffee consumed"])
-            + "\nTea consumed:"
-            + str(self.results["Tea consumed"])
-            + "\nCarrot consumed:"
-            + str(self.results["Carrot consumed"])
-            + "\nHarvest baits count:"
-            + str(self.results["Harvest baits count"])
-        )
+        text = ""
+        for k, v in self.results:
+            text += f"{k}: {v}\n"
 
         url = "http://miaotixing.com/trigger?" + parse.urlencode(
             {"id": self.cfg.NOTIFICATION.MIAO_CODE, "text": text, "type": "json"}
@@ -835,10 +806,9 @@ class Player:
                 logger.info("Miaotixing notification sent successfully")
             else:
                 logger.error(
-                    "Miaotixing notification with error code:"
-                    + str(json_object["code"])
-                    + ", Description:"
-                    + json_object["msg"]
+                    "Miaotixing notification with error code: %s\nDescription: %s",
+                    str(json_object["code"]),
+                    json_object["msg"],
                 )
 
     def plot_and_save(self) -> None:
@@ -945,7 +915,6 @@ class Player:
         while True:
             favorite_item_position = next(favorite_item_positions, None)
             if favorite_item_position is None:
-                # TODO: different tackle?
                 pag.press("esc")
                 sleep(ANIMATION_DELAY)
                 pag.press("esc")
@@ -980,14 +949,13 @@ class Player:
         random_offset = random.uniform(-BOUND, BOUND)
         sleep(self.cfg.SELECTED.CHECK_DELAY + random_offset)
 
-
     def _start_trolling(self) -> None:
         """Start trolling and change moving direction based on the trolling setting."""
         if self.cfg.ARGS.TROLLING is None:
             return
         logger.info("Starting trolling")
         pag.press(TROLLING_KEY)
-        if self.cfg.ARGS.TROLLING not in ("left", "right"): # Forward
+        if self.cfg.ARGS.TROLLING not in ("left", "right"):  # Forward
             return
         pag.keyDown(LEFT_KEY if self.cfg.ARGS.TROLLING == "left" else RIGHT_KEY)
 
@@ -1059,7 +1027,7 @@ class Player:
             self.tackle.equip_item("dry_mix")
         except exceptions.ItemNotFoundError:
             logger.error("New dry mix not found")
-            self.tackle.available = False # Skip following stages
+            self.tackle.available = False  # Skip following stages
             self.have_new_dry_mix = False
 
     def _refill_groundbait(self) -> None:

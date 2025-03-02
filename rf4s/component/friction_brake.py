@@ -108,7 +108,7 @@ def monitor_friction_brake(friction_brake: FrictionBrake, bound: bool = False) -
                 sleep(FRICTION_BRAKE_MONITOR_DELAY)
                 fish_hooked = False
                 continue
-            elif not fish_hooked:
+            if not fish_hooked:
                 sleep(friction_brake.cfg.FRICTION_BRAKE.START_DELAY)
                 fish_hooked = True
             with friction_brake.lock:

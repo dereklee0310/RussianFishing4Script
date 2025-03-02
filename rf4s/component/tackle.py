@@ -152,11 +152,10 @@ class Tackle:
                 break
 
             if self.detection.is_fish_hooked_twice():
-                pag.click() # Lock reel
+                pag.click()  # Lock reel
                 return
 
         utils.hold_mouse_button(self.cfg.SELECTED.TIGHTEN_DURATION)
-
 
     @_check_status
     @utils.toggle_clicklock
@@ -224,7 +223,10 @@ class Tackle:
             utils.hold_mouse_button(self.cfg.SELECTED.RETRIEVAL_DURATION, button)
             i -= self.cfg.SELECTED.RETRIEVAL_DURATION
             i = utils.sleep_and_decrease(i, self.cfg.SELECTED.RETRIEVAL_DELAY)
-            if self.detection.is_fish_hooked() or self.detection.is_retrieval_finished():
+            if (
+                self.detection.is_fish_hooked()
+                or self.detection.is_retrieval_finished()
+            ):
                 return
 
     @utils.release_keys_after
@@ -316,7 +318,7 @@ class Tackle:
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
             if self.detection.is_fish_captured():
                 return
-            elif self.cfg.SCRIPT.SNAG_DETECTION and self.detection.is_line_snagged():
+            if self.cfg.SCRIPT.SNAG_DETECTION and self.detection.is_line_snagged():
                 raise exceptions.LineSnaggedError
 
         if not self.detection.is_fish_hooked():
@@ -370,7 +372,6 @@ class Tackle:
             win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, x, y, 0, 0)
             sleep(ANIMATION_DELAY)
 
-
     def equip_item(self, item) -> None:
         """Equip an item from the menu or inventory.
 
@@ -379,10 +380,9 @@ class Tackle:
         """
         if item in ("lure", "pva"):
             return self._equip_item_from_menu(item)
-        else: # dry_mix, groundbait
-            return self._equip_item_from_inventory(item)
+        return self._equip_item_from_inventory(item)  # dry_mix, groundbait
 
-    def _equip_item_from_menu(self, item: Literal["lure", "pva"] ) -> None:
+    def _equip_item_from_menu(self, item: Literal["lure", "pva"]) -> None:
         """Equip an item from the menu.
 
         :param item: The item to equip (e.g., lure, pva).
@@ -395,7 +395,9 @@ class Tackle:
         sleep(ANIMATION_DELAY)
 
     @utils.press_before_and_after("v")
-    def _equip_item_from_inventory(self, item: Literal["dry_mix", "groundbait"]) -> None:
+    def _equip_item_from_inventory(
+        self, item: Literal["dry_mix", "groundbait"]
+    ) -> None:
         """Equip an item from the inventory.
 
         :param item: The item to equip (e.g., dry_mix, groundbait).

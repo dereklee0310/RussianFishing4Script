@@ -14,7 +14,7 @@ _C.SCRIPT.SNAG_DETECTION = True
 _C.SCRIPT.SPOOLING_DETECTION = True
 _C.SCRIPT.RANDOM_ROD_SELECTION = True
 _C.SCRIPT.SPOOL_CONFIDENCE = 0.98
-_C.SCRIPT.SPOD_ROD_RECAST_DELAY = 1800 # 30 minutes
+_C.SCRIPT.SPOD_ROD_RECAST_DELAY = 1800  # 30 minutes
 _C.SCRIPT.LURE_CHANGE_DELAY = 1800
 _C.SCRIPT.ALARM_SOUND = "./static/sound/guitar.wav"
 
@@ -38,7 +38,7 @@ _C.STAT.COMFORT_THRESHOLD = 0.51
 _C.STAT.TEA_DELAY = 300
 _C.STAT.COFFEE_LIMIT = 10
 _C.STAT.COFFEE_PER_DRINK = 1
-_C.STAT.ALCOHOL_DELAY = 900 # 15 minutes
+_C.STAT.ALCOHOL_DELAY = 900  # 15 minutes
 _C.STAT.ALCOHOL_PER_DRINK = 1
 
 
@@ -55,7 +55,12 @@ _C.KEEPNET.CAPACITY = 100
 _C.KEEPNET.DELAY = 0.0
 _C.KEEPNET.FULL_ACTION = "quit"
 _C.KEEPNET.RELEASE_WHITELIST = (
-    "mackerel", "saithe", "herring", "squid", "scallop", "mussel"
+    "mackerel",
+    "saithe",
+    "herring",
+    "squid",
+    "scallop",
+    "mussel",
 )
 
 
@@ -67,8 +72,8 @@ _C.NOTIFICATION.MIAO_CODE = "example"
 
 
 _C.PAUSE = CN()
-_C.PAUSE.DELAY = 1800 # 30 minutes
-_C.PAUSE.DURATION = 600 # 10 minutes
+_C.PAUSE.DELAY = 1800  # 30 minutes
+_C.PAUSE.DURATION = 600  # 10 minutes
 
 
 _C.PROFILE = CN()
@@ -182,7 +187,6 @@ _C.PROFILE.BOLOGNESE.CHECK_DELAY = 1.0
 _C.PROFILE.BOLOGNESE.PULL_DELAY = 0.5
 _C.PROFILE.BOLOGNESE.DRIFT_TIMEOUT = 32.0
 _C.PROFILE.BOLOGNESE.CAMERA_SHAPE = "square"
-
 
 
 def get_cfg_defaults():

@@ -20,28 +20,26 @@ from pathlib import Path
 from socket import gaierror
 
 from pynput import keyboard
+from rich import box, print
 from rich.logging import RichHandler
-from rich import print, box
 from rich.panel import Panel
-from rich.table import Table, Column
-from rich.console import Console
 from rich.style import Style
-
-sys.path.append(".") # python -m module -> python file
-
+from rich.table import Column, Table
 from yacs.config import CfgNode as CN
 
+sys.path.append(".")  # python -m module -> python file
+
+from rf4s import utils
 from rf4s.config import config
 from rf4s.controller.window import Window
 from rf4s.player import Player
-from rf4s import utils
 
 # Ignore %(name)s because it's verbose
 logging.basicConfig(
     level=logging.INFO,
     format="%(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[RichHandler(rich_tracebacks=True)]
+    handlers=[RichHandler(rich_tracebacks=True)],
 )
 logger = logging.getLogger("rich")
 # Reference: https://rich.readthedocs.io/en/latest/logging.html
@@ -134,8 +132,8 @@ class App:
         for argument in ARGUMENTS:
             flag1 = f"-{argument[0]}"
             flag2 = f"--{argument[1]}"
-            help = argument[2]
-            parser.add_argument(flag1, flag2, action="store_true", help=help)
+            help_message = argument[2]
+            parser.add_argument(flag1, flag2, action="store_true", help=help_message)
 
         # ----------------------------- release strategy ----------------------------- #
         release_strategy = parser.add_mutually_exclusive_group()
@@ -210,8 +208,10 @@ class App:
             const="forward",
             type=str,
             choices=["forward", "left", "right"],
-            help=("enable trolling mode, DIRECTION: 'forward',''left', or 'right', "
-                  "will only move forward by press 'j' if direction is not specified"),
+            help=(
+                "enable trolling mode, DIRECTION: 'forward',''left', or 'right', "
+                "will only move forward by press 'j' if direction is not specified"
+            ),
             metavar="DIRECTION",
         )
 
@@ -225,7 +225,7 @@ class App:
             help=(
                 "enable broken lure auto-replace, ACTION: 'replace' or 'alarm', "
                 "will replace the broken lure if action is not specified"
-            ), # TODO
+            ),  # TODO
             metavar="ACTION",
         )
         return parser
@@ -240,8 +240,7 @@ class App:
         """
         if not 0 <= args.fishes_in_keepnet < self.cfg.KEEPNET.CAPACITY:
             logger.critical(
-                "Invalid number of fishes in keepnet: '%s'",
-                args.fishes_in_keepnet
+                "Invalid number of fishes in keepnet: '%s'", args.fishes_in_keepnet
             )
             return False
 
@@ -315,9 +314,10 @@ class App:
         logger.info("Verifying image files")
         if self.cfg.SCRIPT.LANGUAGE == "en":
             return True
-        logger.warning("Language '%s' is not fully supported, "
-                       "consider using EN version",
-                       self.cfg.SCRIPT.LANGUAGE)
+        logger.warning(
+            "Language '%s' is not fully supported, consider using EN version",
+            self.cfg.SCRIPT.LANGUAGE,
+        )
         image_dir = ROOT / "static" / self.cfg.SCRIPT.LANGUAGE
         try:
             current_images = [f.name for f in image_dir.iterdir() if f.is_file()]
@@ -328,15 +328,13 @@ class App:
         target_images = [f.name for f in template_dir.iterdir() if f.is_file()]
         missing_images = set(target_images) - set(current_images)
         if len(missing_images) > 0:
-            logger.critical(
-                "Some images are missing, please add them manually"
-            )
+            logger.critical("Some images are missing, please add them manually")
             table = Table(
                 # "Filename",
                 Column("Filename", style=Style(color="red")),
                 title="Missing Images",
                 box=box.DOUBLE,
-                show_header=False
+                show_header=False,
             )
             for filename in missing_images:
                 table.add_row(f"static/{self.cfg.SCRIPT.LANGUAGE}/{filename}")
@@ -465,11 +463,14 @@ class App:
         self.cfg.SCRIPT.SNAG_DETECTION = False
         self.cfg.SCRIPT.SPOOLING_DETECTION = False
 
-        if self.cfg.SELECTED.MODE in ("telescopic", "bolognese") and not self.window.supported:
+        if (
+            self.cfg.SELECTED.MODE in ("telescopic", "bolognese")
+            and not self.window.supported
+        ):
             logger.critical(
                 "Fishing mode '%s' doesn't support window size '%s'",
                 self.cfg.SELECTED.MODE,
-                f"{width}x{height}"
+                f"{width}x{height}",
             )
             sys.exit(1)
 
@@ -490,7 +491,7 @@ class App:
             if self.cfg.SELECTED.MODE not in ("pirk", "elevator"):
                 logger.error(
                     "Electric mode is not compatible with mode '%s'",
-                    self.cfg.SELECTED.MODE
+                    self.cfg.SELECTED.MODE,
                 )
                 logger.error("Electric mode will be disabled")
                 self.cfg.ARGS.ELECTRO = False

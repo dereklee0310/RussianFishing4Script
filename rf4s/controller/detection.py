@@ -10,11 +10,11 @@ and pixel color analysis. It is used for automating tasks in Russian Fishing 4.
 
 import time
 from pathlib import Path
+from typing import Generator
 
 import pyautogui as pag
-from pyscreeze import Box
 from PIL import Image
-from typing import Generator
+from pyscreeze import Box
 
 from rf4s.controller.window import Window
 
@@ -36,15 +36,15 @@ ROOT = Path(__file__).resolve().parents[2]
 
 COORD_OFFSETS = {
     "1600x900": {
-        "friction_brake_very_high": (502, 799, 1096), # Left point only
+        "friction_brake_very_high": (502, 799, 1096),  # Left point only
         "friction_brake_high": (459, 799, 1139),
         "friction_brake_medium": (417, 799, 1181),
         "friction_brake_low": (396, 799, 1202),
         "fish_icon": (389, 844),
         "clip_icon": (1042, 844),
-        "spool_icon": (1077, 844), # x + 15, y + 15
+        "spool_icon": (1077, 844),  # x + 15, y + 15
         "reel_burning_icon": (1112, 842),
-        "snag_icon": (1147, 829), # x + 15, y
+        "snag_icon": (1147, 829),  # x + 15, y
         "float_camera": (720, 654),
         "bait_icon": (35, 31),
     },
@@ -119,7 +119,9 @@ class Detection:
 
         self.bait_icon_reference_img = Image.open(self.image_dir / "bait_icon.png")
 
-    def _get_image_box(self, image: str, confidence: float, multiple: bool = False) -> Box | Generator[Box, None, None] | None:
+    def _get_image_box(
+        self, image: str, confidence: float, multiple: bool = False
+    ) -> Box | Generator[Box, None, None] | None:
         """A wrapper for locateOnScreen method and path resolving.
 
         :param image: Base name of the image.
@@ -190,10 +192,7 @@ class Detection:
         return self._get_image_box("fish_icon", 0.9)
 
     def is_fish_hooked_pixel(self) -> bool:
-        return all(
-            c > MIN_GRAY_SCALE_LEVEL
-            for c in pag.pixel(*self.fish_icon_coord)
-        )
+        return all(c > MIN_GRAY_SCALE_LEVEL for c in pag.pixel(*self.fish_icon_coord))
 
     def is_fish_hooked_twice(self) -> bool:
         if not self.is_fish_hooked():
@@ -210,8 +209,7 @@ class Detection:
 
     def is_clip_open(self) -> bool:
         return not all(
-            c > MIN_GRAY_SCALE_LEVEL
-            for c in pag.pixel(*self.clip_icon_coord)
+            c > MIN_GRAY_SCALE_LEVEL for c in pag.pixel(*self.clip_icon_coord)
         )
 
     # ---------------------------- Retrieval detection --------------------------- #
@@ -224,14 +222,10 @@ class Detection:
     def _is_rainbow_line_0or5m(self):
         return self._get_image_box(
             "5m", self.cfg.SCRIPT.SPOOL_CONFIDENCE
-        ) or self._get_image_box(
-            "0m", self.cfg.SCRIPT.SPOOL_CONFIDENCE
-        )
+        ) or self._get_image_box("0m", self.cfg.SCRIPT.SPOOL_CONFIDENCE)
 
     def _is_spool_full(self):
-        return self._get_image_box(
-            "wheel", self.cfg.SCRIPT.SPOOL_CONFIDENCE
-        )
+        return self._get_image_box("wheel", self.cfg.SCRIPT.SPOOL_CONFIDENCE)
 
     def is_line_snagged(self) -> bool:
         return pag.pixel(*self.snag_icon_coord) == CRITICAL_COLOR
@@ -264,8 +258,9 @@ class Detection:
         return self._get_image_box("warning", 0.8)
 
     def is_operation_success(self):
-        return (self._get_image_box("ok_black", 0.8) or
-                self._get_image_box("ok_white", 0.8))
+        return self._get_image_box("ok_black", 0.8) or self._get_image_box(
+            "ok_white", 0.8
+        )
 
     def is_material_complete(self):
         return not self._get_image_box("material_slot", 0.9)
@@ -344,11 +339,14 @@ class Detection:
     def is_bait_chosen(self):
         # Two bait slots, check only the first one
         if self.cfg.SELECTED.MODE in ("telescopic", "bolognese"):
-            return pag.locate(
-                pag.screenshot(region=self.bait_icon_coord),
-                self.bait_icon_reference_img,
-                confidence=0.6
-            ) is None
+            return (
+                pag.locate(
+                    pag.screenshot(region=self.bait_icon_coord),
+                    self.bait_icon_reference_img,
+                    confidence=0.6,
+                )
+                is None
+            )
         return self._get_image_box("bait_icon", 0.6) is None
 
     def is_groundbait_chosen(self):
@@ -360,7 +358,6 @@ class Detection:
     def get_dry_mix_position(self):
         return self._get_image_box("dry_feed_mix", 0.98)
 
-
     # ------------------------------ Friction brake ------------------------------ #
     def is_friction_brake_high(self) -> bool:
         return pag.pixelMatchesColor(
@@ -368,7 +365,7 @@ class Detection:
         )
 
     def is_reel_burning(self) -> bool:
-        return pag.pixel(*self.setting.reel_burning_icon_coord) == ORANGE_REEL
+        return pag.pixel(*self.reel_burning_icon_coord) == ORANGE_REEL
 
     def is_float_state_changed(self, reference_img):
         current_img = pag.screenshot(region=self.float_camera_rect)

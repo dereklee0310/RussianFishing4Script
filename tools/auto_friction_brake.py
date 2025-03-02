@@ -8,25 +8,23 @@ and resetting the friction brake.
 """
 
 import argparse
-import sys
-import shlex
 import logging
-from yacs.config import CfgNode as CN
+import shlex
+import sys
 from multiprocessing import Lock
-from rich.logging import RichHandler
-
 from pathlib import Path
 
 from pynput import keyboard
+from rich.logging import RichHandler
+from yacs.config import CfgNode as CN
 
 sys.path.append(".")
 
 from rf4s import utils
+from rf4s.component.friction_brake import FrictionBrake
 from rf4s.config import config
 from rf4s.controller.detection import Detection
-from rf4s.component.friction_brake import FrictionBrake
 from rf4s.controller.window import Window
-
 
 EXIT = "'h'"
 RESET = "'g'"

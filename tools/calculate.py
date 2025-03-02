@@ -9,13 +9,14 @@ based on the reel's max drag, friction brake wear, leader's load capacity, and w
 import sys
 
 from rich import print
-from rich.table import Table
 from rich.prompt import Prompt
+from rich.table import Table
 
 sys.path.append(".")
 from rf4s import utils
 
 BIAS = 1e-6
+
 
 def get_tackle_stats():
     """Get actual stats of reel and leader based on their wears.
@@ -30,7 +31,7 @@ def get_tackle_stats():
         "Reel's max drag (kg): ",
         "Reel's friction brake wear (%): ",
         "Leader's load capacity (kg): ",
-        "Leader's wear (%): "
+        "Leader's wear (%): ",
     )
 
     while True:
@@ -50,7 +51,6 @@ def get_tackle_stats():
         true_max_drag = max_drag * (100 - friction_brake_wear) / 100
         true_load_capacity = leader_load_capacity * (100 - leader_wear) / 100
         return true_max_drag, true_load_capacity
-
 
 
 def get_validated_input(prompt: str) -> float | None:
@@ -75,6 +75,7 @@ def get_validated_input(prompt: str) -> float | None:
             return float(user_input)
         except ValueError:
             utils.print_error("Invalid input. Please enter a number.")
+
 
 def main():
     """Main function to run the friction brake calculation.

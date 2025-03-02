@@ -9,6 +9,7 @@ for logging and automation purposes in Russian Fishing 4.
 import datetime
 import time
 
+
 class Timer:
     """Class for calculating and generating timestamps for logs.
 

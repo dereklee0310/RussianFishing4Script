@@ -12,12 +12,11 @@ import sys
 from time import sleep
 
 import pyautogui as pag
-from prettytable import PrettyTable
 from pyscreeze import Box
-from rich.text import Text
+from rich import print
 from rich.console import Console
 from rich.table import Table
-from rich import print
+from rich.text import Text
 
 # BASE_DELAY + LOOP_DELAY >= 2.2 to trigger clicklock
 BASE_DELAY = 0.2
@@ -48,6 +47,7 @@ def hold_mouse_button(duration: float = 1, button: str = "left") -> None:
     pag.mouseUp(button=button)
     if button == "left" and duration >= 2.1:  # + 0.1 due to pag.mouseDown() delay
         pag.click()
+
 
 def hold_mouse_buttons(duration: float = 1) -> None:
     """Hold left and right mouse buttons simultaneously.
@@ -92,11 +92,9 @@ def ask_for_confirmation(msg: str = "Ready to start") -> None:
             sys.exit()
 
 
-def display_running_results(app: object, result_map: tuple[tuple[str, str]]) -> None:
+def display_running_results(result_map: tuple[tuple[str, str]]) -> None:
     """Display the running results of different apps.
 
-    :param app: Caller object.
-    :type app: object
     :param result_map: Attribute name - column name mapping.
     :type result_map: tuple[tuple[str, str]]
     """
@@ -139,7 +137,7 @@ def start_app(app: object, results: tuple[tuple[str, str]] | None) -> None:
     except KeyboardInterrupt:
         pass
     if results is not None:
-        display_running_results(app, results)
+        display_running_results(results)
     app.window.activate_script_window()
 
 
@@ -200,9 +198,9 @@ def press_before_and_after(key):
     return func_wrapper
 
 
-
 def release_keys_after(func):
     """Release keys that might have been holding down."""
+
     def release_keys():
         pag.keyUp("ctrl")
         pag.keyUp("ctrl")
@@ -233,13 +231,13 @@ def print_error(msg):
 # so use a decorator here to simplify the code
 def reset_friction_brake_after(func):
     """Reset friction brake after calling the function."""
+
     def wrapper(self, *args, **kwargs):
         func(self, *args, **kwargs)
         if not self.cfg.ARGS.FRICTION_BRAKE:
             return
 
         with self.friction_brake_lock:
-            self.friction_brake.reset(
-                self.cfg.FRICTION_BRAKE.INITIAL)
+            self.friction_brake.reset(self.cfg.FRICTION_BRAKE.INITIAL)
 
     return wrapper

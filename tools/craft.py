@@ -11,21 +11,17 @@ discarding crafted items, fast crafting mode, and a configurable crafting limit.
 
 import argparse
 import logging
+import random
 import sys
+from datetime import datetime
 from pathlib import Path
+from time import sleep
 
 import pyautogui as pag
 from rich.logging import RichHandler
 from yacs.config import CfgNode as CN
 
 sys.path.append(".")
-
-import argparse
-import logging
-import random
-import sys
-from datetime import datetime
-from time import sleep
 
 from rf4s import utils
 from rf4s.config import config

@@ -14,6 +14,7 @@ import argparse
 import logging
 import sys
 from pathlib import Path
+from time import sleep
 
 import pyautogui as pag
 from rich.logging import RichHandler
@@ -21,17 +22,11 @@ from yacs.config import CfgNode as CN
 
 sys.path.append(".")
 
-import argparse
-import logging
-import sys
-
-from time import sleep
-
 from rf4s import utils
 from rf4s.config import config
 from rf4s.controller.detection import Detection
-from rf4s.controller.window import Window
 from rf4s.controller.timer import Timer
+from rf4s.controller.window import Window
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -103,7 +98,7 @@ class App:
             "-r",
             "--refill",
             action="store_true",
-            help="refill hunger and comfort by consuming tea and carrot"
+            help="refill hunger and comfort by consuming tea and carrot",
         )
         parser.add_argument(
             "-s",
@@ -186,8 +181,11 @@ class App:
 
 if __name__ == "__main__":
     app = App()
-    utils.start_app(app, (
-    ("Tea consumed", app.tea_count),
-    ("Carrot consumed", app.carrot_count),
-    ("Number of harvests", app.harvest_count),
-))
+    utils.start_app(
+        app,
+        (
+            ("Tea consumed", app.tea_count),
+            ("Carrot consumed", app.carrot_count),
+            ("Number of harvests", app.harvest_count),
+        ),
+    )
