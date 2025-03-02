@@ -109,7 +109,8 @@ class App:
         # Parser will use the last occurence if the arguments are duplicated,
         # so put argv at the end to overwrite launch options.
         args_list = shlex.split(self.cfg.SCRIPT.LAUNCH_OPTIONS) + sys.argv[1:]
-        args = self._setup_parser().parse_args(args_list)
+        self.parser = self._setup_parser()
+        args = self.parser.parse_args(args_list)
         if not self._is_args_valid(args):
             sys.exit(1)
 
@@ -394,18 +395,21 @@ class App:
         Continuously prompts until a valid profile ID is entered or the
         user chooses to exit.
         """
-        print("Enter profile id to use, q to exit:")
+        print("Enter profile id to use, h to see help message, q to exit:")
 
         while True:
-            pid = input(">>> ")
-            if self._is_pid_valid(pid):
+            user_input = input(">>> ")
+            if self._is_pid_valid(user_input):
                 break
-            if pid == "q":
+            if user_input == "q":
                 print("Bye.")
                 sys.exit()
+            if user_input == "h":
+                self.parser.print_help()
+                continue
             utils.print_error("Invalid profile id, please try again.")
 
-        self.cfg.ARGS.PID = int(pid)
+        self.cfg.ARGS.PID = int(user_input)
 
     def setup_user_profile(self) -> None:
         """Configure the user profile based on arguments or interactive selection.
