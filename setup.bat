@@ -8,4 +8,4 @@ python -m pip install -r requirements.txt
 
 if not exist ".\screenshots" mkdir screenshots
 if not exist ".\logs" mkdir logs
-if not exist ".\config.yaml" copy ".\rf4s\config\config.py" ".\config.yaml"
+if not exist ".\config.yaml" copy ".\rf4s\config\config.yaml" ".\config.yaml"
