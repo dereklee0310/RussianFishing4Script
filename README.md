@@ -1,9 +1,10 @@
+**[[中文版]][Chinese README]**
 <div align="center">
 
 ![RF4S][RF4S logo]
-<h1 align="center">RF4S</h1>
+<h1 align="center">RF4S: Russian Fishing 4 Script</h1>
 
-**A simple bot for Russian Fishing 4, supporting spin, bottom, marine, and float fishing.**
+**A simple fishing bot for Russian Fishing 4, supporting spin, bottom, marine, and float fishing.**
 
 <a target="_blank" href="https://opensource.org/license/gpl-3-0" style="background:none">
     <img src="https://img.shields.io/badge/License-GPLv3-blue.svg" style="height: 22px;" />
@@ -29,138 +30,169 @@
 
 </div>
 
-## [中文版說明][Chinese README]
-
-## [Release Notes][Release notes]
 > [!TIP]
-> Join us on our [Discord server][Discord] to get the latest news about the project.
+> Join the [Discord server][Discord] if you want to suggest new features, report bugs or get help on how to use the script.
+
 
 ## Getting Started  
 ### Prerequisites
-- [Python3.10~3.12][Python]
+Download and install **[Python 3.12][Python]**.  
 
+> [!IMPORTANT] 
+> Ensure Python is added to `PATH` during installation.
 
-### Install
-[Download][Download] the repository and unzip it, or:
-```
-git clone https://github.com/dereklee0310/RussianFishing4Script
-```
-> [!IMPORTANT]
-> Download path cannot contain non-English characters.
+> [!WARNING] 
+> Python 3.13+ is not supported.
 
-### Dependencies
+### Installation
+1. Open cmd or powershell
+2. Clone the repository and navigate into the project directory:
 ```
-cd "the path of the project"
-.\setup.bat
+git clone https://github.com/dereklee0310/RussianFishing4Script.git
+cd RussianFishing4Script
 ```
 > [!TIP]
-> If you already have Python installed on your computer, create a virtual environment to prevent version conflicts.
+> If you don't have git, **[download this repository][Download]** and unzip it.
+
+> [!WARNING] 
+> The download path cannot contain non-English characters.
+
+### Dependencies
+Run the setup script to install required packages and create the default configuration file:
+```
+setup.bat
+```
+
+> [!TIP] 
+> Create a virtual environment to avoid version conflicts if you already have Python installed.
+
+### Setup
+- Enable **[Mouse ClickLock][Clicklock]** in Windows mouse settings and set the time before locking to "Long"
+- Make sure your game language is the same as the setting in `config.yaml` (default is `EN`).
+- Set interface scale to `1x`.
+- Set display mode to `window mode` or `borderless windowed`.
+- Make sure your reel is fully loaded, or equip a rainbow line and use `-R` flag.
+- Add tea, carrot, and coffee to your **[favorites][Favorite food]** if you want to use `-r` or `-c` flag.
+- To use a feature that replaces an item for you, you must add items to your **[favorites][Favorite lure]** for replacement.
 
 ## Usage
-
-### Prerequisites
-- Enable **[Mouse ClickLock][Clicklock]** in Windows mouse settings and set the time before locking to "Long"
-- Set the language in `config.ini`
-- Set interface scale to "1x"
-- Set display mode to "borderless windowed"
-- Make sure your reel is fully loaded, or use `-R`  along with a rainbow line when executing the main script
-- Add tea, carrot, and coffee to your **[favorites][Favorite food]** so that they can be selected through quick food selection menu
-- To enable broken or random lure replacement, the lures for replacement must also be added to **[favorites][Favorite lure]**
-> [!IMPORTANT]
-> Please follow the instructions above, otherwise, you may encounter unexpected errors at runtime
-> 
 ### Before you start...
-- Move your character to the fishing spot before executing the script
-- Spin/marine/float/wakey rig fishing: Pick up the rod you want to use
-- Bottom Fishing: Add the tackles you want to use to the quick selection slots, 
-  cast them, and place them nearby to let the bot access them via shortcuts (1 ~ 3)
+- Move your character to the fishing spot before running the script
+- For Spin/Marine/Float/Wakey Rig Fishing: Pick up the rod you want to use.
+- For Bottom Fishing:
+    - Add tackles to quick selection slots.
+    - Cast them and place them nearby so the bot can access them via shortcuts (1 ~ 3).
 > [!NOTE]
-> Currently, We only support single rod for float fishing and wakey rig fishing.
+> Currently, only bottom fishing mode support multiple rods.
 
-### 1. Change the current working directory
+### Let's Run it!
+Run the script with default configuration:
 ```
-cd "the path of the project"
-cd src
+python tools\main.py
 ```
-
-### 2. Execute the main script
 > [!IMPORTANT]
-> If the scrip is running but no action is taken, please run your terminal as 
-> administrator and try again.
+> Navigate to into the project directory first before you run the command if you want to run it in a new terminal window.
+> ```
+> cd "path\to\your\project\RussianFishing4Script"
+> ```
 
-Here are some examples of how to execute the script with different arguments:
-- Run with default settings
-```
-python app.py
-```
+> [!NOTE]
+> The script stops once the keepnet is full. Stop it manually by typing `Ctrl-C` in your terminal. 
 
-- Display help message
+## Tools
+### Craft Items
+**Craft items until materials run out (press `Ctrl-C` to quit):**
 ```
-python app.py -h
+python tools\craft.py
 ```
-- Display a list of available user profiles and set the number of fishes in the keepnet to 32 (68 fishes to catch)
+**Craft 10 items:**
 ```
-python app.py -n 32
+python tools\craft.py -n 10
 ```
-- Select profile 3, drink the coffee while battling against fish, and send an email to yourself after it's terminated
+**Discard crafted groundbaits:**
 ```
-python app.py -p 3 --coffee --email
+python tools\craft.py -d
 ```
-- Release unmarked fish, enable hunger and comfort refill, and plot a catch/hour chart after it's terminated
+> [!IMPORTANT]
+> Select materials before you run the script.
+### Harvest Baits
+**Harvest baits (press `Ctrl-C` to quit):**
 ```
-python app.py -mrP
+python tools\harvest.py
 ```
-## Other Useful Scripts
+**Replenish hunger and comfort while harvesting:**
+```
+python tools\harvest.py -r
+```
+**Open control panel while waiting (reduces power consumption):**
+```
+python tools\harvest.py -s
+```
 ### Toggle moving forward
-- Press w to stop/continue, press s to quit.
-- Use `-s` to hold the Shift key
+**Toggle Auto-Move (`W`to pause, `S` to quit):**
 ```
-python move.py [-s]
+python tools\move.py
 ```
-
-### Item crafting
-- Specify the number of items to craft with `-n QUANTITY` 
-- Use `-d` to discard all the crafted items
+**Move while holding Shift:**
 ```
-python craft.py [-d] [-n QUANTITY]
-```
-> [!IMPORTANT]
-> The materials must be selected before the execution.
-
-### Calculate the maximum friction brake you can use on your tackle
-```
-python calculate.py
+python tools\move.py -s
 ```
 
-### Harvest baits and refill stats automatically
-- Start a harvesting loop without moving or fishing
-- Use `-s` to open control panel while waiting for energy to regenerate
-- Use `-n CHECK_DELAY_SECOND` to specify the delay between two checks
+### Automate Friction Brake
+**Automate Friction Brake (`G` to reset, `H` to quit):**
 ```
-python harvest.py [-s] [-n CHECK_DELAY_SECOND]
+python tools\auto_friction_brake.py
+```
+
+### Calculate tackle's stats and friction brake
+**Show your reel's real drag and leader's real load capacity based on wear:**
+```
+python tools\calculate.py
 ```
 
 ## Configuration
-- Please refer to the guides and examples in **[template.ini][Template]** 
-  and edit your settings in **[config.ini][Config]**  
-- To enable email notification, set your Gmail address and Google app password in `.env`  
-- Edit `SMTP_SERVER` in `.env` if you want to use other SMTP server
+See **[configuraion guide][Configuraion guide].**
 
 ## Troubleshooting
-**How to exit the program?**
-- Type `Ctrl + C` in your terminal.
-   
-**Cannot quit the program?**
-- The Shift key might have been pressed down, press again to release it and type `Ctrl-C` as usual.  
+<details>
+<summary>How to stop the script?</summary>
 
-**Rod not getting lifted after the retrieval is finished?**
-- Fill up your reel, or use a rainbow main line with `-R` flag
-- Change the game window size
-- Lower the value of `retrieval_detect_confidence` in `config.ini`
-- Keep away from light sources or turn off the boat light
+- Type `Ctrl-C` in your terminal. 
+</details>
+<!-- ------------------------------- divide -------------------------------- -->
+<details>
+<summary>Can't stop the script?</summary>
+
+- Some keys might have been pressed down (e.g. `Ctrl`, `Shift`, `Mouse button`, etc.),  
+  press them again to release it and type `Ctrl-C` as usual.
+</details>
+<!-- ------------------------------- divide -------------------------------- -->
+<details>
+<summary>Stuck at casting 128%?</summary>
+
+- Check that the game language and script language settings are the same.
+- Make sure your reel is fully loaded, or equip a rainbow line and use `-R` flag. 
+</details>
+
+<!-- ------------------------------- divide -------------------------------- -->
+<details>
+<summary>Didn't lift the rod after the retrieval is finished?</summary>
+
+- Make sure your reel is fully loaded, or equip a rainbow line and use `-R` flag. 
+- Change the game window size.
+- Lower the value of `SPOOL_CONFIDENCE` in `config.yaml`.
+- Keep away from light sources or turn off the boat light.
+</details>
+<!-- ------------------------------- divide -------------------------------- -->
+<details>
+<summary>Script is running but nothing happen?</summary>
+
+- Open a new terminal window as administrator and run it again.
+</details>
+<!-- ------------------------------- divide -------------------------------- -->
 
 ## License
-[GNU General Public License version 3][license]
+[GNU General Public License version 3][License]
 
 ## Contributing
 Any contribution, bug report, or idea about new features is welcome.
@@ -169,21 +201,16 @@ Any contribution, bug report, or idea about new features is welcome.
 dereklee0310@gmail.com 
 
 [RF4S logo]: static/readme/RF4S.png
-
 [Python badge]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
 [Windows badge]: https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white
 
-
 [Chinese README]: /docs/中文版README.md
-[Release notes]: /docs/release_notes.md
 [Discord]: https://discord.gg/BZQWQnAMbY
 [Python]: https://www.python.org/downloads/
 [Download]: https://github.com/dereklee0310/RussianFishing4Script/archive/refs/heads/main.zip
 [Clicklock]: /static/readme/clicklock.png
 [Favorite food]: /static/readme/favorites.png
 [Favorite lure]: /static/readme/favorites_2.png
-[Template]: template.ini
-[Config]: config.ini
-[Integrity guide]: /docs/integrity_guide.md
+[Configuraion guide]: /docs/Configuration.md
 
-[license]: LICENSE
+[License]: LICENSE
