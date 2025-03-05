@@ -90,6 +90,7 @@ Run the script with default configuration:
 ```
 python tools\main.py
 ```
+For more advanced usage, see [configuration guide][Configuraion guide].
 > [!IMPORTANT]
 > Navigate to into the project directory first before you run the command if you want to run it in a new terminal window.
 > ```
