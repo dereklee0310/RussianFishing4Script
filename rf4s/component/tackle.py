@@ -40,6 +40,7 @@ LIFT_DURATION = 3
 TELESCOPIC_RETRIEVAL_TIMEOUT = 8
 LANDING_NET_DURATION = 6
 LANDING_NET_DELAY = 0.5
+SINK_DELAY = 2
 
 
 OFFSET = 100
@@ -149,6 +150,7 @@ class Tackle:
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
             if self.detection.is_moving_in_bottom_layer():
                 logger.info("Lure has reached bottom layer")
+                sleep(SINK_DELAY)
                 break
 
             if self.detection.is_fish_hooked_twice():
