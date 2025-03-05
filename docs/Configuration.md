@@ -1,10 +1,70 @@
+**[中文版][Chinese configuration guide]**
 # Configuration Guide
 ## Using Launch Options
 You can use launch options to enable one or more features at startup.
-### Display help messages
+### Display Help Message
 ```
 python tools\main.py -h
 ```
+### Help Message
+```
+usage: main.py [-h] [-c] [-A] [-r] [-H] [-g] [-f] [-l] [-C] [-o] [-L] [-x] [-X] [-b] [-S] [-e] [-P] [-M] [-s] [-so]
+               [-gb] [-dm] [-pva] [-E] [-a | -m] [-d | -R] [-p PID | -N PROFILE_NAME] [-n FISH_COUNT] [-t [DURATION]]
+               [-T [DIRECTION]] [-bl [ACTION]]
+               [opts ...]
+
+Start AFK script for Russian Fishing 4
+
+positional arguments:
+  opts                  overwrite configuration
+
+options:
+  -h, --help            show this help message and exit
+  -c, --coffee          drink coffee if stamina is low
+  -A, --alcohol         drink alcohol before keeping the fish regularly
+  -r, --refill          refill hunger and comfort by consuming tea and carrot
+  -H, --harvest         harvest baits before casting
+  -g, --gear_ratio      switch the gear ratio after the retrieval timed out
+  -f, --friction_brake  enable auto friction brake
+  -l, --lift            lift the tackle constantly while pulling a fish
+  -C, --skip_cast       Immediately start retrieving for the first fish
+  -o, --spod_rod        recast spod rod regularly
+  -L, --lure            change current lure with a random one regularly, mode: spin
+  -x, --mouse           move mouse randomly before casting the rod
+  -X, --pause           pause the script before casting the rod regularly
+  -b, --bite            take a screenshot after casting in screenshots/ (for fish spot)
+  -S, --screenshot      take a screenshot of every fish you caught in screenshots/
+  -e, --email           send email noticication after the script stop
+  -P, --plot            save fishing data in /logs
+  -M, --miaotixing      send miaotixing notification after the script stop
+  -s, --shutdown        shutdown computer after the script stop
+  -so, --signout        Sign out instead of closing the game
+  -gb, --groundbait     enable groundbait refill, mode: bottom
+  -dm, --dry_mix        enable dry mix refill, mode: bottom
+  -pva, --pva           enable pva refill, mode: bottom
+  -E, --electro         enable electric mode for Electro Raptor series reel
+  -a, --all             keep all captured fishes, used by default
+  -m, --marked          keep only the marked fishes
+  -d, --default-spool   use default spool icon for retrieval detection, used by default
+  -R, --rainbow-line    use rainbow line meter for retrieval detection
+  -p PID, --pid PID     id of the profile you want to use
+  -N PROFILE_NAME, --pname PROFILE_NAME
+                        name of the profile you want to use
+  -n FISH_COUNT, --fishes-in-keepnet FISH_COUNT
+                        number of fishes in your keepnet, 0 by default
+  -t [DURATION], --boat-ticket [DURATION]
+                        enable boat ticket auto renewal, DURATION: '1', '2', '3' or '5', will use a 5 hour ticket if
+                        duration is not specified
+  -T [DIRECTION], --trolling [DIRECTION]
+                        enable trolling mode, DIRECTION: 'forward',''left', or 'right', will only move forward by
+                        press 'j' if direction is not specified
+  -bl [ACTION], --broken-lure [ACTION]
+                        enable broken lure auto-replace, ACTION: 'replace' or 'alarm', will replace the broken lure if
+                        action is not specified
+```
+> [!TIP]
+> Other tools like `craft.py` or `move.py` also support `-h` for displaying help messages. 
+
 ### Examples
 **Set the number of fishes in the keepnet to 32 (68 fishes to catch):**
 ```
@@ -29,11 +89,10 @@ python tools\main.py -o -dm
 Edit your settings in `config.yaml`, changes will be applied when you run the script again.  
 For details on each settings, see [configuration references](#configuration-references).
 
-
 ### Add a New Profile
 If you want to add a custom profile for your use case, copy a existing profile from the default configuration file, edit it, and add it back to the `PROFILE` section.
 
-Here we add a new profile called `YOUR_NEW_PROFILE`, it would pop up in the profile list for you to choose when you run the script again:
+Here we add a new profile called `YOUR_NEW_PROFILE`, it would pop up in the profile list when you run the script again:
 ```yaml
 PROFILE:
   SPIN:
@@ -65,6 +124,21 @@ PROFILE:
 > - Make sure the indentation level of the new profile is correct.
 > - `MODE` must be `spin`, `bottom`, `pirk`, `elevator`, `telescopic`, or `bolognese`.
 
+### Overwrite Configuration
+Sometimes you might want to change a setting in `config.yaml` for one-time use,  
+you can achieve this by using launch options without modifying your configuration file.  
+Here's a simple example that overwrites your language setting:
+```
+python tools\main.py SCRIPT.LANGUAGE "ru"
+```
+
+### Two-rod Trolling Mode
+Since trolling on a boat is just bottom fishing with trolling and direction keys pressed,  
+you can combine a bottom fishing profile with the `-j` flag to get things done.  
+There's no 3rd rod pod on the boat, so you should overwrite the bottom rod keys like this:
+```
+python tools\main.py -j KEY.BOTTOM_RODS "1, 2"
+```
 
 ## Configuration References
 ```python
@@ -394,3 +468,5 @@ def get_cfg_defaults():
     return _C.clone()
 
 ```
+
+[Chinese configuration guide]: /docs/CONFIGURATION_zh-TW.md

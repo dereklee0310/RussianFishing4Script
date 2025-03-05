@@ -116,9 +116,6 @@ class App:
 
         args_cfg = CN({"ARGS": config.dict_to_cfg(vars(args))})
         self.cfg.merge_from_other_cfg(args_cfg)
-        if not self._is_smtp_valid() or not self._is_images_valid():
-            sys.exit(1)
-
         self.args = args
 
     def _setup_parser(self) -> ArgumentParser:
@@ -441,6 +438,9 @@ class App:
                 x.strip() for x in self.args.opts[value_idx].split(",")
             ]
         self.cfg.merge_from_list(self.args.opts)
+        # Check here because config might got overwritten
+        if not self._is_smtp_valid() or not self._is_images_valid():
+            sys.exit(1)
         config.print_cfg(self.cfg.SELECTED)
 
     def setup_window(self) -> None:

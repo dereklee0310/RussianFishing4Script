@@ -90,7 +90,7 @@ Run the script with default configuration:
 ```
 python tools\main.py
 ```
-For more advanced usage, see [configuration guide][Configuraion guide].
+For more advanced usage, see **[configuration guide][Configuration guide]**.
 > [!IMPORTANT]
 > Navigate to into the project directory first before you run the command if you want to run it in a new terminal window.
 > ```
@@ -152,7 +152,7 @@ python tools\calculate.py
 ```
 
 ## Configuration
-See **[configuraion guide][Configuraion guide].**
+See **[Configuration guide][Configuration guide].**
 
 ## Troubleshooting
 <details>
@@ -192,8 +192,11 @@ See **[configuraion guide][Configuraion guide].**
 </details>
 <!-- ------------------------------- divide -------------------------------- -->
 
+## Changelog
+See **[changelog][Changelog].**
+
 ## License
-[GNU General Public License version 3][License]
+**[GNU General Public License version 3][License]**
 
 ## Contributing
 Any contribution, bug report, or idea about new features is welcome.
@@ -205,13 +208,14 @@ dereklee0310@gmail.com
 [Python badge]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
 [Windows badge]: https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white
 
-[Chinese README]: /docs/中文版README.md
+[Chinese README]: /docs/README_zh-TW
 [Discord]: https://discord.gg/BZQWQnAMbY
 [Python]: https://www.python.org/downloads/
 [Download]: https://github.com/dereklee0310/RussianFishing4Script/archive/refs/heads/main.zip
 [Clicklock]: /static/readme/clicklock.png
 [Favorite food]: /static/readme/favorites.png
 [Favorite lure]: /static/readme/favorites_2.png
-[Configuraion guide]: /docs/Configuration.md
+[Configuration guide]: /docs/CONFIGURATION.md
+[Changelog]: /docs/CHANGELOG.md
 
 [License]: LICENSE
