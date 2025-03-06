@@ -208,7 +208,7 @@ dereklee0310@gmail.com
 [Python badge]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
 [Windows badge]: https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white
 
-[Chinese README]: /docs/README_zh-TW
+[Chinese README]: /docs/README_zh-TW.md
 [Discord]: https://discord.gg/BZQWQnAMbY
 [Python]: https://www.python.org/downloads/
 [Download]: https://github.com/dereklee0310/RussianFishing4Script/archive/refs/heads/main.zip
