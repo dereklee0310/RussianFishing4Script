@@ -183,13 +183,15 @@ _C.PROFILE.PIRK.CAST_DELAY = 4.0 # Delay after casting before lure sinks
 _C.PROFILE.PIRK.SINK_TIMEOUT = 60.0 # Maximum time allowed for sinking
 # Duration to tighten the line after sinking lure/adjusting lure depth
 _C.PROFILE.PIRK.TIGHTEN_DURATION = 1.0
-# Delay after opening reel to adjust depth, set this to 0 to recast the rod instead
+# Delay after opening reel to adjust lure depth, set this to 0 to recast the rod instead
 _C.PROFILE.PIRK.DEPTH_ADJUST_DELAY = 4.0
+# Durtion to tighten the line after opening reel for DEPTH_ADJUST_DELAY seconds
+_C.PROFILE.PIRK.DEPTH_ADJUST_DURATION = 1.0
 _C.PROFILE.PIRK.CTRL = False # Hold Ctrl key during pirking
 # Duration of lifting the rod, set this to 0 if you want to wait instead of pirking
 _C.PROFILE.PIRK.PIRK_DURATION = 0.5
 _C.PROFILE.PIRK.PIRK_DELAY = 2.0  # Delay after lifting the rod
-# Timeout for pirking session #TODO
+# Timeout for pirking session
 _C.PROFILE.PIRK.PIRK_TIMEOUT = 32.0
 # Retrieve the fishing line during pirking
 _C.PROFILE.PIRK.PIRK_RETRIEVAL = False
@@ -206,6 +208,7 @@ _C.PROFILE.PIRK_WITH_RETRIEVAL.CAST_DELAY = 4.0
 _C.PROFILE.PIRK_WITH_RETRIEVAL.SINK_TIMEOUT = 60.0
 _C.PROFILE.PIRK_WITH_RETRIEVAL.TIGHTEN_DURATION = 1.0
 _C.PROFILE.PIRK_WITH_RETRIEVAL.DEPTH_ADJUST_DELAY = 0.0
+_C.PROFILE.PIRK_WITH_RETRIEVAL.DEPTH_ADJUST_DURATION = 1.0
 _C.PROFILE.PIRK_WITH_RETRIEVAL.CTRL = False
 _C.PROFILE.PIRK_WITH_RETRIEVAL.PIRK_DURATION = 0.5
 _C.PROFILE.PIRK_WITH_RETRIEVAL.PIRK_DELAY = 2.0
@@ -222,6 +225,7 @@ _C.PROFILE.WAKEY_RIG.CAST_DELAY = 4.0
 _C.PROFILE.WAKEY_RIG.SINK_TIMEOUT = 45.0
 _C.PROFILE.WAKEY_RIG.TIGHTEN_DURATION = 1.0
 _C.PROFILE.WAKEY_RIG.DEPTH_ADJUST_DELAY = 4.0
+_C.PROFILE.WAKEY_RIG.DEPTH_ADJUST_DURATION = 1.0
 _C.PROFILE.WAKEY_RIG.CTRL = True
 _C.PROFILE.WAKEY_RIG.PIRK_DURATION = 1.5
 _C.PROFILE.WAKEY_RIG.PIRK_DELAY = 4.0

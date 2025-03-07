@@ -556,7 +556,7 @@ class Player:
                     logger.info("Adjusting lure depth")
                     pag.press("enter")  # Open reel
                     sleep(self.cfg.SELECTED.DEPTH_ADJUST_DELAY)
-                    utils.hold_mouse_button(self.cfg.SELECTED.TIGHTEN_DURATION)
+                    utils.hold_mouse_button(self.cfg.SELECTED.DEPTH_ADJUST_DURATION)
                 else:
                     self._reset_tackle()
                     self._cast_tackle()
