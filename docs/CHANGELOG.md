@@ -1,6 +1,11 @@
+## 0.2.1 (2025-03-08)
+
+- Fix a bug that auto-friction-brake, snag detection, and spooling detection are always
+  disabled even the correct flags are used.
+
 ## 0.2.0 (2025-03-07)
 
-- Fix a bug that `-c` feature is not working properly
+- Fix a bug that `-c` feature is not working properly.
 
 -  Added a `DEPTH_ADJUST_DURATION` setting to the `pirk` fishing mode to allow the user to set the duration of tightening the fishing line after opening the reel to adjust the depth of the lure.
 
