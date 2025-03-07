@@ -357,11 +357,11 @@ class Player:
             self._handle_termination("Coffee limit reached", shutdown=False)
 
         logger.info("Drinking coffee")
-        for _ in range(self.cfg.COFFEE_PER_DRINK):
+        for _ in range(self.cfg.STAT.COFFEE_PER_DRINK):
             self._access_item("coffee")
             sleep(ANIMATION_DELAY)
-        self.cur_coffee_count += self.cfg.COFFEE_PER_DRINK
-        self.total_coffee_count += self.cfg.COFFEE_PER_DRINK
+        self.cur_coffee_count += self.cfg.STAT.COFFEE_PER_DRINK
+        self.total_coffee_count += self.cfg.STAT.COFFEE_PER_DRINK
 
     def _access_item(self, item: str) -> None:
         """Access an item by name using quick selection shortcut or menu.
