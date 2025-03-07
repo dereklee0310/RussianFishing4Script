@@ -23,7 +23,7 @@ post_commit_hooks = []
 [[tool.bumpversion.files]]
 filename = "rf4s/config/config.yaml"
 search = "VERSION: \"{current_version}\""
-replace = "VERSION = \"{new_version}\""
+replace = "VERSION: \"{new_version}\""
 
 [[tool.bumpversion.files]]
 filename = "rf4s/config/defaults.py"
