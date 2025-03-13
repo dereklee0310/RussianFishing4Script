@@ -238,10 +238,10 @@ class Detection:
         return self._get_image_box("ready", 0.6)
 
     def is_tackle_broken(self):
-        return self._get_image_box("broke", 0.6)
+        return self._get_image_box("broke", 0.8)
 
     def is_lure_broken(self):
-        return self._get_image_box("lure_is_broken", 0.7)
+        return self._get_image_box("lure_is_broken", 0.8)
 
     def is_moving_in_bottom_layer(self):
         return self._get_image_box("movement", 0.7)
