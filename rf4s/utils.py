@@ -19,8 +19,8 @@ from rich.table import Table
 from rich.text import Text
 
 # BASE_DELAY + LOOP_DELAY >= 2.2 to trigger clicklock
-BASE_DELAY = 0.2
-LOOP_DELAY = 2
+BASE_DELAY = 1.2
+LOOP_DELAY = 1
 
 ANIMATION_DELAY = 1
 
