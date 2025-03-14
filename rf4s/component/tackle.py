@@ -251,6 +251,8 @@ class Tackle:
             if self.cfg.SELECTED.PIRK_DURATION > 0:
                 if self.cfg.SELECTED.CTRL:
                     pag.keyDown("ctrl")
+                if self.cfg.SELECTED.SHIFT:
+                    pag.keyDown("shift")
                 utils.hold_mouse_button(self.cfg.SELECTED.PIRK_DURATION, button="right")
                 i -= self.cfg.SELECTED.PIRK_DURATION
                 i = utils.sleep_and_decrease(i, self.cfg.SELECTED.PIRK_DELAY)
