@@ -622,6 +622,10 @@ class Player:
         if self.cfg.ARGS.SCREENSHOT:
             self.window.save_screenshot(self.timer.get_cur_timestamp())
 
+        if self._is_fish_blacklisted():
+            pag.press("backspace")
+            return
+
         if self.detection.is_fish_marked():
             self.marked_count += 1
         else:
@@ -671,13 +675,29 @@ class Player:
         :return: True if the fish is in the whitelist, False otherwise.
         :rtype: bool
         """
-        if self.cfg.KEEPNET.RELEASE_WHITELIST is None:
-            return False
+        return self._is_fish_in_list(self.cfg.KEEPNET.RELEASE_WHITELIST)
 
-        for species in self.cfg.KEEPNET.RELEASE_WHITELIST:
+    def _is_fish_blacklisted(self) -> bool:
+        """Check if the fish is in the blacklist.
+
+        :return:  True if the fish is in the blacklist, False otherwise
+        :rtype: bool
+        """
+        return self._is_fish_in_list(self.cfg.KEEPNET.BLACKLIST)
+
+    def _is_fish_in_list(self, fish_species_list: tuple | list) -> bool:
+        """Check if the fish species matches any in the table.
+
+        :param fish_species_list: fish species list
+        :type fish_species_list: tuple | list
+        :return: True if the fish species matches, False otherwise
+        :rtype: bool
+        """
+        for species in fish_species_list:
             if self.detection.is_fish_species_matched(species):
                 return True
         return False
+
 
     def general_quit(self, msg: str) -> None:
         """Quit the game through the control panel.

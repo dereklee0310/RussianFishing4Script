@@ -218,4 +218,4 @@ dereklee0310@gmail.com
 [Configuration guide]: /docs/CONFIGURATION.md
 [Changelog]: /docs/CHANGELOG.md
 
-[License]: LICENSE
+[License]: /LICENSE

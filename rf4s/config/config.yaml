@@ -52,6 +52,7 @@ KEEPNET:
     - "squid"
     - "scallop"
     - "mussel"
+  BLACKLIST: []
 
 NOTIFICATION:
   EMAIL: "email@example.com"

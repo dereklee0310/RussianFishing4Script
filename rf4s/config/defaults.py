@@ -86,6 +86,10 @@ _C.KEEPNET.RELEASE_WHITELIST = (
     "scallop",
     "mussel",
 )
+# Fish in the blacklist will always be released
+# Options: perch, shorthorn sculpin
+_C.KEEPNET.BLACKLIST = (
+)
 
 # ---------------------------------------------------------------------------- #
 #                                 Notification                                 #
