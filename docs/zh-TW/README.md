@@ -160,11 +160,11 @@ python tools\calculate.py
 1. 關注微信公衆號 **[喵提醒][Miaotixing]**。
    
 2. 新建提醒服務  
-<img src="../static/readme/mtx1.png" height="400">
-<img src="../static/readme/mtx2.png" height="400">
+<img src="/static/readme/mtx1.png" height="400">
+<img src="/static/readme/mtx2.png" height="400">
 
 3. 效果展示  
-<img src="../static/readme/mtx3.png" height="400">
+<img src="/static/readme/mtx3.png" height="400">
 
 [Miaotixing]: https://miaotixing.com/how
 
@@ -210,7 +210,7 @@ python tools\calculate.py
 詳見 **[更新日誌][Changelog]**。
 
 ## 許可協議
-**[GNU 通用公共許可協議第三版][License]**
+**[GNU General Public License version 3][License]**
 
 ## 參與貢獻
 歡迎提交代碼、報告錯誤或提出新功能建議。
@@ -229,7 +229,7 @@ dereklee0310@gmail.com
 [Clicklock]: /static/readme/clicklock.png
 [Favorite food]: /static/readme/favorites.png
 [Favorite lure]: /static/readme/favorites_2.png
-[Configuration guide]: /docs/CONFIGURATION.md
-[Changelog]: /docs/CHANGELOG.md
+[Configuration guide]: /docs/zh-TW/CONFIGURATION.md
+[Changelog]: /docs/zh-TW/CHANGELOG.md
 
 [License]: /LICENSE

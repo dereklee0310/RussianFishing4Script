@@ -1,6 +1,6 @@
 作者很懶，直接把丟給DeepSeek R1生成🤗
 
-**[[英文版]][Configuration guide]**
+**[[English Version]][Configuration guide]**
 
 # 配置指南  
 
@@ -296,4 +296,4 @@ def get_cfg_defaults():
     return _C.clone()  
 ```  
 
-[Configuration guide]: /docs/CONFIGURATION.md
+[Configuration guide]: /docs/en/CONFIGURATION.md

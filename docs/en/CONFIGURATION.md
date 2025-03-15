@@ -1,4 +1,4 @@
-**[中文版][Chinese configuration guide]**
+**[[中文版]][Chinese configuration guide]**
 # Configuration Guide
 ## Using Launch Options
 You can use launch options to enable one or more features at startup.
@@ -480,4 +480,4 @@ def get_cfg_defaults():
 
 ```
 
-[Chinese configuration guide]: /docs/CONFIGURATION_zh-TW.md
+[Chinese configuration guide]: /docs/zh-TW/CONFIGURATION.md

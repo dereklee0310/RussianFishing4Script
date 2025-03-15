@@ -1,4 +1,4 @@
-**[[中文版]][Chinese README]**
+**[[中文版]][README]**
 <div align="center">
 
 ![RF4S][RF4S logo]
@@ -208,14 +208,14 @@ dereklee0310@gmail.com
 [Python badge]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
 [Windows badge]: https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white
 
-[Chinese README]: /docs/README_zh-TW.md
+[README]: /docs/zh-TW/README.md
 [Discord]: https://discord.gg/BZQWQnAMbY
 [Python]: https://www.python.org/downloads/
 [Download]: https://github.com/dereklee0310/RussianFishing4Script/archive/refs/heads/main.zip
 [Clicklock]: /static/readme/clicklock.png
 [Favorite food]: /static/readme/favorites.png
 [Favorite lure]: /static/readme/favorites_2.png
-[Configuration guide]: /docs/CONFIGURATION.md
-[Changelog]: /docs/CHANGELOG.md
+[Configuration guide]: /docs/en/CONFIGURATION.md
+[Changelog]: /docs/en/CHANGELOG.md
 
 [License]: /LICENSE

@@ -1,3 +1,5 @@
+**[[中文版]][CHANGELOG]**
+
 ## 0.2.1 (2025-03-08)
 
 - Fix a bug that auto-friction-brake, snag detection, and spooling detection are always
@@ -12,3 +14,5 @@
 ## 0.1.0 (2025-03-06)
 
 - New config system, bolognese mode, trolling mode, window mode support, and more.
+
+[CHANGELOG]: /docs/zh-TW/CHANGELOG.md
