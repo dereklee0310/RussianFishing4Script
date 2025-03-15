@@ -26,7 +26,7 @@ MIN_GRAY_SCALE_LEVEL = 150
 YELLOW_FRICTION_BRAKE = (200, 214, 63)
 ORANGE_FRICTION_BRAKE = (229, 188, 0)
 RED_FRICTION_BRAKE = (206, 56, 21)
-COLOR_TOLERANCE = 64
+COLOR_TOLERANCE = 32
 CAMERA_OFFSET = 40
 SIDE_LENGTH = 160
 SIDE_LENGTH_HALF = 80
@@ -36,10 +36,10 @@ ROOT = Path(__file__).resolve().parents[2]
 
 COORD_OFFSETS = {
     "1600x900": {
-        "friction_brake_very_high": (502, 799, 1096),  # Left point only
-        "friction_brake_high": (459, 799, 1139),
-        "friction_brake_medium": (417, 799, 1181),
-        "friction_brake_low": (396, 799, 1202),
+        "friction_brake_very_high": (502, 876),  # Left point only
+        "friction_brake_high": (459, 876),
+        "friction_brake_medium": (417, 876),
+        "friction_brake_low": (396, 876),
         "fish_icon": (389, 844),
         "clip_icon": (1042, 844),
         "spool_icon": (1077, 844),  # x + 15, y + 15
@@ -49,10 +49,10 @@ COORD_OFFSETS = {
         "bait_icon": (35, 31),
     },
     "1920x1080": {
-        "friction_brake_very_high": (662, 959, 1256),
-        "friction_brake_high": (619, 959, 1299),
-        "friction_brake_medium": (577, 959, 1341),
-        "friction_brake_low": (556, 959, 1362),
+        "friction_brake_very_high": (662, 1056),
+        "friction_brake_high": (619, 1056),
+        "friction_brake_medium": (577, 1056),
+        "friction_brake_low": (556, 1056),
         "fish_icon": (549, 1024),
         "clip_icon": (1202, 1024),
         "spool_icon": (1237, 1024),
@@ -62,10 +62,10 @@ COORD_OFFSETS = {
         "bait_icon": (35, 31),
     },
     "2560x1440": {
-        "friction_brake_very_high": (982, 1279, 1576),
-        "friction_brake_high": (939, 1279, 1619),
-        "friction_brake_medium": (897, 1279, 1661),
-        "friction_brake_low": (876, 1279, 1682),
+        "friction_brake_very_high": (982, 1412),
+        "friction_brake_high": (939, 1412),
+        "friction_brake_medium": (897, 1412),
+        "friction_brake_low": (876, 1412),
         "fish_icon": (869, 1384),
         "clip_icon": (1522, 1384),
         "spool_icon": (1557, 1384),

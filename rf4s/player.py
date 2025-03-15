@@ -1065,7 +1065,6 @@ class Player:
 
     def test(self):
         """Boo!"""
-        self.disconnected_quit()
         while True:
             sleep(0.1)
-            print(self.detection.is_pva_chosen())
+            print(self.detection.is_friction_brake_high())
