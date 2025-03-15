@@ -45,33 +45,38 @@ Download and install **[Python 3.12][Python]**.
 > Python 3.13+ is not supported.
 
 ### Installation
-1. Open cmd or powershell
+1. Open cmd or PowerShell (not Python)
 2. Clone the repository and navigate into the project directory:
 ```
 git clone https://github.com/dereklee0310/RussianFishing4Script.git
 cd RussianFishing4Script
 ```
 > [!TIP]
-> If you don't have git, **[download this repository][Download]** and unzip it.
+> Or, **[download this repository][Download]** and unzip it if you don't have `git` installed on your pc.  
+> Then run open cmd or PowerShell (not Python) and navigate into the project directory:
+> ```
+> cd "path\to\the\project"
+> ```
+> `path\to\the\project` should look something like `...\...\RussianFishing4Script-main`
 
 > [!WARNING] 
 > The download path cannot contain non-English characters.
 
 ### Dependencies
-Run the setup script to install required packages and create the default configuration file:
+In cmd or PowerShell, type the command below to install required packages and create a default configuration file:
 ```
-setup.bat
+.\setup.bat
 ```
 
 > [!TIP] 
 > Create a virtual environment to avoid version conflicts if you already have Python installed.
 
 ### Setup
-- Enable **[Mouse ClickLock][Clicklock]** in Windows mouse settings and set the time before locking to "Long"
+- Enable **[Mouse ClickLock][Clicklock]** in Windows mouse settings and set the time before locking to "Long".
 - Make sure your game language is the same as the setting in `config.yaml` (default is `EN`).
 - Set interface scale to `1x`.
 - Set display mode to `window mode` or `borderless windowed`.
-- Make sure your reel is fully loaded, or equip a rainbow line and use `-R` flag.
+- Make sure your reel is fully loaded, or equip a rainbow line and use `-R` flag (see **[configuration guide][Configuration guide]**).
 - Add tea, carrot, and coffee to your **[favorites][Favorite food]** if you want to use `-r` or `-c` flag.
 - To use a feature that replaces an item for you, you must add items to your **[favorites][Favorite lure]** for replacement.
 
@@ -92,9 +97,10 @@ python tools\main.py
 ```
 For more advanced usage, see **[configuration guide][Configuration guide]**.
 > [!IMPORTANT]
-> Navigate to into the project directory first before you run the command if you want to run it in a new terminal window.
+> If you want to run it in a new terminal window, don't forget to navigate into the project directory:
 > ```
-> cd "path\to\your\project\RussianFishing4Script"
+> cd "path\to\the\project"
+> python tools\main.py
 > ```
 
 > [!NOTE]
@@ -152,7 +158,7 @@ python tools\calculate.py
 ```
 
 ## Configuration
-See **[Configuration guide][Configuration guide].**
+See **[configuration guide][Configuration guide].**
 
 ## Troubleshooting
 <details>

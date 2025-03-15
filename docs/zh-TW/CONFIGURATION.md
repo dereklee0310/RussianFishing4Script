@@ -296,4 +296,18 @@ def get_cfg_defaults():
     return _C.clone()  
 ```  
 
+
+## 喵提醒的MIAO_CODE配置方式
+1. 關注微信公衆號 **[喵提醒][Miaotixing]**。
+   
+2. 新建提醒服務  
+![test][Miaotixing1] ![test2][Miaotixing2]
+
+3. 效果展示  
+![test2][Miaotixing3]
+
+[Miaotixing1]: /static/readme/mtx1.png
+[Miaotixing2]: /static/readme/mtx2.png
+[Miaotixing3]: /static/readme/mtx3.png
+[Miaotixing]: https://miaotixing.com/how
 [Configuration guide]: /docs/en/CONFIGURATION.md
