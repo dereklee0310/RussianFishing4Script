@@ -199,7 +199,7 @@ _C.KEEPNET.RELEASE_WHITELIST = (  # -m模式保留魚種
     "mackerel", "saithe", "herring",  
     "squid", "scallop", "mussel"  
 )
-# 魚種保留黑名單
+# 魚種黑名單
 # 選項: perch, shorthorn sculpin
 _C.KEEPNET.BLACKLIST = (
 )

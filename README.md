@@ -187,7 +187,7 @@ See **[configuration guide][Configuration guide].**
 
 - Make sure your reel is fully loaded, or equip a rainbow line and use `-R` flag. 
 - Change the game window size.
-- Lower the value of `SPOOL_CONFIDENCE` in `config.yaml`.
+- Reduce the value of `SPOOL_CONFIDENCE` in `config.yaml`.
 - Keep away from light sources or turn off the boat light.
 </details>
 <!-- ------------------------------- divide -------------------------------- -->
