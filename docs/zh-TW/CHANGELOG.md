@@ -1,18 +1,25 @@
 **[[English Version]][CHANGELOG]**
 
+## 0.3.0 (2025-03-16)
+
+- 降低擬餌斷裂檢測的靈敏度，避免異常終止問題
+- 新增 `KEEPNET.BLACKLIST` 設定項，黑名單中的魚類將始終被放生
+- 為 `PIRK` 模式新增 `SHIFT` 設定，允許用戶在使用 pirking 時按住 shift 鍵操作
+- 提升檢測頻率以優化用戶體驗
+- 修復自動摩擦制動器無法正常運作的 bug
+- 更新 README 文件
+
 ## 0.2.1 (2025-03-08)
 
-- Fix a bug that auto-friction-brake, snag detection, and spooling detection are always
-  disabled even the correct flags are used.
+- 修復了即使使用正確參數，自動摩擦制動/卡鉤檢測/捲線檢測仍被強制禁用的 bug
 
 ## 0.2.0 (2025-03-07)
 
-- Fix a bug that `-c` feature is not working properly.
-
--  Added a `DEPTH_ADJUST_DURATION` setting to the `pirk` fishing mode to allow the user to set the duration of tightening the fishing line after opening the reel to adjust the depth of the lure.
+- 修復 `-c` 功能異常問題
+- 為 `pirk` 釣魚模式新增 `DEPTH_ADJUST_DURATION` 設定項，允許用戶設置開捲後收緊釣線調整誘餌深度的持續時間
 
 ## 0.1.0 (2025-03-06)
 
-- New config system, bolognese mode, trolling mode, window mode support, and more.
+- 全新配置系統，新增磯釣模式、拖釣模式、視窗模式支援等多項功能
 
 [CHANGELOG]: /docs/en/CHANGELOG.md
