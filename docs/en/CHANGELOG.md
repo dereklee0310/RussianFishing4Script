@@ -1,6 +1,6 @@
 **[[中文版]][CHANGELOG]**
 
-## 0.3.1 (2025-03-16)
+## 0.4.0 (2025-03-16)
 
 - Fixed a bug that the casting power level cannot be set to a value other than 1 or 5.
 
