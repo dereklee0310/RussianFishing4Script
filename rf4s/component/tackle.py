@@ -135,7 +135,7 @@ class Tackle:
                     utils.hold_mouse_button(1)
             case _:
                 # -1 for backward compatibility
-                duration = CAST_SCALE * (self.cfg.SELECTED.CAST_POWE_LEVEL - 1)
+                duration = CAST_SCALE * (self.cfg.SELECTED.CAST_POWER_LEVEL - 1)
                 utils.hold_mouse_button(duration)
 
         sleep(self.cfg.SELECTED.CAST_DELAY)

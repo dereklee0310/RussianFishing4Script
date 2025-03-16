@@ -227,6 +227,7 @@ _C.PROFILE.SPIN.CAST_DELAY = 6.0  # 拋竿後等待時間（秒）
 _C.PROFILE.SPIN.TIGHTEN_DURATION = 0.0  # 收緊釣線時長（秒）  
 _C.PROFILE.SPIN.RETRIEVAL_DURATION = 0.0  # 收線/提竿持續時間（秒）  
 _C.PROFILE.SPIN.RETRIEVAL_DELAY = 0.0  # 收線後延遲（秒）  
+_C.PROFILE.SPIN.RETRIEVAL_TIMEOUT = 256.0 # 打狀態超時 （秒）
 _C.PROFILE.SPIN.PRE_ACCELERATION = False  # 拋竿前按住Shift（特殊技法）  
 _C.PROFILE.SPIN.POST_ACCELERATION = "off"  # 遛魚時加速模式（on/off/auto）  
 _C.PROFILE.SPIN.TYPE = "normal"  # 操作類型：normal（常規）/pause（停頓）/lift（提拉）  
