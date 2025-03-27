@@ -416,6 +416,8 @@ class Player:
                 self.general_quit("Fishing line is at its end")
             except exceptions.LineSnaggedError:
                 self._handle_snagged_line()
+            except exceptions.LureBrokenError:
+                self._handle_broken_lure()
             except TimeoutError:  # rare events
                 self._handle_timeout()
 

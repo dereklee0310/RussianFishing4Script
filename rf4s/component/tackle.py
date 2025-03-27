@@ -113,6 +113,8 @@ class Tackle:
                 raise exceptions.LineAtEndError
             if self.cfg.SCRIPT.SNAG_DETECTION and self.detection.is_line_snagged():
                 raise exceptions.LineSnaggedError
+            if self.detection.is_lure_broken():
+                raise exceptions.LureBrokenError
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
 
         raise TimeoutError
