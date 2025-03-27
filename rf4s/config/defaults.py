@@ -77,7 +77,7 @@ _C.KEEPNET.CAPACITY = 100
 _C.KEEPNET.DELAY = 0.0   # Delay before keeping the fish (for screenshots)
 _C.KEEPNET.FULL_ACTION = "quit" # Action when keepnet is full. Options: quit, alarm
 # Whitelist for unmarked fish releasing when using -m flag
-# Options: mackerel, saithe, herring, squid, scallop, mussel
+# Options: mackerel, saithe, herring, squid, scallop, mussel, perch, shorthorn_sculpin
 _C.KEEPNET.RELEASE_WHITELIST = (
     "mackerel",
     "saithe",
@@ -87,7 +87,7 @@ _C.KEEPNET.RELEASE_WHITELIST = (
     "mussel",
 )
 # Fish in the blacklist will always be released
-# Options: perch, shorthorn sculpin
+# Options: mackerel, saithe, herring, squid, scallop, mussel, perch, shorthorn_sculpin
 _C.KEEPNET.BLACKLIST = (
 )
 
