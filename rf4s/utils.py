@@ -157,8 +157,6 @@ def toggle_clicklock(func):
         sleep(BASE_DELAY + LOOP_DELAY)
         try:
             func(self, *args, **kwargs)
-        except Exception as e:
-            raise e
         finally:
             pag.click()
 
@@ -172,8 +170,6 @@ def toggle_right_mouse_button(func):
         pag.mouseDown(button="right")
         try:
             func(*args, **kwargs)
-        except Exception as e:
-            raise e
         finally:
             pag.mouseUp(button="right")
 
@@ -182,13 +178,11 @@ def toggle_right_mouse_button(func):
 
 def press_before_and_after(key):
     def func_wrapper(func):
-        def args_wrapper(self, *args):
+        def args_wrapper(*args, **kwargs):
             pag.press(key)
             sleep(ANIMATION_DELAY)
             try:
-                func(self, *args)
-            except Exception as e:
-                raise e
+                func(*args, **kwargs)
             finally:
                 pag.press(key)
                 sleep(ANIMATION_DELAY)
@@ -197,28 +191,30 @@ def press_before_and_after(key):
 
     return func_wrapper
 
+def release_keys_after(arrow_keys: bool = False):
+    """Release keys that might have been holding down
 
-def release_keys_after(func):
-    """Release keys that might have been holding down."""
+    :param arrow_keys: whether to toggle arrow keys, defaults to False
+    :type arrow_keys: bool, optional
+    """
 
-    def release_keys():
-        pag.keyUp("ctrl")
+    def release_keys(arrow_keys):
         pag.keyUp("ctrl")
         pag.keyUp("shift")
-        pag.keyUp("w")
-        pag.keyUp("a")
-        pag.keyUp("d")
+        if arrow_keys:
+            pag.keyUp("w")
+            pag.keyUp("a")
+            pag.keyUp("d")
 
-    def wrapper(*args, **kwargs):
-        try:
-            func(*args, **kwargs)
-            release_keys()
-        except Exception as e:
-            raise e
-        finally:
-            release_keys()
+    def func_wrapper(func):  # Capture arrow_keys as default arg
+        def args_wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            finally:
+                release_keys(arrow_keys)  # Uses the captured value
+        return args_wrapper
 
-    return wrapper
+    return func_wrapper
 
 
 def print_error(msg):

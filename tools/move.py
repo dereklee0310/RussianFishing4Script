@@ -108,7 +108,7 @@ class App:
             pag.keyDown("w")
             self.w_key_pressed = True
 
-    @utils.release_keys_after
+    @utils.release_keys_after(arrow_keys=True)
     def start(self) -> None:
         """Start automation and keyboard listener.
 

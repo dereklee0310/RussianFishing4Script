@@ -161,7 +161,7 @@ class Tackle:
 
     @_check_status
     @utils.toggle_clicklock
-    @utils.release_keys_after
+    @utils.release_keys_after()
     def retrieve(self, first: bool = True) -> None:
         """Retrieve the line until the end is reached and detect unexpected events.
 
@@ -211,7 +211,7 @@ class Tackle:
         logger.info("Retrieving fishing line with lift")
         self._special_retrieve(button="right")
 
-    @utils.release_keys_after
+    @utils.release_keys_after()
     def _special_retrieve(self, button: str) -> None:
         """Retrieve the line with special conditions (pause or lift).
 
@@ -231,7 +231,7 @@ class Tackle:
             ):
                 return
 
-    @utils.release_keys_after
+    @utils.release_keys_after()
     def _pirk(self) -> None:
         """Start pirking until a fish is hooked.
 
