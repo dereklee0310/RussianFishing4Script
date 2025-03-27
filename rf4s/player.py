@@ -1065,6 +1065,4 @@ class Player:
 
     def test(self):
         """Boo!"""
-        while True:
-            sleep(0.1)
-            print(self.detection.is_friction_brake_high())
+        self._retrieve_line()

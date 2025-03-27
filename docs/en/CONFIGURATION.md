@@ -475,6 +475,8 @@ _C.PROFILE.BOLOGNESE.DRIFT_TIMEOUT = 32.0
 # Options: square, wide, tall
 # (Fallback to float camera detection mode if the window size is not supported)
 _C.PROFILE.BOLOGNESE.CAMERA_SHAPE = "square"
+# Hold Shift key during fish fight. Options: on, off, auto
+_C.PROFILE.BOLOGNESE.POST_ACCELERATION = "off"
 
 
 def get_cfg_defaults():

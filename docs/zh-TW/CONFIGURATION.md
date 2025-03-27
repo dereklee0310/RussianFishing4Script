@@ -290,7 +290,8 @@ _C.PROFILE.BOLOGNESE.MODE = "bolognese"
 _C.PROFILE.BOLOGNESE.CAST_POWER_LEVEL = 5.0  # 拋投力度  
 _C.PROFILE.BOLOGNESE.CAST_DELAY = 4.0  # 拋竿後等待時間（秒）  
 _C.PROFILE.BOLOGNESE.FLOAT_SENSITIVITY = 0.68  # 浮標檢測敏感度  
-_C.PROFILE.BOLOGNESE.DRIFT_TIMEOUT = 32.0  # 漂流超時重拋（秒）  
+_C.PROFILE.BOLOGNESE.DRIFT_TIMEOUT = 32.0  # 漂流超時重拋（秒）
+_C.PROFILE.BOLOGNESE.POST_ACCELERATION = "off"  # 遛魚加速模式（on/off/auto）
 
 def get_cfg_defaults():  
     """獲取默認配置節點"""  
