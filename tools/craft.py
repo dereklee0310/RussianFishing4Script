@@ -24,6 +24,7 @@ from yacs.config import CfgNode as CN
 sys.path.append(".")
 
 from rf4s import utils
+from rf4s.app.app import App
 from rf4s.config import config
 from rf4s.controller.detection import Detection
 from rf4s.controller.window import Window
@@ -44,7 +45,7 @@ logging.basicConfig(
 logger = logging.getLogger("rich")
 
 
-class App:
+class CraftApp(App):
     """Main application class for automating crafting.
 
     This class manages the configuration, detection, and execution of the crafting
@@ -66,27 +67,15 @@ class App:
         Loads configuration, parses command-line arguments, and sets up the game window
         and detection instances.
         """
-        self.cfg = config.setup_cfg()
-        self.cfg.merge_from_file(ROOT / "config.yaml")
-        args = self.parse_args()
-        args_cfg = CN({"ARGS": config.dict_to_cfg(vars(args))})
-        self.cfg.merge_from_other_cfg(args_cfg)
-        self.cfg.merge_from_list(args.opts)
+        super().__init__()
 
-        # Dummy mode
-        dummy = CN({"SELECTED": config.dict_to_cfg({"MODE": "spin"})})
-        self.cfg.merge_from_other_cfg(dummy)
-
-        self.cfg.freeze()
-
-        self.window = Window()
         self.detection = Detection(self.cfg, self.window)
 
         self.success_count = 0
         self.fail_count = 0
         self.craft_count = 0
 
-    def parse_args(self) -> argparse.Namespace:
+    def _parse_args(self) -> argparse.Namespace:
         """Configure argument parser and parse command-line arguments.
 
         :return: Parsed command-line arguments.
@@ -116,7 +105,7 @@ class App:
         )
         return parser.parse_args()
 
-    def start(self) -> None:
+    def _start(self) -> None:
         """Main loop for crafting items.
 
         Executes the primary loop for crafting items until materials are exhausted or
@@ -165,12 +154,10 @@ class App:
 
 
 if __name__ == "__main__":
-    app = App()
-    utils.start_app(
-        app,
+    CraftApp().start(
         (
-            ("Successful Crafts", app.success_count),
-            ("Failed Crafts", app.fail_count),
-            ("Materials Used", app.craft_count),
+            ("Successful Crafts", "success_count"),
+            ("Failed Crafts", "fail_count"),
+            ("Materials Used", "craft_count"),
         ),
     )

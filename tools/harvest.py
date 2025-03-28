@@ -23,10 +23,9 @@ from yacs.config import CfgNode as CN
 sys.path.append(".")
 
 from rf4s import utils
-from rf4s.config import config
+from rf4s.app.app import App
 from rf4s.controller.detection import Detection
 from rf4s.controller.timer import Timer
-from rf4s.controller.window import Window
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -41,7 +40,7 @@ logger = logging.getLogger("rich")
 ANIMATION_DELAY = 0.5
 
 
-class App:
+class HarvestApp(App):
     """Main application class for automating bait harvesting and hunger/comfort refill.
 
     This class manages the configuration, detection, and execution of the harvesting
@@ -63,20 +62,8 @@ class App:
         Loads configuration, parses command-line arguments, and sets up the game window,
         detection, and timer instances.
         """
-        self.cfg = config.setup_cfg()
-        self.cfg.merge_from_file(ROOT / "config.yaml")
-        args = self.parse_args()
-        args_cfg = CN({"ARGS": config.dict_to_cfg(vars(args))})
-        self.cfg.merge_from_other_cfg(args_cfg)
-        self.cfg.merge_from_list(args.opts)
+        super().__init__()
 
-        # Dummy mode
-        dummy = CN({"SELECTED": config.dict_to_cfg({"MODE": "spin"})})
-        self.cfg.merge_from_other_cfg(dummy)
-
-        self.cfg.freeze()
-
-        self.window = Window()
         self.detection = Detection(self.cfg, self.window)
         self.timer = Timer(self.cfg)
 
@@ -84,7 +71,7 @@ class App:
         self.carrot_count = 0
         self.harvest_count = 0
 
-    def parse_args(self) -> argparse.Namespace:
+    def _parse_args(self) -> argparse.Namespace:
         """Configure argument parser and parse command-line arguments.
 
         :return: Parsed command-line arguments.
@@ -114,36 +101,6 @@ class App:
             help="delay time between each checks, 32s by default",
         )
         return parser.parse_args()
-
-    def start(self) -> None:
-        """Main loop for eating and harvesting.
-
-        Executes the primary loop for checking hunger/comfort levels, consuming food,
-        and harvesting baits. Supports power-saving mode and configurable check delays.
-        """
-        pag.press(str(self.cfg.KEY.DIGGING_TOOL))
-        sleep(3)
-        while True:
-            if self.cfg.ARGS.REFILL:
-                if self.detection.is_comfort_low() and self.timer.is_tea_drinkable():
-                    self._consume_food("tea")
-                    self.tea_count += 1
-
-                if self.detection.is_hunger_low():
-                    self._consume_food("carrot")
-                    self.carrot_count += 1
-
-            if not self.detection.is_energy_high():
-                logger.info("Energy is not high enough")
-            self._harvest_baits()
-            self.harvest_count += 1
-
-            if self.cfg.ARGS.POWER_SAVING:
-                pag.press("esc")
-            sleep(self.cfg.ARGS.CHECK_DELAY)
-            if self.cfg.ARGS.POWER_SAVING:
-                pag.press("esc")
-            sleep(ANIMATION_DELAY)
 
     def _harvest_baits(self) -> None:
         """Harvest baits from the game.
@@ -178,14 +135,42 @@ class App:
             pag.click()
         sleep(ANIMATION_DELAY)
 
+    def _start(self) -> None:
+        """Main loop for eating and harvesting.
+
+        Executes the primary loop for checking hunger/comfort levels, consuming food,
+        and harvesting baits. Supports power-saving mode and configurable check delays.
+        """
+        pag.press(str(self.cfg.KEY.DIGGING_TOOL))
+        sleep(3)
+        while True:
+            if self.cfg.ARGS.REFILL:
+                if self.detection.is_comfort_low() and self.timer.is_tea_drinkable():
+                    self._consume_food("tea")
+                    self.tea_count += 1
+
+                if self.detection.is_hunger_low():
+                    self._consume_food("carrot")
+                    self.carrot_count += 1
+
+            if not self.detection.is_energy_high():
+                logger.info("Energy is not high enough")
+            self._harvest_baits()
+            self.harvest_count += 1
+
+            if self.cfg.ARGS.POWER_SAVING:
+                pag.press("esc")
+            sleep(self.cfg.ARGS.CHECK_DELAY)
+            if self.cfg.ARGS.POWER_SAVING:
+                pag.press("esc")
+            sleep(ANIMATION_DELAY)
+
 
 if __name__ == "__main__":
-    app = App()
-    utils.start_app(
-        app,
+    HarvestApp().start(
         (
-            ("Tea consumed", app.tea_count),
-            ("Carrot consumed", app.carrot_count),
-            ("Number of harvests", app.harvest_count),
+            ("Tea consumed", "tea_count"),
+            ("Carrot consumed", "carrot_count"),
+            ("Number of harvests", "harvest_count"),
         ),
     )

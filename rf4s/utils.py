@@ -92,24 +92,6 @@ def ask_for_confirmation(msg: str = "Ready to start") -> None:
             sys.exit()
 
 
-def display_running_results(result_map: tuple[tuple[str, str]]) -> None:
-    """Display the running results of different apps.
-
-    :param result_map: Attribute name - column name mapping.
-    :type result_map: tuple[tuple[str, str]]
-    """
-    table = Table(
-        "Results",
-        title="Running Results",
-        show_header=False,
-        # min_width=20,
-    )
-    table.title = "Running Results"
-    for field, value in result_map:
-        table.add_row(str(field), str(value))
-    print(table)
-
-
 def get_box_center(box: Box) -> tuple[int, int]:
     """Get the center coordinate (x, y) of the given box.
 
@@ -121,25 +103,6 @@ def get_box_center(box: Box) -> tuple[int, int]:
     :rtype: tuple[int, int]
     """
     return int(box.left + box.width // 2), int(box.top + box.height // 2)
-
-
-def start_app(app: object, results: tuple[tuple[str, str]] | None) -> None:
-    """A wrapper for confirmation, window activation, and start.
-
-    :param app: Main application class.
-    :type app: object
-    :param results: Counter lookup table.
-    :type results: tuple[tuple[str, str]] | None
-    """
-    app.window.activate_game_window()
-    try:
-        app.start()
-    except KeyboardInterrupt:
-        pass
-    if results is not None:
-        display_running_results(results)
-    app.window.activate_script_window()
-
 
 # ---------------------------------------------------------------------------- #
 #                                  decorators                                  #

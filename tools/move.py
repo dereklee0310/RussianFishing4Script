@@ -19,13 +19,12 @@ from yacs.config import CfgNode as CN
 sys.path.append(".")
 
 from rf4s import utils
-from rf4s.config import config
-from rf4s.controller.window import Window
+from rf4s.app.app import App
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
-class App:
+class MoveApp(App):
     """Main controller for movement automation in Russian Fishing 4.
 
     Manages configuration, keyboard event listeners, and W/Shift key simulation.
@@ -42,27 +41,17 @@ class App:
         Merges configurations from multiple sources (YAML, CLI) and prepares
         the game window controller.
         """
-        self.cfg = config.setup_cfg()
-        self.cfg.merge_from_file(ROOT / "config.yaml")
-        args = self.parse_args()
-        args_cfg = CN({"ARGS": config.dict_to_cfg(vars(args))})
-        self.cfg.merge_from_other_cfg(args_cfg)
-        self.cfg.merge_from_list(args.opts)
-
-        # Dummy mode
-        dummy = CN({"SELECTED": config.dict_to_cfg({"MODE": "spin"})})
-        self.cfg.merge_from_other_cfg(dummy)
+        super().__init__()
 
         # Format key
+        self.cfg.defrost()
         self.cfg.ARGS.EXIT_KEY = f"'{self.cfg.ARGS.EXIT_KEY}'"
         self.cfg.ARGS.PAUSE_KEY = f"'{self.cfg.ARGS.PAUSE_KEY}'"
-
         self.cfg.freeze()
 
-        self.window = Window()
         self.w_key_pressed = True
 
-    def parse_args(self) -> argparse.Namespace:
+    def _parse_args(self) -> argparse.Namespace:
         """Parse command-line arguments.
 
         :return: Parsed arguments containing runtime configuration.
@@ -93,7 +82,7 @@ class App:
         )
         return parser.parse_args()
 
-    def on_release(self, key: keyboard.KeyCode) -> None:
+    def _on_release(self, key: keyboard.KeyCode) -> None:
         """Handle keyboard release events for script control.
 
         :param key: Key released by the user.
@@ -109,7 +98,7 @@ class App:
             self.w_key_pressed = True
 
     @utils.release_keys_after(arrow_keys=True)
-    def start(self) -> None:
+    def _start(self) -> None:
         """Start automation and keyboard listener.
 
         Begins W key simulation (with optional Shift key) and enters blocking listener loop.
@@ -120,11 +109,9 @@ class App:
         pag.keyDown("w")
 
         # blocking listener loop
-        with keyboard.Listener(self.on_release) as listener:
+        with keyboard.Listener(self._on_release) as listener:
             listener.join()
 
 
 if __name__ == "__main__":
-    utils.start_app(App(), None)
-
-# (Original comments remain unchanged below)
+    MoveApp.start()

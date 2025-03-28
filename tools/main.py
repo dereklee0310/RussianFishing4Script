@@ -84,7 +84,7 @@ DISCORD_LINK = "Discord: https://discord.gg/BZQWQnAMbY"
 ROOT = Path(__file__).resolve().parents[1]
 
 
-class App:
+class Rf4sApp:
     """Main application class for Russian Fishing 4 automation.
 
     This class orchestrates the entire automation process, from parsing command-line
@@ -547,5 +547,4 @@ class App:
 
 
 if __name__ == "__main__":
-    app = App()
-    app.start()
+    Rf4sApp().start()

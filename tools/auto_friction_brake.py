@@ -20,11 +20,11 @@ from yacs.config import CfgNode as CN
 
 sys.path.append(".")
 
-from rf4s import utils
+
+from rf4s.app.app import App
 from rf4s.component.friction_brake import FrictionBrake
 from rf4s.config import config
 from rf4s.controller.detection import Detection
-from rf4s.controller.window import Window
 
 EXIT = "'h'"
 RESET = "'g'"
@@ -39,7 +39,7 @@ logging.basicConfig(
 logger = logging.getLogger("rich")
 
 
-class App:
+class FrictionBrakeApp(App):
     """Main application class for automating friction brake adjustments.
 
     This class manages the configuration, detection, and execution of the friction
@@ -59,25 +59,15 @@ class App:
         Loads configuration, parses command-line arguments, sets up the game window,
         and initializes the friction brake controller.
         """
-        self.cfg = config.setup_cfg()
-        self.cfg.merge_from_file(ROOT / "config.yaml")
-        args = self.parse_args()
-        args_cfg = CN({"ARGS": config.dict_to_cfg(vars(args))})
-        self.cfg.merge_from_other_cfg(args_cfg)
-        self.cfg.merge_from_list(args.opts)
-
-        # Dummy mode
-        dummy = CN({"SELECTED": config.dict_to_cfg({"MODE": "spin"})})
-        self.cfg.merge_from_other_cfg(dummy)
+        super().__init__()
 
         # Format key
+        self.cfg.defrost()
         self.cfg.ARGS.EXIT_KEY = f"'{self.cfg.ARGS.EXIT_KEY}'"
         self.cfg.ARGS.RESET_KEY = f"'{self.cfg.ARGS.RESET_KEY}'"
-
         self.cfg.freeze()
         config.print_cfg(self.cfg.FRICTION_BRAKE)
 
-        self.window = Window()
         width, height = self.window.box[:2]
         if self.window.title_bar_exist:
             logger.info("Window mode detected. Please don't move the game window")
@@ -96,7 +86,7 @@ class App:
             self.cfg, self.friction_brake_lock, self.detection
         )
 
-    def parse_args(self) -> argparse.Namespace:
+    def _parse_args(self) -> argparse.Namespace:
         """Configure argument parser and parse command-line arguments.
 
         :return: Parsed command-line arguments.
@@ -123,7 +113,7 @@ class App:
         args_list = shlex.split(self.cfg.SCRIPT.LAUNCH_OPTIONS) + sys.argv[1:]
         return parser.parse_args(args_list)
 
-    def on_release(self, key: keyboard.KeyCode) -> None:
+    def _on_release(self, key: keyboard.KeyCode) -> None:
         """Handle key release events for controlling the application.
 
         Exits the script or resets the friction brake based on the key pressed.
@@ -138,17 +128,16 @@ class App:
         if keystroke == self.cfg.ARGS.RESET_KEY:
             self.friction_brake.reset(self.cfg.FRICTION_BRAKE.INITIAL)
 
-    def start(self):
+    def _start(self):
         """Start the friction brake automation process.
 
         Begins the friction brake monitoring process and starts a keyboard listener
         to handle control keys.
         """
         self.friction_brake.monitor_process.start()
-        with keyboard.Listener(on_release=self.on_release) as listener:
+        with keyboard.Listener(on_release=self._on_release) as listener:
             listener.join()
 
 
 if __name__ == "__main__":
-    app = App()
-    utils.start_app(app, None)
+    FrictionBrakeApp.start()
