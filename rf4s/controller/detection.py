@@ -272,7 +272,7 @@ class Detection:
     def get_yes_position(self):
         return self._get_image_box("yes", 0.8)
 
-    def get_make_position(self):
+    def get_make_button_position(self):
         return self._get_image_box("make", 0.9)
 
     # ------------------------ Quiting game from main menu ----------------------- #

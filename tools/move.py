@@ -14,12 +14,12 @@ from pathlib import Path
 
 import pyautogui as pag
 from pynput import keyboard
-from yacs.config import CfgNode as CN
 
 sys.path.append(".")
 
 from rf4s import utils
 from rf4s.app.app import App
+from rf4s.config.config import print_cfg
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -48,6 +48,7 @@ class MoveApp(App):
         self.cfg.ARGS.EXIT_KEY = f"'{self.cfg.ARGS.EXIT_KEY}'"
         self.cfg.ARGS.PAUSE_KEY = f"'{self.cfg.ARGS.PAUSE_KEY}'"
         self.cfg.freeze()
+        print_cfg(self.cfg.ARGS)
 
         self.w_key_pressed = True
 
@@ -104,6 +105,7 @@ class MoveApp(App):
         Begins W key simulation (with optional Shift key) and enters blocking listener loop.
         Automatically releases keys when stopped via decorator.
         """
+
         if self.cfg.ARGS.SHIFT:
             pag.keyDown("shift")
         pag.keyDown("w")

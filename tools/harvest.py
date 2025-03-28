@@ -23,6 +23,7 @@ from yacs.config import CfgNode as CN
 sys.path.append(".")
 
 from rf4s import utils
+from rf4s.config.config import print_cfg
 from rf4s.app.app import App
 from rf4s.controller.detection import Detection
 from rf4s.controller.timer import Timer
@@ -63,6 +64,7 @@ class HarvestApp(App):
         detection, and timer instances.
         """
         super().__init__()
+        print(self.cfg.ARGS)
 
         self.detection = Detection(self.cfg, self.window)
         self.timer = Timer(self.cfg)

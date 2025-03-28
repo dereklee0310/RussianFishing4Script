@@ -19,15 +19,12 @@ from time import sleep
 
 import pyautogui as pag
 from rich.logging import RichHandler
-from yacs.config import CfgNode as CN
 
 sys.path.append(".")
 
-from rf4s import utils
 from rf4s.app.app import App
-from rf4s.config import config
+from rf4s.config.config import print_cfg
 from rf4s.controller.detection import Detection
-from rf4s.controller.window import Window
 
 CRAFT_DELAY = 4.0
 CRAFT_DELAY_2X = 8.0
@@ -68,6 +65,7 @@ class CraftApp(App):
         and detection instances.
         """
         super().__init__()
+        print_cfg(self.cfg.ARGS)
 
         self.detection = Detection(self.cfg, self.window)
 
@@ -115,15 +113,15 @@ class CraftApp(App):
         craft_delay = CRAFT_DELAY
         click_delay = ANIMATION_DELAY
 
-        make_btn_coord = self.detection.get_make_position()
-        if make_btn_coord is None:
+        make_button_position = self.detection.get_make_button_position()
+        if make_button_position is None:
             logger.critical(
                 "Make button not found, please set the interface scale to "
                 "1x or move your mouse around"
             )
             self.window.activate_script_window()
             return
-        pag.moveTo(make_btn_coord)
+        pag.moveTo(make_button_position)
 
         while self.detection.is_material_complete():
             logger.info("Crafting item")

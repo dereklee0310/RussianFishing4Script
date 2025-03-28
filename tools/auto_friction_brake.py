@@ -16,14 +16,13 @@ from pathlib import Path
 
 from pynput import keyboard
 from rich.logging import RichHandler
-from yacs.config import CfgNode as CN
 
 sys.path.append(".")
 
 
 from rf4s.app.app import App
 from rf4s.component.friction_brake import FrictionBrake
-from rf4s.config import config
+from rf4s.config.config import print_cfg
 from rf4s.controller.detection import Detection
 
 EXIT = "'h'"
@@ -66,7 +65,8 @@ class FrictionBrakeApp(App):
         self.cfg.ARGS.EXIT_KEY = f"'{self.cfg.ARGS.EXIT_KEY}'"
         self.cfg.ARGS.RESET_KEY = f"'{self.cfg.ARGS.RESET_KEY}'"
         self.cfg.freeze()
-        config.print_cfg(self.cfg.FRICTION_BRAKE)
+        print_cfg(self.cfg.ARGS)
+        print_cfg(self.cfg.FRICTION_BRAKE)
 
         width, height = self.window.box[:2]
         if self.window.title_bar_exist:
@@ -140,4 +140,4 @@ class FrictionBrakeApp(App):
 
 
 if __name__ == "__main__":
-    FrictionBrakeApp.start()
+    FrictionBrakeApp().start()

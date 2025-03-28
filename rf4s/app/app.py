@@ -6,8 +6,10 @@ It initializes the configuration with a dummy profile and parses args.
 
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
+
 from pathlib import Path
 
+from rich import print
 from rich.table import Table
 from yacs.config import CfgNode as CN
 
@@ -15,6 +17,7 @@ from rf4s.config import config
 from rf4s.controller.window import Window
 
 ROOT = Path(__file__).resolve().parents[2]
+
 
 class App:
     def __init__(self):
@@ -38,7 +41,7 @@ class App:
     def _start(self):
         raise NotImplementedError("_start method must be implemented in subclass")
 
-    def start(self, results: tuple[tuple[str, str]]=()) -> None:
+    def start(self, results: tuple[tuple[str, str]] = ()) -> None:
         """A wrapper for confirmation, window activation, and start.
 
         :param app: Main application class.
@@ -48,7 +51,7 @@ class App:
         """
         self.window.activate_game_window()
         try:
-            self.start()
+            self._start()
         except KeyboardInterrupt:
             pass
         if results:
@@ -69,5 +72,5 @@ class App:
         )
         table.title = "Running Results"
         for field_name, attribute_name in results:
-            table.add_row(field_name, getattr(self, attribute_name))
+            table.add_row(field_name, str(getattr(self, attribute_name)))
         print(table)
