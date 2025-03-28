@@ -9,13 +9,13 @@ _C.VERSION = "0.4.0"
 #                                    General                                   #
 # ---------------------------------------------------------------------------- #
 _C.SCRIPT = CN()
-_C.SCRIPT.LANGUAGE = "en" # Language for the script. Options: en, ru, zh-TW, zh-CN
+_C.SCRIPT.LANGUAGE = "en"  # Language for the script. Options: en, ru, zh-TW, zh-CN
 _C.SCRIPT.LAUNCH_OPTIONS = ""  # Default launch options for the script, e.g., -r -c -H
 _C.SCRIPT.SMTP_VERIFICATION = True
 _C.SCRIPT.IMAGE_VERIFICATION = True
 _C.SCRIPT.SNAG_DETECTION = True
 _C.SCRIPT.SPOOLING_DETECTION = True
-_C.SCRIPT.RANDOM_ROD_SELECTION = True # For bottom mode
+_C.SCRIPT.RANDOM_ROD_SELECTION = True  # For bottom mode
 # Confidence threshold for spooling detection (lower = more sensitive)
 _C.SCRIPT.SPOOL_CONFIDENCE = 0.98
 # Delay before recasting spod rod (in seconds)
@@ -50,13 +50,13 @@ _C.KEY.QUIT = "CTRL-C"
 _C.STAT = CN()
 # Minimum energy level before drinking coffee/harvesting baits
 _C.STAT.ENERGY_THRESHOLD = 0.74
-_C.STAT.HUNGER_THRESHOLD = 0.5 # Minimum hunger level before consuming carrot
-_C.STAT.COMFORT_THRESHOLD = 0.51 # Minimum comfort level before consuming tea
+_C.STAT.HUNGER_THRESHOLD = 0.5  # Minimum hunger level before consuming carrot
+_C.STAT.COMFORT_THRESHOLD = 0.51  # Minimum comfort level before consuming tea
 _C.STAT.TEA_DELAY = 300  # Delay between tea drinks (in seconds)
 _C.STAT.COFFEE_LIMIT = 10  # Maximum coffee drinks per fish fight.
-_C.STAT.COFFEE_PER_DRINK = 1 # Amount of coffee consumed per drink
+_C.STAT.COFFEE_PER_DRINK = 1  # Amount of coffee consumed per drink
 _C.STAT.ALCOHOL_DELAY = 900  # Delay between alcohol drinks (in seconds)
-_C.STAT.ALCOHOL_PER_DRINK = 1 # Amount of alcohol consumed per drink
+_C.STAT.ALCOHOL_PER_DRINK = 1  # Amount of alcohol consumed per drink
 
 # ---------------------------------------------------------------------------- #
 #                   Friction Brake (Use -f flag to enable it)                  #
@@ -66,16 +66,16 @@ _C.FRICTION_BRAKE.INITIAL = 29  # Initial friction brake value
 _C.FRICTION_BRAKE.MAX = 30  # Maximum friction brake value
 # Delay before starting to adjust friction brake after a fish is hooked
 _C.FRICTION_BRAKE.START_DELAY = 2.0
-_C.FRICTION_BRAKE.INCREASE_DELAY = 1.0 # Delay before increasing friction brake
-_C.FRICTION_BRAKE.SENSITIVITY = "medium" # Sensitivity of friction brake detection
+_C.FRICTION_BRAKE.INCREASE_DELAY = 1.0  # Delay before increasing friction brake
+_C.FRICTION_BRAKE.SENSITIVITY = "medium"  # Sensitivity of friction brake detection
 
 # ---------------------------------------------------------------------------- #
 #                                    Keepnet                                   #
 # ---------------------------------------------------------------------------- #
 _C.KEEPNET = CN()
 _C.KEEPNET.CAPACITY = 100
-_C.KEEPNET.DELAY = 0.0   # Delay before keeping the fish (for screenshots)
-_C.KEEPNET.FULL_ACTION = "quit" # Action when keepnet is full. Options: quit, alarm
+_C.KEEPNET.DELAY = 0.0  # Delay before keeping the fish (for screenshots)
+_C.KEEPNET.FULL_ACTION = "quit"  # Action when keepnet is full. Options: quit, alarm
 # Whitelist for unmarked fish releasing when using -m flag
 # Options: mackerel, saithe, herring, squid, scallop, mussel, perch, shorthorn_sculpin
 _C.KEEPNET.RELEASE_WHITELIST = (
@@ -88,8 +88,7 @@ _C.KEEPNET.RELEASE_WHITELIST = (
 )
 # Fish in the blacklist will always be released
 # Options: mackerel, saithe, herring, squid, scallop, mussel, perch, shorthorn_sculpin
-_C.KEEPNET.BLACKLIST = (
-)
+_C.KEEPNET.BLACKLIST = ()
 
 # ---------------------------------------------------------------------------- #
 #                                 Notification                                 #
@@ -169,7 +168,7 @@ _C.PROFILE.BOTTOM.MODE = "bottom"
 # 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+ (power cast), FYR
 # For instance, 2.5 cast_power_level equals to 37.5% casting power
 _C.PROFILE.BOTTOM.CAST_POWER_LEVEL = 5.0
-_C.PROFILE.BOTTOM.CAST_DELAY = 4.0 # Delay after casting before lure sinks
+_C.PROFILE.BOTTOM.CAST_DELAY = 4.0  # Delay after casting before lure sinks
 # Hold Shift key during fish fight. Options: on, off, auto
 _C.PROFILE.BOTTOM.POST_ACCELERATION = "off"
 # Delay before checking fish bite on next rod
@@ -187,16 +186,16 @@ _C.PROFILE.PIRK.MODE = "pirk"
 # 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+ (power cast), FYR
 # For instance, 2.5 cast_power_level equals to 37.5% casting power
 _C.PROFILE.PIRK.CAST_POWER_LEVEL = 1.0
-_C.PROFILE.PIRK.CAST_DELAY = 4.0 # Delay after casting before lure sinks
-_C.PROFILE.PIRK.SINK_TIMEOUT = 60.0 # Maximum time allowed for sinking
+_C.PROFILE.PIRK.CAST_DELAY = 4.0  # Delay after casting before lure sinks
+_C.PROFILE.PIRK.SINK_TIMEOUT = 60.0  # Maximum time allowed for sinking
 # Duration to tighten the line after sinking lure/adjusting lure depth
 _C.PROFILE.PIRK.TIGHTEN_DURATION = 1.0
 # Delay after opening reel to adjust lure depth, set this to 0 to recast the rod instead
 _C.PROFILE.PIRK.DEPTH_ADJUST_DELAY = 4.0
 # Durtion to tighten the line after opening reel for DEPTH_ADJUST_DELAY seconds
 _C.PROFILE.PIRK.DEPTH_ADJUST_DURATION = 1.0
-_C.PROFILE.PIRK.CTRL = False # Hold Ctrl key during pirking
-_C.PROFILE.PIRK.SHIFT = False # Hold Shift key during pirking
+_C.PROFILE.PIRK.CTRL = False  # Hold Ctrl key during pirking
+_C.PROFILE.PIRK.SHIFT = False  # Hold Shift key during pirking
 # Duration of lifting the rod, set this to 0 if you want to wait instead of pirking
 _C.PROFILE.PIRK.PIRK_DURATION = 0.5
 _C.PROFILE.PIRK.PIRK_DELAY = 2.0  # Delay after lifting the rod
@@ -300,8 +299,8 @@ _C.PROFILE.TELESCOPIC.CAST_POWER_LEVEL = 5.0
 _C.PROFILE.TELESCOPIC.CAST_DELAY = 4.0
 # Sensitivity of float detection
 _C.PROFILE.TELESCOPIC.FLOAT_SENSITIVITY = 0.68
-_C.PROFILE.TELESCOPIC.CHECK_DELAY = 1.0   # Delay between fish bite checks
-_C.PROFILE.TELESCOPIC.PULL_DELAY = 0.5   # Delay pulling a fish after it's hooked
+_C.PROFILE.TELESCOPIC.CHECK_DELAY = 1.0  # Delay between fish bite checks
+_C.PROFILE.TELESCOPIC.PULL_DELAY = 0.5  # Delay pulling a fish after it's hooked
 # Recast rod after timed out, designed for flowing water maps
 _C.PROFILE.TELESCOPIC.DRIFT_TIMEOUT = 16.0
 # Shape of the float camera, the script tracks the whole camrea window by default
@@ -323,7 +322,7 @@ _C.PROFILE.BOLOGNESE.CAST_DELAY = 4.0
 # Sensitivity of float detection
 _C.PROFILE.BOLOGNESE.FLOAT_SENSITIVITY = 0.68
 _C.PROFILE.BOLOGNESE.CHECK_DELAY = 1.0  # Delay between fish bite checks
-_C.PROFILE.BOLOGNESE.PULL_DELAY = 0.5 # Delay pulling a fish after it's hooked
+_C.PROFILE.BOLOGNESE.PULL_DELAY = 0.5  # Delay pulling a fish after it's hooked
 # Recast rod after timed out, designed for flowing water maps
 _C.PROFILE.BOLOGNESE.DRIFT_TIMEOUT = 32.0
 # Shape of the float camera, the script tracks the whole camrea window by default

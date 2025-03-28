@@ -196,6 +196,7 @@ def press_before_and_after(key):
 
     return func_wrapper
 
+
 def release_keys_after(arrow_keys: bool = False):
     """Release keys that might have been holding down
 
@@ -217,6 +218,7 @@ def release_keys_after(arrow_keys: bool = False):
                 return func(*args, **kwargs)
             finally:
                 release_keys(arrow_keys)  # Uses the captured value
+
         return args_wrapper
 
     return func_wrapper

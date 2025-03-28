@@ -699,7 +699,6 @@ class Player:
                 return True
         return False
 
-
     def general_quit(self, msg: str) -> None:
         """Quit the game through the control panel.
 

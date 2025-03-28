@@ -26,5 +26,6 @@ class LineSnaggedError(Exception):
 class ItemNotFoundError(Exception):
     """Failed to find an available item for replacement."""
 
+
 class LureBrokenError(Exception):
     """Lure is broken."""
