@@ -153,16 +153,18 @@ class HarvestApp(App):
                     self._consume_food("carrot")
                     self.carrot_count += 1
 
-            if not self.detection.is_energy_high():
+            if self.detection.is_energy_high():
+                self._harvest_baits()
+                self.harvest_count += 1
+            else:
                 logger.info("Energy is not high enough")
-            self._harvest_baits()
-            self.harvest_count += 1
 
             if self.cfg.ARGS.POWER_SAVING:
                 pag.press("esc")
-            sleep(self.cfg.ARGS.CHECK_DELAY)
-            if self.cfg.ARGS.POWER_SAVING:
+                sleep(self.cfg.ARGS.CHECK_DELAY)
                 pag.press("esc")
+            else:
+                sleep(self.cfg.ARGS.CHECK_DELAY)
             sleep(ANIMATION_DELAY)
 
 
