@@ -109,9 +109,9 @@ class MoveApp(App):
         pag.keyDown("w")
 
         # blocking listener loop
-        with keyboard.Listener(self._on_release) as listener:
+        with keyboard.Listener(on_release=self._on_release) as listener:
             listener.join()
 
 
 if __name__ == "__main__":
-    MoveApp.start()
+    MoveApp().start()
