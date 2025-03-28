@@ -15,6 +15,7 @@ import pyautogui as pag
 from rf4s.controller.detection import Detection
 
 MAX_FRICTION_BRAKE = 30
+MIN_FRICTION_BRAKE = 0
 UP = 1
 DOWN = -1
 FRICTION_BRAKE_MONITOR_DELAY = 2
@@ -78,11 +79,11 @@ class FrictionBrake:
         if increase:
             if not bound or self.cur.value < self.cfg.FRICTION_BRAKE.MAX:
                 pag.scroll(UP, _pause=False)
-                self.cur.value += 1
+                self.cur.value = min(self.cur.value + 1, MAX_FRICTION_BRAKE)
         else:
             if self.cur.value > 0:
                 pag.scroll(DOWN, _pause=False)
-                self.cur.value -= 1
+                self.cur.value = max(self.cur.value - 1, MIN_FRICTION_BRAKE)
         sleep(LOOP_DELAY)
 
 

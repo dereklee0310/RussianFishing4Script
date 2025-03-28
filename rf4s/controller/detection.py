@@ -36,10 +36,10 @@ ROOT = Path(__file__).resolve().parents[2]
 
 COORD_OFFSETS = {
     "1600x900": {
-        "friction_brake_very_high": (502, 876),  # Left point only
-        "friction_brake_high": (459, 876),
-        "friction_brake_medium": (417, 876),
-        "friction_brake_low": (396, 876),
+        "friction_brake_very_high": (502, 872),  # Left point only
+        "friction_brake_high": (459, 872),
+        "friction_brake_medium": (417, 872),
+        "friction_brake_low": (396, 872),
         "fish_icon": (389, 844),
         "clip_icon": (1042, 844),
         "spool_icon": (1077, 844),  # x + 15, y + 15
@@ -49,10 +49,10 @@ COORD_OFFSETS = {
         "bait_icon": (35, 31),
     },
     "1920x1080": {
-        "friction_brake_very_high": (662, 1056),
-        "friction_brake_high": (619, 1056),
-        "friction_brake_medium": (577, 1056),
-        "friction_brake_low": (556, 1056),
+        "friction_brake_very_high": (662, 1052),
+        "friction_brake_high": (619, 1052),
+        "friction_brake_medium": (577, 1052),
+        "friction_brake_low": (556, 1052),
         "fish_icon": (549, 1024),
         "clip_icon": (1202, 1024),
         "spool_icon": (1237, 1024),
