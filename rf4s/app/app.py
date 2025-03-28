@@ -1,8 +1,9 @@
-"""Default App class for other tools.
+"""Base application class for other tools.
 
-This module provides a default App class for tools like item crafting and baits.
-It initializes the configuration with a dummy profile and parses args.
-#TODO
+Provides core functionality for:
+- Configuration management
+- Window control
+- Result display
 
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
@@ -20,7 +21,29 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 class App:
+    """Main application class providing configuration setup, window management,
+    and result display functionality.
+
+    This class serves as a base for specialized tools. Subclasses must implement
+    `_parse_args()` and `_start()` methods.
+
+    Attributes:
+        cfg (yacs.config.CfgNode): Merged configuration from defaults, config file,
+            CLI arguments, and runtime options (frozen after initialization).
+        window (rf4s.controller.window.Window): Window management controller.
+    """
     def __init__(self):
+        """Initialize application configuration and window controller.
+
+        Configuration is built from:
+        1. Default configuration
+        2. config.yaml file
+        3. Command-line arguments (via subclass implementation)
+        4. Runtime options
+
+        Raises:
+            NotImplementedError: If subclass does not implement `_parse_args()`
+        """
         self.cfg = config.setup_cfg()
         self.cfg.merge_from_file(ROOT / "config.yaml")
         args = self._parse_args()
@@ -42,12 +65,10 @@ class App:
         raise NotImplementedError("_start method must be implemented in subclass")
 
     def start(self, results: tuple[tuple[str, str]] = ()) -> None:
-        """A wrapper for confirmation, window activation, and start.
+        """Wrapper method for _start() that handle window activation and result display.
 
-        :param app: Main application class.
-        :type app: object
-        :param results: Counter lookup table.
-        :type results: tuple[tuple[str, str]] | None
+        :param results: (field name, attribute name) pairs
+        :type results: tuple[tuple[str, str]], optional
         """
         self.window.activate_game_window()
         try:
@@ -59,9 +80,9 @@ class App:
         self.window.activate_script_window()
 
     def _print_results(self, results: tuple[tuple[str, str]]) -> None:
-        """Display the running results of different apps.
+        """Display the running results in a table format.
 
-        :param results: Attribute name - column name mapping.
+        :param results: (field name, attribute name) pairs
         :type results: tuple[tuple[str, str]]
         """
         table = Table(
