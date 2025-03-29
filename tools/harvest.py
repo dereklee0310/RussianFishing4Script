@@ -23,8 +23,8 @@ from yacs.config import CfgNode as CN
 sys.path.append(".")
 
 from rf4s import utils
-from rf4s.config.config import print_cfg
 from rf4s.app.app import App
+from rf4s.config.config import print_cfg
 from rf4s.controller.detection import Detection
 from rf4s.controller.timer import Timer
 

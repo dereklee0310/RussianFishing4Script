@@ -32,6 +32,7 @@ class App:
             CLI arguments, and runtime options (frozen after initialization).
         window (rf4s.controller.window.Window): Window management controller.
     """
+
     def __init__(self):
         """Initialize application configuration and window controller.
 

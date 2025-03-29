@@ -15,7 +15,6 @@ import pyautogui as pag
 from pyscreeze import Box
 from rich import print
 from rich.console import Console
-from rich.table import Table
 from rich.text import Text
 
 # BASE_DELAY + LOOP_DELAY >= 2.2 to trigger clicklock

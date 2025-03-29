@@ -1,5 +1,21 @@
 **[[中文版]][CHANGELOG]**
 
+## 0.4.1 (2025-03-30)
+
+- Fixed a bug that left/right trolling mode doesn't work properly
+
+- Fixed an issue where electro mode doesn't work and compatible with `-g` flag
+
+- Fixed broken lure detection mechanism
+
+- Fixed a bug that pause is hard to trigger when using "toggle moving foward" tool 
+
+- Added missing `POST_ACCELERATION` setting to `BOLOGNESE` mode
+
+- Tools now display config before running
+
+- Improved configuration guide
+
 ## 0.4.0 (2025-03-16)
 
 - Fixed a bug that the casting power level cannot be set to a value other than 1 or 5.
