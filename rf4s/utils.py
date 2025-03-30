@@ -115,7 +115,7 @@ def toggle_clicklock(func):
     def wrapper(self, *args, **kwargs):
         # ELECTRO must be enabled, always use electric mode if GEAR_RATIO is disabled
         # otherwise, only use electric mode when it's the first time
-        if self.cfg.ARGS.ELECTRO and (not self.cfg.ARGS.GEAR_RATIO or args[0]):
+        if self.cfg.ARGS.ELECTRO and (not self.cfg.ARGS.GEAR_RATIO or (not args or args[0])):
             pag.click(clicks=2, interval=0.1)
         else:
             pag.mouseDown()
