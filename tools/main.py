@@ -501,8 +501,7 @@ class Rf4sApp:
                 self.cfg.ARGS.ELECTRO = False
             else:
                 logger.info(
-                    "Electric mode is enabled, make sure you're using\n"
-                    "Electro Raptor and EL mode at the same time."
+                    "Electric mode is enabled, make sure you're using Electro Raptor"
                 )
 
     def _on_release(self, key: keyboard.KeyCode) -> None:
