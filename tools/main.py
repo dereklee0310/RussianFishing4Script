@@ -535,8 +535,7 @@ class Rf4sApp:
             listener = keyboard.Listener(on_release=self._on_release)
             listener.start()
         try:
-            self.player._pull_fish()
-            # self.player.start_fishing()
+            self.player.start_fishing()
         except KeyboardInterrupt:
             pass
 
