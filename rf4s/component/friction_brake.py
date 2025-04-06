@@ -48,9 +48,9 @@ class FrictionBrake:
         :type detection: Detection
         """
         self.cfg = cfg
+        self.lock = lock
         self.detection = detection
         self.cur = Value("i", cfg.FRICTION_BRAKE.INITIAL)
-        self.lock = lock
         self.monitor_process = Process(target=monitor_friction_brake, args=(self,))
 
     def reset(self, target: int) -> None:
@@ -68,16 +68,14 @@ class FrictionBrake:
             pag.scroll(DOWN)
         self.cur.value = target
 
-    def change(self, increase: bool, bound: bool = True) -> None:
+    def change(self, increase: bool) -> None:
         """Increase or decrease the friction brake.
 
         :param increase: Whether to increase the friction brake.
         :type increase: bool
-        :param bound: Whether to check boundaries, defaults to True.
-        :type bound: bool, optional
         """
         if increase:
-            if not bound or self.cur.value < self.cfg.FRICTION_BRAKE.MAX:
+            if self.cur.value < self.cfg.FRICTION_BRAKE.MAX:
                 pag.scroll(UP, _pause=False)
                 self.cur.value = min(self.cur.value + 1, MAX_FRICTION_BRAKE)
         else:
@@ -87,7 +85,7 @@ class FrictionBrake:
         sleep(LOOP_DELAY)
 
 
-def monitor_friction_brake(friction_brake: FrictionBrake, bound: bool = False) -> None:
+def monitor_friction_brake(friction_brake: FrictionBrake) -> None:
     """Monitor friction brake bar and change it accordingly.
 
     This is used as the target function in multiprocess.Process and must be pickable,
@@ -95,8 +93,6 @@ def monitor_friction_brake(friction_brake: FrictionBrake, bound: bool = False) -
 
     :param friction_brake: Friction brake controller.
     :type friction_brake: FrictionBrake
-    :param bound: Whether to check boundaries, defaults to False.
-    :type bound: bool, optional
     """
     logger.info("Monitoring friction brake")
 
@@ -114,10 +110,10 @@ def monitor_friction_brake(friction_brake: FrictionBrake, bound: bool = False) -
                 fish_hooked = True
             with friction_brake.lock:
                 if friction_brake.detection.is_friction_brake_high():
-                    friction_brake.change(increase=False, bound=bound)
+                    friction_brake.change(increase=False)
                 if friction_brake.detection.is_reel_burning():
                     logger.info("Reel burning detected, decreasing friction brake")
-                    friction_brake.change(increase=False, bound=bound)
+                    friction_brake.change(increase=False)
                 else:
                     cur_time = time()
                     if (
@@ -126,6 +122,6 @@ def monitor_friction_brake(friction_brake: FrictionBrake, bound: bool = False) -
                     ):
                         continue
                     pre_time = cur_time
-                    friction_brake.change(increase=True, bound=bound)
+                    friction_brake.change(increase=True)
     except KeyboardInterrupt:
         pass
