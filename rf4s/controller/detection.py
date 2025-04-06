@@ -337,6 +337,9 @@ class Detection:
         return self._get_image_box("pva_icon", 0.6) is None
 
     def is_bait_chosen(self):
+        if self.cfg.SELECTED.MODE in ("pirk", "elevator"):
+            return True
+
         # Two bait slots, check only the first one
         if self.cfg.SELECTED.MODE in ("telescopic", "bolognese"):
             return (
