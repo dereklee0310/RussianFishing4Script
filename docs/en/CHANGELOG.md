@@ -1,5 +1,11 @@
 **[[中文版]][CHANGELOG]**
 
+## 0.4.2 (2025-04-07)
+- Fixed a bug where the friction brake threshold was not being applied correctly
+
+- Fixed unexpected termination due to running out of fillet when using pirk/elevator mode
+
+
 ## 0.4.1 (2025-03-30)
 
 - Fixed a bug that left/right trolling mode doesn't work properly
