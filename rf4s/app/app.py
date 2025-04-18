@@ -12,6 +12,7 @@ import os
 import signal
 import sys
 from pathlib import Path
+from abc import ABC, abstractmethod
 
 from pynput import keyboard
 from rich import print
@@ -25,7 +26,7 @@ from rf4s.controller.window import Window
 ROOT = Path(__file__).resolve().parents[2]
 
 
-class App:
+class App(ABC):
     """A base application class.
 
     Attributes:
@@ -53,15 +54,19 @@ class App:
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
             sys.exit()
 
+    @abstractmethod
     def _start(self):
         raise NotImplementedError("_start() must be implemented in subclass")
 
+    @abstractmethod
     def start(self):
         raise NotImplementedError("start() must be implemented in subclass")
 
+    @abstractmethod
     def create_parser(self):
         raise NotImplementedError("create_parser() must be implemented in subclass")
 
+    @abstractmethod
     def display_results(self) -> None:
         raise NotImplementedError("display_result() must be implemented in subclass")
 
