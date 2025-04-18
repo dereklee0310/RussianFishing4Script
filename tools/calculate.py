@@ -28,10 +28,10 @@ def get_tackle_stats():
     :rtype: tuple[float, float]
     """
     prompts = (
-        "Reel's max drag (kg): ",
-        "Reel's friction brake wear (%): ",
-        "Leader's load capacity (kg): ",
-        "Leader's wear (%): ",
+        "Reel's max drag (kg)",
+        "Reel's friction brake wear (%)",
+        "Leader's load capacity (kg)",
+        "Leader's wear (%)",
     )
 
     while True:

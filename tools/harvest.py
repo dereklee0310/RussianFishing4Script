@@ -7,54 +7,36 @@ mode and configurable check delays.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
-# pylint: disable=no-member
-# setting node's attributes will be merged on the fly
-
 import argparse
-import logging
 import sys
 from pathlib import Path
 from time import sleep
 
 import pyautogui as pag
-from rich.logging import RichHandler
-from yacs.config import CfgNode as CN
 
 sys.path.append(".")
 
-from rf4s import utils
-from rf4s.app.app import App
+from rf4s.app.app import ToolApp
 from rf4s.config.config import print_cfg
-from rf4s.controller.detection import Detection
 from rf4s.controller.timer import Timer
+from rf4s.utils import create_rich_logger
 
 ROOT = Path(__file__).resolve().parents[1]
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[RichHandler(rich_tracebacks=True)],
-)
-logger = logging.getLogger("rich")
-
+DIG_DELAY = 5  # 4 + 1 s
+CHECK_DELAY = 0.5
 ANIMATION_DELAY = 0.5
 
+logger = create_rich_logger()
 
-class HarvestApp(App):
+
+class HarvestApp(ToolApp):
     """Main application class for automating bait harvesting and hunger/comfort refill.
 
     This class manages the configuration, detection, and execution of the harvesting
     and refill processes. It also handles power-saving mode and check delays.
 
     Attributes:
-        cfg (CfgNode): Configuration node merged from YAML and CLI arguments.
-        window (Window): Game window controller instance.
-        detection (Detection): Detection instance for in-game state checks.
         timer (Timer): Timer instance for managing cooldowns.
-        tea_count (int): Number of tea consumed.
-        carrot_count (int): Number of carrots consumed.
-        harvest_count (int): Number of baits harvested.
     """
 
     def __init__(self):
@@ -64,20 +46,19 @@ class HarvestApp(App):
         detection, and timer instances.
         """
         super().__init__()
-        print(self.cfg.ARGS)
+        print_cfg(self.cfg.ARGS)
 
-        self.detection = Detection(self.cfg, self.window)
         self.timer = Timer(self.cfg)
 
-        self.tea_count = 0
-        self.carrot_count = 0
-        self.harvest_count = 0
+        self.results["Tea consumed"] = 0
+        self.results["Carrot consumed"] = 0
+        self.results["Bait harvested"] = 0
 
-    def _parse_args(self) -> argparse.Namespace:
-        """Configure argument parser and parse command-line arguments.
+    def create_parser(self) -> argparse.ArgumentParser:
+        """Create an argument parser for the application.
 
-        :return: Parsed command-line arguments.
-        :rtype: argparse.Namespace
+        :return: Configured argument parser.
+        :rtype: argparse.ArgumentParser
         """
         parser = argparse.ArgumentParser(
             description="Harvest baits and refill hunger/comfort automatically.",
@@ -102,39 +83,54 @@ class HarvestApp(App):
             default=32,
             help="delay time between each checks, 32s by default",
         )
-        return parser.parse_args()
+        return parser
 
-    def _harvest_baits(self) -> None:
-        """Harvest baits from the game.
+    def harvest_baits(self) -> None:
+        """Harvest baits using shovel/spoon.
 
         The digging tool should be pulled out before calling this method. Waits for
         harvest success and presses the spacebar to complete the process.
         """
         logger.info("Harvesting baits")
-        # Dig and wait (4 + 1)s
         pag.click()
-        sleep(5)
-
-        i = 64
-        while i > 0 and not self.detection.is_harvest_success():
-            i = utils.sleep_and_decrease(i, 2)
+        sleep(DIG_DELAY)
+        while not self.detection.is_harvest_success():
+            sleep(CHECK_DELAY)
         pag.press("space")
         logger.info("Baits harvested succussfully")
         sleep(ANIMATION_DELAY)
 
-    def _consume_food(self, food: str) -> None:
-        """Consume a specific type of food.
+    def refill_player_stats(self) -> None:
+        """Refill player stats using tea and carrot."""
+        if not self.cfg.ARGS.REFILL:
+            return
 
-        Opens the food menu, moves the cursor to the food's position, and clicks to consume it.
+        logger.info("Refilling player stats")
+        # Comfort is affected by weather, add a check to avoid over drink
+        if self.detection.is_comfort_low() and self.timer.is_tea_drinkable():
+            self._use_item("tea")
+            self.results["Tea consumed"] += 1
 
-        :param food: The type of food to consume (e.g., "tea" or "carrot").
-        :type food: str
+        if self.detection.is_hunger_low():
+            self._use_item("carrot")
+            self.results["Carrot consumed"] += 1
+
+    def _use_item(self, item: str) -> None:
+        """Access an item by name using quick selection shortcut or menu.
+
+        :param item: The name of the item to access.
+        :type item: str
         """
-        logger.info("Consuming %s", food)
-        with pag.hold("t"):
-            sleep(ANIMATION_DELAY)
-            pag.moveTo(self.detection.get_food_position(food))
-            pag.click()
+        logger.info("Using item: %s", item)
+        key = str(self.cfg.KEY[item.upper()])
+        if key != "-1":  # Use shortcut
+            pag.press(key)
+        else:  # Open food menu
+            with pag.hold("t"):
+                sleep(ANIMATION_DELAY)
+                food_position = self.detection.get_food_position(item)
+                pag.moveTo(food_position)
+                pag.click()
         sleep(ANIMATION_DELAY)
 
     def _start(self) -> None:
@@ -146,18 +142,10 @@ class HarvestApp(App):
         pag.press(str(self.cfg.KEY.DIGGING_TOOL))
         sleep(3)
         while True:
-            if self.cfg.ARGS.REFILL:
-                if self.detection.is_comfort_low() and self.timer.is_tea_drinkable():
-                    self._consume_food("tea")
-                    self.tea_count += 1
-
-                if self.detection.is_hunger_low():
-                    self._consume_food("carrot")
-                    self.carrot_count += 1
-
+            self.refill_player_stats()
             if self.detection.is_energy_high():
-                self._harvest_baits()
-                self.harvest_count += 1
+                self.harvest_baits()
+                self.results["Bait harvested"] += 1
             else:
                 logger.info("Energy is not high enough")
 
@@ -167,14 +155,7 @@ class HarvestApp(App):
                 pag.press("esc")
             else:
                 sleep(self.cfg.ARGS.CHECK_DELAY)
-            sleep(ANIMATION_DELAY)
 
 
 if __name__ == "__main__":
-    HarvestApp().start(
-        (
-            ("Tea consumed", "tea_count"),
-            ("Carrot consumed", "carrot_count"),
-            ("Number of harvests", "harvest_count"),
-        ),
-    )
+    HarvestApp().start()

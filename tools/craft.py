@@ -6,11 +6,7 @@ discarding crafted items, fast crafting mode, and a configurable crafting limit.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
-# pylint: disable=no-member
-# setting node's attributes will be merged on the fly
-
 import argparse
-import logging
 import random
 import sys
 from datetime import datetime
@@ -18,66 +14,47 @@ from pathlib import Path
 from time import sleep
 
 import pyautogui as pag
-from rich.logging import RichHandler
 
 sys.path.append(".")
-
-from rf4s.app.app import App
+from rf4s.app.app import ToolApp
 from rf4s.config.config import print_cfg
-from rf4s.controller.detection import Detection
+from rf4s.utils import create_rich_logger
 
 CRAFT_DELAY = 4.0
-CRAFT_DELAY_2X = 8.0
-
-ANIMATION_DELAY = 0.5
-ANIMATION_DELAY_2X = 1.0
+CRAFT_DELAY_2X = CRAFT_DELAY * 2
+LOOP_DELAY = 0.5
+LOOP_DELAY_2X = LOOP_DELAY * 2
 ROOT = Path(__file__).resolve().parents[1]
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[RichHandler(rich_tracebacks=True)],
-)
-logger = logging.getLogger("rich")
+logger = create_rich_logger()
 
 
-class CraftApp(App):
+class CraftApp(ToolApp):
     """Main application class for automating crafting.
 
     This class manages the configuration, detection, and execution of the crafting
     process. It tracks the number of successful and failed crafts, as well as the
     total number of materials used.
-
-    Attributes:
-        cfg (CfgNode): Configuration node merged from YAML and CLI arguments.
-        window (Window): Game window controller instance.
-        detection (Detection): Detection instance for in-game state checks.
-        success_count (int): Number of successful crafts.
-        fail_count (int): Number of failed crafts.
-        craft_count (int): Total number of crafting attempts.
     """
 
     def __init__(self):
         """Initialize the application.
 
-        Loads configuration, parses command-line arguments, and sets up the game window
-        and detection instances.
+        1. Display cfg node.
+        2. Initialize results dictionary.
         """
         super().__init__()
         print_cfg(self.cfg.ARGS)
 
-        self.detection = Detection(self.cfg, self.window)
+        self.results["Successful crafts"] = 0
+        self.results["Failed crafts"] = 0
+        self.results["Materials used"] = 0
 
-        self.success_count = 0
-        self.fail_count = 0
-        self.craft_count = 0
+    def create_parser(self) -> argparse.ArgumentParser:
+        """Create an argument parser for the application.
 
-    def _parse_args(self) -> argparse.Namespace:
-        """Configure argument parser and parse command-line arguments.
-
-        :return: Parsed command-line arguments.
-        :rtype: argparse.Namespace
+        :return: Configured argument parser.
+        :rtype: argparse.ArgumentParser
         """
         parser = argparse.ArgumentParser(description="Craft items automatically.")
         parser.add_argument("opts", nargs="*", help="overwrite configuration")
@@ -101,18 +78,27 @@ class CraftApp(App):
             help="number of items to craft, no limit by default",
             metavar="LIMIT",
         )
-        return parser.parse_args()
+        return parser
 
-    def _start(self) -> None:
-        """Main loop for crafting items.
+    def get_action_delays(self) -> tuple[float, float]:
+        """Get crafting and checking delays.
 
-        Executes the primary loop for crafting items until materials are exhausted or
-        the crafting limit is reached. Supports fast crafting mode and discarding items.
+        :return: Two delays in seconds
+        :rtype: tuple[float, float]
         """
-        random.seed(datetime.now().timestamp())
-        craft_delay = CRAFT_DELAY
-        click_delay = ANIMATION_DELAY
+        if not self.cfg.ARGS.FAST:
+            return CRAFT_DELAY, LOOP_DELAY
+        return (
+            random.uniform(CRAFT_DELAY, CRAFT_DELAY_2X),
+            random.uniform(LOOP_DELAY, LOOP_DELAY_2X),
+        )
 
+    def move_cursor_to_make_button(self) -> None:
+        """Move the cursor to the make button position.
+
+        This method uses the Detection class to find the position of the make button
+        and moves the cursor to that position.
+        """
         make_button_position = self.detection.get_make_button_position()
         if make_button_position is None:
             logger.critical(
@@ -123,39 +109,51 @@ class CraftApp(App):
             return
         pag.moveTo(make_button_position)
 
-        while self.detection.is_material_complete():
-            logger.info("Crafting item")
-            pag.click()
+    def craft_item(
+        self, craft_delay: float, accept_delay: float, accept_key: str
+    ) -> None:
+        """Craft an item.
 
-            if not self.cfg.ARGS.FAST:
-                craft_delay = random.uniform(CRAFT_DELAY, CRAFT_DELAY_2X)
-                click_delay = random.uniform(ANIMATION_DELAY, ANIMATION_DELAY_2X)
-            sleep(craft_delay)
-
-            while True:
-                if self.detection.is_operation_success():
-                    logger.info("Item crafted successfully")
-                    self.success_count += 1
-                    break
-
-                if self.detection.is_operation_failed():
-                    logger.warning("Failed to craft item")
-                    self.fail_count += 1
-                    break
-                sleep(ANIMATION_DELAY)
-            self.craft_count += 1
-
-            pag.press("backspace" if self.cfg.ARGS.DISCARD else "space")
-            if self.craft_count >= self.cfg.ARGS.CRAFT_LIMIT:
+        :param craft_delay: Delay in seconds before accepting the crafted item.
+        :type craft_delay: float
+        :param accept_delay: Delay in seconds after accepting the crafted item.
+        :type accept_delay: float
+        :param accept_key: Key to press after accepting the crafted item.
+        :type accept_key: str
+        """
+        logger.info("Crafting item")
+        pag.click()
+        sleep(craft_delay)
+        self.results["Materials used"] += 1
+        while True:
+            if self.detection.is_operation_success():
+                logger.info("Crafting successed")
+                self.results["Successful crafts"] += 1
                 break
-            sleep(click_delay)
+
+            if self.detection.is_operation_failed():
+                logger.warning("Crafting failed")
+                self.results["Failed crafts"] += 1
+                break
+            sleep(LOOP_DELAY)
+        pag.press(accept_key)
+        sleep(accept_delay)
+
+    def _start(self) -> None:
+        """Main loop for crafting items.
+
+        Executes the primary loop for crafting items until materials are exhausted or
+        the crafting limit is reached. Supports fast crafting mode and discarding items.
+        """
+        random.seed(datetime.now().timestamp())
+        accept_key = "backspace" if self.cfg.ARGS.DISCARD else "space"
+        self.move_cursor_to_make_button()
+        while (
+            self.detection.is_material_complete()
+            and self.results["Materials used"] < self.cfg.ARGS.CRAFT_LIMIT
+        ):
+            self.craft_item(*self.get_action_delays(), accept_key)
 
 
 if __name__ == "__main__":
-    CraftApp().start(
-        (
-            ("Successful Crafts", "success_count"),
-            ("Failed Crafts", "fail_count"),
-            ("Materials Used", "craft_count"),
-        ),
-    )
+    CraftApp().start()

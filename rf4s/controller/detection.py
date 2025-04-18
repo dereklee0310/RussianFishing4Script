@@ -11,6 +11,7 @@ and pixel color analysis. It is used for automating tasks in Russian Fishing 4.
 import time
 from pathlib import Path
 from typing import Generator
+from functools import partial
 
 import pyautogui as pag
 from PIL import Image
@@ -114,8 +115,15 @@ class Detection:
         self.window = window
         self.image_dir = ROOT / "static" / cfg.SCRIPT.LANGUAGE
 
-        if window.supported:
+        if window.is_size_supported():
             self._set_absolute_coords()
+            self.is_fish_hooked = self.is_fish_hooked_pixel
+        else:
+            self.is_fish_hooked = partial(
+                self._get_image_box,
+                image="fish_icon",
+                confidence="0.9",
+            )
 
         self.bait_icon_reference_img = Image.open(self.image_dir / "bait_icon.png")
 
@@ -140,8 +148,7 @@ class Detection:
 
     def _set_absolute_coords(self) -> None:
         """Add offsets to the base coordinates to get absolute ones."""
-        window_size = f"{self.window.box[2]}x{self.window.box[3]}"
-        self.coord_offsets = COORD_OFFSETS[window_size]
+        self.coord_offsets = COORD_OFFSETS[self.window.get_resolution_str()]
 
         for key in self.coord_offsets:
             setattr(self, f"{key}_coord", self._get_absolute_coord(key))
@@ -173,10 +180,8 @@ class Detection:
         :return: Converted absolute coordinate.
         :rtype: list[int]
         """
-        return [
-            self.window.box[0] + self.coord_offsets[offset_key][0],
-            self.window.box[1] + self.coord_offsets[offset_key][1],
-        ]
+        box = self.window.get_box()
+        return [box[i] + self.coord_offsets[offset_key][i] for i in range(2)]
 
     # ----------------------------- Unmarked release ----------------------------- #
     def is_fish_marked(self):
@@ -187,9 +192,7 @@ class Detection:
 
     # -------------------------------- Fish status ------------------------------- #
     def is_fish_hooked(self):
-        if self.window.supported:
-            return self.is_fish_hooked_pixel()
-        return self._get_image_box("fish_icon", 0.9)
+        pass  # It's initialized in the constructor
 
     def is_fish_hooked_pixel(self) -> bool:
         return all(c > MIN_GRAY_SCALE_LEVEL for c in pag.pixel(*self.fish_icon_coord))

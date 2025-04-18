@@ -8,46 +8,80 @@ Provides core functionality for:
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
+import os
+import signal
+import sys
 from pathlib import Path
 
+from pynput import keyboard
 from rich import print
 from rich.table import Table
 from yacs.config import CfgNode as CN
 
 from rf4s.config import config
+from rf4s.controller.detection import Detection
 from rf4s.controller.window import Window
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
 class App:
-    """Main application class providing configuration setup, window management,
-    and result display functionality.
-
-    This class serves as a base for specialized tools. Subclasses must implement
-    `_parse_args()` and `_start()` methods.
+    """A base application class.
 
     Attributes:
-        cfg (yacs.config.CfgNode): Merged configuration from defaults, config file,
-            CLI arguments, and runtime options (frozen after initialization).
-        window (rf4s.controller.window.Window): Window management controller.
+        cfg (yacs.config.CfgNode): Default + user's configuration file
+        window (Window): Window controller
     """
 
     def __init__(self):
-        """Initialize application configuration and window controller.
-
-        Configuration is built from:
-        1. Default configuration
-        2. config.yaml file
-        3. Command-line arguments (via subclass implementation)
-        4. Runtime options
-
-        Raises:
-            NotImplementedError: If subclass does not implement `_parse_args()`
-        """
+        """Initialize a mutable cfg node for further modification."""
         self.cfg = config.setup_cfg()
         self.cfg.merge_from_file(ROOT / "config.yaml")
-        args = self._parse_args()
+        self.window = Window()
+
+    def _on_release(self, key: keyboard.KeyCode) -> None:
+        """Monitor user's keystrokes and convert a key press to a CTRL_C_EVENT.
+
+        :param key: The key that was released.
+        :type key: keyboard.KeyCode
+
+        Exits the application when the configured quit key is pressed.
+        """
+        # Trigger CTRL_C_EVENT, which will be caught in start() to simulate pressing
+        # CTRL-C to terminate the script.
+        if key == keyboard.KeyCode.from_char(self.cfg.KEY.QUIT):
+            os.kill(os.getpid(), signal.CTRL_C_EVENT)
+            sys.exit()
+
+    def _start(self):
+        raise NotImplementedError("_start() must be implemented in subclass")
+
+    def start(self):
+        raise NotImplementedError("start() must be implemented in subclass")
+
+    def create_parser(self):
+        raise NotImplementedError("create_parser() must be implemented in subclass")
+
+    def display_results(self) -> None:
+        raise NotImplementedError("display_result() must be implemented in subclass")
+
+
+class ToolApp(App):
+    """General application class for other tools.
+
+    Attributes:
+        detection (Detection): Detection controller
+        results (dict): Running results
+    """
+    def __init__(self):
+        """Set up an immutable cfg node for further modification.
+
+        1. Parse command-line arguments and merge them with the existing cfg node.
+        2. Create a Window instance and a Detection instance.
+        3. Create an empty dictionary for results
+        """
+        super().__init__()
+        args = self.create_parser().parse_args()
         args_cfg = CN({"ARGS": config.dict_to_cfg(vars(args))})
         self.cfg.merge_from_other_cfg(args_cfg)
         self.cfg.merge_from_list(args.opts)
@@ -57,42 +91,27 @@ class App:
         self.cfg.merge_from_other_cfg(dummy)
         self.cfg.freeze()
 
-        self.window = Window()
+        self.detection = Detection(self.cfg, self.window)
+        self.results = {} # This will be used in display_results()
 
-    def _parse_args(self):
-        raise NotImplementedError("parse_args method must be implemented in subclass")
+    def display_results(self) -> None:
+        """Display the running results in a table format."""
+        table = Table("Results", title="Running Results", show_header=False)
+        for name, value in self.results.items():
+            table.add_row(name, str(value))
+        print(table)
 
-    def _start(self):
-        raise NotImplementedError("_start method must be implemented in subclass")
+    def start(self) -> None:
+        """Wrapper method that handle window activation and result display."""
+        if self.cfg.KEY.QUIT != "CTRL-C":
+            listener = keyboard.Listener(on_release=self._on_release)
+            listener.start()
 
-    def start(self, results: tuple[tuple[str, str]] = ()) -> None:
-        """Wrapper method for _start() that handle window activation and result display.
-
-        :param results: (field name, attribute name) pairs
-        :type results: tuple[tuple[str, str]], optional
-        """
         self.window.activate_game_window()
         try:
             self._start()
         except KeyboardInterrupt:
             pass
-        if results:
-            self._print_results(results)
+        if self.results:
+            self.display_results()
         self.window.activate_script_window()
-
-    def _print_results(self, results: tuple[tuple[str, str]]) -> None:
-        """Display the running results in a table format.
-
-        :param results: (field name, attribute name) pairs
-        :type results: tuple[tuple[str, str]]
-        """
-        table = Table(
-            "Results",
-            title="Running Results",
-            show_header=False,
-            # min_width=20,
-        )
-        table.title = "Running Results"
-        for field_name, attribute_name in results:
-            table.add_row(field_name, str(getattr(self, attribute_name)))
-        print(table)

@@ -1,5 +1,15 @@
 **[[中文版]][CHANGELOG]**
 
+## tmp
+
+Update app and window module
+
+-e/--exit-key -> -q/--quit-key
+
+type in calculate.py
+
+-bl -> -BL
+
 ## 0.4.2 (2025-04-07)
 - Fixed a bug where the friction brake threshold was not being applied correctly
 

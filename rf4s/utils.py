@@ -13,8 +13,8 @@ from time import sleep
 
 import pyautogui as pag
 from pyscreeze import Box
-from rich import print
 from rich.console import Console
+from rich.logging import RichHandler
 from rich.text import Text
 
 # BASE_DELAY + LOOP_DELAY >= 2.2 to trigger clicklock
@@ -104,6 +104,23 @@ def get_box_center(box: Box) -> tuple[int, int]:
     return int(box.left + box.width // 2), int(box.top + box.height // 2)
 
 
+def create_rich_logger() -> RichHandler:
+    """Create a default RichHandler for logging.
+
+    :return: Logging handler from rich.
+    :rtype: RichHandler
+    """
+    # Ignore %(name)s because it's too verbose
+    # https://rich.readthedocs.io/en/latest/logging.html
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        handlers=[RichHandler(rich_tracebacks=True)],
+    )
+    return logging.getLogger("rich")
+
+
 # ---------------------------------------------------------------------------- #
 #                                  decorators                                  #
 # ---------------------------------------------------------------------------- #
@@ -115,7 +132,9 @@ def toggle_clicklock(func):
     def wrapper(self, *args, **kwargs):
         # ELECTRO must be enabled, always use electric mode if GEAR_RATIO is disabled
         # otherwise, only use electric mode when it's the first time
-        if self.cfg.ARGS.ELECTRO and (not self.cfg.ARGS.GEAR_RATIO or (not args or args[0])):
+        if self.cfg.ARGS.ELECTRO and (
+            not self.cfg.ARGS.GEAR_RATIO or (not args or args[0])
+        ):
             pag.click(clicks=2, interval=0.1)
         else:
             pag.mouseDown()

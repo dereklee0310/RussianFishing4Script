@@ -8,37 +8,22 @@ and resetting the friction brake.
 """
 
 import argparse
-import logging
-import shlex
 import sys
 from multiprocessing import Lock
-from pathlib import Path
 
 from pynput import keyboard
-from rich.logging import RichHandler
+from rich import print
 
 sys.path.append(".")
-
-
-from rf4s.app.app import App
+from rf4s.app.app import ToolApp
 from rf4s.component.friction_brake import FrictionBrake
 from rf4s.config.config import print_cfg
-from rf4s.controller.detection import Detection
+from rf4s.utils import create_rich_logger
 
-EXIT = "'h'"
-RESET = "'g'"
-ROOT = Path(__file__).resolve().parents[1]
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[RichHandler(rich_tracebacks=True)],
-)
-logger = logging.getLogger("rich")
+logger = create_rich_logger()
 
 
-class FrictionBrakeApp(App):
+class FrictionBrakeApp(ToolApp):
     """Main application class for automating friction brake adjustments.
 
     This class manages the configuration, detection, and execution of the friction
@@ -46,57 +31,67 @@ class FrictionBrakeApp(App):
 
     Attributes:
         cfg (CfgNode): Configuration node merged from YAML and CLI arguments.
-        window (Window): Game window controller instance.
-        detection (Detection): Detection instance for in-game state checks.
-        friction_brake_lock (Lock): Dummy lock for thread synchronization.
         friction_brake (FrictionBrake): Friction brake controller instance.
     """
 
     def __init__(self):
         """Initialize the application.
 
-        Loads configuration, parses command-line arguments, sets up the game window,
-        and initializes the friction brake controller.
+        1. Check the game window state.
+        2. Format keybinds in cfg node.
+        3. Display cfg node.
+        4. Initialize a friction brake instance.
         """
         super().__init__()
+        if not self.is_game_window_valid():
+            sys.exit(1)
 
-        # Format key
+        # Format keys
         self.cfg.defrost()
-        self.cfg.ARGS.EXIT_KEY = f"'{self.cfg.ARGS.EXIT_KEY}'"
+        self.cfg.ARGS.QUIT_KEY = f"'{self.cfg.ARGS.QUIT_KEY}'"
         self.cfg.ARGS.RESET_KEY = f"'{self.cfg.ARGS.RESET_KEY}'"
         self.cfg.freeze()
         print_cfg(self.cfg.ARGS)
         print_cfg(self.cfg.FRICTION_BRAKE)
-
-        width, height = self.window.box[:2]
-        if self.window.title_bar_exist:
-            logger.info("Window mode detected. Please don't move the game window")
-        if not self.window.supported:
-            logger.warning('Window mode must be "Borderless windowed" or "Window mode"')
-            logger.critical(
-                "Invalid window size '%s', use '2560x1440', '1920x1080' or '1600x900'",
-                f"{width}x{height}",
-            )
-            sys.exit(1)
-
-        self.detection = Detection(self.cfg, self.window)
-
-        self.friction_brake_lock = Lock()  # dummy lock
-        self.friction_brake = FrictionBrake(
-            self.cfg, self.friction_brake_lock, self.detection
+        print(
+            "Press %s to reset friction brake, %s to quit",
+            self.cfg.ARGS.RESET_KEY,
+            self.cfg.ARGS.QUIT_KEY,
         )
 
-    def _parse_args(self) -> argparse.Namespace:
-        """Configure argument parser and parse command-line arguments.
+        self.friction_brake = FrictionBrake(self.cfg, Lock(), self.detection)
 
-        :return: Parsed command-line arguments.
-        :rtype: argparse.Namespace
+    def is_game_window_valid(self) -> bool:
+        """Check if the game window mode and size are valid.
+
+        :return: True if valid, False otherwise
+        :rtype: bool
+        """
+        if self.window.is_title_bar_exist():
+            logger.info("Window mode detected. Please don't move the game window")
+        if not self.window.is_size_supported():
+            logger.critical(
+                'Window mode must be "Borderless windowed" or "Window mode"'
+            )
+            logger.critical(
+                "Unsupported window size '%s', "
+                "use '2560x1440', '1920x1080' or '1600x900'",
+                self.window.get_resolution_str(),
+            )
+            return False
+        return True
+
+    def create_parser(self) -> argparse.ArgumentParser:
+        """Create an argument parser for the application.
+
+        :return: Configured argument parser.
+        :rtype: argparse.ArgumentParser
         """
         parser = argparse.ArgumentParser(description="Automate friction brake.")
         parser.add_argument("opts", nargs="*", help="overwrite configuration")
         parser.add_argument(
-            "-e",
-            "--exit-key",
+            "-q",
+            "--quit-key",
             default="h",
             type=str,
             help="key to quit the script, h by default",
@@ -110,19 +105,16 @@ class FrictionBrakeApp(App):
             help="key to reset friction brake, g by default",
             metavar="KEY",
         )
-        args_list = shlex.split(self.cfg.SCRIPT.LAUNCH_OPTIONS) + sys.argv[1:]
-        return parser.parse_args(args_list)
+        return parser
 
     def _on_release(self, key: keyboard.KeyCode) -> None:
-        """Handle key release events for controlling the application.
-
-        Exits the script or resets the friction brake based on the key pressed.
+        """Handle exit and quit events.
 
         :param key: The key that was released.
         :type key: keyboard.KeyCode
         """
         keystroke = str(key).lower()
-        if keystroke == self.cfg.ARGS.EXIT_KEY:
+        if keystroke == self.cfg.ARGS.QUIT_KEY:
             self.friction_brake.monitor_process.terminate()
             sys.exit()
         if keystroke == self.cfg.ARGS.RESET_KEY:

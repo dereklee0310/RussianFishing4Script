@@ -7,12 +7,7 @@ argument parsing, window management, and fishing automation.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
-# pylint: disable=no-member
-
-import logging
-import os
 import shlex
-import signal
 import smtplib
 import sys
 from argparse import ArgumentParser, Namespace
@@ -21,28 +16,19 @@ from socket import gaierror
 
 from pynput import keyboard
 from rich import box, print
-from rich.logging import RichHandler
 from rich.panel import Panel
 from rich.style import Style
 from rich.table import Column, Table
 from yacs.config import CfgNode as CN
 
 sys.path.append(".")  # python -m module -> python file
-
 from rf4s import utils
+from rf4s.app.app import App
 from rf4s.config import config
-from rf4s.controller.window import Window
 from rf4s.player import Player
+from rf4s.utils import create_rich_logger
 
-# Ignore %(name)s because it's verbose
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-    handlers=[RichHandler(rich_tracebacks=True)],
-)
-logger = logging.getLogger("rich")
-# Reference: https://rich.readthedocs.io/en/latest/logging.html
+logger = create_rich_logger()
 
 ARGUMENTS = (
     ("c", "coffee", "drink coffee if stamina is low"),
@@ -84,17 +70,17 @@ DISCORD_LINK = "Discord: https://discord.gg/BZQWQnAMbY"
 ROOT = Path(__file__).resolve().parents[1]
 
 
-class Rf4sApp:
+class RF4SApp(App):
     """Main application class for Russian Fishing 4 automation.
 
     This class orchestrates the entire automation process, from parsing command-line
     arguments to configuring the environment and executing the fishing routine.
 
     Attributes:
-        cfg (CfgNode): Configuration node merged from YAML and CLI arguments.
-        args (Namespace): Parsed command-line arguments.
-        window (Window): Game window controller instance.
-        player (Player): Player instance for fishing automation.
+        cfg (CfgNode): Configuration node merged from YAML and CLI arguments
+        args (Namespace): Parsed command-line arguments
+        window (Window): Game window controller instance
+        player (Player): Player instance for fishing automation
     """
 
     def __init__(self):
@@ -102,23 +88,18 @@ class Rf4sApp:
 
         Loads configuration, parses command-line arguments, and sets up the environment.
         """
-        print(Panel.fit(LOGO, box=box.HEAVY), GITHUB_LINK, DISCORD_LINK, sep="\n")
-        self.cfg = config.setup_cfg()
-        self.cfg.merge_from_file(ROOT / "config.yaml")
-
+        super().__init__()
+        self.parser = self.create_parser()
         # Parser will use the last occurence if the arguments are duplicated,
         # so put argv at the end to overwrite launch options.
-        args_list = shlex.split(self.cfg.SCRIPT.LAUNCH_OPTIONS) + sys.argv[1:]
-        self.parser = self._setup_parser()
-        args = self.parser.parse_args(args_list)
-        if not self._is_args_valid(args):
+        self.args = self.parser.parse_args(
+            shlex.split(self.cfg.SCRIPT.LAUNCH_OPTIONS) + sys.argv[1:]
+        )
+        if not self.is_args_valid(self.args):
             sys.exit(1)
+        self.cfg.merge_from_other_cfg(CN({"ARGS": config.dict_to_cfg(vars(self.args))}))
 
-        args_cfg = CN({"ARGS": config.dict_to_cfg(vars(args))})
-        self.cfg.merge_from_other_cfg(args_cfg)
-        self.args = args
-
-    def _setup_parser(self) -> ArgumentParser:
+    def create_parser(self) -> ArgumentParser:
         """Configure the argument parser with all supported command-line options.
 
         :return: Configured ArgumentParser instance with all options and flags.
@@ -133,7 +114,6 @@ class Rf4sApp:
             help_message = argument[2]
             parser.add_argument(flag1, flag2, action="store_true", help=help_message)
 
-        # ----------------------------- release strategy ----------------------------- #
         release_strategy = parser.add_mutually_exclusive_group()
         release_strategy.add_argument(
             "-a",
@@ -145,7 +125,6 @@ class Rf4sApp:
             "-m", "--marked", action="store_true", help="keep only the marked fishes"
         )
 
-        # ----------------------- retrieval detection strategy ----------------------- #
         retrieval_detecton_strategy = parser.add_mutually_exclusive_group()
         retrieval_detecton_strategy.add_argument(
             "-d",
@@ -160,7 +139,6 @@ class Rf4sApp:
             help="use rainbow line meter for retrieval detection",
         )
 
-        # -------------------------- arguments with metavar -------------------------- #
         profile_selection_strategy = parser.add_mutually_exclusive_group()
         profile_selection_strategy.add_argument(
             "-p",
@@ -176,7 +154,6 @@ class Rf4sApp:
             help="name of the profile you want to use",
             metavar="PROFILE_NAME",
         )
-
         parser.add_argument(
             "-n",
             "--fishes-in-keepnet",
@@ -198,7 +175,6 @@ class Rf4sApp:
             ),
             metavar="DURATION",
         )
-
         parser.add_argument(
             "-T",
             "--trolling",
@@ -212,9 +188,8 @@ class Rf4sApp:
             ),
             metavar="DIRECTION",
         )
-
         parser.add_argument(
-            "-bl",
+            "-BL",
             "--broken-lure",
             nargs="?",
             const="replace",
@@ -223,12 +198,12 @@ class Rf4sApp:
             help=(
                 "enable broken lure auto-replace, ACTION: 'replace' or 'alarm', "
                 "will replace the broken lure if action is not specified"
-            ),  # TODO
+            ),
             metavar="ACTION",
         )
         return parser
 
-    def _is_args_valid(self, args: Namespace) -> bool:
+    def is_args_valid(self, args: Namespace) -> bool:
         """Validate provided command-line arguments.
 
         :param args: Parsed command-line arguments to validate.
@@ -242,7 +217,7 @@ class Rf4sApp:
             )
             return False
 
-        if args.pid is not None and not self._is_pid_valid(str(args.pid)):
+        if args.pid is not None and not self.is_pid_valid(str(args.pid)):
             logger.critical("Invalid profile id: '%s'", args.pid)
             return False
 
@@ -253,7 +228,7 @@ class Rf4sApp:
         # boat_ticket_duration already checked by choices[...]
         return True
 
-    def _is_pid_valid(self, pid: str) -> bool:
+    def is_pid_valid(self, pid: str) -> bool:
         """Check if the profile ID is valid.
 
         :param pid: Profile ID to validate.
@@ -263,7 +238,7 @@ class Rf4sApp:
         """
         return pid.isdigit() and 0 <= int(pid) < len(self.cfg.PROFILE)
 
-    def _is_smtp_valid(self) -> bool:
+    def is_smtp_valid(self) -> bool:
         """Verify SMTP server connection for email notifications.
 
         Tests the connection to the configured SMTP server using stored
@@ -297,7 +272,7 @@ class Rf4sApp:
             return False
         return True
 
-    def _is_images_valid(self) -> bool:
+    def is_images_valid(self) -> bool:
         """Verify that all required image files exist for the selected language.
 
         Compares files in the reference 'en' directory with those in the current
@@ -340,7 +315,7 @@ class Rf4sApp:
             return False
         return True
 
-    def _is_profile_valid(self, profile_name: str) -> bool:
+    def is_profile_valid(self, profile_name: str) -> bool:
         """Check if a profile configuration is valid and complete.
 
         :param profile_name: Name of the profile to validate.
@@ -371,7 +346,7 @@ class Rf4sApp:
             return False
         return True
 
-    def _display_available_profiles(self) -> None:
+    def display_available_profiles(self) -> None:
         """Display a table of available profiles for user selection.
 
         Shows a formatted table with profile IDs and names.
@@ -386,7 +361,7 @@ class Rf4sApp:
             table.add_row(f"{i:>2}. {profile}")
         print(table)
 
-    def _get_pid(self) -> None:
+    def get_pid(self) -> None:
         """Prompt the user to enter a profile ID and validate the input.
 
         Continuously prompts until a valid profile ID is entered or the
@@ -396,7 +371,7 @@ class Rf4sApp:
 
         while True:
             user_input = input(">>> ")
-            if self._is_pid_valid(user_input):
+            if self.is_pid_valid(user_input):
                 break
             if user_input == "q":
                 print("Bye.")
@@ -408,7 +383,7 @@ class Rf4sApp:
 
         self.cfg.ARGS.PID = int(user_input)
 
-    def setup_user_profile(self) -> None:
+    def create_user_profile(self) -> None:
         """Configure the user profile based on arguments or interactive selection.
 
         Selects a profile based on command-line arguments or user input,
@@ -418,15 +393,14 @@ class Rf4sApp:
             profile_name = self.cfg.ARGS.PNAME
         else:
             if self.cfg.ARGS.PID is None:
-                self._display_available_profiles()
-                self._get_pid()
+                self.display_available_profiles()
+                self.get_pid()
             profile_name = list(self.cfg.PROFILE)[self.cfg.ARGS.PID]
 
-        if not self._is_profile_valid(profile_name):
+        if not self.is_profile_valid(profile_name):
             sys.exit(1)
 
-        self.cfg.SELECTED = CN({"NAME": profile_name})
-        self.cfg.SELECTED.set_new_allowed(True)
+        self.cfg.SELECTED = CN({"NAME": profile_name}, new_allowed=True)
         self.cfg.SELECTED.merge_from_other_cfg(self.cfg.PROFILE[profile_name])
 
         # Merge args.opts here because we can only overwrite cfg.SELECTED
@@ -439,29 +413,30 @@ class Rf4sApp:
             ]
         self.cfg.merge_from_list(self.args.opts)
         # Check here because config might got overwritten
-        if not self._is_smtp_valid() or not self._is_images_valid():
+        if not self.is_smtp_valid() or not self.is_images_valid():
             sys.exit(1)
         config.print_cfg(self.cfg.SELECTED)
 
-    def setup_window(self) -> None:
+    def is_window_valid(self) -> None:
         """Set up and validate the game window.
 
         Creates a Window object, checks if the window size is supported,
         and disables incompatible features if needed.
         """
-        self.window = Window()
-        width, height = self.window.box[:2]
-        if self.window.title_bar_exist:
+        if self.window.is_title_bar_exist():
             logger.info("Window mode detected. Please don't move the game window")
-        if not self.window.supported:
+        if not self.window.is_size_supported():
             logger.warning('Window mode must be "Borderless windowed" or "Window mode"')
             logger.warning(
-                "Invalid window size '%s', use '2560x1440', '1920x1080' or '1600x900'",
-                f"{width}x{height}",
+                "Unsupported window size '%s', "
+                "use '2560x1440', '1920x1080' or '1600x900'",
+                self.window.get_resolution_str(),
             )
-            logger.error("Snag detection will be disabled")
-            logger.error("Spooling detection will be disabled")
-            logger.error("Auto friction brake will be disabled")
+            logger.error(
+                "Snag detection will be disabled\n"
+                "Spooling detection will be disabled\n"
+                "Auto friction brake will be disabled\n"
+            )
 
             self.cfg.ARGS.FRICTION_BRAKE = False
             self.cfg.SCRIPT.SNAG_DETECTION = False
@@ -469,53 +444,41 @@ class Rf4sApp:
 
         if (
             self.cfg.SELECTED.MODE in ("telescopic", "bolognese")
-            and not self.window.supported
+            and not self.window.is_size_supported()
         ):
             logger.critical(
                 "Fishing mode '%s' doesn't support window size '%s'",
                 self.cfg.SELECTED.MODE,
-                f"{width}x{height}",
+                self.window.get_resolution_str(),
             )
-            sys.exit(1)
+            return False
+        return True
 
-    def setup_player(self) -> None:
-        """Initialize the Player object with current configuration.
-
-        Creates a new Player instance using the current config and window.
-        """
-        self.player = Player(self.cfg, self.window)
-
-    def print_hints(self):
+    def is_electro_valid(self):
         """Display helpful information about the current configuration.
 
         Checks configuration compatibility and prints warnings for
         potential issues.
         """
-        if self.cfg.ARGS.ELECTRO:
-            if self.cfg.SELECTED.MODE not in ("pirk", "elevator"):
-                logger.error(
-                    "Electric mode is not compatible with mode '%s'",
-                    self.cfg.SELECTED.MODE,
-                )
-                logger.error("Electric mode will be disabled")
-                self.cfg.ARGS.ELECTRO = False
-            else:
-                logger.info(
-                    "Electric mode is enabled, make sure you're using Electro Raptor"
-                )
+        if not self.cfg.ARGS.ELECTRO:
+            return
 
-    def _on_release(self, key: keyboard.KeyCode) -> None:
-        """Handle key release events for application control.
+        if self.cfg.SELECTED.MODE in ("pirk", "elevator"):
+            logger.info(
+                "Electric mode is enabled, make sure you're using Electro Raptor"
+            )
+        else:
+            logger.error(
+                "Electric mode is not compatible with mode '%s'"
+                "Electric mode will be disabled",
+                self.cfg.SELECTED.MODE,
+            )
+            self.cfg.ARGS.ELECTRO = False
 
-        :param key: The key that was released.
-        :type key: keyboard.KeyCode
-
-        Exits the application when the configured quit key is pressed.
-        """
-        # CTRL_C_EVENT: https://stackoverflow.com/questions/58455684/
-        if key == keyboard.KeyCode.from_char(self.cfg.KEY.QUIT):
-            os.kill(os.getpid(), signal.CTRL_C_EVENT)
-            sys.exit()
+    def _start(self) -> None:
+        """Entry point."""
+        self.player = Player(self.cfg, self.window)
+        self.player.start_fishing()
 
     def start(self) -> None:
         """Start the fishing automation process.
@@ -524,26 +487,26 @@ class Rf4sApp:
         registers key listeners, and begins the fishing automation.
         Handles termination and displays results.
         """
-        self.setup_user_profile()
-        self.setup_window()
-        self.setup_player()
-        self.print_hints()
+        self.create_user_profile()
+        if not self.is_window_valid() or not self.is_electro_valid():
+            sys.exit(1)
         self.cfg.freeze()
-        self.window.activate_game_window()
 
         if self.cfg.KEY.QUIT != "CTRL-C":
             listener = keyboard.Listener(on_release=self._on_release)
             listener.start()
+
+        self.window.activate_game_window()
         try:
-            self.player.start_fishing()
+            self._start()
         except KeyboardInterrupt:
             pass
 
-        # self.player.friction_brake_monitor_process.join()
         print(self.player.gen_result("Terminated by user"))
         if self.cfg.ARGS.PLOT:
             self.player.plot_and_save()
 
 
 if __name__ == "__main__":
-    Rf4sApp().start()
+    print(Panel.fit(LOGO, box=box.HEAVY), GITHUB_LINK, DISCORD_LINK, sep="\n")
+    RF4SApp().start()

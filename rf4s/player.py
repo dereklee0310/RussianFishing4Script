@@ -17,7 +17,6 @@ from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from multiprocessing import Lock
-
 # from email.mime.image import MIMEImage
 from pathlib import Path
 from time import sleep
@@ -297,7 +296,7 @@ class Player:
         if not self.cfg.ARGS.HARVEST or not self.detection.is_energy_high():
             return
         logger.info("Harvesting baits")
-        self._access_item("digging_tool")
+        self._use_item("digging_tool")
         sleep(PULL_OUT_DELAY)
         pag.click()
 
@@ -313,8 +312,8 @@ class Player:
                 break
 
         if pickup:
-            self._access_item("main_rod")
-            sleep(ANIMATION_DELAY)
+            self._use_item("main_rod")
+            sleep(PULL_OUT_DELAY)
 
         # When timed out, do not raise a TimeoutError but defer it to resetting stage
 
@@ -326,14 +325,12 @@ class Player:
         logger.info("Refilling player stats")
         # Comfort is affected by weather, add a check to avoid over drink
         if self.detection.is_comfort_low() and self.timer.is_tea_drinkable():
-            self._access_item("tea")
+            self._use_item("tea")
             self.tea_count += 1
-            sleep(ANIMATION_DELAY)
 
         if self.detection.is_hunger_low():
-            self._access_item("carrot")
+            self._use_item("carrot")
             self.carrot_count += 1
-            sleep(ANIMATION_DELAY)
 
     def _drink_alcohol(self) -> None:
         """Drink alcohol with the given quantity."""
@@ -342,8 +339,7 @@ class Player:
 
         logger.info("Drinking alcohol")
         for _ in range(self.cfg.STAT.ALCOHOL_PER_DRINK):
-            self._access_item("alcohol")
-            sleep(ANIMATION_DELAY)
+            self._use_item("alcohol")
         self.alcohol_count += self.cfg.STAT.ALCOHOL_PER_DRINK
 
     def _drink_coffee(self) -> None:
@@ -357,28 +353,27 @@ class Player:
 
         logger.info("Drinking coffee")
         for _ in range(self.cfg.STAT.COFFEE_PER_DRINK):
-            self._access_item("coffee")
-            sleep(ANIMATION_DELAY)
+            self._use_item("coffee")
         self.cur_coffee_count += self.cfg.STAT.COFFEE_PER_DRINK
         self.total_coffee_count += self.cfg.STAT.COFFEE_PER_DRINK
 
-    def _access_item(self, item: str) -> None:
+    def _use_item(self, item: str) -> None:
         """Access an item by name using quick selection shortcut or menu.
 
         :param item: The name of the item to access.
         :type item: str
         """
+        logger.info("Using item: %s", item)
         key = str(self.cfg.KEY[item.upper()])
-        if key != "-1":
+        if key != "-1": # Use shortcut
             pag.press(key)
-            return
-
-        # Open food menu
-        with pag.hold("t"):
-            sleep(ANIMATION_DELAY)
-            food_position = self.detection.get_food_position(item)
-            pag.moveTo(food_position)
-            pag.click()
+        else: # Open food menu
+            with pag.hold("t"):
+                sleep(ANIMATION_DELAY)
+                food_position = self.detection.get_food_position(item)
+                pag.moveTo(food_position)
+                pag.click()
+        sleep(ANIMATION_DELAY)
 
     @utils.reset_friction_brake_after
     def _reset_tackle(self) -> None:
@@ -423,8 +418,7 @@ class Player:
 
     def _cast_spod_rod(self) -> None:
         """Cast the spod rod if dry mix is available."""
-        self._access_item("spod_rod")
-        sleep(ANIMATION_DELAY)
+        self._use_item("spod_rod")
         self._reset_tackle()
 
         # If no dry mix is available, skip casting
