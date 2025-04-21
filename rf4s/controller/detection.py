@@ -364,6 +364,9 @@ class Detection:
     def get_dry_mix_position(self):
         return self._get_image_box("dry_feed_mix", 0.98)
 
+    def get_pva_position(self):
+        return self._get_image_box("pva_stick_or_pva_stringer", 0.98)
+
     # ------------------------------ Friction brake ------------------------------ #
     def is_friction_brake_high(self) -> bool:
         return pag.pixelMatchesColor(

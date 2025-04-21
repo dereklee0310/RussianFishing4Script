@@ -170,7 +170,7 @@ class RF4SApp(App):
             type=int,
             choices=[1, 2, 3, 5],
             help=(
-                "enable boat ticket auto renewal, DURATION: '1', '2', '3' or '5', "
+                "enable boat ticket auto renewal, DURATION: 1, 2, 3 or 5, "
                 "will use a 5 hour ticket if duration is not specified"
             ),
             metavar="DURATION",
@@ -183,8 +183,8 @@ class RF4SApp(App):
             type=str,
             choices=["forward", "left", "right"],
             help=(
-                "enable trolling mode, DIRECTION: 'forward',''left', or 'right', "
-                "will only move forward by press 'j' if direction is not specified"
+                "enable trolling mode, DIRECTION: 'forward', 'left', or 'right', "
+                "will only move forward by pressing 'j' if direction is not specified"
             ),
             metavar="DIRECTION",
         )
@@ -461,7 +461,7 @@ class RF4SApp(App):
         potential issues.
         """
         if not self.cfg.ARGS.ELECTRO:
-            return
+            return True
 
         if self.cfg.SELECTED.MODE in ("pirk", "elevator"):
             logger.info(
@@ -474,6 +474,8 @@ class RF4SApp(App):
                 self.cfg.SELECTED.MODE,
             )
             self.cfg.ARGS.ELECTRO = False
+        return True
+
 
     def _start(self) -> None:
         """Entry point."""
@@ -505,6 +507,10 @@ class RF4SApp(App):
         print(self.player.gen_result("Terminated by user"))
         if self.cfg.ARGS.PLOT:
             self.player.plot_and_save()
+
+    def display_results(self):
+        pass
+        # return super().display_results()
 
 
 if __name__ == "__main__":

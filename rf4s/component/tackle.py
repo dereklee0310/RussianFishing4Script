@@ -17,6 +17,7 @@ from typing import Literal
 import pyautogui as pag
 import win32api
 import win32con
+from pyscreeze import Box
 
 from rf4s import exceptions, utils
 from rf4s.controller.detection import Detection
@@ -384,19 +385,18 @@ class Tackle:
         :param item: The item to equip (e.g., lure, pva, dry_mix, groundbait).
         :type item: str
         """
-        if item in ("lure", "pva"):
+        if item == "lure":
             return self._equip_item_from_menu(item)
-        return self._equip_item_from_inventory(item)  # dry_mix, groundbait
+        return self._equip_item_from_inventory(item)  # groundbait, dry_mix, pva
 
-    def _equip_item_from_menu(self, item: Literal["lure", "pva"]) -> None:
+    def _equip_item_from_menu(self, item: str) -> None:
         """Equip an item from the menu.
 
-        :param item: The item to equip (e.g., lure, pva).
-        :type item: Literal["lure", "pva"]
+        :param item: The item to equip (e.g., lure).
+        :type item: str
         """
         logger.info("Equiping new %s from menu", item)
-        menu_key = "h" if item == "pva" else "b"
-        with pag.hold(menu_key):
+        with pag.hold("b"):
             self._equip_favorite_item(item)
         sleep(ANIMATION_DELAY)
 
@@ -412,29 +412,33 @@ class Tackle:
         logger.info("Equiping new %s from inventory", item)
         scrollbar_position = self.detection.get_scrollbar_position()
         if scrollbar_position is None:
-            if item == "groundbait":
-                groundbait_position = self.detection.get_groundbait_position()
-                pag.click(utils.get_box_center(groundbait_position))
-                self._equip_favorite_item(item)
-            else:
-                dry_mix_position = self.detection.get_dry_mix_position()
-                pag.click(utils.get_box_center(dry_mix_position))
-                self._equip_favorite_item(item)
+            pag.click(utils.get_box_center(self.get_item_position(item)))
+            self._equip_favorite_item(item)
+            return
 
         pag.moveTo(scrollbar_position)
         for _ in range(5):
             sleep(ANIMATION_DELAY)
             pag.drag(xOffset=0, yOffset=125, duration=0.5, button="left")
-
-            if item == "groundbait":
-                position = self.detection.get_groundbait_position()
-            else:
-                position = self.detection.get_dry_mix_position()
-
+            position = self.get_item_position(item)
             if position is not None:
                 pag.click(utils.get_box_center(position))
                 self._equip_favorite_item(item)
                 break
+
+    def get_item_position(self, item: str) -> Box | None:
+        """Get the position of an item.
+        :param item: The item to get the position for (e.g., pva, dry_mix, groundbait)
+        :type item: str
+        :return: position of the item
+        :rtype: Box | None
+        """
+        if item == "groundbait":
+            return self.detection.get_groundbait_position()
+        elif item == "dry_mix":
+            return self.detection.get_dry_mix_position()
+        else: # pva
+            return self.detection.get_pva_position()
 
     def _equip_favorite_item(self, item: bool):
         """Select a favorite item for replacement and replace the broken one.

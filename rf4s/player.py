@@ -1023,10 +1023,8 @@ class Player:
         if not self.cfg.ARGS.PVA or not self.have_new_pva:
             return
 
-        if self.detection.is_pva_chosen():
-            logger.info("Pva is not used up yet")
-        else:
-            logger.info("Pva has been used up")
+        if not self.detection.is_pva_chosen():
+            logger.warning("Pva has been used up")
             try:
                 self.tackle.equip_item("pva")
             except exceptions.ItemNotFoundError:
