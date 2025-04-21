@@ -17,6 +17,7 @@ from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from multiprocessing import Lock
+
 # from email.mime.image import MIMEImage
 from pathlib import Path
 from time import sleep
@@ -365,9 +366,9 @@ class Player:
         """
         logger.info("Using item: %s", item)
         key = str(self.cfg.KEY[item.upper()])
-        if key != "-1": # Use shortcut
+        if key != "-1":  # Use shortcut
             pag.press(key)
-        else: # Open food menu
+        else:  # Open food menu
             with pag.hold("t"):
                 sleep(ANIMATION_DELAY)
                 food_position = self.detection.get_food_position(item)
@@ -958,6 +959,17 @@ class Player:
             self._refill_groundbait()
             self._refill_pva()
             self._cast_tackle(lock=True)
+
+            sleep(self.cfg.PUT_DOWN_DELAY)
+            if self.detection.is_fish_hooked():
+                check_miss_counts[self.tackle_idx] = 0
+                self._retrieve_line()
+                self._pull_fish()
+                self._reset_tackle()
+                self._refill_groundbait()
+                self._refill_pva()
+                self._cast_tackle(lock=True)
+                return  # Check next rod immediately
 
         pag.press("0")
         random_offset = random.uniform(-BOUND, BOUND)

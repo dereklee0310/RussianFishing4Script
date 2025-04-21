@@ -476,7 +476,6 @@ class RF4SApp(App):
             self.cfg.ARGS.ELECTRO = False
         return True
 
-
     def _start(self) -> None:
         """Entry point."""
         self.player = Player(self.cfg, self.window)
