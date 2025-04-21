@@ -86,7 +86,7 @@ class CraftApp(ToolApp):
         :return: Two delays in seconds
         :rtype: tuple[float, float]
         """
-        if not self.cfg.ARGS.FAST:
+        if self.cfg.ARGS.FAST:
             return CRAFT_DELAY, LOOP_DELAY
         return (
             random.uniform(CRAFT_DELAY, CRAFT_DELAY_2X),

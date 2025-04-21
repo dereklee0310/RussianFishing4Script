@@ -54,9 +54,8 @@ class FrictionBrakeApp(ToolApp):
         print_cfg(self.cfg.ARGS)
         print_cfg(self.cfg.FRICTION_BRAKE)
         print(
-            "Press %s to reset friction brake, %s to quit",
-            self.cfg.ARGS.RESET_KEY,
-            self.cfg.ARGS.QUIT_KEY,
+            f"Press {self.cfg.ARGS.RESET_KEY[1:-1]} to reset friction brake, "
+            f"{self.cfg.ARGS.QUIT_KEY[1:-1]} to quit."
         )
 
         self.friction_brake = FrictionBrake(self.cfg, Lock(), self.detection)

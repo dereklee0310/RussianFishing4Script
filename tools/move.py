@@ -46,10 +46,10 @@ class MoveApp(ToolApp):
         self.cfg.ARGS.PAUSE_KEY = f"'{self.cfg.ARGS.PAUSE_KEY}'"
         self.cfg.freeze()
         print_cfg(self.cfg.ARGS)
+
         print(
-            "Press %s to pause, %s to quit",
-            self.cfg.ARGS.PAUSE_KEY,
-            self.cfg.ARGS.QUIT_KEY,
+            f"Press {self.cfg.ARGS.PAUSE_KEY[1:-1]} to pause, "
+            f"{self.cfg.ARGS.QUIT_KEY[1:-1]} to quit."
         )
 
         self.w_key_pressed = True

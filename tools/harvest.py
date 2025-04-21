@@ -155,6 +155,7 @@ class HarvestApp(ToolApp):
                 pag.press("esc")
             else:
                 sleep(self.cfg.ARGS.CHECK_DELAY)
+            sleep(ANIMATION_DELAY)
 
 
 if __name__ == "__main__":
