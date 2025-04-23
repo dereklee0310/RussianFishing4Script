@@ -74,10 +74,6 @@ class Player:
     :type window: Window
     """
 
-    # pylint: disable=too-many-instance-attributes, disable=no-member
-    # there are too many counters...
-    # setting node's attributes will be merged on the fly
-
     def __init__(self, cfg, window: Window):
         """Initialize monitor, timer, and some trivial counters.
 

@@ -1,6 +1,7 @@
 build/
 .idea/
 .vscode/
+.ruff_cache
 __pycache__/
 src/__pycache__/
 

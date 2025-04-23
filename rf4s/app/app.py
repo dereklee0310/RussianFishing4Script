@@ -78,6 +78,7 @@ class ToolApp(App):
         detection (Detection): Detection controller
         results (dict): Running results
     """
+
     def __init__(self):
         """Set up an immutable cfg node for further modification.
 
@@ -97,7 +98,7 @@ class ToolApp(App):
         self.cfg.freeze()
 
         self.detection = Detection(self.cfg, self.window)
-        self.results = {} # This will be used in display_results()
+        self.results = {}  # This will be used in display_results()
 
     def display_results(self) -> None:
         """Display the running results in a table format."""

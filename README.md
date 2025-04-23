@@ -15,12 +15,12 @@
 <a target="_blank" href="http://makeapullrequest.com" style="background:none">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat" style="height: 22px;" />
 </a>
-<a target="_blank" href="https://github.com/pylint-dev/pylint" style="background:none">
+<!-- <a target="_blank" href="https://github.com/pylint-dev/pylint" style="background:none">
     <img src="https://img.shields.io/badge/linting-pylint-yellowgreen" style="height: 22px;" />
-</a>
-<a target="_blank" href="https://github.com/psf/black" style="background:none">
+</a> -->
+<!-- <a target="_blank" href="https://github.com/psf/black" style="background:none">
     <img src="https://img.shields.io/badge/code%20style-black-000000.svg" style="height: 22px;" />
-</a>
+</a> -->
 <!-- <a target="_blank" href="link_to_docs, tbd" style="background:none">
     <img src="https://img.shields.io/badge/docs-%23BE1B55" style="height: 22px;" />
 </a> -->  

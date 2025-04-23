@@ -6,8 +6,6 @@ and pixel color analysis. It is used for automating tasks in Russian Fishing 4.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
-# pylint: disable=missing-function-docstring
-
 import time
 from pathlib import Path
 from typing import Generator
@@ -100,8 +98,6 @@ class Detection:
         coord_offsets (dict): Dictionary of coordinate offsets for different window sizes.
         bait_icon_reference_img (Image): Reference image for bait icon detection.
     """
-
-    # pylint: disable=too-many-public-methods
 
     def __init__(self, cfg, window: Window):
         """Initialize the Detection class with configuration and window settings.

@@ -17,12 +17,12 @@
 <a target="_blank" href="http://makeapullrequest.com" style="background:none">
     <img src="https://img.shields.io/badge/PRs-歡迎提交-brightgreen.svg?style=flat" style="height: 22px;" />
 </a>
-<a target="_blank" href="https://github.com/pylint-dev/pylint" style="background:none">
+<!-- <a target="_blank" href="https://github.com/pylint-dev/pylint" style="background:none">
     <img src="https://img.shields.io/badge/代碼檢查-pylint-yellowgreen" style="height: 22px;" />
 </a>
 <a target="_blank" href="https://github.com/psf/black" style="background:none">
     <img src="https://img.shields.io/badge/代碼風格-black-000000.svg" style="height: 22px;" />
-</a>
+</a> -->
 <!-- <a target="_blank" href="link_to_docs, tbd" style="background:none">
     <img src="https://img.shields.io/badge/文檔-%23BE1B55" style="height: 22px;" />
 </a> -->  

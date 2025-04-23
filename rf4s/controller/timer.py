@@ -31,9 +31,6 @@ class Timer:
         last_pause (float): Timestamp of the last script pause.
     """
 
-    # pylint: disable=too-many-instance-attributes
-    # there are too many counters...
-
     def __init__(self, cfg):
         """Initialize the Timer class with configuration settings.
 

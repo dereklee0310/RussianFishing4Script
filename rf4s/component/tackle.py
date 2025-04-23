@@ -7,8 +7,6 @@ common tasks like clicklock and key releases.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
-# pylint: disable=c-extension-no-member
-
 import logging
 import random
 from time import sleep
@@ -437,7 +435,7 @@ class Tackle:
             return self.detection.get_groundbait_position()
         elif item == "dry_mix":
             return self.detection.get_dry_mix_position()
-        else: # pva
+        else:  # pva
             return self.detection.get_pva_position()
 
     def _equip_favorite_item(self, item: bool):
