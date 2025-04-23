@@ -386,3 +386,6 @@ class Detection:
 
     def is_harvest_success(self):
         return self._get_image_box("harvest_confirm", 0.8)
+
+    def is_gift_receieved(self):
+        return self._get_image_box("gift", 0.8)

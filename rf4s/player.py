@@ -402,7 +402,7 @@ class Player:
                 self._pull_fish()
                 return
             except exceptions.FishCapturedError:
-                self._handle_fish()
+                self.handle_fish()
                 return
             except exceptions.LineAtEndError:
                 self.general_quit("Fishing line is at its end")
@@ -517,7 +517,7 @@ class Player:
                 self.tackle.retrieve(first)
                 break
             except exceptions.FishCapturedError:
-                self._handle_fish()
+                self.handle_fish()
                 break
             except exceptions.LineAtEndError:
                 self.general_quit("Fishing line is at its end")
@@ -590,7 +590,7 @@ class Player:
         while True:
             try:
                 self.tackle.pull()
-                self._handle_fish()
+                self.handle_fish()
                 return
             except exceptions.FishGotAwayError:
                 return
@@ -602,6 +602,14 @@ class Player:
                     sleep(PUT_DOWN_DELAY)
                     continue
                 self._retrieve_line()
+
+
+    def handle_fish(self) -> None:
+        self._handle_fish()
+        sleep(ANIMATION_DELAY)
+        if self.detection.is_gift_receieved():
+            pag.press("space")
+            return
 
     def _handle_fish(self) -> None:
         """Keep or release the fish and record the fish count.
