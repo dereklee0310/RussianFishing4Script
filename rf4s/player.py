@@ -102,24 +102,23 @@ class Player:
             cfg, self.friction_brake_lock, self.detection
         )
 
-        self.results = None
+        self.result_dict = None
 
-        self.cast_miss_count = 0
-        self.keep_fish_count = 0
-        self.marked_count = 0
-        self.unmarked_count = 0
-
-        self.tea_count = 0
-        self.carrot_count = 0
-        self.alcohol_count = 0
-        self.cur_coffee_count = 0
-        self.total_coffee_count = 0
-        self.harvest_count = 0
-
-        self.have_new_lure = True
-        self.have_new_groundbait = True
-        self.have_new_dry_mix = True
-        self.have_new_pva = True
+        self.records = {
+            "tea": 0,
+            "carrot": 0,
+            "alcohol": 0,
+            "cur_coffee": 0,
+            "total_coffee": 0,
+            "bait": 0,
+            "kept_fish": 0,
+            "marked_fish": 0,
+            "unmarked_fish": 0,
+            "have_new_lure": True,
+            "have_new_groundbait": True,
+            "have_new_dry_mix": True,
+            "have_new_pva": True,
+        }
 
     def start_fishing(self) -> None:
         """Start the main fishing loop with the specified fishing strategy."""
@@ -165,8 +164,6 @@ class Player:
 
             if self.detection.is_fish_hooked():
                 self._pull_fish()
-            else:
-                self.cast_miss_count += 1
 
     def start_bottom_mode(self) -> None:
         """Main bottom fishing loop."""
@@ -246,7 +243,6 @@ class Player:
             try:
                 monitor()
             except TimeoutError:
-                self.cast_miss_count += 1
                 continue
 
             sleep(self.cfg.SELECTED.PULL_DELAY)
@@ -305,7 +301,7 @@ class Player:
                 pag.press("space")
                 pag.press("backspace")
                 sleep(ANIMATION_DELAY)
-                self.harvest_count += 1
+                self.records["bait"] += 1
                 break
 
         if pickup:
@@ -323,11 +319,11 @@ class Player:
         # Comfort is affected by weather, add a check to avoid over drink
         if self.detection.is_comfort_low() and self.timer.is_tea_drinkable():
             self._use_item("tea")
-            self.tea_count += 1
+            self.records["tea"] += 1
 
         if self.detection.is_hunger_low():
             self._use_item("carrot")
-            self.carrot_count += 1
+            self.records["carrot"] += 1
 
     def _drink_alcohol(self) -> None:
         """Drink alcohol with the given quantity."""
@@ -337,22 +333,22 @@ class Player:
         logger.info("Drinking alcohol")
         for _ in range(self.cfg.STAT.ALCOHOL_PER_DRINK):
             self._use_item("alcohol")
-        self.alcohol_count += self.cfg.STAT.ALCOHOL_PER_DRINK
+        self.records["alcohol"] += self.cfg.STAT.ALCOHOL_PER_DRINK
 
     def _drink_coffee(self) -> None:
         """Drink coffee to refill energy if energy is low."""
         if not self.cfg.ARGS.COFFEE or self.detection.is_energy_high():
             return
 
-        if self.cur_coffee_count > self.cfg.STAT.COFFEE_LIMIT:
+        if self.records["cur_coffee"] > self.cfg.STAT.COFFEE_LIMIT:
             pag.press("esc")  # Just back to control panel to reduce power usage
             self._handle_termination("Coffee limit reached", shutdown=False)
 
         logger.info("Drinking coffee")
         for _ in range(self.cfg.STAT.COFFEE_PER_DRINK):
             self._use_item("coffee")
-        self.cur_coffee_count += self.cfg.STAT.COFFEE_PER_DRINK
-        self.total_coffee_count += self.cfg.STAT.COFFEE_PER_DRINK
+        self.records["cur_coffee"] += self.cfg.STAT.COFFEE_PER_DRINK
+        self.records["total_coffee"] += self.cfg.STAT.COFFEE_PER_DRINK
 
     def _use_item(self, item: str) -> None:
         """Access an item by name using quick selection shortcut or menu.
@@ -478,15 +474,15 @@ class Player:
                 self.general_quit("Lure is broken")
 
     @utils.release_keys_after(arrow_keys=True)
-    def _handle_termination(self, msg: str, shutdown: bool) -> None:
+    def _handle_termination(self, termination_reason: str, shutdown: bool) -> None:
         """Handle script termination.
 
-        :param msg: The cause of the termination.
-        :type msg: str
+        :param termination_reason: The reason for termination.
+        :type termination_reason: str
         :param shutdown: Whether to shutdown the computer after termination.
         :type shutdown: bool
         """
-        table = self.gen_result(msg)
+        table = self.create_table_from_result(self.create_result(termination_reason))
         if self.cfg.ARGS.EMAIL:
             self.send_email()
         if self.cfg.ARGS.MIAOTIXING:
@@ -511,7 +507,7 @@ class Player:
 
         first = True
         gr_switched = False
-        self.cur_coffee_count = 0
+        self.records["cur_coffee"] = 0
         while True:
             try:
                 self.tackle.retrieve(first)
@@ -553,7 +549,6 @@ class Player:
                     self._reset_tackle()
                     self._cast_tackle()
                     self.tackle.sink()
-                self.cast_miss_count += 1
 
     def _do_elevating(self) -> None:
         """Perform elevating until a fish is hooked."""
@@ -565,7 +560,6 @@ class Player:
                 break
             except TimeoutError:
                 self._handle_timeout()
-                self.cast_miss_count += 1
                 # Lazy skip
 
     def _monitor_float_state(self) -> None:
@@ -603,7 +597,6 @@ class Player:
                     continue
                 self._retrieve_line()
 
-
     def handle_fish(self) -> None:
         self._handle_fish()
         sleep(ANIMATION_DELAY)
@@ -627,9 +620,9 @@ class Player:
             return
 
         if self.detection.is_fish_marked():
-            self.marked_count += 1
+            self.records["marked_fish"] += 1
         else:
-            self.unmarked_count += 1
+            self.records["unmarked_fish"] += 1
             if self.cfg.ARGS.MARKED and not self._is_fish_whitelisted():
                 pag.press("backspace")
                 return
@@ -638,9 +631,9 @@ class Player:
         sleep(self.cfg.KEEPNET.DELAY)
         pag.press("space")
 
-        self.keep_fish_count += 1
+        self.records["kept_fish"] += 1
         limit = self.cfg.KEEPNET.CAPACITY - self.cfg.ARGS.FISHES_IN_KEEPNET
-        if self.keep_fish_count == limit:
+        if self.records["kept_fish"] == limit:
             self._handle_full_keepnet()
 
         # Avoid wrong cast hour
@@ -650,7 +643,6 @@ class Player:
 
     def _handle_full_keepnet(self) -> None:
         """Handle a full keepnet event."""
-        msg = "Keepnet is full"
         match self.cfg.KEEPNET.FULL_ACTION:
             case "alarm":
                 playsound(str(Path(self.cfg.SCRIPT.ALARM_SOUND).resolve()))
@@ -661,7 +653,7 @@ class Player:
                     listner.join()
                 logger.info("Continue running script")
             case "quit":
-                self.general_quit(msg)
+                self.general_quit("Keepnet is full")
             case _:
                 raise ValueError
 
@@ -698,13 +690,13 @@ class Player:
                 return True
         return False
 
-    def general_quit(self, msg: str) -> None:
+    def general_quit(self, termination_reason: str) -> None:
         """Quit the game through the control panel.
 
-        :param msg: The cause of the termination.
-        :type msg: str
+        :param termination_reason: reason for termination
+        :type termination_reason: str
         """
-        logger.critical(msg)
+        logger.critical(termination_reason)
         sleep(ANIMATION_DELAY)
         pag.press("esc")
         sleep(ANIMATION_DELAY)
@@ -718,7 +710,7 @@ class Player:
         pag.moveTo(self.detection.get_yes_position())
         pag.click()
 
-        self._handle_termination(msg, shutdown=True)
+        self._handle_termination(termination_reason, shutdown=True)
 
     def disconnected_quit(self) -> None:
         """Quit the game through the main menu."""
@@ -736,82 +728,92 @@ class Player:
 
         self._handle_termination("Game disconnected", shutdown=True)
 
-    def gen_result(self, msg: str) -> Table:
-        """Generate a summary of the running results.
+    def create_result(self, termination_reason: str) -> dict:
+        """Convert records into running results.
 
-        :param msg: The cause of the termination.
-        :type msg: str
-        :return: Table containing the running results.
+        :param termination_reason: reason for termination
+        :type termination_reason: str
+        :return: running results
+        :rtype: dict
+        """
+        total_fish_count = self.records["marked_fish"] + self.records["unmarked_fish"]
+        # Will be 0 if total_fish_count = 0
+        mark_ratio_str = (
+            f"{self.records['marked_fish']} / "
+            f"{self.records['unmarked_fish']} / "
+            f"{int(self.records['marked_fish'] / max(1, total_fish_count) * 100)}%"
+        )
+        bite_rate_str = (
+            f"{total_fish_count} / "
+            f"{self.records['kept_fish']} / "
+            f"{int(total_fish_count / (self.timer.get_running_time() / 3600))}/hr"
+        )
+
+        return {
+            "Reason for termination": termination_reason,
+            "Start time": self.timer.get_start_datetime(),
+            "Finish time": self.timer.get_cur_datetime(),
+            "Running time": self.timer.get_running_time(),
+            "Marked / Unmarked / Mark ratio": mark_ratio_str,
+            "Total / Kept / Bite rate": bite_rate_str,
+            "Tea consumed": self.records["tea"],
+            "Carrot consumed": self.records["carrot"],
+            "Alcohol consumed": self.records["alcohol"],
+            "Coffee consumed": self.records["total_coffee"],
+            "Bait harvested": self.records["bait"],
+        }
+
+    def create_table_from_result(self, results: dict) -> Table:
+        """Create a Rich table from running results.
+
+        :param results: running results
+        :type results: dict
+        :return: formatted running results table
         :rtype: Table
         """
-        logger.info("Generating running results")
-        fish_count_total = self.marked_count + self.unmarked_count
-        cast_count = self.cast_miss_count + fish_count_total
-
-        if fish_count_total == 0:
-            marked_ratio = 0
-        else:
-            marked_ratio = int(self.marked_count / fish_count_total * 100)
-        mum_desc = f"{self.marked_count} / {self.unmarked_count} / {marked_ratio}%"
-
-        bite_ratio = int(fish_count_total / cast_count * 100) if cast_count != 0 else 0
-        hmb_desc = f"{fish_count_total} / {cast_count} / {bite_ratio}%"
-
-        # TODO
-        results = (
-            ("Cause of termination", msg),
-            ("Start time", self.timer.get_start_datetime()),
-            ("Finish time", self.timer.get_cur_datetime()),
-            ("Running time", self.timer.get_running_time()),
-            ("Fish caught", self.keep_fish_count),
-            ("Marked / Unmarked / Mark ratio", mum_desc),
-            ("Hit / Miss / Bite ratio", hmb_desc),
-            ("Alcohol consumed", self.alcohol_count),
-            ("Coffee consumed", self.total_coffee_count),
-            ("Tea consumed", self.tea_count),
-            ("Carrot consumed", self.carrot_count),
-            ("Harvest baits count", self.harvest_count),
-        )
-        self.results = results
-
         table = Table(
             "Field", "Value", title="Running Results", box=box.DOUBLE, show_header=False
         )
 
-        for k, v in results:
+        for k, v in results.items():
             table.add_row(k, str(v))
         return table
 
-    def send_email(self) -> None:
-        """Send a notification email to the user's email address."""
+    def send_email(self, results: dict) -> None:
+        """Send a notification email to the user's email address.
+
+        :param results: running results
+        :type results: dict
+        """
         logger.info("Sending email")
-        sender = self.cfg.NOTIFICATION.EMAIL
-        password = self.cfg.NOTIFICATION.PASSWORD
-        smtp_server = self.cfg.NOTIFICATION.SMTP_SERVER
 
         msg = MIMEMultipart()
         msg["Subject"] = "RussianFishing4Script: Notice of Program Termination"
-        msg["From"] = sender
-        recipients = [sender]
+        msg["From"] = self.cfg.NOTIFICATION.EMAIL
+        recipients = [self.cfg.NOTIFICATION.EMAIL]
         msg["To"] = ", ".join(recipients)
 
-        results = ""
-        for k, v in self.results:
-            results += f"{k}: {v}\n"
-        msg.attach(MIMEText(results))
+        text = ""
+        for k, v in results.items():
+            text += f"{k}: {v}\n"
+        msg.attach(MIMEText(text))
 
-        with smtplib.SMTP_SSL(smtp_server, 465) as server:
+        with smtplib.SMTP_SSL(self.cfg.NOTIFICATION.SMTP_SERVER, 465) as server:
             # smtp_server.ehlo()
-            server.login(sender, password)
-            server.sendmail(sender, recipients, msg.as_string())
+            server.login(self.cfg.NOTIFICATION.EMAIL, self.cfg.NOTIFICATION.PASSWORD)
+            server.sendmail(self.cfg.NOTIFICATION.EMAIL, recipients, msg.as_string())
         logger.info("Email sent successfully")
 
-    def send_miaotixing(self) -> None:
-        """Send a notification to the user's miaotixing service."""
+    def send_miaotixing(self, results: dict) -> None:
+        """Send a notification to the user's miaotixing service.
+
+        :param results: running results
+        :type results: dict
+        """
         logger.info("Sending miaotixing notification")
 
         text = ""
-        for k, v in self.results:
+        for k, v in results.items():
             text += f"{k}: {v}\n"
 
         url = "http://miaotixing.com/trigger?" + parse.urlencode(
@@ -833,7 +835,7 @@ class Player:
     def plot_and_save(self) -> None:
         """Plot and save an image using rhour and ghour lists from the timer object."""
         logger.info("Plotting Curves")
-        if self.keep_fish_count == 0:
+        if self.records["kept_fish"] == 0:
             return
 
         cast_rhour_list, cast_ghour_list = self.timer.get_cast_time_list()
@@ -955,7 +957,6 @@ class Player:
         :param check_miss_counts: List of miss counts for all rods.
         :type check_miss_counts: list[int]
         """
-        self.cast_miss_count += 1
         check_miss_counts[self.tackle_idx] += 1
         if check_miss_counts[self.tackle_idx] >= self.cfg.SELECTED.CHECK_MISS_LIMIT:
             check_miss_counts[self.tackle_idx] = 0
@@ -1023,7 +1024,7 @@ class Player:
 
     def _change_tackle_lure(self) -> None:
         """Change the lure on the current tackle if possible."""
-        if not self.cfg.ARGS.LURE or not self.have_new_lure:
+        if not self.cfg.ARGS.LURE or not self.records["have_new_lure"]:
             return
 
         if self.timer.is_lure_changeable():
@@ -1032,11 +1033,10 @@ class Player:
                 self.tackle.equip_item("lure")
             except exceptions.ItemNotFoundError:
                 logger.error("New lure not found")
-                self.have_new_lure = False
 
     def _refill_pva(self) -> None:
         """Refill the PVA bag if it has been used up."""
-        if not self.cfg.ARGS.PVA or not self.have_new_pva:
+        if not self.cfg.ARGS.PVA or not self.records["have_new_pva"]:
             return
 
         if not self.detection.is_pva_chosen():
@@ -1045,22 +1045,22 @@ class Player:
                 self.tackle.equip_item("pva")
             except exceptions.ItemNotFoundError:
                 logger.error("New pva not found")
-                self.have_new_pva = False
+                self.records["have_new_pva"] = False
 
     def _refill_dry_mix(self) -> None:
         """Refill the dry mix if it has been used up."""
-        if not self.cfg.ARGS.DRY_MIX or not self.have_new_dry_mix:
+        if not self.cfg.ARGS.DRY_MIX or not self.records["have_new_dry_mix"]:
             return
         try:
             self.tackle.equip_item("dry_mix")
         except exceptions.ItemNotFoundError:
             logger.error("New dry mix not found")
             self.tackle.available = False  # Skip following stages
-            self.have_new_dry_mix = False
+            self.records["have_new_dry_mix"] = False
 
     def _refill_groundbait(self) -> None:
         """Refill the groundbait if it has been used up."""
-        if not self.cfg.ARGS.GROUNDBAIT or not self.have_new_groundbait:
+        if not self.cfg.ARGS.GROUNDBAIT or not self.records["have_new_groundbait"]:
             return
 
         if self.detection.is_groundbait_chosen():
@@ -1070,7 +1070,6 @@ class Player:
                 self.tackle.equip_item("groundbait")
             except exceptions.ItemNotFoundError:
                 logger.error("New groundbait not found")
-                self.have_new_groundbait = False
 
     def test(self):
         """Boo!"""

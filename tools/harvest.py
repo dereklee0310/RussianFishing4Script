@@ -49,10 +49,7 @@ class HarvestApp(ToolApp):
         print_cfg(self.cfg.ARGS)
 
         self.timer = Timer(self.cfg)
-
-        self.results["Tea consumed"] = 0
-        self.results["Carrot consumed"] = 0
-        self.results["Bait harvested"] = 0
+        self.results = {"Tea consumed": 0, "Carrot consumed": 0, "Bait harvested": 0}
 
     def create_parser(self) -> argparse.ArgumentParser:
         """Create an argument parser for the application.

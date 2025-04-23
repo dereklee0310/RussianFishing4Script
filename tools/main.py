@@ -503,7 +503,11 @@ class RF4SApp(App):
         except KeyboardInterrupt:
             pass
 
-        print(self.player.gen_result("Terminated by user"))
+        print(
+            self.player.create_table_from_result(
+                self.player.create_result("Terminated by user")
+            )
+        )
         if self.cfg.ARGS.PLOT:
             self.player.plot_and_save()
 

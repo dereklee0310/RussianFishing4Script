@@ -38,17 +38,10 @@ class CraftApp(ToolApp):
     """
 
     def __init__(self):
-        """Initialize the application.
-
-        1. Display cfg node.
-        2. Initialize results dictionary.
-        """
+        """Initialize the application."""
         super().__init__()
         print_cfg(self.cfg.ARGS)
-
-        self.results["Successful crafts"] = 0
-        self.results["Failed crafts"] = 0
-        self.results["Materials used"] = 0
+        self.results = {"Successful crafts": 0, "Failed crafts": 0, "Materials used": 0}
 
     def create_parser(self) -> argparse.ArgumentParser:
         """Create an argument parser for the application.
