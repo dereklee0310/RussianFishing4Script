@@ -53,7 +53,7 @@ cd RussianFishing4Script
 ```
 > [!TIP]
 > Or, **[download this repository][Download]** and unzip it if you don't have `git` installed on your pc.  
-> Then run open cmd or PowerShell (not Python) and navigate into the project directory:
+> Then open cmd or PowerShell (not Python) and navigate into the project directory:
 > ```
 > cd "path\to\the\project"
 > ```
