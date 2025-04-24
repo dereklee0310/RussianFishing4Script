@@ -482,7 +482,7 @@ class Player:
         :param shutdown: Whether to shutdown the computer after termination.
         :type shutdown: bool
         """
-        table = self.create_table_from_result(self.create_result(termination_reason))
+        table = self.create_table_from_results(self.create_results(termination_reason))
         if self.cfg.ARGS.EMAIL:
             self.send_email()
         if self.cfg.ARGS.MIAOTIXING:
@@ -615,7 +615,7 @@ class Player:
         if self.cfg.ARGS.SCREENSHOT:
             self.window.save_screenshot(self.timer.get_cur_timestamp())
 
-        if self._is_fish_blacklisted():
+        if self.detection.is_fish_blacklisted():
             pag.press("backspace")
             return
 
@@ -623,7 +623,7 @@ class Player:
             self.records["marked_fish"] += 1
         else:
             self.records["unmarked_fish"] += 1
-            if self.cfg.ARGS.MARKED and not self._is_fish_whitelisted():
+            if self.cfg.ARGS.MARKED and not self.detection.is_fish_whitelisted():
                 pag.press("backspace")
                 return
 
@@ -660,35 +660,6 @@ class Player:
     def _on_release(self, _: keyboard.KeyCode) -> None:
         """Handle key release events."""
         sys.exit()
-
-    def _is_fish_whitelisted(self) -> bool:
-        """Check if the fish is in the whitelist.
-
-        :return: True if the fish is in the whitelist, False otherwise.
-        :rtype: bool
-        """
-        return self._is_fish_in_list(self.cfg.KEEPNET.RELEASE_WHITELIST)
-
-    def _is_fish_blacklisted(self) -> bool:
-        """Check if the fish is in the blacklist.
-
-        :return:  True if the fish is in the blacklist, False otherwise
-        :rtype: bool
-        """
-        return self._is_fish_in_list(self.cfg.KEEPNET.BLACKLIST)
-
-    def _is_fish_in_list(self, fish_species_list: tuple | list) -> bool:
-        """Check if the fish species matches any in the table.
-
-        :param fish_species_list: fish species list
-        :type fish_species_list: tuple | list
-        :return: True if the fish species matches, False otherwise
-        :rtype: bool
-        """
-        for species in fish_species_list:
-            if self.detection.is_fish_species_matched(species):
-                return True
-        return False
 
     def general_quit(self, termination_reason: str) -> None:
         """Quit the game through the control panel.
@@ -728,7 +699,7 @@ class Player:
 
         self._handle_termination("Game disconnected", shutdown=True)
 
-    def create_result(self, termination_reason: str) -> dict:
+    def create_results(self, termination_reason: str) -> dict:
         """Convert records into running results.
 
         :param termination_reason: reason for termination
@@ -763,7 +734,7 @@ class Player:
             "Bait harvested": self.records["bait"],
         }
 
-    def create_table_from_result(self, results: dict) -> Table:
+    def create_table_from_results(self, results: dict) -> Table:
         """Create a Rich table from running results.
 
         :param results: running results

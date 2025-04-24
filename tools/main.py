@@ -504,8 +504,8 @@ class RF4SApp(App):
             pass
 
         print(
-            self.player.create_table_from_result(
-                self.player.create_result("Terminated by user")
+            self.player.create_table_from_results(
+                self.player.create_results("Terminated by user")
             )
         )
         if self.cfg.ARGS.PLOT:

@@ -206,10 +206,34 @@ class Detection:
     def is_fish_captured(self):
         return self._get_image_box("keep", 0.9)
 
-    def is_clip_open(self) -> bool:
-        return not all(
-            c > MIN_GRAY_SCALE_LEVEL for c in pag.pixel(*self.clip_icon_coord)
-        )
+    def is_fish_whitelisted(self) -> bool:
+        """Check if the fish is in the whitelist.
+
+        :return: True if the fish is in the whitelist, False otherwise.
+        :rtype: bool
+        """
+        return self._is_fish_in_list(self.cfg.KEEPNET.RELEASE_WHITELIST)
+
+    def is_fish_blacklisted(self) -> bool:
+        """Check if the fish is in the blacklist.
+
+        :return:  True if the fish is in the blacklist, False otherwise
+        :rtype: bool
+        """
+        return self._is_fish_in_list(self.cfg.KEEPNET.BLACKLIST)
+
+    def _is_fish_in_list(self, fish_species_list: tuple | list) -> bool:
+        """Check if the fish species matches any in the table.
+
+        :param fish_species_list: fish species list
+        :type fish_species_list: tuple | list
+        :return: True if the fish species matches, False otherwise
+        :rtype: bool
+        """
+        for species in fish_species_list:
+            if self.is_fish_species_matched(species):
+                return True
+        return False
 
     # ---------------------------- Retrieval detection --------------------------- #
     def is_retrieval_finished(self):
@@ -231,6 +255,11 @@ class Detection:
 
     def is_line_at_end(self) -> bool:
         return pag.pixel(*self.spool_icon_coord) in (WARNING_COLOR, CRITICAL_COLOR)
+
+    def is_clip_open(self) -> bool:
+        return not all(
+            c > MIN_GRAY_SCALE_LEVEL for c in pag.pixel(*self.clip_icon_coord)
+        )
 
     # ------------------------------ Text detection ------------------------------ #
     def is_tackle_ready(self):
