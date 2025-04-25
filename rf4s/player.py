@@ -13,6 +13,7 @@ import os
 import random
 import smtplib
 import sys
+from collections import Counter
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -249,27 +250,6 @@ class Player:
             hold_mouse_button(PRE_RETRIEVAL_DURATION)
             self._pull_fish()
 
-    def _get_controllers(self, telescopic: bool) -> tuple[callable, callable]:
-        """Get the monitor and hold_mouse_button functions based on the fishing mode.
-
-        :param telescopic: Whether the fishing mode is telescopic.
-        :type telescopic: bool
-        :return: Tuple containing the monitor and hold_mouse_button functions.
-        :rtype: tuple[callable, callable]
-        """
-        if telescopic:
-            hold_mouse_button = utils.hold_mouse_button
-            monitor = self._monitor_float_state
-        else:
-            if self.detection.is_clip_open():
-                logger.warning("Clip is not set, fall back to camera mode")
-                monitor = self._monitor_float_state
-            else:
-                monitor = self._monitor_clip_state
-            hold_mouse_button = utils.hold_mouse_buttons
-
-        return monitor, hold_mouse_button
-
     def _monitor_clip_state(self) -> None:
         """Monitor the state of the bolognese clip."""
         i = self.cfg.SELECTED.DRIFT_TIMEOUT
@@ -439,67 +419,6 @@ class Player:
         if update:
             self.timer.update_cast_time()
 
-    def _pause_script(self) -> None:
-        """Pause the script for a specified duration."""
-        logger.info("Pausing script")
-        pag.press("esc")
-        bound = self.cfg.PAUSE.DURATION // 20
-        offset = random.randint(-bound, bound)
-        sleep(self.cfg.PAUSE.DURATION + offset)
-        pag.press("esc")
-
-    def _handle_timeout(self) -> None:
-        """Handle common timeout events."""
-        if self.detection.is_tackle_broken():
-            self.general_quit("Tackle is broken")
-
-        if self.detection.is_disconnected():
-            self.disconnected_quit()
-
-        if self.detection.is_ticket_expired():
-            self._handle_expired_ticket()
-
-    def _handle_broken_lure(self) -> None:
-        """Handle the broken lure event according to the settings."""
-        match self.cfg.ARGS.BROKEN_LURE:
-            case "replace":
-                self._replace_broken_lures()
-            case "alarm":
-                playsound(str(Path(self.cfg.SCRIPT.ALARM_SOUND).resolve()))
-                self.window.activate_script_window()
-                print("Please replace your lure")
-                print(input("Press enter to continue..."))
-                self.window.activate_game_window()
-            case _:
-                self.general_quit("Lure is broken")
-
-    @utils.release_keys_after(arrow_keys=True)
-    def _handle_termination(self, termination_reason: str, shutdown: bool) -> None:
-        """Handle script termination.
-
-        :param termination_reason: The reason for termination.
-        :type termination_reason: str
-        :param shutdown: Whether to shutdown the computer after termination.
-        :type shutdown: bool
-        """
-        table = self.create_table_from_results(self.create_results(termination_reason))
-        if self.cfg.ARGS.EMAIL:
-            self.send_email()
-        if self.cfg.ARGS.MIAOTIXING:
-            self.send_miaotixing()
-        if self.cfg.ARGS.PLOT:
-            self.plot_and_save()
-        if shutdown and self.cfg.ARGS.SHUTDOWN:
-            os.system("shutdown /s /t 5")
-        print(table)
-        sys.exit()
-
-    def _handle_snagged_line(self) -> None:
-        """Handle a snagged line event."""
-        if len(self.tackles) == 1:
-            self.general_quit("Line is snagged")
-        self.tackle.available = False
-
     def _retrieve_line(self) -> None:
         """Retrieve the fishing line until it is fully retrieved."""
         if self.detection.is_retrieval_finished():
@@ -596,6 +515,215 @@ class Player:
                     sleep(PUT_DOWN_DELAY)
                     continue
                 self._retrieve_line()
+
+    def _put_down_tackle(self, check_miss_counts: list[int]) -> None:
+        """Put down the tackle and wait for a while.
+
+        :param check_miss_counts: List of miss counts for all rods.
+        :type check_miss_counts: list[int]
+        """
+        check_miss_counts[self.tackle_idx] += 1
+        if check_miss_counts[self.tackle_idx] >= self.cfg.SELECTED.CHECK_MISS_LIMIT:
+            check_miss_counts[self.tackle_idx] = 0
+            self._reset_tackle()
+            self._refill_groundbait()
+            self._refill_pva()
+            self._cast_tackle(lock=True)
+
+            sleep(self.cfg.PUT_DOWN_DELAY)
+            if self.detection.is_fish_hooked():
+                check_miss_counts[self.tackle_idx] = 0
+                self._retrieve_line()
+                self._pull_fish()
+                self._reset_tackle()
+                self._refill_groundbait()
+                self._refill_pva()
+                self._cast_tackle(lock=True)
+                return  # Check next rod immediately
+
+        pag.press("0")
+        random_offset = random.uniform(-BOUND, BOUND)
+        sleep(self.cfg.SELECTED.CHECK_DELAY + random_offset)
+
+    def _start_trolling(self) -> None:
+        """Start trolling and change moving direction based on the trolling setting."""
+        if self.cfg.ARGS.TROLLING is None:
+            return
+        logger.info("Starting trolling")
+        pag.press(TROLLING_KEY)
+        if self.cfg.ARGS.TROLLING not in ("left", "right"):  # Forward
+            return
+        pag.keyDown(LEFT_KEY if self.cfg.ARGS.TROLLING == "left" else RIGHT_KEY)
+
+    def _update_tackle(self) -> None:
+        """Update the current tackle (rod) being used."""
+        candidates = self._get_available_rods()
+        if not candidates:
+            self.general_quit("All rods are unavailable")
+        if self.cfg.SCRIPT.RANDOM_ROD_SELECTION:
+            self.tackle_idx = random.choice(candidates)
+        else:
+            self.tackle_idx = candidates[0]
+        self.tackle = self.tackles[self.tackle_idx]
+
+    def _get_available_rods(self) -> list[int]:
+        """
+        Get a list of available rods.
+
+        :return: List of indices of available rods.
+        :rtype: list[int]
+        """
+        if self.num_tackle == 1 and self.tackle.available:
+            return [self.tackle]
+
+        candidates = list(range(len(self.tackles)))
+        # Rotate the candidates for sequential polling
+        start = candidates.index(self.tackle_idx)
+        candidates = candidates[start:] + candidates[:start]
+        candidates = [i for i in candidates if self.tackles[i].available]
+
+        #  Exclude current rod only if there's another available tackle
+        if len(candidates) > 1 and self.tackle_idx in candidates:
+            candidates.remove(self.tackle_idx)
+        return candidates
+
+    def _change_tackle_lure(self) -> None:
+        """Change the lure on the current tackle if possible."""
+        if not self.cfg.ARGS.LURE or not self.records["have_new_lure"]:
+            return
+
+        if self.timer.is_lure_changeable():
+            logger.info("Changing lure randomly")
+            try:
+                self.tackle.equip_item("lure")
+            except exceptions.ItemNotFoundError:
+                logger.error("New lure not found")
+
+    def _refill_pva(self) -> None:
+        """Refill the PVA bag if it has been used up."""
+        if not self.cfg.ARGS.PVA or not self.records["have_new_pva"]:
+            return
+
+        if not self.detection.is_pva_chosen():
+            logger.warning("Pva has been used up")
+            try:
+                self.tackle.equip_item("pva")
+            except exceptions.ItemNotFoundError:
+                logger.error("New pva not found")
+                self.records["have_new_pva"] = False
+
+    def _refill_dry_mix(self) -> None:
+        """Refill the dry mix if it has been used up."""
+        if not self.cfg.ARGS.DRY_MIX or not self.records["have_new_dry_mix"]:
+            return
+        try:
+            self.tackle.equip_item("dry_mix")
+        except exceptions.ItemNotFoundError:
+            logger.error("New dry mix not found")
+            self.tackle.available = False  # Skip following stages
+            self.records["have_new_dry_mix"] = False
+
+    def _refill_groundbait(self) -> None:
+        """Refill the groundbait if it has been used up."""
+        if not self.cfg.ARGS.GROUNDBAIT or not self.records["have_new_groundbait"]:
+            return
+
+        if self.detection.is_groundbait_chosen():
+            logger.info("Groundbait is not used up yet")
+        else:
+            try:
+                self.tackle.equip_item("groundbait")
+            except exceptions.ItemNotFoundError:
+                logger.error("New groundbait not found")
+
+    def test(self):
+        """Boo!"""
+        self._retrieve_line()
+
+
+
+    # TBD: Menu, Plotter, Result, Handler
+    def _get_controllers(self, telescopic: bool) -> tuple[callable, callable]:
+        """Get the monitor and hold_mouse_button functions based on the fishing mode.
+
+        :param telescopic: Whether the fishing mode is telescopic.
+        :type telescopic: bool
+        :return: Tuple containing the monitor and hold_mouse_button functions.
+        :rtype: tuple[callable, callable]
+        """
+        if telescopic:
+            hold_mouse_button = utils.hold_mouse_button
+            monitor = self._monitor_float_state
+        else:
+            if self.detection.is_clip_open():
+                logger.warning("Clip is not set, fall back to camera mode")
+                monitor = self._monitor_float_state
+            else:
+                monitor = self._monitor_clip_state
+            hold_mouse_button = utils.hold_mouse_buttons
+
+        return monitor, hold_mouse_button
+
+    def _pause_script(self) -> None:
+        """Pause the script for a specified duration."""
+        logger.info("Pausing script")
+        pag.press("esc")
+        bound = self.cfg.PAUSE.DURATION // 20
+        offset = random.randint(-bound, bound)
+        sleep(self.cfg.PAUSE.DURATION + offset)
+        pag.press("esc")
+
+    def _handle_timeout(self) -> None:
+        """Handle common timeout events."""
+        if self.detection.is_tackle_broken():
+            self.general_quit("Tackle is broken")
+
+        if self.detection.is_disconnected():
+            self.disconnected_quit()
+
+        if self.detection.is_ticket_expired():
+            self._handle_expired_ticket()
+
+    def _handle_broken_lure(self) -> None:
+        """Handle the broken lure event according to the settings."""
+        match self.cfg.ARGS.BROKEN_LURE:
+            case "replace":
+                self._replace_broken_lures()
+            case "alarm":
+                playsound(str(Path(self.cfg.SCRIPT.ALARM_SOUND).resolve()))
+                self.window.activate_script_window()
+                print("Please replace your lure")
+                print(input("Press enter to continue..."))
+                self.window.activate_game_window()
+            case _:
+                self.general_quit("Lure is broken")
+
+    @utils.release_keys_after(arrow_keys=True)
+    def _handle_termination(self, termination_reason: str, shutdown: bool) -> None:
+        """Handle script termination.
+
+        :param termination_reason: The reason for termination.
+        :type termination_reason: str
+        :param shutdown: Whether to shutdown the computer after termination.
+        :type shutdown: bool
+        """
+        table = self.create_table_from_results(self.create_results(termination_reason))
+        if self.cfg.ARGS.EMAIL:
+            self.send_email()
+        if self.cfg.ARGS.MIAOTIXING:
+            self.send_miaotixing()
+        if self.cfg.ARGS.PLOT:
+            self.plot_and_save()
+        if shutdown and self.cfg.ARGS.SHUTDOWN:
+            os.system("shutdown /s /t 5")
+        print(table)
+        sys.exit()
+
+    def _handle_snagged_line(self) -> None:
+        """Handle a snagged line event."""
+        if len(self.tackles) == 1:
+            self.general_quit("Line is snagged")
+        self.tackle.available = False
 
     def handle_fish(self) -> None:
         self._handle_fish()
@@ -921,127 +1049,3 @@ class Player:
                 pag.click(clicks=2, interval=0.1)
                 sleep(WEAR_TEXT_UPDATE_DELAY)
                 break
-
-    def _put_down_tackle(self, check_miss_counts: list[int]) -> None:
-        """Put down the tackle and wait for a while.
-
-        :param check_miss_counts: List of miss counts for all rods.
-        :type check_miss_counts: list[int]
-        """
-        check_miss_counts[self.tackle_idx] += 1
-        if check_miss_counts[self.tackle_idx] >= self.cfg.SELECTED.CHECK_MISS_LIMIT:
-            check_miss_counts[self.tackle_idx] = 0
-            self._reset_tackle()
-            self._refill_groundbait()
-            self._refill_pva()
-            self._cast_tackle(lock=True)
-
-            sleep(self.cfg.PUT_DOWN_DELAY)
-            if self.detection.is_fish_hooked():
-                check_miss_counts[self.tackle_idx] = 0
-                self._retrieve_line()
-                self._pull_fish()
-                self._reset_tackle()
-                self._refill_groundbait()
-                self._refill_pva()
-                self._cast_tackle(lock=True)
-                return  # Check next rod immediately
-
-        pag.press("0")
-        random_offset = random.uniform(-BOUND, BOUND)
-        sleep(self.cfg.SELECTED.CHECK_DELAY + random_offset)
-
-    def _start_trolling(self) -> None:
-        """Start trolling and change moving direction based on the trolling setting."""
-        if self.cfg.ARGS.TROLLING is None:
-            return
-        logger.info("Starting trolling")
-        pag.press(TROLLING_KEY)
-        if self.cfg.ARGS.TROLLING not in ("left", "right"):  # Forward
-            return
-        pag.keyDown(LEFT_KEY if self.cfg.ARGS.TROLLING == "left" else RIGHT_KEY)
-
-    def _update_tackle(self) -> None:
-        """Update the current tackle (rod) being used."""
-        candidates = self._get_available_rods()
-        if not candidates:
-            self.general_quit("All rods are unavailable")
-        if self.cfg.SCRIPT.RANDOM_ROD_SELECTION:
-            self.tackle_idx = random.choice(candidates)
-        else:
-            self.tackle_idx = candidates[0]
-        self.tackle = self.tackles[self.tackle_idx]
-
-    def _get_available_rods(self) -> list[int]:
-        """
-        Get a list of available rods.
-
-        :return: List of indices of available rods.
-        :rtype: list[int]
-        """
-        if self.num_tackle == 1 and self.tackle.available:
-            return [self.tackle]
-
-        candidates = list(range(len(self.tackles)))
-        # Rotate the candidates for sequential polling
-        start = candidates.index(self.tackle_idx)
-        candidates = candidates[start:] + candidates[:start]
-        candidates = [i for i in candidates if self.tackles[i].available]
-
-        #  Exclude current rod only if there's another available tackle
-        if len(candidates) > 1 and self.tackle_idx in candidates:
-            candidates.remove(self.tackle_idx)
-        return candidates
-
-    def _change_tackle_lure(self) -> None:
-        """Change the lure on the current tackle if possible."""
-        if not self.cfg.ARGS.LURE or not self.records["have_new_lure"]:
-            return
-
-        if self.timer.is_lure_changeable():
-            logger.info("Changing lure randomly")
-            try:
-                self.tackle.equip_item("lure")
-            except exceptions.ItemNotFoundError:
-                logger.error("New lure not found")
-
-    def _refill_pva(self) -> None:
-        """Refill the PVA bag if it has been used up."""
-        if not self.cfg.ARGS.PVA or not self.records["have_new_pva"]:
-            return
-
-        if not self.detection.is_pva_chosen():
-            logger.warning("Pva has been used up")
-            try:
-                self.tackle.equip_item("pva")
-            except exceptions.ItemNotFoundError:
-                logger.error("New pva not found")
-                self.records["have_new_pva"] = False
-
-    def _refill_dry_mix(self) -> None:
-        """Refill the dry mix if it has been used up."""
-        if not self.cfg.ARGS.DRY_MIX or not self.records["have_new_dry_mix"]:
-            return
-        try:
-            self.tackle.equip_item("dry_mix")
-        except exceptions.ItemNotFoundError:
-            logger.error("New dry mix not found")
-            self.tackle.available = False  # Skip following stages
-            self.records["have_new_dry_mix"] = False
-
-    def _refill_groundbait(self) -> None:
-        """Refill the groundbait if it has been used up."""
-        if not self.cfg.ARGS.GROUNDBAIT or not self.records["have_new_groundbait"]:
-            return
-
-        if self.detection.is_groundbait_chosen():
-            logger.info("Groundbait is not used up yet")
-        else:
-            try:
-                self.tackle.equip_item("groundbait")
-            except exceptions.ItemNotFoundError:
-                logger.error("New groundbait not found")
-
-    def test(self):
-        """Boo!"""
-        self._retrieve_line()
