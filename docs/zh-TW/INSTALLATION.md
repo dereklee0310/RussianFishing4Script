@@ -1,5 +1,4 @@
 **[[English version]][installation]**
-# 安裝指南
 ## 必要條件
 下載並安裝 **[Python 3.12.*][Python]**。  
 

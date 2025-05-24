@@ -1,5 +1,4 @@
 **[[中文版]][installation]**
-## Installation
 ### Approach 1: Clone via Git
 ```
 git clone https://github.com/dereklee0310/RussianFishing4Script.git

@@ -1,5 +1,4 @@
 **[[中文版]][configuration]**
-# Configuration Guide
 ## Using Launch Options
 You can use launch options to enable one or more features at startup.
 ### Display Help Message

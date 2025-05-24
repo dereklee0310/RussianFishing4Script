@@ -1,4 +1,4 @@
-**[[中文版]][readme]**
+**[[English version]][readme]**
 <div align="center">
 
 ![rf4s_logo]
