@@ -181,15 +181,24 @@ class Player:
             sleep(ANIMATION_DELAY)
             if self.detection.is_fish_hooked():
                 check_miss_counts[self.tackle_idx] = 0
-                self._retrieve_line()
-                self._pull_fish()
-                self._reset_tackle()
-                self._refill_groundbait()
-                self._refill_pva()
-                self._cast_tackle(lock=True)
+                self.retrieve_and_recast()
             else:
-                self._put_down_tackle(check_miss_counts)
+                sleep(self.cfg.SELECTED.PUT_DOWN_DELAY)
+                if self.detection.is_fish_hooked():
+                    check_miss_counts[self.tackle_idx] = 0
+                    self.retrieve_and_recast()
+                else:
+                    self._put_down_tackle(check_miss_counts)
             self._update_tackle()
+
+    def retrieve_and_recast(self) -> None:
+        self._retrieve_line()
+        self._pull_fish()
+        self._reset_tackle()
+        self._refill_groundbait()
+        self._refill_pva()
+        self._cast_tackle(lock=True)
+
 
     def start_pirk_mode(self) -> None:
         """Main marine fishing loop for pirk mode."""
@@ -529,17 +538,6 @@ class Player:
             self._refill_groundbait()
             self._refill_pva()
             self._cast_tackle(lock=True)
-
-            sleep(self.cfg.PUT_DOWN_DELAY)
-            if self.detection.is_fish_hooked():
-                check_miss_counts[self.tackle_idx] = 0
-                self._retrieve_line()
-                self._pull_fish()
-                self._reset_tackle()
-                self._refill_groundbait()
-                self._refill_pva()
-                self._cast_tackle(lock=True)
-                return  # Check next rod immediately
 
         pag.press("0")
         random_offset = random.uniform(-BOUND, BOUND)

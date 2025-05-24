@@ -175,6 +175,8 @@ _C.PROFILE.BOTTOM.POST_ACCELERATION = "off"
 _C.PROFILE.BOTTOM.CHECK_DELAY = 32.0
 # Maximum allowed misses before recasting the rod
 _C.PROFILE.BOTTOM.CHECK_MISS_LIMIT = 16
+# Delay before checking if a fish is hooked again and putting down the rod
+_C.PROFILE.BOTTOM.PUT_DOWN_DELAY = 0.0
 
 
 # ---------------------------------------------------------------------------- #

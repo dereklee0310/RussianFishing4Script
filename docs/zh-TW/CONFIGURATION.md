@@ -240,6 +240,7 @@ _C.PROFILE.BOTTOM.CAST_DELAY = 4.0  # 拋竿後等待時間（秒）
 _C.PROFILE.BOTTOM.POST_ACCELERATION = "off"  # 遛魚加速模式  
 _C.PROFILE.BOTTOM.CHECK_DELAY = 32.0  # 檢查咬口間隔（秒）  
 _C.PROFILE.BOTTOM.CHECK_MISS_LIMIT = 16  # 最大空竿次數後重拋  
+_C.PROFILE.BOTTOM.PUT_DOWN_DELAY = 0.0  # 放下竿子前再次檢查延遲
 
 ## 海釣/維基配置（Pirk技法）##  
 _C.PROFILE.PIRK = CN()  

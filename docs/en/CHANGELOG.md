@@ -6,7 +6,15 @@ Update app and window module
 
 -e/--exit-key -> -q/--quit-key
 
-type in calculate.py
+typo in calculate.py
+
+
+add put down delay
+
+migrate to ruff
+
+add gift handling
+
 
 -bl -> -BL
 
