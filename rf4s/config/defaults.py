@@ -112,6 +112,9 @@ _C.PROFILE = CN()
 # ---------------------------------------------------------------------------- #
 _C.PROFILE.SPIN = CN()
 _C.PROFILE.SPIN.MODE = "spin"
+# Launch options that overwrites SCRIPT.LAUNCH_OPTIONS
+# Fall back to SCRIPT.LAUNCH_OPTIONS if left empty
+_C.PROFILE.SPIN.LAUNCH_OPTIONS = ""
 # Power level for casting, 1 ~ 5
 # 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+ (power cast), FYR
 # For instance, 2.5 cast_power_level equals to 37.5% casting power
@@ -135,6 +138,7 @@ _C.PROFILE.SPIN.TYPE = "normal"
 
 _C.PROFILE.SPIN_WITH_PAUSE = CN()
 _C.PROFILE.SPIN_WITH_PAUSE.MODE = "spin"
+_C.PROFILE.SPIN_WITH_PAUSE.LAUNCH_OPTIONS = ""
 _C.PROFILE.SPIN_WITH_PAUSE.CAST_POWER_LEVEL = 5.0
 _C.PROFILE.SPIN_WITH_PAUSE.CAST_DELAY = 6.0
 _C.PROFILE.SPIN_WITH_PAUSE.TIGHTEN_DURATION = 1.0
@@ -148,6 +152,7 @@ _C.PROFILE.SPIN_WITH_PAUSE.TYPE = "pause"
 
 _C.PROFILE.SPIN_WITH_LIFT = CN()
 _C.PROFILE.SPIN_WITH_LIFT.MODE = "spin"
+_C.PROFILE.SPIN_WITH_LIFT.LAUNCH_OPTIONS = ""
 _C.PROFILE.SPIN_WITH_LIFT.CAST_POWER_LEVEL = 5.0
 _C.PROFILE.SPIN_WITH_LIFT.CAST_DELAY = 6.0
 _C.PROFILE.SPIN_WITH_LIFT.TIGHTEN_DURATION = 0.0
@@ -164,6 +169,9 @@ _C.PROFILE.SPIN_WITH_LIFT.TYPE = "lift"
 # ---------------------------------------------------------------------------- #
 _C.PROFILE.BOTTOM = CN()
 _C.PROFILE.BOTTOM.MODE = "bottom"
+# Launch options that overwrites SCRIPT.LAUNCH_OPTIONS
+# Fall back to SCRIPT.LAUNCH_OPTIONS if left empty
+_C.PROFILE.BOTTOM.LAUNCH_OPTIONS = ""
 # Power level for casting, 1 ~ 5
 # 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+ (power cast), FYR
 # For instance, 2.5 cast_power_level equals to 37.5% casting power
@@ -184,6 +192,9 @@ _C.PROFILE.BOTTOM.PUT_DOWN_DELAY = 0.0
 # ---------------------------------------------------------------------------- #
 _C.PROFILE.PIRK = CN()
 _C.PROFILE.PIRK.MODE = "pirk"
+# Launch options that overwrites SCRIPT.LAUNCH_OPTIONS
+# Fall back to SCRIPT.LAUNCH_OPTIONS if left empty
+_C.PROFILE.PIRK.LAUNCH_OPTIONS = ""
 # Power level for casting, 1 ~ 5
 # 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+ (power cast), FYR
 # For instance, 2.5 cast_power_level equals to 37.5% casting power
@@ -213,6 +224,7 @@ _C.PROFILE.PIRK.POST_ACCELERATION = "auto"
 
 _C.PROFILE.PIRK_WITH_RETRIEVAL = CN()
 _C.PROFILE.PIRK_WITH_RETRIEVAL.MODE = "pirk"
+_C.PROFILE.PIRK_WITH_RETRIEVAL.LAUNCH_OPTIONS = ""
 _C.PROFILE.PIRK_WITH_RETRIEVAL.CAST_POWER_LEVEL = 1.0
 _C.PROFILE.PIRK_WITH_RETRIEVAL.CAST_DELAY = 4.0
 _C.PROFILE.PIRK_WITH_RETRIEVAL.SINK_TIMEOUT = 60.0
@@ -231,6 +243,7 @@ _C.PROFILE.PIRK_WITH_RETRIEVAL.POST_ACCELERATION = "auto"
 # Spin fishing with wakey rig at Ladoga Archipelago
 _C.PROFILE.WAKEY_RIG = CN()
 _C.PROFILE.WAKEY_RIG.MODE = "pirk"
+_C.PROFILE.WAKEY_RIG.LAUNCH_OPTIONS = ""
 _C.PROFILE.WAKEY_RIG.CAST_POWER_LEVEL = 1.0
 _C.PROFILE.WAKEY_RIG.CAST_DELAY = 4.0
 _C.PROFILE.WAKEY_RIG.SINK_TIMEOUT = 45.0
@@ -251,6 +264,9 @@ _C.PROFILE.WAKEY_RIG.POST_ACCELERATION = "auto"
 # ---------------------------------------------------------------------------- #
 _C.PROFILE.ELEVATOR = CN()
 _C.PROFILE.ELEVATOR.MODE = "elevator"
+# Launch options that overwrites SCRIPT.LAUNCH_OPTIONS
+# Fall back to SCRIPT.LAUNCH_OPTIONS if left empty
+_C.PROFILE.ELEVATOR.LAUNCH_OPTIONS = ""
 # Power level for casting, 1 ~ 5
 # 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+ (power cast), FYR
 # For instance, 2.5 cast_power_level equals to 37.5% casting power
@@ -277,6 +293,7 @@ _C.PROFILE.ELEVATOR.POST_ACCELERATION = "auto"
 
 _C.PROFILE.ELEVATOR_WITH_DROP = CN()
 _C.PROFILE.ELEVATOR_WITH_DROP.MODE = "elevator"
+_C.PROFILE.ELEVATOR_WITH_DROP.LAUNCH_OPTIONS = ""
 _C.PROFILE.ELEVATOR_WITH_DROP.CAST_POWER_LEVEL = 1.0
 _C.PROFILE.ELEVATOR_WITH_DROP.CAST_DELAY = 4.0
 _C.PROFILE.ELEVATOR_WITH_DROP.SINK_TIMEOUT = 60.0
@@ -293,6 +310,9 @@ _C.PROFILE.ELEVATOR_WITH_DROP.POST_ACCELERATION = "auto"
 # ---------------------------------------------------------------------------- #
 _C.PROFILE.TELESCOPIC = CN()
 _C.PROFILE.TELESCOPIC.MODE = "telescopic"
+# Launch options that overwrites SCRIPT.LAUNCH_OPTIONS
+# Fall back to SCRIPT.LAUNCH_OPTIONS if left empty
+_C.PROFILE.TELESCOPIC.LAUNCH_OPTIONS = ""
 # Power level for casting, 1 ~ 5
 # 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+ (power cast), FYR
 # For instance, 2.5 cast_power_level equals to 37.5% casting power
@@ -315,6 +335,9 @@ _C.PROFILE.TELESCOPIC.CAMERA_SHAPE = "square"
 # ---------------------------------------------------------------------------- #
 _C.PROFILE.BOLOGNESE = CN()
 _C.PROFILE.BOLOGNESE.MODE = "bolognese"
+# Launch options that overwrites SCRIPT.LAUNCH_OPTIONS
+# Fall back to SCRIPT.LAUNCH_OPTIONS if left empty
+_C.PROFILE.BOLOGNESE.LAUNCH_OPTIONS = ""
 # Power level for casting, 1 ~ 5
 # 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+ (power cast), FYR
 # For instance, 2.5 cast_power_level equals to 37.5% casting power

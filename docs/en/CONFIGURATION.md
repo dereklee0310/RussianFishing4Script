@@ -147,19 +147,19 @@ python tools\main.py -T KEY.BOTTOM_RODS "1, 2"
 from yacs.config import CfgNode as CN
 
 _C = CN()
-_C.VERSION = "0.0.0"
+_C.VERSION = "0.4.2"
 
 # ---------------------------------------------------------------------------- #
 #                                    General                                   #
 # ---------------------------------------------------------------------------- #
 _C.SCRIPT = CN()
-_C.SCRIPT.LANGUAGE = "en" # Language for the script. Options: en, ru, zh-TW, zh-CN
+_C.SCRIPT.LANGUAGE = "en"  # Language for the script. Options: en, ru, zh-TW, zh-CN
 _C.SCRIPT.LAUNCH_OPTIONS = ""  # Default launch options for the script, e.g., -r -c -H
 _C.SCRIPT.SMTP_VERIFICATION = True
 _C.SCRIPT.IMAGE_VERIFICATION = True
 _C.SCRIPT.SNAG_DETECTION = True
 _C.SCRIPT.SPOOLING_DETECTION = True
-_C.SCRIPT.RANDOM_ROD_SELECTION = True # For bottom mode
+_C.SCRIPT.RANDOM_ROD_SELECTION = True  # For bottom mode
 # Confidence threshold for spooling detection (lower = more sensitive)
 _C.SCRIPT.SPOOL_CONFIDENCE = 0.98
 # Delay before recasting spod rod (in seconds)
@@ -194,13 +194,13 @@ _C.KEY.QUIT = "CTRL-C"
 _C.STAT = CN()
 # Minimum energy level before drinking coffee/harvesting baits
 _C.STAT.ENERGY_THRESHOLD = 0.74
-_C.STAT.HUNGER_THRESHOLD = 0.5 # Minimum hunger level before consuming carrot
-_C.STAT.COMFORT_THRESHOLD = 0.51 # Minimum comfort level before consuming tea
+_C.STAT.HUNGER_THRESHOLD = 0.5  # Minimum hunger level before consuming carrot
+_C.STAT.COMFORT_THRESHOLD = 0.51  # Minimum comfort level before consuming tea
 _C.STAT.TEA_DELAY = 300  # Delay between tea drinks (in seconds)
 _C.STAT.COFFEE_LIMIT = 10  # Maximum coffee drinks per fish fight.
-_C.STAT.COFFEE_PER_DRINK = 1 # Amount of coffee consumed per drink
+_C.STAT.COFFEE_PER_DRINK = 1  # Amount of coffee consumed per drink
 _C.STAT.ALCOHOL_DELAY = 900  # Delay between alcohol drinks (in seconds)
-_C.STAT.ALCOHOL_PER_DRINK = 1 # Amount of alcohol consumed per drink
+_C.STAT.ALCOHOL_PER_DRINK = 1  # Amount of alcohol consumed per drink
 
 # ---------------------------------------------------------------------------- #
 #                   Friction Brake (Use -f flag to enable it)                  #
@@ -210,16 +210,16 @@ _C.FRICTION_BRAKE.INITIAL = 29  # Initial friction brake value
 _C.FRICTION_BRAKE.MAX = 30  # Maximum friction brake value
 # Delay before starting to adjust friction brake after a fish is hooked
 _C.FRICTION_BRAKE.START_DELAY = 2.0
-_C.FRICTION_BRAKE.INCREASE_DELAY = 1.0 # Delay before increasing friction brake
-_C.FRICTION_BRAKE.SENSITIVITY = "medium" # Sensitivity of friction brake detection
+_C.FRICTION_BRAKE.INCREASE_DELAY = 1.0  # Delay before increasing friction brake
+_C.FRICTION_BRAKE.SENSITIVITY = "medium"  # Sensitivity of friction brake detection
 
 # ---------------------------------------------------------------------------- #
 #                                    Keepnet                                   #
 # ---------------------------------------------------------------------------- #
 _C.KEEPNET = CN()
 _C.KEEPNET.CAPACITY = 100
-_C.KEEPNET.DELAY = 0.0   # Delay before keeping the fish (for screenshots)
-_C.KEEPNET.FULL_ACTION = "quit" # Action when keepnet is full. Options: quit, alarm
+_C.KEEPNET.DELAY = 0.0  # Delay before keeping the fish (for screenshots)
+_C.KEEPNET.FULL_ACTION = "quit"  # Action when keepnet is full. Options: quit, alarm
 # Whitelist for unmarked fish releasing when using -m flag
 # Options: mackerel, saithe, herring, squid, scallop, mussel, perch, shorthorn_sculpin
 _C.KEEPNET.RELEASE_WHITELIST = (
@@ -232,8 +232,7 @@ _C.KEEPNET.RELEASE_WHITELIST = (
 )
 # Fish in the blacklist will always be released
 # Options: mackerel, saithe, herring, squid, scallop, mussel, perch, shorthorn_sculpin
-_C.KEEPNET.BLACKLIST = (
-)
+_C.KEEPNET.BLACKLIST = ()
 
 # ---------------------------------------------------------------------------- #
 #                                 Notification                                 #
@@ -257,6 +256,9 @@ _C.PROFILE = CN()
 # ---------------------------------------------------------------------------- #
 _C.PROFILE.SPIN = CN()
 _C.PROFILE.SPIN.MODE = "spin"
+# Launch options that overwrites SCRIPT.LAUNCH_OPTIONS
+# Fall back to SCRIPT.LAUNCH_OPTIONS if left empty
+_C.PROFILE.SPIN.LAUNCH_OPTIONS = ""
 # Power level for casting, 1 ~ 5
 # 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+ (power cast), FYR
 # For instance, 2.5 cast_power_level equals to 37.5% casting power
@@ -280,6 +282,7 @@ _C.PROFILE.SPIN.TYPE = "normal"
 
 _C.PROFILE.SPIN_WITH_PAUSE = CN()
 _C.PROFILE.SPIN_WITH_PAUSE.MODE = "spin"
+_C.PROFILE.SPIN_WITH_PAUSE.LAUNCH_OPTIONS = ""
 _C.PROFILE.SPIN_WITH_PAUSE.CAST_POWER_LEVEL = 5.0
 _C.PROFILE.SPIN_WITH_PAUSE.CAST_DELAY = 6.0
 _C.PROFILE.SPIN_WITH_PAUSE.TIGHTEN_DURATION = 1.0
@@ -293,6 +296,7 @@ _C.PROFILE.SPIN_WITH_PAUSE.TYPE = "pause"
 
 _C.PROFILE.SPIN_WITH_LIFT = CN()
 _C.PROFILE.SPIN_WITH_LIFT.MODE = "spin"
+_C.PROFILE.SPIN_WITH_LIFT.LAUNCH_OPTIONS = ""
 _C.PROFILE.SPIN_WITH_LIFT.CAST_POWER_LEVEL = 5.0
 _C.PROFILE.SPIN_WITH_LIFT.CAST_DELAY = 6.0
 _C.PROFILE.SPIN_WITH_LIFT.TIGHTEN_DURATION = 0.0
@@ -304,17 +308,19 @@ _C.PROFILE.SPIN_WITH_LIFT.POST_ACCELERATION = "off"
 _C.PROFILE.SPIN_WITH_LIFT.TYPE = "lift"
 
 
-
 # ---------------------------------------------------------------------------- #
 #                            Bottom Fishing Profile                            #
 # ---------------------------------------------------------------------------- #
 _C.PROFILE.BOTTOM = CN()
 _C.PROFILE.BOTTOM.MODE = "bottom"
+# Launch options that overwrites SCRIPT.LAUNCH_OPTIONS
+# Fall back to SCRIPT.LAUNCH_OPTIONS if left empty
+_C.PROFILE.BOTTOM.LAUNCH_OPTIONS = ""
 # Power level for casting, 1 ~ 5
 # 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+ (power cast), FYR
 # For instance, 2.5 cast_power_level equals to 37.5% casting power
 _C.PROFILE.BOTTOM.CAST_POWER_LEVEL = 5.0
-_C.PROFILE.BOTTOM.CAST_DELAY = 4.0 # Delay after casting before lure sinks
+_C.PROFILE.BOTTOM.CAST_DELAY = 4.0  # Delay after casting before lure sinks
 # Hold Shift key during fish fight. Options: on, off, auto
 _C.PROFILE.BOTTOM.POST_ACCELERATION = "off"
 # Delay before checking fish bite on next rod
@@ -330,20 +336,23 @@ _C.PROFILE.BOTTOM.PUT_DOWN_DELAY = 0.0
 # ---------------------------------------------------------------------------- #
 _C.PROFILE.PIRK = CN()
 _C.PROFILE.PIRK.MODE = "pirk"
+# Launch options that overwrites SCRIPT.LAUNCH_OPTIONS
+# Fall back to SCRIPT.LAUNCH_OPTIONS if left empty
+_C.PROFILE.PIRK.LAUNCH_OPTIONS = ""
 # Power level for casting, 1 ~ 5
 # 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+ (power cast), FYR
 # For instance, 2.5 cast_power_level equals to 37.5% casting power
 _C.PROFILE.PIRK.CAST_POWER_LEVEL = 1.0
-_C.PROFILE.PIRK.CAST_DELAY = 4.0 # Delay after casting before lure sinks
-_C.PROFILE.PIRK.SINK_TIMEOUT = 60.0 # Maximum time allowed for sinking
+_C.PROFILE.PIRK.CAST_DELAY = 4.0  # Delay after casting before lure sinks
+_C.PROFILE.PIRK.SINK_TIMEOUT = 60.0  # Maximum time allowed for sinking
 # Duration to tighten the line after sinking lure/adjusting lure depth
 _C.PROFILE.PIRK.TIGHTEN_DURATION = 1.0
 # Delay after opening reel to adjust lure depth, set this to 0 to recast the rod instead
 _C.PROFILE.PIRK.DEPTH_ADJUST_DELAY = 4.0
 # Durtion to tighten the line after opening reel for DEPTH_ADJUST_DELAY seconds
 _C.PROFILE.PIRK.DEPTH_ADJUST_DURATION = 1.0
-_C.PROFILE.PIRK.CTRL = False # Hold Ctrl key during pirking
-_C.PROFILE.PIRK.SHIFT = False # Hold Shift key during pirking
+_C.PROFILE.PIRK.CTRL = False  # Hold Ctrl key during pirking
+_C.PROFILE.PIRK.SHIFT = False  # Hold Shift key during pirking
 # Duration of lifting the rod, set this to 0 if you want to wait instead of pirking
 _C.PROFILE.PIRK.PIRK_DURATION = 0.5
 _C.PROFILE.PIRK.PIRK_DELAY = 2.0  # Delay after lifting the rod
@@ -359,6 +368,7 @@ _C.PROFILE.PIRK.POST_ACCELERATION = "auto"
 
 _C.PROFILE.PIRK_WITH_RETRIEVAL = CN()
 _C.PROFILE.PIRK_WITH_RETRIEVAL.MODE = "pirk"
+_C.PROFILE.PIRK_WITH_RETRIEVAL.LAUNCH_OPTIONS = ""
 _C.PROFILE.PIRK_WITH_RETRIEVAL.CAST_POWER_LEVEL = 1.0
 _C.PROFILE.PIRK_WITH_RETRIEVAL.CAST_DELAY = 4.0
 _C.PROFILE.PIRK_WITH_RETRIEVAL.SINK_TIMEOUT = 60.0
@@ -377,6 +387,7 @@ _C.PROFILE.PIRK_WITH_RETRIEVAL.POST_ACCELERATION = "auto"
 # Spin fishing with wakey rig at Ladoga Archipelago
 _C.PROFILE.WAKEY_RIG = CN()
 _C.PROFILE.WAKEY_RIG.MODE = "pirk"
+_C.PROFILE.WAKEY_RIG.LAUNCH_OPTIONS = ""
 _C.PROFILE.WAKEY_RIG.CAST_POWER_LEVEL = 1.0
 _C.PROFILE.WAKEY_RIG.CAST_DELAY = 4.0
 _C.PROFILE.WAKEY_RIG.SINK_TIMEOUT = 45.0
@@ -397,6 +408,9 @@ _C.PROFILE.WAKEY_RIG.POST_ACCELERATION = "auto"
 # ---------------------------------------------------------------------------- #
 _C.PROFILE.ELEVATOR = CN()
 _C.PROFILE.ELEVATOR.MODE = "elevator"
+# Launch options that overwrites SCRIPT.LAUNCH_OPTIONS
+# Fall back to SCRIPT.LAUNCH_OPTIONS if left empty
+_C.PROFILE.ELEVATOR.LAUNCH_OPTIONS = ""
 # Power level for casting, 1 ~ 5
 # 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+ (power cast), FYR
 # For instance, 2.5 cast_power_level equals to 37.5% casting power
@@ -423,6 +437,7 @@ _C.PROFILE.ELEVATOR.POST_ACCELERATION = "auto"
 
 _C.PROFILE.ELEVATOR_WITH_DROP = CN()
 _C.PROFILE.ELEVATOR_WITH_DROP.MODE = "elevator"
+_C.PROFILE.ELEVATOR_WITH_DROP.LAUNCH_OPTIONS = ""
 _C.PROFILE.ELEVATOR_WITH_DROP.CAST_POWER_LEVEL = 1.0
 _C.PROFILE.ELEVATOR_WITH_DROP.CAST_DELAY = 4.0
 _C.PROFILE.ELEVATOR_WITH_DROP.SINK_TIMEOUT = 60.0
@@ -439,6 +454,9 @@ _C.PROFILE.ELEVATOR_WITH_DROP.POST_ACCELERATION = "auto"
 # ---------------------------------------------------------------------------- #
 _C.PROFILE.TELESCOPIC = CN()
 _C.PROFILE.TELESCOPIC.MODE = "telescopic"
+# Launch options that overwrites SCRIPT.LAUNCH_OPTIONS
+# Fall back to SCRIPT.LAUNCH_OPTIONS if left empty
+_C.PROFILE.TELESCOPIC.LAUNCH_OPTIONS = ""
 # Power level for casting, 1 ~ 5
 # 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+ (power cast), FYR
 # For instance, 2.5 cast_power_level equals to 37.5% casting power
@@ -447,8 +465,8 @@ _C.PROFILE.TELESCOPIC.CAST_POWER_LEVEL = 5.0
 _C.PROFILE.TELESCOPIC.CAST_DELAY = 4.0
 # Sensitivity of float detection
 _C.PROFILE.TELESCOPIC.FLOAT_SENSITIVITY = 0.68
-_C.PROFILE.TELESCOPIC.CHECK_DELAY = 1.0   # Delay between fish bite checks
-_C.PROFILE.TELESCOPIC.PULL_DELAY = 0.5   # Delay pulling a fish after it's hooked
+_C.PROFILE.TELESCOPIC.CHECK_DELAY = 1.0  # Delay between fish bite checks
+_C.PROFILE.TELESCOPIC.PULL_DELAY = 0.5  # Delay pulling a fish after it's hooked
 # Recast rod after timed out, designed for flowing water maps
 _C.PROFILE.TELESCOPIC.DRIFT_TIMEOUT = 16.0
 # Shape of the float camera, the script tracks the whole camrea window by default
@@ -461,6 +479,9 @@ _C.PROFILE.TELESCOPIC.CAMERA_SHAPE = "square"
 # ---------------------------------------------------------------------------- #
 _C.PROFILE.BOLOGNESE = CN()
 _C.PROFILE.BOLOGNESE.MODE = "bolognese"
+# Launch options that overwrites SCRIPT.LAUNCH_OPTIONS
+# Fall back to SCRIPT.LAUNCH_OPTIONS if left empty
+_C.PROFILE.BOLOGNESE.LAUNCH_OPTIONS = ""
 # Power level for casting, 1 ~ 5
 # 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+ (power cast), FYR
 # For instance, 2.5 cast_power_level equals to 37.5% casting power
@@ -470,7 +491,7 @@ _C.PROFILE.BOLOGNESE.CAST_DELAY = 4.0
 # Sensitivity of float detection
 _C.PROFILE.BOLOGNESE.FLOAT_SENSITIVITY = 0.68
 _C.PROFILE.BOLOGNESE.CHECK_DELAY = 1.0  # Delay between fish bite checks
-_C.PROFILE.BOLOGNESE.PULL_DELAY = 0.5 # Delay pulling a fish after it's hooked
+_C.PROFILE.BOLOGNESE.PULL_DELAY = 0.5  # Delay pulling a fish after it's hooked
 # Recast rod after timed out, designed for flowing water maps
 _C.PROFILE.BOLOGNESE.DRIFT_TIMEOUT = 32.0
 # Shape of the float camera, the script tracks the whole camrea window by default
