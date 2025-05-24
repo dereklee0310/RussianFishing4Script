@@ -1,4 +1,4 @@
-**[[中文版]][Chinese configuration guide]**
+**[[中文版]][configuration]**
 # Configuration Guide
 ## Using Launch Options
 You can use launch options to enable one or more features at startup.
@@ -64,6 +64,10 @@ options:
 ```
 > [!TIP]
 > Other tools like `craft.py` or `move.py` also support `-h` for displaying help messages. 
+
+> [!IMPORTANT]
+> Add tea and carrot/coffee to your **[favorites][favorite_food]** if you want to use `-r` or `-c` options.  
+> To use a option that replaces an item for you, you also need to add items to your **[favorites][favorite_lure]**.
 
 ### Examples
 **Set the number of fishes in the keepnet to 32 (68 fishes to catch):**
@@ -487,4 +491,6 @@ def get_cfg_defaults():
 
 ```
 
-[Chinese configuration guide]: /docs/zh-TW/CONFIGURATION.md
+[configuration]: /docs/zh-TW/CONFIGURATION.md
+[favorite_food]: /static/readme/favorite_food.png
+[favorite_lure]: /static/readme/favorite_lure.png

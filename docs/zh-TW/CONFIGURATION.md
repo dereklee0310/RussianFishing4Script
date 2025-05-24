@@ -1,9 +1,4 @@
-作者很懶，直接把丟給DeepSeek R1生成🤗
-
-**[[English Version]][Configuration guide]**
-
-# 配置指南  
-
+**[[English version]][configuration]**
 ## 使用啟動參數  
 可通過啟動參數啟用一項或多項功能。  
 
@@ -67,7 +62,11 @@ usage: main.py [-h] [-c] [-A] [-r] [-H] [-g] [-f] [-l] [-C] [-o] [-L] [-x] [-X] 
 ```  
 
 > [!TIP]  
-> 其他工具如`craft.py`或`move.py`也支持`-h`參數顯示幫助信息。  
+> 其他工具如`craft.py`或`move.py`也支持`-h`參數顯示幫助信息。
+
+> [!IMPORTANT]
+> 若需使用 `-r` 或 `-c` 參數，請將茶和胡蘿蔔/咖啡加入 **[收藏物品][favorite_food]**。  
+> 需自動更換物品的功能，請將相關物品加入 **[收藏物品][favorite_lure]**。
 
 ### 使用示例  
 **設置魚護當前魚量為32條（需捕獲68條）：**  
@@ -300,16 +299,18 @@ def get_cfg_defaults():
 
 
 ## 喵提醒的MIAO_CODE配置方式
-1. 關注微信公衆號 **[喵提醒][Miaotixing]**。
+1. 關注微信公衆號 **[喵提醒][meow]**。
    
 2. 新建提醒服務  
-![test][Miaotixing1] ![test2][Miaotixing2]
+![meow_1] ![meow_2]
 
 3. 效果展示  
-![test2][Miaotixing3]
+![meow_3]
 
-[Miaotixing1]: /static/readme/mtx1.png
-[Miaotixing2]: /static/readme/mtx2.png
-[Miaotixing3]: /static/readme/mtx3.png
-[Miaotixing]: https://miaotixing.com/how
-[Configuration guide]: /docs/en/CONFIGURATION.md
+[configuration]: /docs/en/CONFIGURATION.md
+[favorite_food]: /static/readme/favorite_food.png
+[favorite_lure]: /static/readme/favorite_lure.png
+[meow]: https://miaotixing.com/how
+[meow_1]: /static/readme/mtx1.png
+[meow_2]: /static/readme/mtx2.png
+[meow_3]: /static/readme/mtx3.png

@@ -1,4 +1,4 @@
-**[[English Version]][CHANGELOG]**
+**[[English version]][CHANGELOG]**
 
 ## 0.4.2 (2025-04-07)
 - 修復摩擦制動閾值設定未正確生效的問題
