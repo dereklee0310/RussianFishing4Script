@@ -498,7 +498,8 @@ class RF4SApp(App):
         if self.cfg.KEY.QUIT != "CTRL-C":
             listener = keyboard.Listener(on_release=self._on_release)
             listener.start()
-
+        print(f"Press {self.cfg.KEY.QUIT} to quit.")
+        
         self.window.activate_game_window()
         try:
             self._start()

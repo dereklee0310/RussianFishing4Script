@@ -13,6 +13,7 @@ from pathlib import Path
 from time import sleep
 
 import pyautogui as pag
+from pynput import keyboard
 
 sys.path.append(".")
 
@@ -136,6 +137,11 @@ class HarvestApp(ToolApp):
         Executes the primary loop for checking hunger/comfort levels, consuming food,
         and harvesting baits. Supports power-saving mode and configurable check delays.
         """
+        if self.cfg.KEY.QUIT != "CTRL-C":
+            listener = keyboard.Listener(on_release=self._on_release)
+            listener.start()
+        print(f"Press {self.cfg.KEY.QUIT} to quit.")
+
         pag.press(str(self.cfg.KEY.DIGGING_TOOL))
         sleep(3)
         while True:

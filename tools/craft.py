@@ -14,6 +14,7 @@ from pathlib import Path
 from time import sleep
 
 import pyautogui as pag
+from pynput import keyboard
 
 sys.path.append(".")
 from rf4s.app.app import ToolApp
@@ -138,6 +139,10 @@ class CraftApp(ToolApp):
         Executes the primary loop for crafting items until materials are exhausted or
         the crafting limit is reached. Supports fast crafting mode and discarding items.
         """
+        if self.cfg.KEY.QUIT != "CTRL-C":
+            listener = keyboard.Listener(on_release=self._on_release)
+            listener.start()
+        print(f"Press {self.cfg.KEY.QUIT} to quit.")
         random.seed(datetime.now().timestamp())
         accept_key = "backspace" if self.cfg.ARGS.DISCARD else "space"
         self.move_cursor_to_make_button()

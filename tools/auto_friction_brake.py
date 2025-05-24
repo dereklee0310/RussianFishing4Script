@@ -53,10 +53,6 @@ class FrictionBrakeApp(ToolApp):
         self.cfg.freeze()
         print_cfg(self.cfg.ARGS)
         print_cfg(self.cfg.FRICTION_BRAKE)
-        print(
-            f"Press {self.cfg.ARGS.RESET_KEY[1:-1]} to reset friction brake, "
-            f"{self.cfg.ARGS.QUIT_KEY[1:-1]} to quit."
-        )
 
         self.friction_brake = FrictionBrake(self.cfg, Lock(), self.detection)
 
@@ -125,6 +121,10 @@ class FrictionBrakeApp(ToolApp):
         Begins the friction brake monitoring process and starts a keyboard listener
         to handle control keys.
         """
+        print(
+            f"Press {self.cfg.ARGS.RESET_KEY[1:-1]} to reset friction brake, "
+            f"{self.cfg.ARGS.QUIT_KEY[1:-1]} to quit."
+        )
         self.friction_brake.monitor_process.start()
         with keyboard.Listener(on_release=self._on_release) as listener:
             listener.join()

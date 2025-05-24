@@ -47,11 +47,6 @@ class MoveApp(ToolApp):
         self.cfg.freeze()
         print_cfg(self.cfg.ARGS)
 
-        print(
-            f"Press {self.cfg.ARGS.PAUSE_KEY[1:-1]} to pause, "
-            f"{self.cfg.ARGS.QUIT_KEY[1:-1]} to quit."
-        )
-
         self.w_key_pressed = True
 
     def create_parser(self) -> argparse.ArgumentParser:
@@ -103,6 +98,10 @@ class MoveApp(ToolApp):
     @utils.release_keys_after(arrow_keys=True)
     def _start(self) -> None:
         """Start W key automation and keyboard listener."""
+        print(
+            f"Press {self.cfg.ARGS.PAUSE_KEY[1:-1]} to pause, "
+            f"{self.cfg.ARGS.QUIT_KEY[1:-1]} to quit."
+        )
         if self.cfg.ARGS.SHIFT:
             pag.keyDown("shift")
         pag.keyDown("w")
