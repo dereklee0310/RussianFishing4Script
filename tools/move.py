@@ -42,8 +42,8 @@ class MoveApp(ToolApp):
 
         # Format key
         self.cfg.defrost()
-        self.cfg.ARGS.QUIT_KEY = f"'{self.cfg.ARGS.QUIT_KEY}'"
         self.cfg.ARGS.PAUSE_KEY = f"'{self.cfg.ARGS.PAUSE_KEY}'"
+        self.cfg.ARGS.QUIT_KEY = f"'{self.cfg.ARGS.QUIT_KEY}'"
         self.cfg.freeze()
         print_cfg(self.cfg.ARGS)
 
@@ -63,19 +63,19 @@ class MoveApp(ToolApp):
             "-s", "--shift", action="store_true", help="Hold Shift key while moving"
         )
         parser.add_argument(
+            "-p",
+            "--pause-key",
+            default="w",
+            type=str,
+            help="key to pause the script, w by default",
+            metavar="KEY",
+        )
+        parser.add_argument(
             "-q",
             "--quit-key",
             default="s",
             type=str,
             help="key to quit the script, s by default",
-            metavar="KEY",
-        )
-        parser.add_argument(
-            "-r",
-            "--pause-key",
-            default="w",
-            type=str,
-            help="key to pause the script, w by default",
             metavar="KEY",
         )
         return parser

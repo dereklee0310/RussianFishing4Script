@@ -85,19 +85,19 @@ class FrictionBrakeApp(ToolApp):
         parser = argparse.ArgumentParser(description="Automate friction brake.")
         parser.add_argument("opts", nargs="*", help="overwrite configuration")
         parser.add_argument(
-            "-q",
-            "--quit-key",
-            default="h",
-            type=str,
-            help="key to quit the script, h by default",
-            metavar="KEY",
-        )
-        parser.add_argument(
             "-r",
             "--reset-key",
             default="g",
             type=str,
             help="key to reset friction brake, g by default",
+            metavar="KEY",
+        )
+        parser.add_argument(
+            "-q",
+            "--quit-key",
+            default="h",
+            type=str,
+            help="key to quit the script, h by default",
             metavar="KEY",
         )
         return parser

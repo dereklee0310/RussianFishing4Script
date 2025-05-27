@@ -100,7 +100,7 @@ class CraftApp(ToolApp):
                 "1x or move your mouse around"
             )
             self.window.activate_script_window()
-            return
+            sys.exit(1)
         pag.moveTo(make_button_position)
 
     def craft_item(
@@ -146,10 +146,13 @@ class CraftApp(ToolApp):
         random.seed(datetime.now().timestamp())
         accept_key = "backspace" if self.cfg.ARGS.DISCARD else "space"
         self.move_cursor_to_make_button()
-        while (
-            self.detection.is_material_complete()
-            and self.results["Materials used"] < self.cfg.ARGS.CRAFT_LIMIT
-        ):
+        while True:
+            if not self.detection.is_material_complete():
+                logger.critical("Running out of materials")
+                sys.exit(1)
+            if self.results["Materials used"] == self.cfg.ARGS.CRAFT_LIMIT:
+                logger.info("Crafting limit reached")
+                sys.exit(1)
             self.craft_item(*self.get_action_delays(), accept_key)
 
 
