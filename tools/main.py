@@ -403,7 +403,7 @@ class RF4SApp(App):
         self.cfg.SELECTED = CN({"NAME": profile_name}, new_allowed=True)
         self.cfg.SELECTED.merge_from_other_cfg(self.cfg.PROFILE[profile_name])
         if self.cfg.SELECTED.LAUNCH_OPTIONS:  # Overwrite
-            args = self.parser.parse_args(self.cfg.SELECTED.LAUNCH_OPTIONS)
+            args = self.parser.parse_args(shlex.split(self.cfg.SELECTED.LAUNCH_OPTIONS))
             self.cfg.ARGS = config.dict_to_cfg(vars(args))
         # Merge args.opts here because we can only overwrite cfg.SELECTED
         # after it's constructed using profile id or name.
@@ -499,7 +499,6 @@ class RF4SApp(App):
             listener = keyboard.Listener(on_release=self._on_release)
             listener.start()
         print(f"Press {self.cfg.KEY.QUIT} to quit.")
-        
         self.window.activate_game_window()
         try:
             self._start()
