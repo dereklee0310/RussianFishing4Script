@@ -400,11 +400,6 @@ class RF4SApp(App):
         if not self.is_profile_valid(profile_name):
             sys.exit(1)
 
-        self.cfg.SELECTED = CN({"NAME": profile_name}, new_allowed=True)
-        self.cfg.SELECTED.merge_from_other_cfg(self.cfg.PROFILE[profile_name])
-        if self.cfg.SELECTED.LAUNCH_OPTIONS:  # Overwrite
-            args = self.parser.parse_args(shlex.split(self.cfg.SELECTED.LAUNCH_OPTIONS))
-            self.cfg.ARGS = config.dict_to_cfg(vars(args))
         # Merge args.opts here because we can only overwrite cfg.SELECTED
         # after it's constructed using profile id or name.
         # Process list-like values if possible
@@ -414,6 +409,12 @@ class RF4SApp(App):
                 x.strip() for x in self.args.opts[value_idx].split(",")
             ]
         self.cfg.merge_from_list(self.args.opts)
+        self.cfg.SELECTED = CN({"NAME": profile_name}, new_allowed=True)
+        self.cfg.SELECTED.merge_from_other_cfg(self.cfg.PROFILE[profile_name])
+        if self.cfg.SELECTED.LAUNCH_OPTIONS:  # Overwrite
+            args = self.parser.parse_args(shlex.split(self.cfg.SELECTED.LAUNCH_OPTIONS))
+            self.cfg.ARGS = config.dict_to_cfg(vars(args))
+
         # Check here because config might got overwritten
         if not self.is_smtp_valid() or not self.is_images_valid():
             sys.exit(1)

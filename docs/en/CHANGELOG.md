@@ -8,7 +8,6 @@ Update app and window module
 
 typo in calculate.py
 
-
 add put down delay
 
 migrate to ruff
@@ -19,6 +18,18 @@ add gift handling
 -bl -> -BL
 
 fix pva/groundbait refill
+
+fix material check bug for craft
+
+add quit hint
+
+add independent launch options
+
+todo: boundary check
+
+improve results
+
+fix opts bug
 
 ## 0.4.2 (2025-04-07)
 - Fixed a bug where the friction brake threshold was not being applied correctly

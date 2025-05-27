@@ -58,6 +58,14 @@ class Timer:
         :return: Formatted execution time (hh:mm:ss).
         :rtype: str
         """
+        return time.time() - self.start_time
+
+    def get_running_time_str(self) -> str:
+        """Calculate the execution time of the program.
+
+        :return: Formatted execution time (hh:mm:ss).
+        :rtype: str
+        """
         return str(
             datetime.timedelta(seconds=int(time.time() - self.start_time))
         )  # truncate to seconds

@@ -13,7 +13,6 @@ import os
 import random
 import smtplib
 import sys
-from collections import Counter
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -198,7 +197,6 @@ class Player:
         self._refill_groundbait()
         self._refill_pva()
         self._cast_tackle(lock=True)
-
 
     def start_pirk_mode(self) -> None:
         """Main marine fishing loop for pirk mode."""
@@ -638,8 +636,6 @@ class Player:
         """Boo!"""
         self._retrieve_line()
 
-
-
     # TBD: Menu, Plotter, Result, Handler
     def _get_controllers(self, telescopic: bool) -> tuple[callable, callable]:
         """Get the monitor and hold_mouse_button functions based on the fishing mode.
@@ -843,16 +839,16 @@ class Player:
         bite_rate_str = (
             f"{total_fish_count} / "
             f"{self.records['kept_fish']} / "
-            f"{int(total_fish_count / (self.timer.get_running_time() / 3600))}/hr"
+            f"{(total_fish_count / self.timer.get_running_time() / 3600):.1f}/hr"
         )
 
         return {
             "Reason for termination": termination_reason,
             "Start time": self.timer.get_start_datetime(),
-            "Finish time": self.timer.get_cur_datetime(),
-            "Running time": self.timer.get_running_time(),
+            "End time": self.timer.get_cur_datetime(),
+            "Running time": self.timer.get_running_time_str(),
             "Marked / Unmarked / Mark ratio": mark_ratio_str,
-            "Total / Kept / Bite rate": bite_rate_str,
+            "Total  / Kept     / Bite rate ": bite_rate_str,
             "Tea consumed": self.records["tea"],
             "Carrot consumed": self.records["carrot"],
             "Alcohol consumed": self.records["alcohol"],
