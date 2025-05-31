@@ -411,7 +411,10 @@ class Player:
         except exceptions.FishCapturedError:
             self.handle_fish()
         except exceptions.LineAtEndError:
-            self.general_quit("Fishing line is at its end")
+            if self.cfg.ARGS.FRICTION_BRAKE:
+                with self.friction_brake.lock:
+                    self.friction_brake.change(increase=False)
+                    self.general_quit("Fishing line is at its end")
         except exceptions.LineSnaggedError:
             self._handle_snagged_line()
         except exceptions.LureBrokenError:
