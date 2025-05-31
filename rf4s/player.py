@@ -493,6 +493,9 @@ class Player:
 
         first = True
         gr_switched = False
+        if self.cfg.ARGS.ELECTRO:
+            self.tackle.switch_gear_ratio() # Use electro mode
+
         self.records["cur_coffee"] = 0
 
         with self.toggle_clicklock():

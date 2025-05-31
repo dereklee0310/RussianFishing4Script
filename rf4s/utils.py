@@ -126,28 +126,28 @@ def create_rich_logger() -> RichHandler:
 # ---------------------------------------------------------------------------- #
 
 
-def toggle_clicklock(func):
-    """Toggle clicklock before and after calling the function."""
+# def toggle_clicklock(func):
+#     """Toggle clicklock before and after calling the function."""
 
-    def wrapper(self, *args, **kwargs):
-        # ELECTRO must be enabled, always use electric mode if GEAR_RATIO is disabled
-        # otherwise, only use electric mode when it's the first time
-        if self.cfg.ARGS.ELECTRO and (
-            not self.cfg.ARGS.GEAR_RATIO or (not args or args[0])
-        ):
-            pag.click(clicks=2, interval=0.1)
-        else:
-            pag.mouseDown()
-        sleep(BASE_DELAY + LOOP_DELAY)
-        try:
-            func(self, *args, **kwargs)
-        finally:
-            if self.cfg.ARGS.ELECTRO:
-                pag.click(clicks=2, interval=0.1)
-            else:
-                pag.click()
+#     def wrapper(self, *args, **kwargs):
+#         # ELECTRO must be enabled, always use electric mode if GEAR_RATIO is disabled
+#         # otherwise, only use electric mode when it's the first time
+#         if self.cfg.ARGS.ELECTRO and (
+#             not self.cfg.ARGS.GEAR_RATIO or (not args or args[0])
+#         ):
+#             pag.click(clicks=2, interval=0.1)
+#         else:
+#             pag.mouseDown()
+#         sleep(BASE_DELAY + LOOP_DELAY)
+#         try:
+#             func(self, *args, **kwargs)
+#         finally:
+#             if self.cfg.ARGS.ELECTRO:
+#                 pag.click(clicks=2, interval=0.1)
+#             else:
+#                 pag.click()
 
-    return wrapper
+#     return wrapper
 
 
 def toggle_right_mouse_button(func):
