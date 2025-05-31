@@ -51,7 +51,6 @@ ANIMATION_DELAY = 1
 TICKET_EXPIRE_DELAY = 16
 DISCONNECTED_DELAY = 8
 WEAR_TEXT_UPDATE_DELAY = 2
-BOUND = 2
 PUT_DOWN_DELAY = 4
 
 SCREENSHOT_DELAY = 2
@@ -600,7 +599,8 @@ class Player:
             self._cast_tackle(lock=True)
 
         pag.press("0")
-        random_offset = random.uniform(-BOUND, BOUND)
+        bound = self.cfg.SELECTED.CHECK_DELAY // 5
+        random_offset = random.uniform(-bound, bound)
         sleep(self.cfg.SELECTED.CHECK_DELAY + random_offset)
 
     def _start_trolling(self) -> None:
@@ -726,7 +726,7 @@ class Player:
         """Pause the script for a specified duration."""
         logger.info("Pausing script")
         pag.press("esc")
-        bound = self.cfg.PAUSE.DURATION // 20
+        bound = self.cfg.PAUSE.DURATION // 5
         offset = random.randint(-bound, bound)
         sleep(self.cfg.PAUSE.DURATION + offset)
         pag.press("esc")

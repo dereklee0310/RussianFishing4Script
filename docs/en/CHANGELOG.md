@@ -41,6 +41,8 @@ add gift delay
 
 keepnet.delay -> keepnet.fish_delay
 
+fix check delay bound bug
+
 ## 0.4.2 (2025-04-07)
 - Fixed a bug where the friction brake threshold was not being applied correctly
 
