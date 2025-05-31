@@ -88,6 +88,13 @@ class Tackle:
 
         return wrapper
 
+    def is_disconnected_or_ticketed_expired(self) -> None:
+        """Check if the game disconnected or the boat ticket expired."""
+        if self.detection.is_disconnected():
+            raise exceptions.DisconnectedError
+        if self.detection.is_ticket_expired():
+            raise exceptions.TicketExpiredError
+
     @_check_status
     @utils.toggle_clicklock
     def reset(self) -> None:
@@ -114,8 +121,11 @@ class Tackle:
                 raise exceptions.LineSnaggedError
             if self.detection.is_lure_broken():
                 raise exceptions.LureBrokenError
+            if self.detection.is_tackle_broken():
+                raise exceptions.TackleBrokenError
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
 
+        self.is_disconnected_or_ticketed_expired()
         raise TimeoutError
 
     @_check_status
@@ -191,14 +201,17 @@ class Tackle:
                 sleep(0 if self.cfg.ARGS.RAINBOW_LINE else 2)
                 return
 
-            elif self.detection.is_fish_captured():
+            if self.detection.is_fish_captured():
                 raise exceptions.FishCapturedError
-            elif self.cfg.SCRIPT.SPOOLING_DETECTION and self.detection.is_line_at_end():
+            if self.cfg.SCRIPT.SPOOLING_DETECTION and self.detection.is_line_at_end():
                 raise exceptions.LineAtEndError
-            elif self.cfg.SCRIPT.SNAG_DETECTION and self.detection.is_line_snagged():
+            if self.cfg.SCRIPT.SNAG_DETECTION and self.detection.is_line_snagged():
                 raise exceptions.LineSnaggedError
+            if self.detection.is_tackle_broken():
+                raise exceptions.TackleBrokenError
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
 
+        self.is_disconnected_or_ticketed_expired()
         raise TimeoutError
 
     def retrieve_with_pause(self) -> None:
@@ -260,6 +273,7 @@ class Tackle:
             else:
                 i = utils.sleep_and_decrease(i, LOOP_DELAY)
 
+        self.is_disconnected_or_ticketed_expired()
         raise TimeoutError
 
     def pirk(self) -> None:
@@ -303,6 +317,7 @@ class Tackle:
                     i -= self.cfg.SELECTED.ELEVATE_DURATION
             locked = not locked
 
+        self.is_disconnected_or_ticketed_expired()
         raise TimeoutError
 
     @_check_status
@@ -335,6 +350,10 @@ class Tackle:
                 return
             pag.press("space")
             sleep(LANDING_NET_DELAY)
+        if self.detection.is_tackle_broken():
+            raise exceptions.TackleBrokenError
+
+        self.is_disconnected_or_ticketed_expired()
         raise TimeoutError
 
     @utils.toggle_clicklock
@@ -357,7 +376,11 @@ class Tackle:
             if self.detection.is_fish_captured():
                 self.landing_net_out = False
                 return
-        raise TimeoutError()
+            if self.detection.is_tackle_broken():
+                raise exceptions.TackleBrokenError
+
+        self.is_disconnected_or_ticketed_expired()
+        raise TimeoutError
 
     def switch_gear_ratio(self) -> None:
         """Switch the gear ratio of a conventional reel."""
@@ -463,3 +486,28 @@ class Tackle:
         if item in ("dry_mix", "groundbait"):
             pag.press("esc")
         raise exceptions.ItemNotFoundError
+
+    def _monitor_float_state(self) -> None:
+        """Monitor the state of the float."""
+        logger.info("Monitoring float state")
+        reference_img = pag.screenshot(region=self.detection.float_camera_rect)
+        i = self.cfg.SELECTED.DRIFT_TIMEOUT
+        while i > 0:
+            i = utils.sleep_and_decrease(i, self.cfg.SELECTED.CHECK_DELAY)
+            if self.detection.is_float_state_changed(reference_img):
+                logger.info("Float status changed")
+                return
+
+        self.is_disconnected_or_ticketed_expired()
+        raise TimeoutError
+
+    def _monitor_clip_state(self) -> None:
+        """Monitor the state of the bolognese clip."""
+        i = self.cfg.SELECTED.DRIFT_TIMEOUT
+        while i > 0:
+            i = utils.sleep_and_decrease(i, self.cfg.SELECTED.CHECK_DELAY)
+            if self.detection.is_clip_open():
+                return
+
+        self.is_disconnected_or_ticketed_expired()
+        raise TimeoutError

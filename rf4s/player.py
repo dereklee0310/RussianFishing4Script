@@ -17,6 +17,7 @@ from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from multiprocessing import Lock
+from contextlib import contextmanager
 
 # from email.mime.image import MIMEImage
 from pathlib import Path
@@ -250,22 +251,18 @@ class Player:
 
             try:
                 monitor()
+            except exceptions.DisconnectedError:
+                self.disconnected_quit()
+            except exceptions.TicketExpiredError:
+                self._handle_expired_ticket()
             except TimeoutError:
-                continue
+                pass
 
             sleep(self.cfg.SELECTED.PULL_DELAY)
             hold_mouse_button(PRE_RETRIEVAL_DURATION)
             self._pull_fish()
 
-    def _monitor_clip_state(self) -> None:
-        """Monitor the state of the bolognese clip."""
-        i = self.cfg.SELECTED.DRIFT_TIMEOUT
-        while i > 0:
-            i = utils.sleep_and_decrease(i, self.cfg.SELECTED.CHECK_DELAY)
-            if self.detection.is_clip_open():
-                return
 
-        raise TimeoutError
 
     def _harvest_baits(self, pickup: bool = False) -> None:
         """Harvest baits if energy is high.
@@ -378,7 +375,7 @@ class Player:
 
         while True:
             try:
-                with pag.hold("shift"):  # Speed it up!
+                with pag.hold("shift"), self.clicklock_handler():
                     self.tackle.reset()
                     return
             except exceptions.FishHookedError:
@@ -393,8 +390,41 @@ class Player:
                 self._handle_snagged_line()
             except exceptions.LureBrokenError:
                 self._handle_broken_lure()
-            except TimeoutError:  # rare events
-                self._handle_timeout()
+            except exceptions.TackleBrokenError:
+                self.general_quit("Tackle is broken")
+            except exceptions.DisconnectedError:
+                self.disconnected_quit()
+            except exceptions.TicketExpiredError:
+                self._handle_expired_ticket()
+            except TimeoutError:
+                pass
+
+    def clicklock_handler(self, func=None):
+        @contextmanager
+        def _handler():
+            try:
+                yield
+            except (
+                exceptions.FishHookedError,
+                exceptions.FishCapturedError,
+                exceptions.LineAtEndError,
+                exceptions.LineSnaggedError,
+                exceptions.LureBrokenError,
+                exceptions.TackleBrokenError,
+                exceptions.DisconnectedError,
+                exceptions.TicketExpiredError
+            ):
+                pag.click()
+                raise
+
+        if func is None: # Context manager
+            return _handler()
+        else: # Decorator
+            def wrapped(*args, **kwargs):
+                with _handler():
+                    return func(*args, **kwargs)
+            return wrapped
+
 
     def _cast_spod_rod(self) -> None:
         """Cast the spod rod if dry mix is available."""
@@ -436,8 +466,9 @@ class Player:
         self.records["cur_coffee"] = 0
         while True:
             try:
-                self.tackle.retrieve(first)
-                break
+                with self.clicklock_handler():
+                    self.tackle.retrieve(first)
+                    break
             except exceptions.FishCapturedError:
                 self.handle_fish()
                 break
@@ -445,8 +476,13 @@ class Player:
                 self.general_quit("Fishing line is at its end")
             except exceptions.LineSnaggedError:
                 self._handle_snagged_line()
+            except exceptions.TackleBrokenError:
+                self.general_quit("Tackle is broken")
+            except exceptions.DisconnectedError:
+                self.disconnected_quit()
+            except exceptions.TicketExpiredError:
+                self._handle_expired_ticket()
             except TimeoutError:
-                self._handle_timeout()
                 first = False
                 if self.cfg.ARGS.GEAR_RATIO and not gr_switched:
                     self.tackle.switch_gear_ratio()
@@ -464,8 +500,11 @@ class Player:
             try:
                 self.tackle.pirk()
                 break
+            except exceptions.DisconnectedError:
+                self.disconnected_quit()
+            except exceptions.TicketExpiredError:
+                self._handle_expired_ticket()
             except TimeoutError:
-                self._handle_timeout()
                 if self.cfg.SELECTED.DEPTH_ADJUST_DELAY > 0:
                     logger.info("Adjusting lure depth")
                     pag.press("enter")  # Open reel
@@ -484,22 +523,12 @@ class Player:
                 dropped = not dropped
                 self.tackle.elevate(dropped)
                 break
+            except exceptions.DisconnectedError:
+                self.disconnected_quit()
+            except exceptions.TicketExpiredError:
+                self._handle_expired_ticket()
             except TimeoutError:
-                self._handle_timeout()
-                # Lazy skip
-
-    def _monitor_float_state(self) -> None:
-        """Monitor the state of the float."""
-        logger.info("Monitoring float state")
-        reference_img = pag.screenshot(region=self.detection.float_camera_rect)
-        i = self.cfg.SELECTED.DRIFT_TIMEOUT
-        while i > 0:
-            i = utils.sleep_and_decrease(i, self.cfg.SELECTED.CHECK_DELAY)
-            if self.detection.is_float_state_changed(reference_img):
-                logger.info("Float status changed")
-                return
-
-        raise TimeoutError
+                pass
 
     def _pull_fish(self) -> None:
         """Pull the fish up and handle it."""
@@ -516,8 +545,13 @@ class Player:
                 return
             except exceptions.LineSnaggedError:
                 self._handle_snagged_line()
+            except exceptions.TackleBrokenError:
+                self.general_quit("Tackle is broken")
+            except exceptions.DisconnectedError:
+                self.disconnected_quit()
+            except exceptions.TicketExpiredError:
+                self._handle_expired_ticket()
             except TimeoutError:
-                self._handle_timeout()
                 if self.cfg.SELECTED.MODE == "float":
                     sleep(PUT_DOWN_DELAY)
                     continue
@@ -647,13 +681,13 @@ class Player:
         """
         if telescopic:
             hold_mouse_button = utils.hold_mouse_button
-            monitor = self._monitor_float_state
+            monitor = self.tackle._monitor_float_state
         else:
             if self.detection.is_clip_open():
                 logger.warning("Clip is not set, fall back to camera mode")
-                monitor = self._monitor_float_state
+                monitor = self.tackle._monitor_float_state
             else:
-                monitor = self._monitor_clip_state
+                monitor = self.tackle._monitor_clip_state
             hold_mouse_button = utils.hold_mouse_buttons
 
         return monitor, hold_mouse_button
@@ -687,7 +721,7 @@ class Player:
                 playsound(str(Path(self.cfg.SCRIPT.ALARM_SOUND).resolve()))
                 self.window.activate_script_window()
                 print("Please replace your lure")
-                print(input("Press enter to continue..."))
+                input("Press enter to continue...")
                 self.window.activate_game_window()
             case _:
                 self.general_quit("Lure is broken")

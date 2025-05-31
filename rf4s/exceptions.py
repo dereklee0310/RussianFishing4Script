@@ -29,3 +29,15 @@ class ItemNotFoundError(Exception):
 
 class LureBrokenError(Exception):
     """Lure is broken."""
+
+
+class TackleBrokenError(Exception):
+    """Tackle is broken."""
+
+
+class DisconnectedError(Exception):
+    """Disconnected from the game."""
+
+
+class TicketExpiredError(Exception):
+    """Ticket expired."""
