@@ -22,6 +22,7 @@ from yacs.config import CfgNode as CN
 from rf4s.config import config
 from rf4s.controller.detection import Detection
 from rf4s.controller.window import Window
+from rf4s.result.result import Result
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -98,12 +99,12 @@ class ToolApp(App):
         self.cfg.freeze()
 
         self.detection = Detection(self.cfg, self.window)
-        self.results = {}  # This will be used in display_results()
+        self.result = Result()  # This will be used in display_results()
 
     def display_results(self) -> None:
         """Display the running results in a table format."""
         table = Table("Results", title="Running Results", show_header=False)
-        for name, value in self.results.items():
+        for name, value in self.result.as_dict().items():
             table.add_row(name, str(value))
         print(table)
 
@@ -118,6 +119,6 @@ class ToolApp(App):
             self._start()
         except KeyboardInterrupt:
             pass
-        if self.results:
+        if self.result:
             self.display_results()
         self.window.activate_script_window()

@@ -21,6 +21,7 @@ from rf4s.app.app import ToolApp
 from rf4s.config.config import print_cfg
 from rf4s.controller.timer import Timer
 from rf4s.utils import create_rich_logger
+from rf4s.result.result import HarvestResult
 
 ROOT = Path(__file__).resolve().parents[1]
 DIG_DELAY = 5  # 4 + 1 s
@@ -50,7 +51,7 @@ class HarvestApp(ToolApp):
         print_cfg(self.cfg.ARGS)
 
         self.timer = Timer(self.cfg)
-        self.results = {"Tea consumed": 0, "Carrot consumed": 0, "Bait harvested": 0}
+        self.result = HarvestResult()
 
     def create_parser(self) -> argparse.ArgumentParser:
         """Create an argument parser for the application.
@@ -107,11 +108,11 @@ class HarvestApp(ToolApp):
         # Comfort is affected by weather, add a check to avoid over drink
         if self.detection.is_comfort_low() and self.timer.is_tea_drinkable():
             self._use_item("tea")
-            self.results["Tea consumed"] += 1
+            self.result.tea += 1
 
         if self.detection.is_hunger_low():
             self._use_item("carrot")
-            self.results["Carrot consumed"] += 1
+            self.result.carrot += 1
 
     def _use_item(self, item: str) -> None:
         """Access an item by name using quick selection shortcut or menu.
@@ -148,7 +149,7 @@ class HarvestApp(ToolApp):
             self.refill_player_stats()
             if self.detection.is_energy_high():
                 self.harvest_baits()
-                self.results["Bait harvested"] += 1
+                self.result.bait += 1
             else:
                 logger.info("Energy is not high enough")
 

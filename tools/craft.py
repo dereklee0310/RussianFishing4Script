@@ -20,6 +20,7 @@ sys.path.append(".")
 from rf4s.app.app import ToolApp
 from rf4s.config.config import print_cfg
 from rf4s.utils import create_rich_logger
+from rf4s.result.result import CraftResult
 
 CRAFT_DELAY = 4.0
 CRAFT_DELAY_2X = CRAFT_DELAY * 2
@@ -42,7 +43,7 @@ class CraftApp(ToolApp):
         """Initialize the application."""
         super().__init__()
         print_cfg(self.cfg.ARGS)
-        self.results = {"Successful crafts": 0, "Failed crafts": 0, "Materials used": 0}
+        self.result = CraftResult()
 
     def create_parser(self) -> argparse.ArgumentParser:
         """Create an argument parser for the application.
@@ -118,16 +119,16 @@ class CraftApp(ToolApp):
         logger.info("Crafting item")
         pag.click()
         sleep(craft_delay)
-        self.results["Materials used"] += 1
+        self.result.material += 1
         while True:
             if self.detection.is_operation_success():
                 logger.info("Crafting successed")
-                self.results["Successful crafts"] += 1
+                self.result.succes += 1
                 break
 
             if self.detection.is_operation_failed():
                 logger.warning("Crafting failed")
-                self.results["Failed crafts"] += 1
+                self.result.fail += 1
                 break
             sleep(LOOP_DELAY)
         pag.press(accept_key)
@@ -150,7 +151,7 @@ class CraftApp(ToolApp):
             if not self.detection.is_material_complete():
                 logger.critical("Running out of materials")
                 sys.exit(1)
-            if self.results["Materials used"] == self.cfg.ARGS.CRAFT_LIMIT:
+            if self.result.succes == self.cfg.ARGS.CRAFT_LIMIT:
                 logger.info("Crafting limit reached")
                 sys.exit(1)
             self.craft_item(*self.get_action_delays(), accept_key)
