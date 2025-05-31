@@ -31,6 +31,8 @@ improve results
 
 fix opts bug
 
+improve retrieve/reset/pull flow
+
 ## 0.4.2 (2025-04-07)
 - Fixed a bug where the friction brake threshold was not being applied correctly
 

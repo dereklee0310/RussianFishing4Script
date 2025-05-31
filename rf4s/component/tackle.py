@@ -96,7 +96,6 @@ class Tackle:
             raise exceptions.TicketExpiredError
 
     @_check_status
-    @utils.toggle_clicklock
     def reset(self) -> None:
         """Reset the tackle until ready and detect unexpected events.
 
@@ -171,7 +170,6 @@ class Tackle:
         utils.hold_mouse_button(self.cfg.SELECTED.TIGHTEN_DURATION)
 
     @_check_status
-    @utils.toggle_clicklock
     @utils.release_keys_after()
     def retrieve(self, first: bool = True) -> None:
         """Retrieve the line until the end is reached and detect unexpected events.
@@ -214,17 +212,6 @@ class Tackle:
         self.is_disconnected_or_ticketed_expired()
         raise TimeoutError
 
-    def retrieve_with_pause(self) -> None:
-        """Retrieve the line, pausing periodically."""
-        logger.info("Retrieving fishing line with pause")
-        self._special_retrieve(button="left")
-
-    @utils.toggle_clicklock
-    def retrieve_with_lift(self) -> None:
-        """Retrieve the line, lifting periodically."""
-        logger.info("Retrieving fishing line with lift")
-        self._special_retrieve(button="right")
-
     @utils.release_keys_after()
     def _special_retrieve(self, button: str) -> None:
         """Retrieve the line with special conditions (pause or lift).
@@ -246,7 +233,7 @@ class Tackle:
                 return
 
     @utils.release_keys_after()
-    def _pirk(self) -> None:
+    def pirk(self) -> None:
         """Start pirking until a fish is hooked.
 
         :raises exceptions.TimeoutError: The loop timed out.
@@ -275,18 +262,6 @@ class Tackle:
 
         self.is_disconnected_or_ticketed_expired()
         raise TimeoutError
-
-    def pirk(self) -> None:
-        """Perform pirking with or without retrieval."""
-        if self.cfg.SELECTED.PIRK_RETRIEVAL:
-            self._pirk_with_retrieval()
-        else:
-            self._pirk()
-
-    @utils.toggle_clicklock
-    def _pirk_with_retrieval(self):
-        """Perform pirking with retrieval."""
-        self._pirk()
 
     def elevate(self, dropped: bool) -> None:
         """Perform elevator tactic (drop/rise) until a fish is hooked.
@@ -330,7 +305,6 @@ class Tackle:
             self._pull()
 
     @utils.toggle_right_mouse_button
-    @utils.toggle_clicklock
     def _pull(self) -> None:
         """Pull the fish until it's captured."""
         i = PULL_TIMEOUT
@@ -342,7 +316,7 @@ class Tackle:
                 raise exceptions.LineSnaggedError
 
         if not self.detection.is_fish_hooked():
-            raise exceptions.FishGotAwayError
+            return
         if self.detection.is_retrieval_finished():
             pag.press("space")
             sleep(LANDING_NET_DURATION)
@@ -356,7 +330,6 @@ class Tackle:
         self.is_disconnected_or_ticketed_expired()
         raise TimeoutError
 
-    @utils.toggle_clicklock
     def _telescopic_pull(self) -> None:
         """Pull the fish until it's captured, designed for telescopic rod.
 

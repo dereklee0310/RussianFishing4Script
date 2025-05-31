@@ -121,6 +121,8 @@ class Player:
             "have_new_pva": True,
         }
 
+        self.clicklock_enabled = False
+
     def start_fishing(self) -> None:
         """Start the main fishing loop with the specified fishing strategy."""
         if self.cfg.ARGS.FRICTION_BRAKE:
@@ -153,18 +155,29 @@ class Player:
             if not skip_cast:
                 self._refill_stats()
                 self._harvest_baits(pickup=True)
-                self._reset_tackle()
+                self.reset_tackle()
                 self._change_tackle_lure()
                 self._cast_tackle()
             skip_cast = False
 
             if self.cfg.SELECTED.TYPE != "normal":
                 utils.hold_mouse_button(self.cfg.SELECTED.TIGHTEN_DURATION)
-                getattr(self.tackle, f"retrieve_with_{self.cfg.SELECTED.TYPE}")()
-            self._retrieve_line()
+                getattr(self, f"retrieve_with_{self.cfg.SELECTED.TYPE}")()
+            self.retrieve_line()
 
             if self.detection.is_fish_hooked():
-                self._pull_fish()
+                self.pull_fish()
+
+    def retrieve_with_pause(self) -> None:
+        """Retrieve the line, pausing periodically."""
+        logger.info("Retrieving fishing line with pause")
+        self.tackle._special_retrieve(button="left")
+
+    def retrieve_with_lift(self) -> None:
+        """Retrieve the line, lifting periodically."""
+        logger.info("Retrieving fishing line with lift")
+        with self.toggle_clicklock():
+            self.tackle._special_retrieve(button="right")
 
     def start_bottom_mode(self) -> None:
         """Main bottom fishing loop."""
@@ -192,9 +205,9 @@ class Player:
             self._update_tackle()
 
     def retrieve_and_recast(self) -> None:
-        self._retrieve_line()
-        self._pull_fish()
-        self._reset_tackle()
+        self.retrieve_line()
+        self.pull_fish()
+        self.reset_tackle()
         self._refill_groundbait()
         self._refill_pva()
         self._cast_tackle(lock=True)
@@ -213,19 +226,19 @@ class Player:
         :param pirk: Whether to perform pirking or elevating.
         :type pirk: bool
         """
-        perform_technique = self._do_pirking if pirk else self._do_elevating
+        perform_technique = self.do_pirking if pirk else self.do_elevating
         skip_cast = self.cfg.ARGS.SKIP_CAST
         while True:
             if not skip_cast:
                 self._refill_stats()
-                self._reset_tackle()
+                self.reset_tackle()
                 self._cast_tackle()
                 self.tackle.sink()
             skip_cast = False
 
             perform_technique()
-            self._retrieve_line()
-            self._pull_fish()
+            self.retrieve_line()
+            self.pull_fish()
 
     def start_telescopic_mode(self) -> None:
         """Main telescopic fishing loop."""
@@ -246,23 +259,18 @@ class Player:
         while True:
             self._refill_stats()
             self._harvest_baits(pickup=True)
-            self._reset_tackle()
+            self.reset_tackle()
             self._cast_tackle()
 
             try:
-                monitor()
-            except exceptions.DisconnectedError:
-                self.disconnected_quit()
-            except exceptions.TicketExpiredError:
-                self._handle_expired_ticket()
+                with self.error_handler():
+                    monitor()
             except TimeoutError:
                 pass
 
             sleep(self.cfg.SELECTED.PULL_DELAY)
             hold_mouse_button(PRE_RETRIEVAL_DURATION)
-            self._pull_fish()
-
-
+            self.pull_fish()
 
     def _harvest_baits(self, pickup: bool = False) -> None:
         """Harvest baits if energy is high.
@@ -352,8 +360,23 @@ class Player:
                 pag.click()
         sleep(ANIMATION_DELAY)
 
+    def enable_clicklock(self):
+        pag.mouseDown()
+        sleep(2.2)
+        self.clicklock_enabled = True
+
+    def disable_clicklock(self):
+        pag.click()
+        self.clicklock_enabled = False
+
+    @contextmanager
+    def toggle_clicklock(self):
+        self.enable_clicklock()
+        yield
+        self.disable_clicklock()
+
     @utils.reset_friction_brake_after
-    def _reset_tackle(self) -> None:
+    def reset_tackle(self) -> None:
         """Reset the tackle until it is ready."""
         sleep(ANIMATION_DELAY)
         if self.detection.is_tackle_ready():
@@ -373,63 +396,70 @@ class Player:
             self.tackle.available = False
             return
 
-        while True:
-            try:
-                with pag.hold("shift"), self.clicklock_handler():
-                    self.tackle.reset()
-                    return
-            except exceptions.FishHookedError:
-                self._pull_fish()
-                return
-            except exceptions.FishCapturedError:
-                self.handle_fish()
-                return
-            except exceptions.LineAtEndError:
-                self.general_quit("Fishing line is at its end")
-            except exceptions.LineSnaggedError:
-                self._handle_snagged_line()
-            except exceptions.LureBrokenError:
-                self._handle_broken_lure()
-            except exceptions.TackleBrokenError:
-                self.general_quit("Tackle is broken")
-            except exceptions.DisconnectedError:
-                self.disconnected_quit()
-            except exceptions.TicketExpiredError:
-                self._handle_expired_ticket()
-            except TimeoutError:
-                pass
+        with self.toggle_clicklock():
+            while True:
+                try:
+                    # Outer -> inner
+                    with (
+                        self.error_handler(),
+                        self.clicklock_disable_handler(),
+                        pag.hold("shift"),
+                    ):
+                        self.tackle.reset()
+                        break
+                except TimeoutError:
+                    # If it's a TimeoutError or an exception was transformed into a
+                    # TimeoutError, enable clicklock again if necessary.
+                    if not self.clicklock_enabled:
+                        self.enable_clicklock()
 
-    def clicklock_handler(self, func=None):
-        @contextmanager
-        def _handler():
-            try:
-                yield
-            except (
-                exceptions.FishHookedError,
-                exceptions.FishCapturedError,
-                exceptions.LineAtEndError,
-                exceptions.LineSnaggedError,
-                exceptions.LureBrokenError,
-                exceptions.TackleBrokenError,
-                exceptions.DisconnectedError,
-                exceptions.TicketExpiredError
-            ):
-                pag.click()
-                raise
+    @contextmanager
+    def error_handler(self):
+        try:
+            yield
+        except exceptions.FishHookedError:
+            self.pull_fish()
+        except exceptions.FishCapturedError:
+            self.handle_fish()
+        except exceptions.LineAtEndError:
+            self.general_quit("Fishing line is at its end")
+        except exceptions.LineSnaggedError:
+            self._handle_snagged_line()
+        except exceptions.LureBrokenError:
+            self._handle_broken_lure()
+            raise TimeoutError  # Transform into TimeoutError to continue
+        except exceptions.TackleBrokenError:
+            self.general_quit("Tackle is broken")
+        except exceptions.DisconnectedError:
+            self.disconnected_quit()
+        except exceptions.TicketExpiredError:
+            self._handle_expired_ticket()
+            raise TimeoutError  # Transform into TimeoutError to continue
+        except TimeoutError:
+            raise
 
-        if func is None: # Context manager
-            return _handler()
-        else: # Decorator
-            def wrapped(*args, **kwargs):
-                with _handler():
-                    return func(*args, **kwargs)
-            return wrapped
-
+    @contextmanager
+    def clicklock_disable_handler(self):
+        try:
+            yield
+        except (
+            exceptions.FishHookedError,
+            exceptions.FishCapturedError,
+            exceptions.LineAtEndError,
+            exceptions.LineSnaggedError,
+            exceptions.LureBrokenError,
+            exceptions.TackleBrokenError,
+            exceptions.DisconnectedError,
+            exceptions.TicketExpiredError,
+        ):
+            if self.clicklock_enabled:
+                self.disable_clicklock()
+            raise
 
     def _cast_spod_rod(self) -> None:
         """Cast the spod rod if dry mix is available."""
         self._use_item("spod_rod")
-        self._reset_tackle()
+        self.reset_tackle()
 
         # If no dry mix is available, skip casting
         if not self.tackle.available:
@@ -456,7 +486,7 @@ class Player:
         if update:
             self.timer.update_cast_time()
 
-    def _retrieve_line(self) -> None:
+    def retrieve_line(self) -> None:
         """Retrieve the fishing line until it is fully retrieved."""
         if self.detection.is_retrieval_finished():
             return
@@ -464,98 +494,93 @@ class Player:
         first = True
         gr_switched = False
         self.records["cur_coffee"] = 0
-        while True:
-            try:
-                with self.clicklock_handler():
-                    self.tackle.retrieve(first)
-                    break
-            except exceptions.FishCapturedError:
-                self.handle_fish()
-                break
-            except exceptions.LineAtEndError:
-                self.general_quit("Fishing line is at its end")
-            except exceptions.LineSnaggedError:
-                self._handle_snagged_line()
-            except exceptions.TackleBrokenError:
-                self.general_quit("Tackle is broken")
-            except exceptions.DisconnectedError:
-                self.disconnected_quit()
-            except exceptions.TicketExpiredError:
-                self._handle_expired_ticket()
-            except TimeoutError:
-                first = False
-                if self.cfg.ARGS.GEAR_RATIO and not gr_switched:
-                    self.tackle.switch_gear_ratio()
-                    gr_switched = True
-                pag.keyUp("shift")
-                self._drink_coffee()
 
-        pag.keyUp("shift")
-        if gr_switched:
-            self.tackle.switch_gear_ratio()
+        with self.toggle_clicklock():
+            while True:
+                try:
+                    with (
+                        self.error_handler(),
+                        self.clicklock_disable_handler(),
+                    ):
+                        self.tackle.retrieve(first)
+                        break
+                except TimeoutError:
+                    if not self.clicklock_enabled:
+                        self.enable_clicklock()
+                    first = False
+                    if self.cfg.ARGS.GEAR_RATIO and not gr_switched:
+                        self.tackle.switch_gear_ratio()
+                        gr_switched = True
+                    pag.keyUp("shift")
+                    self._drink_coffee()
+
+            pag.keyUp("shift")
+            if gr_switched:
+                self.tackle.switch_gear_ratio()
+
+    def do_pirking(self) -> None:
+        """Perform pirking until a fish is hooked."""
+        if self.cfg.SELECTED.PIRK_RETRIEVAL:
+            with self.toggle_clicklock():
+                self._do_pirking()
+        else:
+            self._do_pirking()
 
     def _do_pirking(self) -> None:
-        """Perform pirking until a fish is hooked."""
         while True:
             try:
-                self.tackle.pirk()
-                break
-            except exceptions.DisconnectedError:
-                self.disconnected_quit()
-            except exceptions.TicketExpiredError:
-                self._handle_expired_ticket()
+                with self.error_handler, self.clicklock_disable_handler():
+                    self.tackle.pirk()
+                    break
             except TimeoutError:
+                if self.cfg.SELECTED.PIRK_RETRIEVAL:
+                    if not self.clicklock_enabled:
+                        self.enable_clicklock()
+                    continue
+
                 if self.cfg.SELECTED.DEPTH_ADJUST_DELAY > 0:
                     logger.info("Adjusting lure depth")
                     pag.press("enter")  # Open reel
                     sleep(self.cfg.SELECTED.DEPTH_ADJUST_DELAY)
                     utils.hold_mouse_button(self.cfg.SELECTED.DEPTH_ADJUST_DURATION)
                 else:
-                    self._reset_tackle()
+                    self.reset_tackle()
                     self._cast_tackle()
                     self.tackle.sink()
 
-    def _do_elevating(self) -> None:
+    def do_elevating(self) -> None:
         """Perform elevating until a fish is hooked."""
         dropped = False
         while True:
             try:
                 dropped = not dropped
-                self.tackle.elevate(dropped)
-                break
-            except exceptions.DisconnectedError:
-                self.disconnected_quit()
-            except exceptions.TicketExpiredError:
-                self._handle_expired_ticket()
+                with self.error_handler:
+                    self.tackle.elevate(dropped)
+                    break
             except TimeoutError:
                 pass
 
-    def _pull_fish(self) -> None:
+    def pull_fish(self) -> None:
         """Pull the fish up and handle it."""
         if not self.detection.is_fish_hooked():
             return
 
         self._drink_alcohol()
-        while True:
-            try:
-                self.tackle.pull()
-                self.handle_fish()
-                return
-            except exceptions.FishGotAwayError:
-                return
-            except exceptions.LineSnaggedError:
-                self._handle_snagged_line()
-            except exceptions.TackleBrokenError:
-                self.general_quit("Tackle is broken")
-            except exceptions.DisconnectedError:
-                self.disconnected_quit()
-            except exceptions.TicketExpiredError:
-                self._handle_expired_ticket()
-            except TimeoutError:
-                if self.cfg.SELECTED.MODE == "float":
-                    sleep(PUT_DOWN_DELAY)
-                    continue
-                self._retrieve_line()
+        with self.toggle_clicklock():
+            while True:
+                try:
+                    with self.error_handler(), self.clicklock_disable_handler():
+                        self.tackle.pull()
+                        self.handle_fish()
+                        break
+                except TimeoutError:
+                    if not self.clicklock_enabled:
+                        self.enable_clicklock()
+
+                    if self.cfg.SELECTED.MODE == "float":
+                        sleep(PUT_DOWN_DELAY)
+                        continue
+                    self.retrieve_line()
 
     def _put_down_tackle(self, check_miss_counts: list[int]) -> None:
         """Put down the tackle and wait for a while.
@@ -566,7 +591,7 @@ class Player:
         check_miss_counts[self.tackle_idx] += 1
         if check_miss_counts[self.tackle_idx] >= self.cfg.SELECTED.CHECK_MISS_LIMIT:
             check_miss_counts[self.tackle_idx] = 0
-            self._reset_tackle()
+            self.reset_tackle()
             self._refill_groundbait()
             self._refill_pva()
             self._cast_tackle(lock=True)
@@ -668,7 +693,7 @@ class Player:
 
     def test(self):
         """Boo!"""
-        self._retrieve_line()
+        self.retrieve_line()
 
     # TBD: Menu, Plotter, Result, Handler
     def _get_controllers(self, telescopic: bool) -> tuple[callable, callable]:
@@ -754,9 +779,13 @@ class Player:
         self.tackle.available = False
 
     def handle_fish(self) -> None:
+        if not self.detection.is_fish_captured():
+            return
+        logger.info("Handling fish")
         self._handle_fish()
         sleep(ANIMATION_DELAY)
         if self.detection.is_gift_receieved():
+            # TODO
             pag.press("space")
             return
 
@@ -765,9 +794,6 @@ class Player:
 
         TODO: Trophy ruffe
         """
-        if not self.detection.is_fish_captured():
-            return
-        logger.info("Handling fish")
         if self.cfg.ARGS.SCREENSHOT:
             self.window.save_screenshot(self.timer.get_cur_timestamp())
 

@@ -15,10 +15,6 @@ class LineAtEndError(Exception):
     """Fishing line is at the end during retrieval."""
 
 
-class FishGotAwayError(Exception):
-    """A hooked fish got away during pulling or retrieving stage."""
-
-
 class LineSnaggedError(Exception):
     """Fishing line is snagged."""
 
