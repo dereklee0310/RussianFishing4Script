@@ -798,7 +798,7 @@ class Player:
         self._handle_fish()
         sleep(ANIMATION_DELAY)
         if self.detection.is_gift_receieved():
-            # TODO
+            sleep(self.cfg.KEEPNET.GIFT_DELAY)
             pag.press("space")
             return
 
@@ -823,7 +823,7 @@ class Player:
                 return
 
         # Fish is marked, unmarked release is disabled, or fish is in whitelist
-        sleep(self.cfg.KEEPNET.DELAY)
+        sleep(self.cfg.KEEPNET.FISH_DELAY)
         pag.press("space")
 
         self.records["kept_fish"] += 1

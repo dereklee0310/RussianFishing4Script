@@ -193,7 +193,8 @@ _C.FRICTION_BRAKE.SENSITIVITY = "medium"  # 檢測敏感度（low/medium/high）
 # --------------------------------- 魚護設置 -------------------------------- #  
 _C.KEEPNET = CN()  
 _C.KEEPNET.CAPACITY = 100  # 魚護容量  
-_C.KEEPNET.DELAY = 0.0  # 存魚前延遲（用於截圖）  
+_C.KEEPNET.FISH_DELAY = 0.0  # 存魚前延遲（用於截圖）
+_C.KEEPNET.GIFT_DELAY = 4.0  # 接受禮物前延遲（用於截圖）
 _C.KEEPNET.FULL_ACTION = "quit"  # 滿護操作：quit（退出）/alarm（警報）
 # -m模式保留魚種
 # 選項: mackerel, saithe, herring, squid, scallop, mussel, perch, shorthorn_sculpin
