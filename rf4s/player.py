@@ -482,6 +482,16 @@ class Player:
 
         if self.cfg.ARGS.BITE:
             self.window.save_screenshot(self.timer.get_cur_timestamp())
+
+        if (
+            self.cfg.ARGS.RANDOM_CAST
+            and random.random() <= self.cfg.SCRIPT.RANDOM_CAST_PROBABILITY
+        ):
+            logger.info("Casting rod redundantly")
+            pag.click()
+            sleep(2)
+            self.reset_tackle()
+
         self.tackle.cast(lock)
         if update:
             self.timer.update_cast_time()
@@ -494,7 +504,7 @@ class Player:
         first = True
         gr_switched = False
         if self.cfg.ARGS.ELECTRO:
-            self.tackle.switch_gear_ratio() # Use electro mode
+            self.tackle.switch_gear_ratio()  # Use electro mode
 
         self.records["cur_coffee"] = 0
 

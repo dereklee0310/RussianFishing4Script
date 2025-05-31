@@ -25,6 +25,8 @@ _C.SCRIPT.SPOD_ROD_RECAST_DELAY = 1800
 # Use spin mode and -L to enable it.
 _C.SCRIPT.LURE_CHANGE_DELAY = 1800
 _C.SCRIPT.ALARM_SOUND = "./static/sound/guitar.wav"  # Path to alarm sound file
+# Probability to add a redundant rod cast (0.0 to 1.0)
+_C.SCRIPT.RANDOM_CAST_PROBABILITY = 0.25
 
 # ---------------------------------------------------------------------------- #
 #                                  Key Binding                                 #

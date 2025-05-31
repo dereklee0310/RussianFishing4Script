@@ -43,6 +43,7 @@ ARGUMENTS = (
     ("L", "lure", "change current lure with a random one regularly, mode: spin"),
     ("x", "mouse", "move mouse randomly before casting the rod"),
     ("X", "pause", "pause the script before casting the rod regularly"),
+    ("xx", "random_cast", "add redundant rod cast randomly"),
     ("b", "bite", "take a screenshot after casting in screenshots/ (for fish spot)"),
     ("S", "screenshot", "take a screenshot of every fish you caught in screenshots/"),
     ("e", "email", "send email noticication after the script stop"),

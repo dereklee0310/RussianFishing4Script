@@ -14,10 +14,10 @@ python tools\main.py -h
 
 ### 幫助信息說明  
 ```  
-usage: main.py [-h] [-c] [-A] [-r] [-H] [-g] [-f] [-l] [-C] [-o] [-L] [-x] [-X] [-b] [-S] [-e] [-P] [-M] [-s] [-so]  
-               [-gb] [-dm] [-pva] [-E] [-a | -m] [-d | -R] [-p PID | -N PROFILE_NAME] [-n FISH_COUNT] [-t [DURATION]]  
-               [-T [DIRECTION]] [-bl [ACTION]]  
-               [opts ...]  
+usage: main.py [-h] [-c] [-A] [-r] [-H] [-g] [-f] [-l] [-C] [-o] [-L] [-x] [-X] [-xx] [-b] [-S] [-e] [-P] [-M] [-s] [-so] [-gb] [-dm]
+               [-pva] [-E] [-a | -m] [-d | -R] [-p PID | -N PROFILE_NAME] [-n FISH_COUNT] [-t [DURATION]] [-T [DIRECTION]]
+               [-BL [ACTION]]
+               [opts ...] 
 
 啟動《俄羅斯釣魚4》自動腳本  
 
@@ -37,7 +37,8 @@ usage: main.py [-h] [-c] [-A] [-r] [-H] [-g] [-f] [-l] [-C] [-o] [-L] [-x] [-X] 
   -o, --spod_rod        定期重拋餌料竿  
   -L, --lure            定期隨機更換擬餌（僅路亞模式）  
   -x, --mouse           拋竿前隨機移動鼠標  
-  -X, --pause           定期暫停腳本運行  
+  -X, --pause           定期暫停腳本運行
+  -xx, --random_cast    隨機添加多餘的拋竿動作
   -b, --bite            拋竿後截圖保存至screenshots/（用於魚點分析）  
   -S, --screenshot      為每條捕獲的魚截圖保存  
   -e, --email           腳本停止後發送郵件通知  
@@ -59,10 +60,10 @@ usage: main.py [-h] [-c] [-A] [-r] [-H] [-g] [-f] [-l] [-C] [-o] [-L] [-x] [-X] 
   -n FISH_COUNT, --fishes-in-keepnet FISH_COUNT  
                         魚護當前魚量（默認0）  
   -t [DURATION], --boat-ticket [DURATION]  
-                        自動續費船票，時長：'1','2','3'或'5'小時（默認5小時）  
+                        自動續費船票，時長：1, 2, 3或5小時（默認5小時）  
   -T [DIRECTION], --trolling [DIRECTION]  
                         啟用拖釣模式，方向：'forward','left','right'（默認按'j'前進）  
-  -bl [ACTION], --broken-lure [ACTION]  
+  -BL [ACTION], --broken-lure [ACTION]  
                         斷餌自動處理，操作：'replace'或'alarm'（默認更換）  
 ```  
 
@@ -155,7 +156,8 @@ _C.SCRIPT.RANDOM_ROD_SELECTION = True  # 底釣隨機選竿
 _C.SCRIPT.SPOOL_CONFIDENCE = 0.98  # 線軸檢測敏感度（值越低越敏感）  
 _C.SCRIPT.SPOD_ROD_RECAST_DELAY = 1800  # 餌料竿重拋間隔（秒）  
 _C.SCRIPT.LURE_CHANGE_DELAY = 1800  # 擬餌更換間隔（秒）  
-_C.SCRIPT.ALARM_SOUND = "./static/sound/guitar.wav"  # 提示音文件路徑  
+_C.SCRIPT.ALARM_SOUND = "./static/sound/guitar.wav"  # 提示音文件路徑
+_C.SCRIPT.RANDOM_CAST_PROBABILITY = 0.25 # 隨機拋竿失誤的機率
 
 # --------------------------------- 快捷鍵設置 ------------------------------ #  
 _C.KEY = CN()  

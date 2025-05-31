@@ -8,9 +8,9 @@ python tools\main.py -h
 ```
 ### Help Message
 ```
-usage: main.py [-h] [-c] [-A] [-r] [-H] [-g] [-f] [-l] [-C] [-o] [-L] [-x] [-X] [-b] [-S] [-e] [-P] [-M] [-s] [-so]
-               [-gb] [-dm] [-pva] [-E] [-a | -m] [-d | -R] [-p PID | -N PROFILE_NAME] [-n FISH_COUNT] [-t [DURATION]]
-               [-T [DIRECTION]] [-bl [ACTION]]
+usage: main.py [-h] [-c] [-A] [-r] [-H] [-g] [-f] [-l] [-C] [-o] [-L] [-x] [-X] [-xx] [-b] [-S] [-e] [-P] [-M] [-s] [-so] [-gb] [-dm]
+               [-pva] [-E] [-a | -m] [-d | -R] [-p PID | -N PROFILE_NAME] [-n FISH_COUNT] [-t [DURATION]] [-T [DIRECTION]]
+               [-BL [ACTION]]
                [opts ...]
 
 Start AFK script for Russian Fishing 4
@@ -32,6 +32,7 @@ options:
   -L, --lure            change current lure with a random one regularly, mode: spin
   -x, --mouse           move mouse randomly before casting the rod
   -X, --pause           pause the script before casting the rod regularly
+  -xx, --random_cast    add redundant rod cast randomly
   -b, --bite            take a screenshot after casting in screenshots/ (for fish spot)
   -S, --screenshot      take a screenshot of every fish you caught in screenshots/
   -e, --email           send email noticication after the script stop
@@ -53,14 +54,13 @@ options:
   -n FISH_COUNT, --fishes-in-keepnet FISH_COUNT
                         number of fishes in your keepnet, 0 by default
   -t [DURATION], --boat-ticket [DURATION]
-                        enable boat ticket auto renewal, DURATION: '1', '2', '3' or '5', will use a 5 hour ticket if
-                        duration is not specified
+                        enable boat ticket auto renewal, DURATION: 1, 2, 3 or 5, will use a 5 hour ticket if duration is not specified  
   -T [DIRECTION], --trolling [DIRECTION]
-                        enable trolling mode, DIRECTION: 'forward',''left', or 'right', will only move forward by
-                        press 'j' if direction is not specified
-  -bl [ACTION], --broken-lure [ACTION]
-                        enable broken lure auto-replace, ACTION: 'replace' or 'alarm', will replace the broken lure if
-                        action is not specified
+                        enable trolling mode, DIRECTION: 'forward', 'left', or 'right', will only move forward by pressing 'j' if       
+                        direction is not specified
+  -BL [ACTION], --broken-lure [ACTION]
+                        enable broken lure auto-replace, ACTION: 'replace' or 'alarm', will replace the broken lure if action is not    
+                        specified
 ```
 > [!TIP]
 > Other tools like `craft.py` or `move.py` also support `-h` for displaying help messages. 
@@ -169,6 +169,8 @@ _C.SCRIPT.SPOD_ROD_RECAST_DELAY = 1800
 # Use spin mode and -L to enable it.
 _C.SCRIPT.LURE_CHANGE_DELAY = 1800
 _C.SCRIPT.ALARM_SOUND = "./static/sound/guitar.wav"  # Path to alarm sound file
+# Probability to add a redundant rod cast (0.0 to 1.0)
+_C.SCRIPT.RANDOM_CAST_PROBABILITY = 0.25
 
 # ---------------------------------------------------------------------------- #
 #                                  Key Binding                                 #
