@@ -912,7 +912,7 @@ class Player:
         bite_rate_str = (
             f"{total_fish_count} / "
             f"{self.records['kept_fish']} / "
-            f"{(total_fish_count / self.timer.get_running_time() / 3600):.1f}/hr"
+            f"{(total_fish_count / (self.timer.get_running_time() / 3600)):.1f}/hr"
         )
 
         return {
