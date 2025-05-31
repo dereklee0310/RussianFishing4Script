@@ -366,9 +366,9 @@ class RF4SApp(App):
         """Prompt the user to enter a profile ID and validate the input.
 
         Continuously prompts until a valid profile ID is entered or the
-        user chooses to exit.
+        user chooses to quit.
         """
-        print("Enter profile id to use, h to see help message, q to exit:")
+        print("Enter profile id to use, h to see help message, q to quit:")
 
         while True:
             user_input = input(">>> ")
