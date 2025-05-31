@@ -507,14 +507,12 @@ class RF4SApp(App):
         except KeyboardInterrupt:
             pass
 
-        print(self.player.build_result_table("Terminated by user"))
+        self.display_results()
         if self.cfg.ARGS.PLOT:
             self.player.plot_and_save()
 
     def display_results(self):
-        # TODO
-        pass
-        # return super().display_results()
+        print(self.player.build_result_table("Terminated by user"))
 
 
 if __name__ == "__main__":

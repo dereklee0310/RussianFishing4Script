@@ -891,13 +891,13 @@ class Player:
         return self.result.as_dict(cause, self.timer)
 
     def build_result_table(self, result) -> Table:
-        """Create a Rich table from running results.
+        """Create a Rich table from running result.
 
-        :return: formatted running results table
+        :return: formatted running result table
         :rtype: Table
         """
         table = Table(
-            "Field", "Value", title="Running Results", box=box.DOUBLE, show_header=False
+            "Field", "Value", title="Running Result", box=box.DOUBLE, show_header=False
         )
 
         for k, v in result.items():
@@ -907,8 +907,8 @@ class Player:
     def send_email(self, result: dict) -> None:
         """Send a notification email to the user's email address.
 
-        :param results: running results
-        :type results: dict
+        :param result: running result
+        :type result: dict
         """
         logger.info("Sending email")
 
@@ -932,8 +932,8 @@ class Player:
     def send_miaotixing(self, result: dict) -> None:
         """Send a notification to the user's miaotixing service.
 
-        :param results: running results
-        :type results: dict
+        :param result: running result
+        :type result: dict
         """
         logger.info("Sending miaotixing notification")
 

@@ -6,8 +6,10 @@ from rf4s.controller.timer import Timer
 @dataclass
 class Result:
     """Dummy result."""
+
     def as_dict(self) -> dict:
         return {}
+
 
 @dataclass
 class RF4SResult:
@@ -61,6 +63,7 @@ class CraftResult:
             "Failed crafts": self.fail,
             "Materials used": self.material,
         }
+
 
 @dataclass
 class HarvestResult:
