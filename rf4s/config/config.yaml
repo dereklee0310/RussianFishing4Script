@@ -61,6 +61,7 @@ NOTIFICATION:
   PASSWORD: "password"
   SMTP_SERVER: "smtp.gmail.com"
   MIAO_CODE: "example"
+  DISCORD_WEBHOOK_URL: ""
 
 PAUSE:
   DELAY: 1800

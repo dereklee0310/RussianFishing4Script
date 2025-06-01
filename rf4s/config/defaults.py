@@ -101,6 +101,7 @@ _C.NOTIFICATION.EMAIL = "email@example.com"
 _C.NOTIFICATION.PASSWORD = "password"
 _C.NOTIFICATION.SMTP_SERVER = "smtp.gmail.com"
 _C.NOTIFICATION.MIAO_CODE = "example"
+_C.NOTIFICATION.DISCORD_WEBHOOK_URL = ""
 
 # ---------------------------------------------------------------------------- #
 #                       Pause ( use -X flag to enable it)                      #

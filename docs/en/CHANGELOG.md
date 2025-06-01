@@ -45,6 +45,11 @@ fix check delay bound bug
 
 add friction brake protection when line is at its end 
 
+----
+fix launch option bug
+
+add discord notification
+
 ## 0.4.2 (2025-04-07)
 - Fixed a bug where the friction brake threshold was not being applied correctly
 

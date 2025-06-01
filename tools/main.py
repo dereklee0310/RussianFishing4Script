@@ -49,6 +49,7 @@ ARGUMENTS = (
     ("e", "email", "send email noticication after the script stop"),
     ("P", "plot", "save fishing data in /logs"),
     ("M", "miaotixing", "send miaotixing notification after the script stop"),
+    ("D", "discord", "send Discord notification after the script stop"),
     ("s", "shutdown", "shutdown computer after the script stop"),
     ("so", "signout", "Sign out instead of closing the game"),
     ("gb", "groundbait", "enable groundbait refill, mode: bottom"),
@@ -264,12 +265,23 @@ class RF4SApp(App):
             logger.critical(
                 "Email address or app password not accepted,\n"
                 "please check your email address and password.\n"
-                "Try another SMTP server and email or refer to\n"
+                "For Gmail users, please refer to\n"
                 "https://support.google.com/accounts/answer/185833\n"
             )
             return False
         except (TimeoutError, gaierror):
             logger.critical("Invalid SMTP Server or connection timed out")
+            return False
+        return True
+
+    def is_discord_webhook_url_valid(self) -> bool:
+        if not self.cfg.ARGS.DISCORD:
+            return True
+        if not self.cfg.NOTIFICATION.DISCORD_WEBHOOK_URL:
+            logger.critical(
+                "Discord Webhook url is not set, see\n"
+                "https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks"
+            )
             return False
         return True
 

@@ -38,6 +38,7 @@ options:
   -e, --email           send email noticication after the script stop
   -P, --plot            save fishing data in /logs
   -M, --miaotixing      send miaotixing notification after the script stop
+  -D, --discord         send Discord notification after the script stop
   -s, --shutdown        shutdown computer after the script stop
   -so, --signout        Sign out instead of closing the game
   -gb, --groundbait     enable groundbait refill, mode: bottom
@@ -245,6 +246,7 @@ _C.NOTIFICATION.EMAIL = "email@example.com"
 _C.NOTIFICATION.PASSWORD = "password"
 _C.NOTIFICATION.SMTP_SERVER = "smtp.gmail.com"
 _C.NOTIFICATION.MIAO_CODE = "example"
+_C.NOTIFICATION.DISCORD_WEBHOOK_URL = ""
 
 # ---------------------------------------------------------------------------- #
 #                       Pause ( use -X flag to enable it)                      #

@@ -43,7 +43,8 @@ usage: main.py [-h] [-c] [-A] [-r] [-H] [-g] [-f] [-l] [-C] [-o] [-L] [-x] [-X] 
   -S, --screenshot      為每條捕獲的魚截圖保存  
   -e, --email           腳本停止後發送郵件通知  
   -P, --plot            在/logs目錄保存釣魚數據  
-  -M, --miaotixing      腳本停止後發送喵提醒通知  
+  -M, --miaotixing      腳本停止後發送喵提醒通知
+  -D, --discord         腳本停止後發送Discord通知
   -s, --shutdown        腳本停止後關閉電腦  
   -so, --signout        退出遊戲而非關閉  
   -gb, --groundbait     補充底餌（僅底釣模式）  
@@ -212,7 +213,8 @@ _C.NOTIFICATION = CN()
 _C.NOTIFICATION.EMAIL = "email@example.com"  # 郵箱地址  
 _C.NOTIFICATION.PASSWORD = "password"  # 郵箱密碼  
 _C.NOTIFICATION.SMTP_SERVER = "smtp.gmail.com"  # SMTP服務器  
-_C.NOTIFICATION.MIAO_CODE = "example"  # 喵提醒識別碼  
+_C.NOTIFICATION.MIAO_CODE = "example"  # 喵提醒識別碼
+_C.NOTIFICATION.DISCORD_WEBHOOK_URL = "" # Discord Webhook 鍊結
 
 # ----------------------------- 暫停設置（需-X參數）------------------------ #  
 _C.PAUSE = CN()  
