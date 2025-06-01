@@ -254,6 +254,7 @@ class Player:
             try:
                 with self.error_handler():
                     monitor()
+                break
             except TimeoutError:
                 pass
 
@@ -395,7 +396,7 @@ class Player:
                         pag.hold("shift"),
                     ):
                         self.tackle.reset()
-                        break
+                    break
                 except TimeoutError:
                     # If it's a TimeoutError or an exception was transformed into a
                     # TimeoutError, enable clicklock again if necessary.
@@ -453,7 +454,7 @@ class Player:
             exceptions.DisconnectedError,
             exceptions.TicketExpiredError,
         ) as e:
-            print(e)
+            print(type(e))
             if self.clicklock_enabled:
                 self.disable_clicklock()
             raise
@@ -518,7 +519,7 @@ class Player:
                         self.clicklock_disable_handler(),
                     ):
                         self.tackle.retrieve(first)
-                        break
+                    break
                 except TimeoutError:
                     if not self.clicklock_enabled:
                         self.enable_clicklock()
@@ -546,7 +547,7 @@ class Player:
             try:
                 with self.error_handler, self.clicklock_disable_handler():
                     self.tackle.pirk()
-                    break
+                break
             except TimeoutError:
                 if self.cfg.SELECTED.PIRK_RETRIEVAL:
                     if not self.clicklock_enabled:
@@ -571,7 +572,7 @@ class Player:
                 dropped = not dropped
                 with self.error_handler:
                     self.tackle.elevate(dropped)
-                    break
+                break
             except TimeoutError:
                 pass
 
@@ -586,8 +587,8 @@ class Player:
                 try:
                     with self.error_handler(), self.clicklock_disable_handler():
                         self.tackle.pull()
-                        self.handle_fish()
-                        break
+                    self.handle_fish()
+                    break
                 except TimeoutError:
                     if not self.clicklock_enabled:
                         self.enable_clicklock()

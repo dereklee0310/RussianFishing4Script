@@ -412,9 +412,11 @@ class RF4SApp(App):
         self.cfg.merge_from_list(self.args.opts)
         self.cfg.SELECTED = CN({"NAME": profile_name}, new_allowed=True)
         self.cfg.SELECTED.merge_from_other_cfg(self.cfg.PROFILE[profile_name])
+
         if self.cfg.SELECTED.LAUNCH_OPTIONS:  # Overwrite
-            args = self.parser.parse_args(shlex.split(self.cfg.SELECTED.LAUNCH_OPTIONS))
-            self.cfg.ARGS = config.dict_to_cfg(vars(args))
+            args_list = shlex.split(self.cfg.SELECTED.LAUNCH_OPTIONS) + sys.argv[1:]
+            self.args = self.parser.parse_args(args_list)
+            self.cfg.ARGS = config.dict_to_cfg(vars(self.args))
 
         # Check here because config might got overwritten
         if not self.is_smtp_valid() or not self.is_images_valid():
@@ -512,7 +514,11 @@ class RF4SApp(App):
             self.player.plot_and_save()
 
     def display_results(self):
-        print(self.player.build_result_table("Terminated by user"))
+        print(
+            self.player.build_result_table(
+                self.player.build_result_dict("Terminated by user")
+            )
+        )
 
 
 if __name__ == "__main__":
