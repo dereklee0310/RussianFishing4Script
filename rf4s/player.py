@@ -7,26 +7,19 @@ automating various fishing techniques.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
-import json
 import logging
 import os
 import random
-import smtplib
 import sys
-from datetime import datetime
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from multiprocessing import Lock
 from contextlib import contextmanager
+from datetime import datetime
+from multiprocessing import Lock
 
 # from email.mime.image import MIMEImage
 from pathlib import Path
 from time import sleep
-from urllib import parse, request
 
 import pyautogui as pag
-from matplotlib import pyplot as plt
-from matplotlib.ticker import MaxNLocator
 from playsound import playsound
 from pynput import keyboard
 from rich import box, print
@@ -36,14 +29,14 @@ from rf4s import exceptions, utils
 from rf4s.component.friction_brake import FrictionBrake
 from rf4s.component.tackle import Tackle
 from rf4s.controller.detection import Detection
-from rf4s.controller.timer import Timer
-from rf4s.controller.window import Window
-from rf4s.result.result import RF4SResult
 from rf4s.controller.notification import (
     DiscordNotification,
     EmailNotification,
     MiaotixingNotification,
 )
+from rf4s.controller.timer import Timer
+from rf4s.controller.window import Window
+from rf4s.result.result import RF4SResult
 
 logger = logging.getLogger("rich")
 random.seed(datetime.now().timestamp())
@@ -787,7 +780,7 @@ class Player:
         result = self.build_result_dict(cause)
         table = self.build_result_table(result)
         if self.cfg.ARGS.DISCORD:
-            DiscordNotification(self.cfg, result).send(5793266) # TODO: dynamic color
+            DiscordNotification(self.cfg, result).send(5793266)  # TODO: dynamic color
         if self.cfg.ARGS.EMAIL:
             EmailNotification(self.cfg, result).send()
         if self.cfg.ARGS.MIAOTIXING:

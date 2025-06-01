@@ -7,8 +7,8 @@ for logging and automation purposes in Russian Fishing 4.
 """
 
 import datetime
-import time
 import logging
+import time
 
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator

@@ -20,8 +20,8 @@ sys.path.append(".")
 from rf4s.app.app import ToolApp
 from rf4s.config.config import print_cfg
 from rf4s.controller.timer import Timer
-from rf4s.utils import create_rich_logger
 from rf4s.result.result import HarvestResult
+from rf4s.utils import create_rich_logger
 
 ROOT = Path(__file__).resolve().parents[1]
 DIG_DELAY = 5  # 4 + 1 s

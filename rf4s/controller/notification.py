@@ -1,16 +1,16 @@
+import json
 import logging
 import smtplib
-from enum import Enum
+from datetime import datetime, timezone
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from enum import Enum
 from urllib import parse, request
 
+from discord_webhook import DiscordEmbed, DiscordWebhook
+from rich import box
 from rich.console import Console
 from rich.table import Table
-from rich import box
-from discord_webhook import DiscordWebhook, DiscordEmbed
-from datetime import datetime, timezone
-import json
 
 logger = logging.getLogger("rich")
 
@@ -104,8 +104,12 @@ class EmailNotification:
         try:
             with smtplib.SMTP_SSL(self.cfg.NOTIFICATION.SMTP_SERVER, 465) as server:
                 # smtp_server.ehlo()
-                server.login(self.cfg.NOTIFICATION.EMAIL, self.cfg.NOTIFICATION.PASSWORD)
-                server.sendmail(self.cfg.NOTIFICATION.EMAIL, recipients, msg.as_string())
+                server.login(
+                    self.cfg.NOTIFICATION.EMAIL, self.cfg.NOTIFICATION.PASSWORD
+                )
+                server.sendmail(
+                    self.cfg.NOTIFICATION.EMAIL, recipients, msg.as_string()
+                )
             logger.info("Email sent successfully")
         except Exception as e:
             logger.error(f"Failed to send email: {e}")

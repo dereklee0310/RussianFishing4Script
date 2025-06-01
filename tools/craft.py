@@ -19,8 +19,8 @@ from pynput import keyboard
 sys.path.append(".")
 from rf4s.app.app import ToolApp
 from rf4s.config.config import print_cfg
-from rf4s.utils import create_rich_logger
 from rf4s.result.result import CraftResult
+from rf4s.utils import create_rich_logger
 
 CRAFT_DELAY = 4.0
 CRAFT_DELAY_2X = CRAFT_DELAY * 2

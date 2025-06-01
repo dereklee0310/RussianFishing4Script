@@ -7,9 +7,9 @@ and pixel color analysis. It is used for automating tasks in Russian Fishing 4.
 """
 
 import time
+from functools import partial
 from pathlib import Path
 from typing import Generator
-from functools import partial
 
 import pyautogui as pag
 from PIL import Image

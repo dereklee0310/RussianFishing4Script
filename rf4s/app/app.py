@@ -11,8 +11,8 @@ Provides core functionality for:
 import os
 import signal
 import sys
-from pathlib import Path
 from abc import ABC, abstractmethod
+from pathlib import Path
 
 from pynput import keyboard
 from rich import print

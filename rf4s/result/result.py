@@ -6,6 +6,7 @@ from rf4s.controller.timer import Timer
 @dataclass
 class Result:
     """Dummy result."""
+
     def as_dict(self) -> dict:
         return {}
 
