@@ -407,27 +407,36 @@ class Player:
         try:
             yield
         except exceptions.FishHookedError:
+            logger.debug("fish hook")
             self.pull_fish()
         except exceptions.FishCapturedError:
+            logger.debug("fish capture")
             self.handle_fish()
         except exceptions.LineAtEndError:
+            logger.debug("line at end")
             if self.cfg.ARGS.FRICTION_BRAKE:
                 with self.friction_brake.lock:
                     self.friction_brake.change(increase=False)
-                    self.general_quit("Fishing line is at its end")
+            self.general_quit("Fishing line is at its end")
         except exceptions.LineSnaggedError:
+            logger.debug("line snagged")
             self._handle_snagged_line()
         except exceptions.LureBrokenError:
+            logger.debug("lure broken")
             self._handle_broken_lure()
             raise TimeoutError  # Transform into TimeoutError to continue
         except exceptions.TackleBrokenError:
+            logger.debug("tackle broken")
             self.general_quit("Tackle is broken")
         except exceptions.DisconnectedError:
+            logger.debug("disconnedted")
             self.disconnected_quit()
         except exceptions.TicketExpiredError:
+            logger.debug("ticket expired")
             self._handle_expired_ticket()
             raise TimeoutError  # Transform into TimeoutError to continue
         except TimeoutError:
+            logger.debug("timeout")
             raise
 
     @contextmanager
@@ -443,7 +452,8 @@ class Player:
             exceptions.TackleBrokenError,
             exceptions.DisconnectedError,
             exceptions.TicketExpiredError,
-        ):
+        ) as e:
+            print(e)
             if self.clicklock_enabled:
                 self.disable_clicklock()
             raise
