@@ -1,10 +1,18 @@
+import logging
+import smtplib
 from enum import Enum
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from urllib import parse, request
+
 from rich.console import Console
 from rich.table import Table
 from rich import box
 from discord_webhook import DiscordWebhook, DiscordEmbed
 from datetime import datetime, timezone
+import json
 
+logger = logging.getLogger("rich")
 
 WEBHOOK_URL = "https://discordapp.com/api/webhooks/1250718168725454849/0l1B6QJk2Gsg0lJ-_VzMCc-uFPU5tX3gx36kRNLCt9sbxOhN5u4yzTtQvDeM6eH0jq8q"
 ICON_URL = "https://i.ibb.co/RpLYcdkm/icon.png"
@@ -48,6 +56,7 @@ class DiscordNotification:
         return capture.get().strip()
 
     def send(self, color: DiscordColor):
+        logger.info("Sending Discord notification")
         raw_table = self.build_raw_table()
         webhook = DiscordWebhook(
             url=self.cfg.NOTIFICATION.DISCORD_WEBHOOK_URL,
@@ -67,6 +76,70 @@ class DiscordNotification:
         response = webhook.execute()
 
         if response.status_code == 200:
-            print("✅ Result successfully sent to Discord.")
+            logger.info("Result successfully sent to Discord.")
         else:
-            print(f"❌ Failed to send result to Discord: {response.text}")
+            logger.error(f"Failed to send result to Discord: {response.text}")
+
+
+class EmailNotification:
+    def __init__(self, cfg, result):
+        self.cfg = cfg
+        self.result = result
+
+    def send(self) -> None:
+        """Send a notification email to the user's email address."""
+        logger.info("Sending email notification")
+
+        msg = MIMEMultipart()
+        msg["Subject"] = "RF4S: Notice of Program Termination"
+        msg["From"] = self.cfg.NOTIFICATION.EMAIL
+        recipients = [self.cfg.NOTIFICATION.EMAIL]
+        msg["To"] = ", ".join(recipients)
+
+        text = ""
+        for k, v in self.result.items():
+            text += f"{k}: {v}\n"
+        msg.attach(MIMEText(text))
+
+        try:
+            with smtplib.SMTP_SSL(self.cfg.NOTIFICATION.SMTP_SERVER, 465) as server:
+                # smtp_server.ehlo()
+                server.login(self.cfg.NOTIFICATION.EMAIL, self.cfg.NOTIFICATION.PASSWORD)
+                server.sendmail(self.cfg.NOTIFICATION.EMAIL, recipients, msg.as_string())
+            logger.info("Email sent successfully")
+        except Exception as e:
+            logger.error(f"Failed to send email: {e}")
+
+
+class MiaotixingNotification:
+    def __init__(self, cfg, result):
+        self.cfg = cfg
+        self.result = result
+
+    def send(self) -> None:
+        """Send a notification to the user's miaotixing service.
+
+        :param result: running result
+        :type result: dict
+        """
+        logger.info("Sending miaotixing notification")
+
+        text = ""
+        for k, v in self.result.items():
+            text += f"{k}: {v}\n"
+
+        url = "http://miaotixing.com/trigger?" + parse.urlencode(
+            {"id": self.cfg.NOTIFICATION.MIAO_CODE, "text": text, "type": "json"}
+        )
+
+        with request.urlopen(url) as page:
+            result = page.read()
+            json_object = json.loads(result)
+            if json_object["code"] == 0:
+                logger.info("Miaotixing notification sent successfully")
+            else:
+                logger.error(
+                    "Miaotixing notification with error code: %s\nDescription: %s",
+                    str(json_object["code"]),
+                    json_object["msg"],
+                )

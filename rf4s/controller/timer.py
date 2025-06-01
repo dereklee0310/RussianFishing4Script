@@ -8,6 +8,12 @@ for logging and automation purposes in Russian Fishing 4.
 
 import datetime
 import time
+import logging
+
+from matplotlib import pyplot as plt
+from matplotlib.ticker import MaxNLocator
+
+logger = logging.getLogger("rich")
 
 
 class Timer:
@@ -173,3 +179,35 @@ class Timer:
             self.last_pause = cur_time
             return True
         return False
+
+    def plot_and_save(self) -> None:
+        """Plot and save an image using rhour and ghour lists from the timer object."""
+        logger.info("Plotting line chart")
+
+        cast_rhour_list, cast_ghour_list = self.get_cast_time_list()
+        _, ax = plt.subplots(nrows=1, ncols=2)
+        # _.canvas.manager.set_window_title('Record')
+        ax[0].set_ylabel("Fish")
+
+        last_rhour = cast_rhour_list[-1]  # Hour: 0, 1, 2, 3, 4, "5"
+        fish_per_rhour = [0] * (last_rhour + 1)  # Idx: (0, 1, 2, 3, 4, 5) = 6
+        for hour in cast_rhour_list:
+            fish_per_rhour[hour] += 1
+        ax[0].plot(range(last_rhour + 1), fish_per_rhour)
+        ax[0].set_title("Fish Caughted per Real Hour")
+        ax[0].set_xticks(range(last_rhour + 2))
+        ax[0].set_xlabel("Hour (real running time)")
+        ax[0].yaxis.set_major_locator(MaxNLocator(integer=True))
+
+        fish_per_ghour = [0] * 24
+        for hour in cast_ghour_list:
+            fish_per_ghour[hour] += 1
+        ax[1].bar(range(0, 24), fish_per_ghour)
+        ax[1].set_title("Fish Caughted per Game Hour")
+        ax[1].set_xticks(range(0, 24, 2))
+        ax[1].set_xlabel("Hour (game time)")
+        ax[1].yaxis.set_major_locator(MaxNLocator(integer=True))
+
+        # plt.tight_layout()
+        plt.savefig(f"../logs/{self.get_cur_timestamp()}.png")
+        logger.info("Chart has been saved under logs/")

@@ -39,6 +39,11 @@ from rf4s.controller.detection import Detection
 from rf4s.controller.timer import Timer
 from rf4s.controller.window import Window
 from rf4s.result.result import RF4SResult
+from rf4s.controller.notification import (
+    DiscordNotification,
+    EmailNotification,
+    MiaotixingNotification,
+)
 
 logger = logging.getLogger("rich")
 random.seed(datetime.now().timestamp())
@@ -781,12 +786,14 @@ class Player:
         """
         result = self.build_result_dict(cause)
         table = self.build_result_table(result)
+        if self.cfg.ARGS.DISCORD:
+            DiscordNotification(self.cfg, result).send(5793266) # TODO: dynamic color
         if self.cfg.ARGS.EMAIL:
-            self.send_email(result)
+            EmailNotification(self.cfg, result).send()
         if self.cfg.ARGS.MIAOTIXING:
-            self.send_miaotixing(result)
-        if self.cfg.ARGS.PLOT:
-            self.plot_and_save()
+            MiaotixingNotification(self.cfg, result).send()
+        if self.cfg.ARGS.PLOT and self.result.kept_fish != 0:
+            self.timer.plot_and_save()
         if shutdown and self.cfg.ARGS.SHUTDOWN:
             os.system("shutdown /s /t 5")
         print(table)
@@ -917,93 +924,6 @@ class Player:
         for k, v in result.items():
             table.add_row(k, str(v))
         return table
-
-    def send_email(self, result: dict) -> None:
-        """Send a notification email to the user's email address.
-
-        :param result: running result
-        :type result: dict
-        """
-        logger.info("Sending email")
-
-        msg = MIMEMultipart()
-        msg["Subject"] = "RussianFishing4Script: Notice of Program Termination"
-        msg["From"] = self.cfg.NOTIFICATION.EMAIL
-        recipients = [self.cfg.NOTIFICATION.EMAIL]
-        msg["To"] = ", ".join(recipients)
-
-        text = ""
-        for k, v in result.items():
-            text += f"{k}: {v}\n"
-        msg.attach(MIMEText(text))
-
-        with smtplib.SMTP_SSL(self.cfg.NOTIFICATION.SMTP_SERVER, 465) as server:
-            # smtp_server.ehlo()
-            server.login(self.cfg.NOTIFICATION.EMAIL, self.cfg.NOTIFICATION.PASSWORD)
-            server.sendmail(self.cfg.NOTIFICATION.EMAIL, recipients, msg.as_string())
-        logger.info("Email sent successfully")
-
-    def send_miaotixing(self, result: dict) -> None:
-        """Send a notification to the user's miaotixing service.
-
-        :param result: running result
-        :type result: dict
-        """
-        logger.info("Sending miaotixing notification")
-
-        text = ""
-        for k, v in result.items():
-            text += f"{k}: {v}\n"
-
-        url = "http://miaotixing.com/trigger?" + parse.urlencode(
-            {"id": self.cfg.NOTIFICATION.MIAO_CODE, "text": text, "type": "json"}
-        )
-
-        with request.urlopen(url) as page:
-            result = page.read()
-            json_object = json.loads(result)
-            if json_object["code"] == 0:
-                logger.info("Miaotixing notification sent successfully")
-            else:
-                logger.error(
-                    "Miaotixing notification with error code: %s\nDescription: %s",
-                    str(json_object["code"]),
-                    json_object["msg"],
-                )
-
-    def plot_and_save(self) -> None:
-        """Plot and save an image using rhour and ghour lists from the timer object."""
-        logger.info("Plotting Curves")
-        if self.result.kept_fish == 0:
-            return
-
-        cast_rhour_list, cast_ghour_list = self.timer.get_cast_time_list()
-        _, ax = plt.subplots(nrows=1, ncols=2)
-        # _.canvas.manager.set_window_title('Record')
-        ax[0].set_ylabel("Fish")
-
-        last_rhour = cast_rhour_list[-1]  # Hour: 0, 1, 2, 3, 4, "5"
-        fish_per_rhour = [0] * (last_rhour + 1)  # Idx: (0, 1, 2, 3, 4, 5) = 6
-        for hour in cast_rhour_list:
-            fish_per_rhour[hour] += 1
-        ax[0].plot(range(last_rhour + 1), fish_per_rhour)
-        ax[0].set_title("Fish Caughted per Real Hour")
-        ax[0].set_xticks(range(last_rhour + 2))
-        ax[0].set_xlabel("Hour (real running time)")
-        ax[0].yaxis.set_major_locator(MaxNLocator(integer=True))
-
-        fish_per_ghour = [0] * 24
-        for hour in cast_ghour_list:
-            fish_per_ghour[hour] += 1
-        ax[1].bar(range(0, 24), fish_per_ghour)
-        ax[1].set_title("Fish Caughted per Game Hour")
-        ax[1].set_xticks(range(0, 24, 2))
-        ax[1].set_xlabel("Hour (game time)")
-        ax[1].yaxis.set_major_locator(MaxNLocator(integer=True))
-
-        # plt.tight_layout()
-        plt.savefig(f"../logs/{self.timer.get_cur_timestamp()}.png")
-        logger.info("Plot has been saved under logs/")
 
     def _handle_expired_ticket(self) -> None:
         """Handle an expired boat ticket event."""
