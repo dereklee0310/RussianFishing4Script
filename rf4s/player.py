@@ -769,15 +769,15 @@ class Player:
                 self.general_quit("Lure is broken")
 
     @utils.release_keys_after(arrow_keys=True)
-    def _handle_termination(self, cause: str, shutdown: bool) -> None:
+    def _handle_termination(self, msg: str, shutdown: bool) -> None:
         """Handle script termination.
 
-        :param cause: The reason for termination.
-        :type cause: str
+        :param msg: The reason for termination.
+        :type msg: str
         :param shutdown: Whether to shutdown the computer after termination.
         :type shutdown: bool
         """
-        result = self.build_result_dict(cause)
+        result = self.build_result_dict(msg)
         table = self.build_result_table(result)
         if self.cfg.ARGS.DISCORD:
             DiscordNotification(self.cfg, result).send(5793266)  # TODO: dynamic color
@@ -863,13 +863,13 @@ class Player:
         """Handle key release events."""
         sys.exit()
 
-    def general_quit(self, cause: str) -> None:
+    def general_quit(self, msg: str) -> None:
         """Quit the game through the control panel.
 
-        :param cause: reason for termination
-        :type cause: str
+        :param msg: reason for termination
+        :type msg: str
         """
-        logger.critical(cause)
+        logger.critical(msg)
         sleep(ANIMATION_DELAY)
         pag.press("esc")
         sleep(ANIMATION_DELAY)
@@ -883,7 +883,7 @@ class Player:
         pag.moveTo(self.detection.get_yes_position())
         pag.click()
 
-        self._handle_termination(cause, shutdown=True)
+        self._handle_termination(msg, shutdown=True)
 
     def disconnected_quit(self) -> None:
         """Quit the game through the main menu."""
@@ -901,8 +901,8 @@ class Player:
 
         self._handle_termination("Game disconnected", shutdown=True)
 
-    def build_result_dict(self, cause: str):
-        return self.result.as_dict(cause, self.timer)
+    def build_result_dict(self, msg: str):
+        return self.result.as_dict(msg, self.timer)
 
     def build_result_table(self, result) -> Table:
         """Create a Rich table from running result.

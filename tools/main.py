@@ -353,10 +353,9 @@ class RF4SApp(App):
 
         if invalid_keys or missing_keys:
             for key in invalid_keys:
-                logger.critical("Invalid setting: '%s'", key)
+                logger.warning("Invalid setting: '%s'", key)
             for key in missing_keys:
-                logger.critical("Missing setting: '%s'", key)
-            return False
+                logger.warning("Missing setting: '%s'", key)
         return True
 
     def display_available_profiles(self) -> None:
@@ -422,7 +421,10 @@ class RF4SApp(App):
                 x.strip() for x in self.args.opts[value_idx].split(",")
             ]
         self.cfg.merge_from_list(self.args.opts)
+
+        mode = self.cfg.PROFILE[profile_name].MODE.upper()
         self.cfg.SELECTED = CN({"NAME": profile_name}, new_allowed=True)
+        self.cfg.SELECTED.merge_from_other_cfg(self.cfg.PROFILE[mode])
         self.cfg.SELECTED.merge_from_other_cfg(self.cfg.PROFILE[profile_name])
 
         if self.cfg.SELECTED.LAUNCH_OPTIONS:  # Overwrite

@@ -50,6 +50,8 @@ fix launch option bug
 
 add discord notification
 
+change setting check to warning
+
 ## 0.4.2 (2025-04-07)
 - Fixed a bug where the friction brake threshold was not being applied correctly
 

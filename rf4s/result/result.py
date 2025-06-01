@@ -22,7 +22,7 @@ class RF4SResult:
     marked_fish: int = 0
     unmarked_fish: int = 0
 
-    def as_dict(self, cause: str, timer: Timer) -> dict:
+    def as_dict(self, msg: str, timer: Timer) -> dict:
         total_fish_count = self.marked_fish + self.unmarked_fish
         # Will be 0 if total_fish_count = 0
         mark_ratio_str = (
@@ -30,19 +30,21 @@ class RF4SResult:
             f"{self.unmarked_fish} / "
             f"{int(self.marked_fish / max(1, total_fish_count) * 100)}%"
         )
-        bite_rate_str = (
+        keep_ratio_str = (
             f"{total_fish_count} / "
             f"{self.kept_fish} / "
-            f"{(total_fish_count / (timer.get_running_time() / 3600)):.1f}/hr"
+            f"{int(self.kept_fish / max(1, total_fish_count) * 100)}%"
         )
+        bite_rate = f"{int((total_fish_count / (timer.get_running_time() / 3600)))}/hr"
 
         return {
-            "Reason for termination": cause,
+            "Stop reason": msg,
             "Start time": timer.get_start_datetime(),
             "End time": timer.get_cur_datetime(),
             "Running time": timer.get_running_time_str(),
-            "Marked / Unmarked / Mark ratio": mark_ratio_str,
-            "Total  / Kept     / Bite rate ": bite_rate_str,
+            "Mark / Unmark / Mark ratio": mark_ratio_str,
+            "Total / Keep / Keep ratio ": keep_ratio_str,
+            "Bite rate": bite_rate,
             "Tea consumed": self.tea,
             "Carrot consumed": self.carrot,
             "Alcohol consumed": self.alcohol,
