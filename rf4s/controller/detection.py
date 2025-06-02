@@ -291,7 +291,7 @@ class Detection:
         )
 
     def is_material_complete(self):
-        return not self._get_image_box("material_slot", 0.9)
+        return not self._get_image_box("material_slot", 0.7)
 
     # ---------------------- Quiting game from control panel --------------------- #
     def get_quit_position(self):
