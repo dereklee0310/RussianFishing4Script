@@ -30,6 +30,7 @@ from rf4s.component.friction_brake import FrictionBrake
 from rf4s.component.tackle import Tackle
 from rf4s.controller.detection import Detection
 from rf4s.controller.notification import (
+    DiscordColor,
     DiscordNotification,
     EmailNotification,
     MiaotixingNotification,
@@ -336,7 +337,7 @@ class Player:
         :param item: The name of the item to access.
         :type item: str
         """
-        logger.info("Using item: %s", item)
+        logger.info("Using %s", item)
         key = str(self.cfg.KEY[item.upper()])
         if key != "-1":  # Use shortcut
             pag.press(key)
@@ -676,7 +677,6 @@ class Player:
             return
 
         if not self.detection.is_pva_chosen():
-            logger.warning("Pva has been used up")
             try:
                 self.tackle.equip_item("pva")
             except exceptions.ItemNotFoundError:
@@ -780,7 +780,8 @@ class Player:
         result = self.build_result_dict(msg)
         table = self.build_result_table(result)
         if self.cfg.ARGS.DISCORD:
-            DiscordNotification(self.cfg, result).send(5793266)  # TODO: dynamic color
+            # TODO: dynamic color
+            DiscordNotification(self.cfg, result).send(DiscordColor.BLURPLE)
         if self.cfg.ARGS.EMAIL:
             EmailNotification(self.cfg, result).send()
         if self.cfg.ARGS.MIAOTIXING:

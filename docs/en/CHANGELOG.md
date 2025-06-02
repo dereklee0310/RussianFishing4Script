@@ -52,6 +52,8 @@ add discord notification
 
 change setting check to warning
 
+todo: remove debug messages in retrieving stage
+
 ## 0.4.2 (2025-04-07)
 - Fixed a bug where the friction brake threshold was not being applied correctly
 

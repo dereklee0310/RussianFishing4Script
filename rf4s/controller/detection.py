@@ -384,13 +384,13 @@ class Detection:
         return self._get_image_box("groundbait_icon", 0.6) is None
 
     def get_groundbait_position(self):
-        return self._get_image_box("classic_feed_mix", 0.98)
+        return self._get_image_box("classic_feed_mix", 0.95)
 
     def get_dry_mix_position(self):
-        return self._get_image_box("dry_feed_mix", 0.98)
+        return self._get_image_box("dry_feed_mix", 0.95)
 
     def get_pva_position(self):
-        return self._get_image_box("pva_stick_or_pva_stringer", 0.98)
+        return self._get_image_box("pva_stick_or_pva_stringer", 0.95)
 
     # ------------------------------ Friction brake ------------------------------ #
     def is_friction_brake_high(self) -> bool:

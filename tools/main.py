@@ -433,7 +433,11 @@ class RF4SApp(App):
             self.cfg.ARGS = config.dict_to_cfg(vars(self.args))
 
         # Check here because config might got overwritten
-        if not self.is_smtp_valid() or not self.is_images_valid():
+        if (
+            not self.is_smtp_valid()
+            or not self.is_images_valid()
+            or not self.is_discord_webhook_url_valid()
+        ):
             sys.exit(1)
         config.print_cfg(self.cfg.SELECTED)
 

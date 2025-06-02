@@ -14,7 +14,6 @@ from rich.table import Table
 
 logger = logging.getLogger("rich")
 
-WEBHOOK_URL = "https://discordapp.com/api/webhooks/1250718168725454849/0l1B6QJk2Gsg0lJ-_VzMCc-uFPU5tX3gx36kRNLCt9sbxOhN5u4yzTtQvDeM6eH0jq8q"
 ICON_URL = "https://i.ibb.co/RpLYcdkm/icon.png"
 
 # Name                             | Int value | Hex code
@@ -76,7 +75,7 @@ class DiscordNotification:
         response = webhook.execute()
 
         if response.status_code == 200:
-            logger.info("Result successfully sent to Discord.")
+            logger.info("Result successfully sent to Discord")
         else:
             logger.error(f"Failed to send result to Discord: {response.text}")
 
