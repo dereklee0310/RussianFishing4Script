@@ -506,7 +506,7 @@ class RF4SApp(App):
 
         Sets up all required components, activates the game window,
         registers key listeners, and begins the fishing automation.
-        Handles termination and displays results.
+        Handles termination and displays result.
         """
         self.create_user_profile()
         if not self.is_window_valid() or not self.is_electro_valid():
@@ -523,11 +523,11 @@ class RF4SApp(App):
         except KeyboardInterrupt:
             pass
 
-        self.display_results()
+        self.display_result()
         if self.cfg.ARGS.PLOT:
             self.player.plot_and_save()
 
-    def display_results(self):
+    def display_result(self):
         print(
             self.player.build_result_table(
                 self.player.build_result_dict("Terminated by user")

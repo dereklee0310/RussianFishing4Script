@@ -68,7 +68,7 @@ class App(ABC):
         raise NotImplementedError("create_parser() must be implemented in subclass")
 
     @abstractmethod
-    def display_results(self) -> None:
+    def display_result(self) -> None:
         raise NotImplementedError("display_result() must be implemented in subclass")
 
 
@@ -77,7 +77,6 @@ class ToolApp(App):
 
     Attributes:
         detection (Detection): Detection controller
-        results (dict): Running results
     """
 
     def __init__(self):
@@ -85,7 +84,7 @@ class ToolApp(App):
 
         1. Parse command-line arguments and merge them with the existing cfg node.
         2. Create a Window instance and a Detection instance.
-        3. Create an empty dictionary for results
+        3. Create an empty dictionary for result
         """
         super().__init__()
         args = self.create_parser().parse_args()
@@ -99,11 +98,15 @@ class ToolApp(App):
         self.cfg.freeze()
 
         self.detection = Detection(self.cfg, self.window)
-        self.result = Result()  # This will be used in display_results()
+        self.result = Result()  # This will be used in display_result()
 
-    def display_results(self) -> None:
-        """Display the running results in a table format."""
-        table = Table("Results", title="Running Results", show_header=False)
+    def display_result(self) -> None:
+        """Display the running result in a table format."""
+        result_dict = self.result.as_dict()
+        if not result_dict:
+            return
+
+        table = Table("Result", title="Running Result", show_header=False)
         for name, value in self.result.as_dict().items():
             table.add_row(name, str(value))
         print(table)
@@ -119,6 +122,5 @@ class ToolApp(App):
             self._start()
         except KeyboardInterrupt:
             pass
-        if self.result:
-            self.display_results()
+        self.display_result()
         self.window.activate_script_window()

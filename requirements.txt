@@ -1,7 +1,6 @@
 pyautogui==0.9.54
 keyboard==0.13.5
 pywin32==306
-# configparser==6.0.0
 pynput==1.7.6
 opencv-python==4.8.0.76
 Pillow==10.1.0
@@ -13,4 +12,5 @@ pyyaml==6.0.2
 yacs==0.1.8
 rich==13.9.4
 bump-my-version==0.32.1
+discord-webhook==1.4.1
 # reference: https://stackoverflow.com/questions/68704443/python-playsound-error-261-for-command-the-driver-cannot-recognize-the-specifie

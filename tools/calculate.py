@@ -80,7 +80,7 @@ def get_validated_input(prompt: str) -> float | None:
 def main():
     """Main function to run the friction brake calculation.
 
-    Prompts the user for input, calculates the results, and displays them in a table.
+    Prompts the user for input, calculates the result, and displays them in a table.
     """
     print("Please enter your tackle's stats, type q to quit, r to restart. ")
     while True:
@@ -89,7 +89,7 @@ def main():
         max_tension = max_drag * max_friction_brake / 30
 
         table = Table(
-            "Results",
+            "Result",
             title="Your tackle's real stats 🎣",
             show_header=False,
             min_width=36,

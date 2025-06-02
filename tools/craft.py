@@ -150,10 +150,10 @@ class CraftApp(ToolApp):
         while True:
             if not self.detection.is_material_complete():
                 logger.critical("Running out of materials")
-                sys.exit(1)
+                return
             if self.result.succes == self.cfg.ARGS.CRAFT_LIMIT:
                 logger.info("Crafting limit reached")
-                sys.exit(1)
+                return
             self.craft_item(*self.get_action_delays(), accept_key)
 
 
