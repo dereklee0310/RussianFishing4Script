@@ -31,31 +31,33 @@ from rf4s.utils import create_rich_logger
 logger = create_rich_logger()
 
 ARGUMENTS = (
-    ("c", "coffee", "drink coffee if stamina is low"),
-    ("A", "alcohol", "drink alcohol before keeping the fish regularly"),
-    ("r", "refill", "refill hunger and comfort by consuming tea and carrot"),
-    ("H", "harvest", "harvest baits before casting"),
-    ("g", "gear_ratio", "switch the gear ratio after the retrieval timed out"),
-    ("f", "friction_brake", "enable auto friction brake"),
-    ("l", "lift", "lift the tackle constantly while pulling a fish"),
-    ("C", "skip_cast", "Immediately start retrieving for the first fish"),
-    ("o", "spod_rod", "recast spod rod regularly"),
-    ("L", "lure", "change current lure with a random one regularly, mode: spin"),
-    ("x", "mouse", "move mouse randomly before casting the rod"),
-    ("X", "pause", "pause the script before casting the rod regularly"),
-    ("xx", "random_cast", "add redundant rod cast randomly"),
-    ("b", "bite", "take a screenshot after casting in screenshots/ (for fish spot)"),
-    ("S", "screenshot", "take a screenshot of every fish you caught in screenshots/"),
-    ("e", "email", "send email noticication after the script stop"),
-    ("P", "plot", "save fishing data in /logs"),
+    ("R", "rainbow", "rainbow line meter for retrieval detection"),
+    ("t", "tag", "keep only tagged fishes"),
+    ("c", "coffee", "drink coffee if stamina is low during a fish fight"),
+    ("a", "alcohol", "drink alcohol before keeping the fish"),
+    ("r", "refill", "consume tea and carrot if hunger or comfort is low"),
+    ("H", "harvest", "harvest baits before casting the rod"),
+    ("L", "lure", "change current lure with a random one, mode: spin"),
+    ("m", "mouse", "move mouse randomly before casting the rod"),
+    ("P", "pause", "pause the script before casting the rod occasionally"),
+    ("RC", "random-cast", "do a redundant rod cast randomly"),
+    ("SC", "skip-cast", "skip the first rod cast"),
+    ("l", "lift", "lift the tackle constantly during a fish fight"),
+    ("e", "electro", "enable electric mode for Electro Raptor series reel"),
+    ("FB", "friction-brake", "adjust friction brake automatically"),
+    ("GR", "gear-ratio", "switch the gear ratio after the retrieval timed out"),
+    ("b", "bite", "save a screenshot in screenshots/ before rod cast (for bite spot)"),
+    ("s", "screenshot", "save a screenshot in screenshots/ after you caught a fish"),
+    ("d", "data", "save fishing data in /logs"),
+    ("E", "email", "send email noticication after the script stop"),
     ("M", "miaotixing", "send miaotixing notification after the script stop"),
     ("D", "discord", "send Discord notification after the script stop"),
-    ("s", "shutdown", "shutdown computer after the script stop"),
-    ("so", "signout", "Sign out instead of closing the game"),
-    ("gb", "groundbait", "enable groundbait refill, mode: bottom"),
-    ("dm", "dry_mix", "enable dry mix refill, mode: bottom"),
-    ("pva", "pva", "enable pva refill, mode: bottom"),
-    ("E", "electro", "enable electric mode for Electro Raptor series reel"),
+    ("S", "shutdown", "shutdown computer after the script stop"),
+    ("SO", "signout", "sign out instead of closing the game"),
+    ("SR", "spod-rod", "recast spod rod"),
+    ("DM", "dry-mix", "enable dry mix refill, mode: bottom"),
+    ("GB", "groundbait", "enable groundbait refill, mode: bottom"),
+    ("PVA", "pva", "enable pva refill, mode: bottom"),
 )
 
 LOGO = """
@@ -116,31 +118,6 @@ class RF4SApp(App):
             help_message = argument[2]
             parser.add_argument(flag1, flag2, action="store_true", help=help_message)
 
-        release_strategy = parser.add_mutually_exclusive_group()
-        release_strategy.add_argument(
-            "-a",
-            "--all",
-            action="store_true",
-            help="keep all captured fishes, used by default",
-        )
-        release_strategy.add_argument(
-            "-m", "--marked", action="store_true", help="keep only the marked fishes"
-        )
-
-        retrieval_detecton_strategy = parser.add_mutually_exclusive_group()
-        retrieval_detecton_strategy.add_argument(
-            "-d",
-            "--default-spool",
-            action="store_true",
-            help="use default spool icon for retrieval detection, used by default",
-        )
-        retrieval_detecton_strategy.add_argument(
-            "-R",
-            "--rainbow-line",
-            action="store_true",
-            help="use rainbow line meter for retrieval detection",
-        )
-
         profile_selection_strategy = parser.add_mutually_exclusive_group()
         profile_selection_strategy.add_argument(
             "-p",
@@ -165,15 +142,15 @@ class RF4SApp(App):
             metavar="FISH_COUNT",
         )
         parser.add_argument(
-            "-t",
+            "-BT",
             "--boat-ticket",
             nargs="?",
             const=5,
             type=int,
             choices=[1, 2, 3, 5],
             help=(
-                "enable boat ticket auto renewal, DURATION: 1, 2, 3 or 5, "
-                "will use a 5 hour ticket if duration is not specified"
+                "renew boat ticket, DURATION: 1, 2, 3 or 5, "
+                "5 by default"
             ),
             metavar="DURATION",
         )
@@ -186,7 +163,7 @@ class RF4SApp(App):
             choices=["forward", "left", "right"],
             help=(
                 "enable trolling mode, DIRECTION: 'forward', 'left', or 'right', "
-                "will only move forward by pressing 'j' if direction is not specified"
+                "'forward' by default"
             ),
             metavar="DIRECTION",
         )
@@ -198,8 +175,8 @@ class RF4SApp(App):
             type=str,
             choices=["replace", "alarm"],
             help=(
-                "enable broken lure auto-replace, ACTION: 'replace' or 'alarm', "
-                "will replace the broken lure if action is not specified"
+                "replace broken lure, ACTION: 'replace' or 'alarm', "
+                "'replace' by default"
             ),
             metavar="ACTION",
         )
@@ -439,6 +416,7 @@ class RF4SApp(App):
             or not self.is_discord_webhook_url_valid()
         ):
             sys.exit(1)
+        config.print_cfg(self.cfg.ARGS)
         config.print_cfg(self.cfg.SELECTED)
 
     def is_window_valid(self) -> None:
@@ -528,7 +506,7 @@ class RF4SApp(App):
             pass
 
         self.display_result()
-        if self.cfg.ARGS.PLOT:
+        if self.cfg.ARGS.DATA:
             self.player.plot_and_save()
 
     def display_result(self):

@@ -830,14 +830,14 @@ class Player:
                 tagged = True
 
         if (
-            self.cfg.ARGS.MARKED
+            self.cfg.ARGS.TAG
             and not tagged
             and not self.detection.is_fish_whitelisted()
         ):
             pag.press("backspace")
             return
 
-        # Fish is marked, unmarked release is disabled, or fish is in whitelist
+        # Fish is tagged, ARGS.TAG is disabled, or fish is in whitelist
         sleep(self.cfg.KEEPNET.FISH_DELAY)
         pag.press("space")
 

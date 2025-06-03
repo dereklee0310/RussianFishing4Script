@@ -190,9 +190,31 @@ class Detection:
         box = self.window.get_box()
         return [box[i] + self.coord_offsets[offset_key][i] for i in range(2)]
 
-    # ----------------------------- Unmarked release ----------------------------- #
-    def is_fish_marked(self):
-        return self._get_image_box("mark", 0.7)
+    # ----------------------------- Untagged release ----------------------------- #
+    def is_tag_exist(self, color: TagColor):
+        match color:
+            case TagColor.GREEN:
+                lower = np.array([30, 128, 128])
+                upper = np.array([36, 255, 255])
+            case TagColor.YELLOW:
+                lower = np.array([22, 128, 128])
+                upper = np.array([28, 255, 255])
+            case TagColor.PINK:
+                lower = np.array([142, 64, 128])
+                upper = np.array([148, 255, 255])
+            case TagColor.BLUE:
+                lower = np.array([101, 64, 128])
+                upper = np.array([107, 255, 255])
+            case TagColor.PURPLE:
+                lower = np.array([127, 64, 128])
+                upper = np.array([133, 255, 255])
+            case _:
+                raise ValueError("Invalid tag color")
+        hsv_img = cv2.cvtColor(np.array(pag.screenshot()), cv2.COLOR_RGB2HSV)
+        mask = cv2.inRange(hsv_img, lower, upper)
+        haystack_img = Image.fromarray(mask)
+        needle_img = Image.open(self.image_dir / f"{color.value}.png")
+        return pag.locate(needle_img, haystack_img, grayscale=True, confidence=0.9)
 
     def is_fish_species_matched(self, species: str):
         return self._get_image_box(species, 0.9)
@@ -249,7 +271,7 @@ class Detection:
     # ---------------------------- Retrieval detection --------------------------- #
     def is_retrieval_finished(self):
         ready = self.is_tackle_ready()
-        if self.cfg.ARGS.RAINBOW_LINE:
+        if self.cfg.ARGS.RAINBOW:
             return ready or self._is_rainbow_line_0or5m()
         return ready or self._is_spool_full()
 
@@ -429,29 +451,3 @@ class Detection:
 
     def is_gift_receieved(self):
         return self._get_image_box("gift", 0.8)
-
-
-    def is_tag_exist(self, color: TagColor):
-        match color:
-            case TagColor.GREEN:
-                lower = np.array([30, 128, 128])
-                upper = np.array([36, 255, 255])
-            case TagColor.YELLOW:
-                lower = np.array([22, 128, 128])
-                upper = np.array([28, 255, 255])
-            case TagColor.PINK:
-                lower = np.array([142, 64, 128])
-                upper = np.array([148, 255, 255])
-            case TagColor.BLUE:
-                lower = np.array([101, 64, 128])
-                upper = np.array([107, 255, 255])
-            case TagColor.PURPLE:
-                lower = np.array([127, 64, 128])
-                upper = np.array([133, 255, 255])
-            case _:
-                raise ValueError("Invalid tag color")
-        hsv_img = cv2.cvtColor(np.array(pag.screenshot()), cv2.COLOR_RGB2HSV)
-        mask = cv2.inRange(hsv_img, lower, upper)
-        haystack_img = Image.fromarray(mask)
-        needle_img = Image.open(self.image_dir / f"{color.value}.png")
-        return pag.locate(needle_img, haystack_img, grayscale=True, confidence=0.9)

@@ -26,9 +26,6 @@ class RF4SResult:
     purple: int = 0
     pink: int = 0
 
-    marked_fish: int = 0
-    unmarked_fish: int = 0
-
     def as_dict(self, msg: str, timer: Timer) -> dict:
         # Will be 0 if total_fish_count = 0
         kept_ratio = f"{int(self.kept / max(1, self.total) * 100)}%"

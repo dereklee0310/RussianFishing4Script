@@ -196,7 +196,7 @@ class Tackle:
                     utils.hold_mouse_button(LIFT_DURATION, button="right")
 
             if self.detection.is_retrieval_finished():
-                sleep(0 if self.cfg.ARGS.RAINBOW_LINE else 2)
+                sleep(0 if self.cfg.ARGS.RAINBOW else 2)
                 return
 
             if self.detection.is_fish_captured():
