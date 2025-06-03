@@ -242,7 +242,7 @@ class Tackle:
 
         i = self.cfg.SELECTED.PIRK_TIMEOUT
         while i > 0:
-            if self.cfg.SELECTED.PIRK_RETRIEVAL and self.detection.is_tackle_ready():
+            if self.detection.is_tackle_ready():
                 return
 
             if self.detection.is_fish_hooked_twice():
