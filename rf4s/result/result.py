@@ -18,33 +18,36 @@ class RF4SResult:
     alcohol: int = 0
     coffee: int = 0
     bait: int = 0
-    kept_fish: int = 0
+    kept: int = 0
+    total: int = 0
+    green: int = 0
+    yellow: int = 0
+    blue: int = 0
+    purple: int = 0
+    pink: int = 0
+
     marked_fish: int = 0
     unmarked_fish: int = 0
 
     def as_dict(self, msg: str, timer: Timer) -> dict:
-        total_fish_count = self.marked_fish + self.unmarked_fish
         # Will be 0 if total_fish_count = 0
-        mark_ratio_str = (
-            f"{self.marked_fish} / "
-            f"{self.unmarked_fish} / "
-            f"{int(self.marked_fish / max(1, total_fish_count) * 100)}%"
-        )
-        keep_ratio_str = (
-            f"{total_fish_count} / "
-            f"{self.kept_fish} / "
-            f"{int(self.kept_fish / max(1, total_fish_count) * 100)}%"
-        )
-        bite_rate = f"{int((total_fish_count / (timer.get_running_time() / 3600)))}/hr"
+        kept_ratio = f"{int(self.kept / max(1, self.total) * 100)}%"
+        bite_rate = f"{int((self.total / (timer.get_running_time() / 3600)))}/hr"
 
         return {
             "Stop reason": msg,
             "Start time": timer.get_start_datetime(),
             "End time": timer.get_cur_datetime(),
             "Running time": timer.get_running_time_str(),
-            "Mark / Unmark / Mark ratio": mark_ratio_str,
-            "Total / Keep / Keep ratio ": keep_ratio_str,
             "Bite rate": bite_rate,
+            "Total fish": self.total,
+            "Kept fish": self.kept,
+            "Kept ratio": kept_ratio,
+            "Green tag fish": self.green,
+            "Yellow tag fish": self.yellow,
+            "Blue tag fish": self.blue,
+            "Purple tag fish": self.purple,
+            "Pink tag fish": self.pink,
             "Tea consumed": self.tea,
             "Carrot consumed": self.carrot,
             "Alcohol consumed": self.alcohol,

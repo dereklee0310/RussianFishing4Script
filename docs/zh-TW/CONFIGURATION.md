@@ -199,13 +199,21 @@ _C.KEEPNET.GIFT_DELAY = 4.0  # 接受禮物前延遲（用於截圖）
 _C.KEEPNET.FULL_ACTION = "quit"  # 滿護操作：quit（退出）/alarm（警報）
 # -m模式保留魚種
 # 選項: mackerel, saithe, herring, squid, scallop, mussel, perch, shorthorn_sculpin
-_C.KEEPNET.RELEASE_WHITELIST = (  # -m模式保留魚種  
+_C.KEEPNET.WHITELIST = (  # -m模式保留魚種  
     "mackerel", "saithe", "herring",  
     "squid", "scallop", "mussel"  
 )
 # 魚種黑名單
 # 選項: mackerel, saithe, herring, squid, scallop, mussel, perch, shorthorn_sculpin
 _C.KEEPNET.BLACKLIST = (
+)
+# -m模式保留魚的標記種類
+_C.KEEPNET.TAGS = (
+    "green",
+    "yellow",
+    "blue"
+    "purple",
+    "pink"
 )
 
 # ----------------------------- 通知設置 -------------------------------- #  

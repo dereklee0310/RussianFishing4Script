@@ -10,8 +10,11 @@ import time
 from functools import partial
 from pathlib import Path
 from typing import Generator
+from enum import Enum
 
 import pyautogui as pag
+import numpy as np
+import cv2
 from PIL import Image
 from pyscreeze import Box
 
@@ -32,6 +35,14 @@ SIDE_LENGTH_HALF = 80
 ORANGE_REEL = (227, 149, 23)
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+class TagColor(Enum):
+    GREEN = "green_tag"
+    YELLOW = "yellow_tag"
+    PINK = "pink_tag"
+    BLUE = "blue_tag"
+    PURPLE = "purple_tag"
 
 COORD_OFFSETS = {
     "1600x900": {
@@ -212,7 +223,7 @@ class Detection:
         :return: True if the fish is in the whitelist, False otherwise.
         :rtype: bool
         """
-        return self._is_fish_in_list(self.cfg.KEEPNET.RELEASE_WHITELIST)
+        return self._is_fish_in_list(self.cfg.KEEPNET.WHITELIST)
 
     def is_fish_blacklisted(self) -> bool:
         """Check if the fish is in the blacklist.
@@ -418,3 +429,29 @@ class Detection:
 
     def is_gift_receieved(self):
         return self._get_image_box("gift", 0.8)
+
+
+    def is_tag_exist(self, color: TagColor):
+        match color:
+            case TagColor.GREEN:
+                lower = np.array([30, 128, 128])
+                upper = np.array([36, 255, 255])
+            case TagColor.YELLOW:
+                lower = np.array([22, 128, 128])
+                upper = np.array([28, 255, 255])
+            case TagColor.PINK:
+                lower = np.array([142, 64, 128])
+                upper = np.array([148, 255, 255])
+            case TagColor.BLUE:
+                lower = np.array([101, 64, 128])
+                upper = np.array([107, 255, 255])
+            case TagColor.PURPLE:
+                lower = np.array([127, 64, 128])
+                upper = np.array([133, 255, 255])
+            case _:
+                raise ValueError("Invalid tag color")
+        hsv_img = cv2.cvtColor(np.array(pag.screenshot()), cv2.COLOR_RGB2HSV)
+        mask = cv2.inRange(hsv_img, lower, upper)
+        haystack_img = Image.fromarray(mask)
+        needle_img = Image.open(self.image_dir / f"{color.value}.png")
+        return pag.locate(needle_img, haystack_img, grayscale=True, confidence=0.9)

@@ -81,7 +81,7 @@ _C.KEEPNET.GIFT_DELAY = 4.0  # Delay before keeping the gift (for screenshots)
 _C.KEEPNET.FULL_ACTION = "quit"  # Action when keepnet is full. Options: quit, alarm
 # Whitelist for unmarked fish releasing when using -m flag
 # Options: mackerel, saithe, herring, squid, scallop, mussel, perch, shorthorn_sculpin
-_C.KEEPNET.RELEASE_WHITELIST = (
+_C.KEEPNET.WHITELIST = (
     "mackerel",
     "saithe",
     "herring",
@@ -92,6 +92,15 @@ _C.KEEPNET.RELEASE_WHITELIST = (
 # Fish in the blacklist will always be released
 # Options: mackerel, saithe, herring, squid, scallop, mussel, perch, shorthorn_sculpin
 _C.KEEPNET.BLACKLIST = ()
+# Only the fish with any tags below would be kept when using -m flag
+_C.KEEPNET.TAGS = (
+    "green",
+    "yellow",
+    "blue"
+    "purple",
+    "pink"
+)
+
 
 # ---------------------------------------------------------------------------- #
 #                                 Notification                                 #

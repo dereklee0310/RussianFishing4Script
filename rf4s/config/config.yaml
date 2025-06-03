@@ -47,7 +47,7 @@ KEEPNET:
   FISH_DELAY: 0.0
   GIFT_DELAY: 4.0
   FULL_ACTION: "quit"
-  RELEASE_WHITELIST:
+  WHITELIST:
     - "mackerel"
     - "saithe"
     - "herring"
@@ -55,6 +55,12 @@ KEEPNET:
     - "scallop"
     - "mussel"
   BLACKLIST: []
+  TAGS:
+    - "green"
+    - "yellow"
+    - "blue"
+    - "purple"
+    - "pink"
 
 NOTIFICATION:
   EMAIL: "email@example.com"

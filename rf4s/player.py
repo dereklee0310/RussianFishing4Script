@@ -28,7 +28,7 @@ from rich.table import Table
 from rf4s import exceptions, utils
 from rf4s.component.friction_brake import FrictionBrake
 from rf4s.component.tackle import Tackle
-from rf4s.controller.detection import Detection
+from rf4s.controller.detection import Detection, TagColor
 from rf4s.controller.notification import (
     DiscordNotification,
     EmailNotification,
@@ -543,7 +543,7 @@ class Player:
     def _do_pirking(self) -> None:
         while True:
             try:
-                with self.error_handler, self.clicklock_disable_handler():
+                with self.error_handler(), self.clicklock_disable_handler():
                     self.tackle.pirk()
                 break
             except TimeoutError:
@@ -568,7 +568,7 @@ class Player:
         while True:
             try:
                 dropped = not dropped
-                with self.error_handler:
+                with self.error_handler():
                     self.tackle.elevate(dropped)
                 break
             except TimeoutError:
@@ -785,7 +785,7 @@ class Player:
             EmailNotification(self.cfg, result).send()
         if self.cfg.ARGS.MIAOTIXING:
             MiaotixingNotification(self.cfg, result).send()
-        if self.cfg.ARGS.PLOT and self.result.kept_fish != 0:
+        if self.cfg.ARGS.PLOT and self.result.kept != 0:
             self.timer.plot_and_save()
         if shutdown and self.cfg.ARGS.SHUTDOWN:
             os.system("shutdown /s /t 5")
@@ -817,25 +817,32 @@ class Player:
         if self.cfg.ARGS.SCREENSHOT:
             self.window.save_screenshot(self.timer.get_cur_timestamp())
 
+        self.result.total += 1
         if self.detection.is_fish_blacklisted():
             pag.press("backspace")
             return
 
-        if self.detection.is_fish_marked():
-            self.result.marked_fish += 1
-        else:
-            self.result.unmarked_fish += 1
-            if self.cfg.ARGS.MARKED and not self.detection.is_fish_whitelisted():
-                pag.press("backspace")
-                return
+        tagged = False
+        for tag in self.cfg.KEEPNET.TAGS:
+            if self.detection.is_tag_exist(TagColor[tag]):
+                self.result[tag] += 1
+                tagged = True
+
+        if (
+            self.cfg.ARGS.MARKED
+            and not tagged
+            and not self.detection.is_fish_whitelisted()
+        ):
+            pag.press("backspace")
+            return
 
         # Fish is marked, unmarked release is disabled, or fish is in whitelist
         sleep(self.cfg.KEEPNET.FISH_DELAY)
         pag.press("space")
 
-        self.result.kept_fish += 1
+        self.result.kept += 1
         limit = self.cfg.KEEPNET.CAPACITY - self.cfg.ARGS.FISHES_IN_KEEPNET
-        if self.result.kept_fish == limit:
+        if self.result.kept == limit:
             self._handle_full_keepnet()
 
         # Avoid wrong cast hour
