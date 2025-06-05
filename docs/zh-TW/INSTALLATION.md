@@ -1,12 +1,4 @@
 **[[English version]][installation]**
-## 必要條件
-下載並安裝 **[Python 3.12.*][Python]**。  
-
-> [!IMPORTANT]  
-> 安裝時請務必勾選 **「Add Python to PATH」** 選項。  
-
-> [!WARNING]  
-> 不支援 Python 3.13 及以上版本。
 
 ## 安裝步驟
 ### 方法一：透過 Git 克隆

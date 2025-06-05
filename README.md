@@ -4,7 +4,7 @@
 ![RF4S][rf4s_logo]
 <h1 align="center">RF4S: Russian Fishing 4 Script</h1>
 
-**A simple fishing bot for Russian Fishing 4, supporting spin, bottom, marine, and float fishing.**
+**A simple Russian Fishing 4 fishing bot, supporting spin, bottom, marine, and float fishing modes.**
 
 <a target="_blank" href="https://opensource.org/license/gpl-3-0" style="background:none">
     <img src="https://img.shields.io/badge/License-GPLv3-blue.svg" style="height: 22px;" />

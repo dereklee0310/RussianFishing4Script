@@ -4,7 +4,7 @@
 ![rf4s_logo]
 <h1 align="center">RF4S: 俄羅斯釣魚4腳本</h1>
 
-**適用於俄羅斯釣魚4的簡易釣魚機器人，支援路亞、水底、海釣及手竿。**
+**俄羅斯釣魚4的簡易釣魚機器人，支援路亞、水底、海釣及手竿等模式。**
 
 <a target="_blank" href="https://opensource.org/license/gpl-3-0" style="background:none">
     <img src="https://img.shields.io/badge/License-GPLv3-blue.svg" style="height: 22px;" />

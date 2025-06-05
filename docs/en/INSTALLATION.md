@@ -8,7 +8,7 @@ cd RussianFishing4Script
 > [!IMPORTANT] 
 > Git must be installed on your system.
 ### Approach 2: Manual Download
-1. [Download this repositorydownloadDownload].
+1. [Download this repository][download].
 2. Right-click `RussianFishing4Script-main.zip` and select "Extract here".
 3. Open the extracted folder (`RussianFishing4Script-main`) and double-click `setup.bat` to install dependencies.
 > [!TIP] 
@@ -22,7 +22,7 @@ cd RussianFishing4Script
 - Go to Windows Mouse Settings > Enable **[Mouse ClickLock][clicklock]**.
 - Set the time before locking to "Long".
 ### Language
-- Confirm your game language matches the language setting in config.yaml (default is "EN").
+- Confirm your game language matches the language setting in config.yaml (default is "en").
 ### Display
 - Set both system and in-game interface scales to "1x".
 - Use "window mode" or "borderless windowed" for the game window mode.
