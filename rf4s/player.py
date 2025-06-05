@@ -811,10 +811,7 @@ class Player:
             return
 
     def _handle_fish(self) -> None:
-        """Keep or release the fish and record the fish count.
-
-        TODO: Trophy ruffe
-        """
+        """Keep or release the fish and record the fish count."""
         if self.cfg.ARGS.SCREENSHOT:
             self.window.save_screenshot(self.timer.get_cur_timestamp())
 
@@ -825,8 +822,8 @@ class Player:
 
         tagged = False
         for tag in self.cfg.KEEPNET.TAGS:
-            if self.detection.is_tag_exist(TagColor[tag]):
-                self.result[tag] += 1
+            if self.detection.is_tag_exist(TagColor[tag.upper()]):
+                setattr(self.result, tag, getattr(self.result, tag) + 1)
                 tagged = True
 
         if (

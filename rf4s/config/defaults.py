@@ -96,7 +96,7 @@ _C.KEEPNET.BLACKLIST = ()
 _C.KEEPNET.TAGS = (
     "green",
     "yellow",
-    "blue"
+    "blue",
     "purple",
     "pink"
 )
