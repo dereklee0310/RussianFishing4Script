@@ -148,10 +148,7 @@ class RF4SApp(App):
             const=5,
             type=int,
             choices=[1, 2, 3, 5],
-            help=(
-                "renew boat ticket, DURATION: 1, 2, 3 or 5, "
-                "5 by default"
-            ),
+            help=("renew boat ticket, DURATION: 1, 2, 3 or 5, 5 by default"),
             metavar="DURATION",
         )
         parser.add_argument(

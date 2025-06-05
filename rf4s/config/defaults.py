@@ -29,13 +29,7 @@ _C.SCRIPT.ALARM_SOUND = "./static/sound/guitar.wav"  # Path to alarm sound file
 _C.SCRIPT.RANDOM_CAST_PROBABILITY = 0.25
 # When using -s flag, only take screenshot of the fishes with tags below
 # If left empty, the script will take screenshot of every fish you caught
-_C.SCRIPT.SCREENSHOT_TAGS = (
-    "green",
-    "yellow",
-    "blue",
-    "purple",
-    "pink"
-)
+_C.SCRIPT.SCREENSHOT_TAGS = ("green", "yellow", "blue", "purple", "pink")
 
 # ---------------------------------------------------------------------------- #
 #                                  Key Binding                                 #
@@ -102,13 +96,7 @@ _C.KEEPNET.WHITELIST = (
 # Options: mackerel, saithe, herring, squid, scallop, mussel, perch, shorthorn_sculpin
 _C.KEEPNET.BLACKLIST = ()
 # When using -t flag, only the fish with tags below would be kept
-_C.KEEPNET.TAGS = (
-    "green",
-    "yellow",
-    "blue",
-    "purple",
-    "pink"
-)
+_C.KEEPNET.TAGS = ("green", "yellow", "blue", "purple", "pink")
 
 
 # ---------------------------------------------------------------------------- #

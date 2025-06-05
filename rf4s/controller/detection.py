@@ -7,14 +7,14 @@ and pixel color analysis. It is used for automating tasks in Russian Fishing 4.
 """
 
 import time
+from enum import Enum
 from functools import partial
 from pathlib import Path
 from typing import Generator
-from enum import Enum
 
-import pyautogui as pag
-import numpy as np
 import cv2
+import numpy as np
+import pyautogui as pag
 from PIL import Image
 from pyscreeze import Box
 
@@ -43,6 +43,7 @@ class TagColor(Enum):
     PINK = "pink_tag"
     BLUE = "blue_tag"
     PURPLE = "purple_tag"
+
 
 COORD_OFFSETS = {
     "1600x900": {

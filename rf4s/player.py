@@ -846,7 +846,6 @@ class Player:
             self.timer.update_cast_time()
         self.timer.add_cast_time()
 
-
     def _handle_full_keepnet(self) -> None:
         """Handle a full keepnet event."""
         match self.cfg.KEEPNET.FULL_ACTION:
