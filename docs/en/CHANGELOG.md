@@ -1,6 +1,6 @@
 **[[中文版]][CHANGELOG]**
 
-## 0.5.0 (2025-06-05)
+## 0.5.0 (2025-06-06)
 
 ### 🆕 New Features
 - **Discord Webhook Integration**: Added support for termination notifications via Discord webhooks. Set it with `NOTIFICATION.DISCORD_WEBHOOK_URL`.

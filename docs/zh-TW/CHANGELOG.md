@@ -1,6 +1,6 @@
 **[[English version]][CHANGELOG]**
 
-## 0.5.0 (2025-06-05)
+## 0.5.0 (2025-06-06)
 
 ### 🆕 新功能
 - **Discord Webhook 整合**：新增腳本終止通知的 Discord Webhook 支持。使用 `NOTIFICATION.DISCORD_WEBHOOK_URL` 進行設定。
