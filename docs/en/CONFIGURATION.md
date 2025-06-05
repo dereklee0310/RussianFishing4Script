@@ -7,9 +7,9 @@ python tools\main.py -h
 ```
 ### Help Message
 ```
-usage: main.py [-h] [-c] [-A] [-r] [-H] [-g] [-f] [-l] [-C] [-o] [-L] [-x] [-X] [-xx] [-b] [-S] [-e] [-P] [-M] [-s] [-so] [-gb] [-dm]
-               [-pva] [-E] [-a | -m] [-d | -R] [-p PID | -N PROFILE_NAME] [-n FISH_COUNT] [-t [DURATION]] [-T [DIRECTION]]
-               [-BL [ACTION]]
+usage: main.py [-h] [-R] [-t] [-c] [-a] [-r] [-H] [-L] [-m] [-P] [-RC] [-SC] [-l] [-e] [-FB] [-GR] [-b] [-s] [-d] [-E]
+               [-M] [-D] [-S] [-SO] [-SR] [-DM] [-GB] [-PVA] [-p PID | -N PROFILE_NAME] [-n FISH_COUNT]
+               [-BT [DURATION]] [-T [DIRECTION]] [-BL [ACTION]]
                [opts ...]
 
 Start AFK script for Russian Fishing 4
@@ -19,48 +19,45 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  -c, --coffee          drink coffee if stamina is low
-  -A, --alcohol         drink alcohol before keeping the fish regularly
-  -r, --refill          refill hunger and comfort by consuming tea and carrot
-  -H, --harvest         harvest baits before casting
-  -g, --gear_ratio      switch the gear ratio after the retrieval timed out
-  -f, --friction_brake  enable auto friction brake
-  -l, --lift            lift the tackle constantly while pulling a fish
-  -C, --skip_cast       Immediately start retrieving for the first fish
-  -o, --spod_rod        recast spod rod regularly
-  -L, --lure            change current lure with a random one regularly, mode: spin
-  -x, --mouse           move mouse randomly before casting the rod
-  -X, --pause           pause the script before casting the rod regularly
-  -xx, --random_cast    add redundant rod cast randomly
-  -b, --bite            take a screenshot after casting in screenshots/ (for fish spot)
-  -S, --screenshot      take a screenshot of every fish you caught in screenshots/
-  -e, --email           send email noticication after the script stop
-  -P, --plot            save fishing data in /logs
+  -R, --rainbow         rainbow line meter for retrieval detection
+  -t, --tag             keep only tagged fishes
+  -c, --coffee          drink coffee if stamina is low during a fish fight
+  -a, --alcohol         drink alcohol before keeping the fish
+  -r, --refill          consume tea and carrot if hunger or comfort is low
+  -H, --harvest         harvest baits before casting the rod
+  -L, --lure            change current lure with a random one, mode: spin
+  -m, --mouse           move mouse randomly before casting the rod
+  -P, --pause           pause the script before casting the rod occasionally
+  -RC, --random-cast    do a redundant rod cast randomly
+  -SC, --skip-cast      skip the first rod cast
+  -l, --lift            lift the tackle constantly during a fish fight
+  -e, --electro         enable electric mode for Electro Raptor series reel
+  -FB, --friction-brake
+                        adjust friction brake automatically
+  -GR, --gear-ratio     switch the gear ratio after the retrieval timed out
+  -b, --bite            save a screenshot in screenshots/ before rod cast (for bite spot)
+  -s, --screenshot      save a screenshot in screenshots/ after you caught a fish
+  -d, --data            save fishing data in /logs
+  -E, --email           send email noticication after the script stop
   -M, --miaotixing      send miaotixing notification after the script stop
   -D, --discord         send Discord notification after the script stop
-  -s, --shutdown        shutdown computer after the script stop
-  -so, --signout        Sign out instead of closing the game
-  -gb, --groundbait     enable groundbait refill, mode: bottom
-  -dm, --dry_mix        enable dry mix refill, mode: bottom
-  -pva, --pva           enable pva refill, mode: bottom
-  -E, --electro         enable electric mode for Electro Raptor series reel
-  -a, --all             keep all captured fishes, used by default
-  -m, --marked          keep only the marked fishes
-  -d, --default-spool   use default spool icon for retrieval detection, used by default
-  -R, --rainbow-line    use rainbow line meter for retrieval detection
+  -S, --shutdown        shutdown computer after the script stop
+  -SO, --signout        sign out instead of closing the game
+  -SR, --spod-rod       recast spod rod
+  -DM, --dry-mix        enable dry mix refill, mode: bottom
+  -GB, --groundbait     enable groundbait refill, mode: bottom
+  -PVA, --pva           enable pva refill, mode: bottom
   -p PID, --pid PID     id of the profile you want to use
   -N PROFILE_NAME, --pname PROFILE_NAME
                         name of the profile you want to use
   -n FISH_COUNT, --fishes-in-keepnet FISH_COUNT
                         number of fishes in your keepnet, 0 by default
-  -t [DURATION], --boat-ticket [DURATION]
-                        enable boat ticket auto renewal, DURATION: 1, 2, 3 or 5, will use a 5 hour ticket if duration is not specified  
+  -BT [DURATION], --boat-ticket [DURATION]
+                        renew boat ticket, DURATION: 1, 2, 3 or 5, 5 by default
   -T [DIRECTION], --trolling [DIRECTION]
-                        enable trolling mode, DIRECTION: 'forward', 'left', or 'right', will only move forward by pressing 'j' if       
-                        direction is not specified
+                        enable trolling mode, DIRECTION: 'forward', 'left', or 'right', 'forward' by default
   -BL [ACTION], --broken-lure [ACTION]
-                        enable broken lure auto-replace, ACTION: 'replace' or 'alarm', will replace the broken lure if action is not    
-                        specified
+                        replace broken lure, ACTION: 'replace' or 'alarm', 'replace' by default
 ```
 > [!TIP]
 > Other tools like `craft.py` or `move.py` also support `-h` for displaying help messages. 

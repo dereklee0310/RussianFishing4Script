@@ -8,60 +8,58 @@ python tools\main.py -h
 ```  
 
 ### 幫助信息說明  
-```  
-usage: main.py [-h] [-c] [-A] [-r] [-H] [-g] [-f] [-l] [-C] [-o] [-L] [-x] [-X] [-xx] [-b] [-S] [-e] [-P] [-M] [-s] [-so] [-gb] [-dm]
-               [-pva] [-E] [-a | -m] [-d | -R] [-p PID | -N PROFILE_NAME] [-n FISH_COUNT] [-t [DURATION]] [-T [DIRECTION]]
-               [-BL [ACTION]]
-               [opts ...] 
+```bash
+usage: main.py [-h] [-R] [-t] [-c] [-a] [-r] [-H] [-L] [-m] [-P] [-RC] [-SC] [-l] [-e] [-FB] [-GR] [-b] [-s] [-d] [-E]
+               [-M] [-D] [-S] [-SO] [-SR] [-DM] [-GB] [-PVA] [-p PID | -N PROFILE_NAME] [-n FISH_COUNT]
+               [-BT [DURATION]] [-T [DIRECTION]] [-BL [ACTION]]
+               [opts ...]
 
-啟動《俄羅斯釣魚4》自動腳本  
+啟動《俄羅斯釣魚4》自動腳本
 
-位置參數:  
-  opts                  覆寫配置文件參數  
+位置參數:
+  opts                  覆寫配置文件參數
 
-選項:  
-  -h, --help            顯示幫助信息  
-  -c, --coffee          體力不足時飲用咖啡  
-  -A, --alcohol         定期飲用酒精飲料後存魚  
-  -r, --refill          通過茶和胡蘿蔔補充飢餓與舒適度  
-  -H, --harvest         拋竿前自動收餌  
-  -g, --gear_ratio      超時後切換齒輪比  
-  -f, --friction_brake  啟用自動摩擦剎車  
-  -l, --lift            遛魚時持續提竿  
-  -C, --skip_cast       跳過首次拋竿直接收線  
-  -o, --spod_rod        定期重拋餌料竿  
-  -L, --lure            定期隨機更換擬餌（僅路亞模式）  
-  -x, --mouse           拋竿前隨機移動鼠標  
-  -X, --pause           定期暫停腳本運行
-  -xx, --random_cast    隨機添加多餘的拋竿動作
-  -b, --bite            拋竿後截圖保存至screenshots/（用於魚點分析）  
-  -S, --screenshot      為每條捕獲的魚截圖保存  
-  -e, --email           腳本停止後發送郵件通知  
-  -P, --plot            在/logs目錄保存釣魚數據  
+選項:
+  -h, --help            顯示幫助訊息
+  -R, --rainbow         使用彩虹線計量器偵測收線
+  -t, --tag             僅保留已標記的魚
+  -c, --coffee          體力不足時飲用咖啡恢復體力
+  -a, --alcohol         在保存魚之前飲酒
+  -r, --refill          當飢餓或舒適度過低時自動補充茶與胡蘿蔔
+  -H, --harvest         拋竿前自動收餌
+  -L, --lure            定期隨機更換擬餌（僅限路亞模式）
+  -m, --mouse           拋竿前隨機移動滑鼠
+  -P, --pause           偶爾暫停腳本運行
+  -RC, --random-cast    隨機添加額外拋竿動作
+  -SC, --skip-cast      跳過首次拋竿直接開始收線
+  -l, --lift            遛魚時持續提竿以節省時間
+  -e, --electro         為Electro Raptor系列捲線器啟用電動模式
+  -FB, --friction-brake 啟用自動摩擦調整
+  -GR, --gear-ratio     收線超時後切換齒輪比
+  -b, --bite            拋竿前截圖保存至 screenshots/（可用於分析咬鉤點）
+  -s, --screenshot      捕獲魚隻後自動截圖保存
+  -d, --data            在/logs目錄保存釣魚數據
+  -E, --email           腳本停止後發送郵件通知
   -M, --miaotixing      腳本停止後發送喵提醒通知
   -D, --discord         腳本停止後發送Discord通知
-  -s, --shutdown        腳本停止後關閉電腦  
-  -so, --signout        退出遊戲而非關閉  
-  -gb, --groundbait     補充底餌（僅底釣模式）  
-  -dm, --dry_mix        補充乾混合餌（僅底釣模式）  
-  -pva, --pva           補充PVA餌（僅底釣模式）  
-  -E, --electro         為Electro Raptor系列捲線器啟用電動模式  
-  -a, --all             保留所有魚獲（默認）  
-  -m, --marked          僅保留標記魚獲  
-  -d, --default-spool   使用默認線軸圖標檢測收線（默認）  
-  -R, --rainbow-line    使用彩虹線計量器檢測收線  
-  -p PID, --pid PID     指定配置檔ID  
-  -N PROFILE_NAME, --pname PROFILE_NAME  
-                        指定配置檔名稱  
-  -n FISH_COUNT, --fishes-in-keepnet FISH_COUNT  
-                        魚護當前魚量（默認0）  
-  -t [DURATION], --boat-ticket [DURATION]  
-                        自動續費船票，時長：1, 2, 3或5小時（默認5小時）  
-  -T [DIRECTION], --trolling [DIRECTION]  
-                        啟用拖釣模式，方向：'forward','left','right'（默認按'j'前進）  
-  -BL [ACTION], --broken-lure [ACTION]  
-                        斷餌自動處理，操作：'replace'或'alarm'（默認更換）  
-```  
+  -S, --shutdown        腳本結束後關閉電腦
+  -SO, --signout        退出遊戲而非關機
+  -SR, --spod-rod       定期重拋餌料竿（底釣模式）
+  -DM, --dry-mix        補充乾混合餌（底釣模式）
+  -GB, --groundbait     補充底餌（底釣模式）
+  -PVA, --pva           補充PVA餌（底釣模式）
+  -p PID, --pid PID     指定配置檔ID
+  -N PROFILE_NAME, --pname PROFILE_NAME
+                        指定配置檔名稱
+  -n FISH_COUNT, --fishes-in-keepnet FISH_COUNT
+                        魚護當前魚量（預設為0）
+  -BT [DURATION], --boat-ticket [DURATION]
+                        自動續費船票，時長：1, 2, 3或5小時（預設5小時）
+  -T [DIRECTION], --trolling [DIRECTION]
+                        啟用拖釣模式，方向：'forward','left','right'（預設按'j'前進）
+  -BL [ACTION], --broken-lure [ACTION]
+                        斷餌自動處理，操作：'replace'或'alarm'（預設更換）
+``` 
 
 > [!TIP]  
 > 其他工具如`craft.py`或`move.py`也支持`-h`參數顯示幫助信息。

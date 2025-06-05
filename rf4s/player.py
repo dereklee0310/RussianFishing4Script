@@ -821,7 +821,6 @@ class Player:
                 tag_color = tag.name.lower()
                 setattr(self.result, tag_color, getattr(self.result, tag_color) + 1)
                 if tag_color in self.cfg.KEEPNET.TAGS:
-                    print(tag_color, "accept tag")
                     tagged = True
 
         if (
