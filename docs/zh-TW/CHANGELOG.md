@@ -1,4 +1,4 @@
-**[[English Version]][CHANGELOG]**
+**[[English version]][CHANGELOG]**
 
 ## 0.5.0 (2025-06-05)
 
