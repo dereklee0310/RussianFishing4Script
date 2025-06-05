@@ -159,6 +159,13 @@ _C.SCRIPT.SPOD_ROD_RECAST_DELAY = 1800  # 餌料竿重拋間隔（秒）
 _C.SCRIPT.LURE_CHANGE_DELAY = 1800  # 擬餌更換間隔（秒）  
 _C.SCRIPT.ALARM_SOUND = "./static/sound/guitar.wav"  # 提示音文件路徑
 _C.SCRIPT.RANDOM_CAST_PROBABILITY = 0.25 # 隨機拋竿失誤的機率
+_C.SCRIPT.SCREENSHOT_TAGS = ( # 魚獲截圖的標記種類，列表為空的話所有的魚都會截圖
+    "green",
+    "yellow",
+    "blue",
+    "purple",
+    "pink"
+)
 
 # --------------------------------- 快捷鍵設置 ------------------------------ #  
 _C.KEY = CN()  
@@ -199,7 +206,7 @@ _C.KEEPNET.GIFT_DELAY = 4.0  # 接受禮物前延遲（用於截圖）
 _C.KEEPNET.FULL_ACTION = "quit"  # 滿護操作：quit（退出）/alarm（警報）
 # -m模式保留魚種
 # 選項: mackerel, saithe, herring, squid, scallop, mussel, perch, shorthorn_sculpin
-_C.KEEPNET.WHITELIST = (  # -m模式保留魚種  
+_C.KEEPNET.WHITELIST = (  # -t模式保留魚種  
     "mackerel", "saithe", "herring",  
     "squid", "scallop", "mussel"  
 )
@@ -207,7 +214,7 @@ _C.KEEPNET.WHITELIST = (  # -m模式保留魚種
 # 選項: mackerel, saithe, herring, squid, scallop, mussel, perch, shorthorn_sculpin
 _C.KEEPNET.BLACKLIST = (
 )
-# -m模式保留魚的標記種類
+# -t模式保留魚的標記種類
 _C.KEEPNET.TAGS = (
     "green",
     "yellow",

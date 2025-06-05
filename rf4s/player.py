@@ -812,7 +812,12 @@ class Player:
 
     def _handle_fish(self) -> None:
         """Keep or release the fish and record the fish count."""
-        if self.cfg.ARGS.SCREENSHOT:
+        tagged = False
+        for tag in self.cfg.SCRIPT.SCREENSHOT_TAGS:
+            if self.detection.is_tag_exist(TagColor[tag.upper()]):
+                tagged = True
+        tagged = not self.cfg.SCRIPT.SCREENSHOT_TAGS or tagged
+        if self.cfg.ARGS.SCREENSHOT and tagged:
             self.window.save_screenshot(self.timer.get_cur_timestamp())
 
         self.result.total += 1
@@ -821,10 +826,13 @@ class Player:
             return
 
         tagged = False
-        for tag in self.cfg.KEEPNET.TAGS:
-            if self.detection.is_tag_exist(TagColor[tag.upper()]):
-                setattr(self.result, tag, getattr(self.result, tag) + 1)
-                tagged = True
+        for tag in TagColor:
+            if self.detection.is_tag_exist(tag):
+                tag_color = tag.name.lower()
+                setattr(self.result, tag_color, getattr(self.result, tag_color) + 1)
+                if tag_color in self.cfg.KEEPNET.TAGS:
+                    print(tag_color, "accept tag")
+                    tagged = True
 
         if (
             self.cfg.ARGS.TAG
@@ -847,6 +855,7 @@ class Player:
         if self.cfg.SELECTED.MODE in ["bottom", "pirk", "elevator"]:
             self.timer.update_cast_time()
         self.timer.add_cast_time()
+
 
     def _handle_full_keepnet(self) -> None:
         """Handle a full keepnet event."""
