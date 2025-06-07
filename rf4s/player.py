@@ -793,10 +793,9 @@ class Player:
         logger.info("Handling fish")
         self._handle_fish()
         sleep(ANIMATION_DELAY)
-        if self.detection.is_gift_receieved():
+        while self.detection.is_gift_receieved():
             sleep(self.cfg.KEEPNET.GIFT_DELAY)
             pag.press("space")
-            return
 
     def _handle_fish(self) -> None:
         """Keep or release the fish and record the fish count."""
