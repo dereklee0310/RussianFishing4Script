@@ -358,7 +358,7 @@ class Detection:
         return box if box is None else pag.center(box)
 
     def get_food_position(self, food: str):
-        return self._get_image_box(food, 0.8)
+        return self._get_image_box(food, 0.9)
 
     def is_energy_high(self) -> bool:
         pos = self._get_energy_icon_position()
