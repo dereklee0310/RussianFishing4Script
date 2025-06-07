@@ -35,16 +35,9 @@
 
 
 ## 快速入門
-### 必要條件
-下載並安裝 **[Python 3.12.*][python]**。  
-
-> [!IMPORTANT]  
-> 安裝時請務必勾選 **「將Python加入PATH」** 選項。  
-
-> [!WARNING]  
-> 不支援 Python 3.13 及以上版本。
 ### 安裝步驟
-請參閱 **[安裝指南][installation]**。
+可執行檔可在 [Releases][releases] 下載。
+如果想使用 Python 直譯器執行，請參閱 **[安裝指南][installation]**。
 ## 使用方式
 ### 開始前注意事項...
 - 執行腳本前，請先將角色移動至釣點
@@ -56,6 +49,12 @@
 > 目前僅底釣模式支援多竿操作。
 
 ### 開始執行！
+> [!IMPORTANT]
+> 如果下載的是可執行檔，將下方的 `python tools\xxx.py` 改為 `.\xxx` 或是直接雙擊檔案即可執行。
+
+> [!TIP]
+> 進階設定和使用方式請參閱 **[設定指南][configuration]**。
+
 1. 開啟 cmd/PowerShell
 2. 進入專案目錄並執行腳本（按 `CTRL-C` 退出）：
 ```
@@ -65,9 +64,6 @@ python tools\main.py
 > [!TIP]
 > `專案目錄路徑` 是克隆或解壓縮專案後存放檔案的目錄。  
 > ![路徑示意][path]
-
-> [!TIP]
-> 進階設定和使用方式請參閱 **[設定指南][configuration]**。
 
 ## 工具集
 ### 製作物品
@@ -153,6 +149,7 @@ dereklee0310@gmail.com
 
 [discord]: https://discord.gg/BZQWQnAMbY
 [python]: https://www.python.org/downloads/
+[releases]: https://github.com/dereklee0310/RussianFishing4Script/releases
 [installation]: /docs/zh-TW/INSTALLATION.md
 [configuration]: /docs/zh-TW/CONFIGURATION.md
 [changelog]: /docs/zh-TW/CHANGELOG.md

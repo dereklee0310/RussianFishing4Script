@@ -35,16 +35,9 @@
 
 
 ## Getting Started
-### Prerequisites
-Download and install **[Python 3.12.*][python]**.  
-
-> [!IMPORTANT] 
-> Ensure the **"Add Python to PATH"** option is selected during installation.  
-
-> [!WARNING] 
-> Python 3.13+ are not supported.
 ### Installation
-See **[INSTALLATION][installation]**.
+You can download executables from [Releases][releases] directly.
+To run it from Python interpreter, see **[INSTALLATION][installation]**.
 ## Usage
 ### Before you start...
 - Move your character to the fishing spot before running the script
@@ -56,6 +49,13 @@ See **[INSTALLATION][installation]**.
 > Currently, only bottom fishing mode support multiple rods.
 
 ### Let's Run it!
+> [!IMPORTANT]
+> For executables, replace `python tools\xxx.py` with `.\xxx` or double-click the file to run it.
+
+> [!TIP]
+> See **[CONFIGURATION][configuration]** for advanced usage and configuration options.
+
+
 1. Open cmd/PowerShell
 2. Navigate into the project directory and run the script with default configuration. Type `CTRL-C` to quit.
 ```
@@ -65,9 +65,6 @@ python tools\main.py
 > [!TIP]
 > `path\to\the\project` is the directory where you placed the files after cloning or extracting the project.  
 > ![path]
-
-> [!TIP]
-> See **[CONFIGURATION][configuration]** for advanced usage and configuration options.
 
 ## Tools
 ### Craft items
@@ -152,6 +149,7 @@ dereklee0310@gmail.com
 
 [discord]: https://discord.gg/BZQWQnAMbY
 [python]: https://www.python.org/downloads/
+[releases]: https://github.com/dereklee0310/RussianFishing4Script/releases
 [installation]: /docs/en/INSTALLATION.md
 [configuration]: /docs/en/CONFIGURATION.md
 [changelog]: /docs/en/CHANGELOG.md

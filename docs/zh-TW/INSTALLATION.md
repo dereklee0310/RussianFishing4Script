@@ -1,5 +1,14 @@
 **[[English version]][installation]**
 
+## 必要條件
+下載並安裝 **[Python 3.12.*][python]**。  
+
+> [!IMPORTANT]  
+> 安裝時請務必勾選 **「將Python加入PATH」** 選項。  
+
+> [!WARNING]  
+> 不支援 Python 3.13 及以上版本。
+
 ## 安裝步驟
 ### 方法一：透過 Git 克隆
 ```
@@ -9,7 +18,7 @@ cd RussianFishing4Script
 ```
 > [!IMPORTANT]  
 > 系統必須已安裝 Git。
-### 方法二：手動下載
+### 方法二：手動下載並安裝
 1. [下載此儲存庫][download]。
 2. 對 `RussianFishing4Script-main.zip` 按右鍵並選擇「解壓縮到當前位置」。
 3. 開啟解壓後的資料夾 (`RussianFishing4Script-main`)，雙擊 `setup.bat` 以安裝依賴項。

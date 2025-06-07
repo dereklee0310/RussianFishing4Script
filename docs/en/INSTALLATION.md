@@ -1,4 +1,15 @@
 **[[中文版]][installation]**
+
+## Prerequisites
+Download and install **[Python 3.12.*][python]**.  
+
+> [!IMPORTANT] 
+> Ensure the **"Add Python to PATH"** option is selected during installation.  
+
+> [!WARNING] 
+> Python 3.13+ are not supported.
+
+## Installation
 ### Approach 1: Clone via Git
 ```
 git clone https://github.com/dereklee0310/RussianFishing4Script.git
@@ -7,7 +18,7 @@ cd RussianFishing4Script
 ```
 > [!IMPORTANT] 
 > Git must be installed on your system.
-### Approach 2: Manual Download
+### Approach 2: Manual Download and Install
 1. [Download this repository][download].
 2. Right-click `RussianFishing4Script-main.zip` and select "Extract here".
 3. Open the extracted folder (`RussianFishing4Script-main`) and double-click `setup.bat` to install dependencies.
