@@ -253,13 +253,11 @@ class Player:
             try:
                 with self.error_handler():
                     monitor()
-                break
+                sleep(self.cfg.SELECTED.PULL_DELAY)
+                hold_mouse_button(PRE_RETRIEVAL_DURATION)
+                self.pull_fish()
             except TimeoutError:
                 pass
-
-            sleep(self.cfg.SELECTED.PULL_DELAY)
-            hold_mouse_button(PRE_RETRIEVAL_DURATION)
-            self.pull_fish()
 
     def _harvest_baits(self, pickup: bool = False) -> None:
         """Harvest baits if energy is high.

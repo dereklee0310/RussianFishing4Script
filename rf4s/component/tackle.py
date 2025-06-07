@@ -480,6 +480,7 @@ class Tackle:
         while i > 0:
             i = utils.sleep_and_decrease(i, self.cfg.SELECTED.CHECK_DELAY)
             if self.detection.is_clip_open():
+                logger.info("Clip status changed")
                 return
 
         self.is_disconnected_or_ticketed_expired()

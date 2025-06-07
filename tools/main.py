@@ -401,7 +401,10 @@ class RF4SApp(App):
         self.cfg.SELECTED.merge_from_other_cfg(self.cfg.PROFILE[mode])
         self.cfg.SELECTED.merge_from_other_cfg(self.cfg.PROFILE[profile_name])
 
-        if self.cfg.SELECTED.LAUNCH_OPTIONS:  # Overwrite
+        if (
+            hasattr(self.cfg.SELECTED, "LAUNCH_OPTIONS")
+            and self.cfg.SELECTED.LAUNCH_OPTIONS
+        ):  # Overwrite
             args_list = shlex.split(self.cfg.SELECTED.LAUNCH_OPTIONS) + sys.argv[1:]
             self.args = self.parser.parse_args(args_list)
             self.cfg.ARGS = config.dict_to_cfg(vars(self.args))
