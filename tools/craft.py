@@ -23,9 +23,9 @@ from rf4s.result.result import CraftResult
 from rf4s.utils import create_rich_logger
 
 CRAFT_DELAY = 4.0
-CRAFT_DELAY_2X = CRAFT_DELAY * 2
+CRAFT_DELAY_3X = CRAFT_DELAY * 3
 LOOP_DELAY = 0.5
-LOOP_DELAY_2X = LOOP_DELAY * 2
+LOOP_DELAY_3X = LOOP_DELAY * 3
 ROOT = Path(__file__).resolve().parents[1]
 
 logger = create_rich_logger()
@@ -84,8 +84,8 @@ class CraftApp(ToolApp):
         if self.cfg.ARGS.FAST:
             return CRAFT_DELAY, LOOP_DELAY
         return (
-            random.uniform(CRAFT_DELAY, CRAFT_DELAY_2X),
-            random.uniform(LOOP_DELAY, LOOP_DELAY_2X),
+            random.uniform(CRAFT_DELAY, CRAFT_DELAY_3X),
+            random.uniform(LOOP_DELAY, LOOP_DELAY_3X),
         )
 
     def move_cursor_to_make_button(self) -> None:
@@ -140,6 +140,7 @@ class CraftApp(ToolApp):
         Executes the primary loop for crafting items until materials are exhausted or
         the crafting limit is reached. Supports fast crafting mode and discarding items.
         """
+        logger.warning("This might get you banned, use at your own risk")
         if self.cfg.KEY.QUIT != "CTRL-C":
             listener = keyboard.Listener(on_release=self._on_release)
             listener.start()
