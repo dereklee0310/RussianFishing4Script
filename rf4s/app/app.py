@@ -11,6 +11,7 @@ Provides core functionality for:
 import os
 import signal
 import sys
+import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
 
@@ -23,9 +24,15 @@ from rf4s.config import config
 from rf4s.controller.detection import Detection
 from rf4s.controller.window import Window
 from rf4s.result.result import Result
+from rf4s.utils import safe_exit
 
-ROOT = Path(__file__).resolve().parents[2]
+# Get the base path depending on runtime environment
+if "__compiled__" in globals():
+    ROOT = Path(sys.executable).parent  # Running as .exe (Nuitka/PyInstaller)
+else:
+    ROOT = Path(__file__).resolve().parents[2]
 
+logger = logging.getLogger("rich")
 
 class App(ABC):
     """A base application class.
@@ -38,6 +45,12 @@ class App(ABC):
     def __init__(self):
         """Initialize a mutable cfg node for further modification."""
         self.cfg = config.setup_cfg()
+
+        config_path = ROOT / "config.yaml"
+        if not config_path.exists():
+            logger.critical("config.yaml not found at %s", config_path)
+            safe_exit()
+
         self.cfg.merge_from_file(ROOT / "config.yaml")
         self.window = Window()
 

@@ -7,6 +7,7 @@ key and mouse states during automation.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
+import msvcrt
 import ctypes
 import logging
 import shlex
@@ -231,7 +232,7 @@ def reset_friction_brake_after(func):
 
 
 def is_compiled():
-    return '__compiled__' in globals() # Nuitka style
+    return "__compiled__" in globals() # Nuitka style
 
 def is_run_by_clicking():
     # Load kernel32.dll
@@ -249,9 +250,12 @@ def is_run_by_clicking():
 def update_argv():
     if is_run_by_clicking():
         logger.info("No launch options used")
-        sys.argv = shlex.split(input("Enter launch options (press Enter to skip): "))
+        sys.argv = ["foo"] + shlex.split(input("Enter launch options (press Enter to skip): "))
 
 def safe_exit():
     if is_run_by_clicking():
-        input("Press Enter to quit...")
+        print("Press any key to quit.")
+        # KeyboardInterrupt will mess with stdin, input will crash silently
+        # Use msvcrt.getch() because it doesn't depends on stdin
+        msvcrt.getch()
     sys.exit()

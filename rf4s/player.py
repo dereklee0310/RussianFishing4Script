@@ -7,6 +7,7 @@ automating various fishing techniques.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
+import msvcrt
 import logging
 import os
 import random
@@ -750,8 +751,9 @@ class Player:
             case "alarm":
                 playsound(str(Path(self.cfg.SCRIPT.ALARM_SOUND).resolve()))
                 self.window.activate_script_window()
-                print("Please replace your lure")
-                input("Press enter to continue...")
+                print("Please replace your lure.")
+                print("Press any key to continue...")
+                msvcrt.getch()
                 self.window.activate_game_window()
             case _:
                 self.general_quit("Lure is broken")
@@ -848,7 +850,8 @@ class Player:
             case "alarm":
                 playsound(str(Path(self.cfg.SCRIPT.ALARM_SOUND).resolve()))
                 self.window.activate_script_window()
-                print(input("Press Enter to continue..."))
+                print("Press any key to continue...")
+                msvcrt.getch()
                 self.window.activate_game_window()
                 with keyboard.Listener(on_release=self._on_release) as listner:
                     listner.join()

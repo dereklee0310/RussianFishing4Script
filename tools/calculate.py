@@ -82,7 +82,7 @@ def main():
 
     Prompts the user for input, calculates the result, and displays them in a table.
     """
-    print("Please enter your tackle's stats, type q to quit, r to restart. ")
+    print("Please enter your tackle's stats, type q to quit, r to restart:")
     while True:
         max_drag, load_capacity = get_tackle_stats()
         max_friction_brake = int(min(load_capacity * 30 / (max_drag + BIAS) - 1, 29))
