@@ -1,5 +1,15 @@
 **[[中文版]][CHANGELOG]**
 
+## 0.5.1 (2025-06-08)
+
+### 🐛 Bug Fixes
+- Fixed an issue preventing the script from handling multiple gifts properly.  
+- Resolved a bug affecting tea drinking functionality due to special characters in rod names.  
+- Fixed an unexpected termination issue when using `telescopic/bolognese` mode.
+
+### 🔧 Improvements
+- Executables are now available for download in the [Releases](https://github.com/dereklee0310/RussianFishing4Script/releases) section.
+
 ## 0.5.0 (2025-06-06)
 
 ### 🆕 New Features

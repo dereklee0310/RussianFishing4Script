@@ -1,5 +1,15 @@
 **[[English version]][CHANGELOG]**
 
+## 0.5.1 (2025-06-08)
+
+### 🐛 錯誤修復
+- 修復了無法正確處理多個禮物的問題。
+- 修復了因釣竿名稱含有特定文字導致喝茶功能異常的錯誤。
+- 修復了使用 `telescopic/bolognese` 模式時意外終止的問題。
+
+### 🔧 改進
+- 於 [Releases](https://github.com/dereklee0310/RussianFishing4Script/releases) 提供可執行檔供用戶下載。
+
 ## 0.5.0 (2025-06-06)
 
 ### 🆕 新功能
