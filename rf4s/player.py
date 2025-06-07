@@ -127,7 +127,7 @@ class Player:
                 "try moving your camera, "
                 "changing your game window size or fishing line"
             )
-            sys.exit(1)
+            utils.safe_exit()
 
         logger.info("Starting fishing mode: '%s'", self.cfg.SELECTED.MODE)
         self._start_trolling()
@@ -779,7 +779,7 @@ class Player:
         if shutdown and self.cfg.ARGS.SHUTDOWN:
             os.system("shutdown /s /t 5")
         print(table)
-        sys.exit()
+        utils.safe_exit()
 
     def _handle_snagged_line(self) -> None:
         """Handle a snagged line event."""
@@ -848,7 +848,7 @@ class Player:
             case "alarm":
                 playsound(str(Path(self.cfg.SCRIPT.ALARM_SOUND).resolve()))
                 self.window.activate_script_window()
-                print(input("Press enter to continue..."))
+                print(input("Press Enter to continue..."))
                 self.window.activate_game_window()
                 with keyboard.Listener(on_release=self._on_release) as listner:
                     listner.join()

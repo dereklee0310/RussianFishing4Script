@@ -18,9 +18,11 @@ sys.path.append(".")
 from rf4s import utils
 from rf4s.app.app import ToolApp
 from rf4s.config.config import print_cfg
+from rf4s.utils import create_rich_logger, update_argv, safe_exit
 
 ROOT = Path(__file__).resolve().parents[1]
 
+logger = create_rich_logger()
 
 class MoveApp(ToolApp):
     """Main controller for movement automation in Russian Fishing 4.
@@ -111,4 +113,9 @@ class MoveApp(ToolApp):
 
 
 if __name__ == "__main__":
-    MoveApp().start()
+    update_argv()
+    try:
+        MoveApp().start()
+    except Exception as e:
+        logger.critical(e, exc_info=True)
+    safe_exit()

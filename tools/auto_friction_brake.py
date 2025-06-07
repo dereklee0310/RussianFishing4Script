@@ -18,7 +18,7 @@ sys.path.append(".")
 from rf4s.app.app import ToolApp
 from rf4s.component.friction_brake import FrictionBrake
 from rf4s.config.config import print_cfg
-from rf4s.utils import create_rich_logger
+from rf4s.utils import create_rich_logger, update_argv, safe_exit
 
 logger = create_rich_logger()
 
@@ -44,7 +44,7 @@ class FrictionBrakeApp(ToolApp):
         """
         super().__init__()
         if not self.is_game_window_valid():
-            sys.exit(1)
+            safe_exit()
 
         # Format keys
         self.cfg.defrost()
@@ -131,4 +131,9 @@ class FrictionBrakeApp(ToolApp):
 
 
 if __name__ == "__main__":
-    FrictionBrakeApp().start()
+    update_argv()
+    try:
+        FrictionBrakeApp().start()
+    except Exception as e:
+        logger.critical(e, exc_info=True)
+    safe_exit()

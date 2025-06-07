@@ -16,6 +16,9 @@ import pyautogui as pag
 import win32con
 import win32gui
 
+sys.path.append(".")  # python -m module -> python file
+from rf4s import utils
+
 logger = logging.getLogger("rich")
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -55,7 +58,7 @@ class Window:
         hwnd = win32gui.FindWindow(None, self.game_title)  # class name: UnityWndClass
         if hwnd == 0:
             logger.critical("Failed to locate the game window: %s", self.game_title)
-            sys.exit(1)
+            utils.safe_exit()
         return hwnd
 
     def is_title_bar_exist(self) -> bool:

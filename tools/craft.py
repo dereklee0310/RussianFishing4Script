@@ -20,7 +20,7 @@ sys.path.append(".")
 from rf4s.app.app import ToolApp
 from rf4s.config.config import print_cfg
 from rf4s.result.result import CraftResult
-from rf4s.utils import create_rich_logger
+from rf4s.utils import create_rich_logger, update_argv, safe_exit
 
 CRAFT_DELAY = 4.0
 CRAFT_DELAY_3X = CRAFT_DELAY * 3
@@ -101,7 +101,7 @@ class CraftApp(ToolApp):
                 "1x or move your mouse around"
             )
             self.window.activate_script_window()
-            sys.exit(1)
+            safe_exit()
         pag.moveTo(make_button_position)
 
     def craft_item(
@@ -159,4 +159,9 @@ class CraftApp(ToolApp):
 
 
 if __name__ == "__main__":
-    CraftApp().start()
+    update_argv()
+    try:
+        CraftApp().start()
+    except Exception as e:
+        logger.critical(e, exc_info=True)
+    safe_exit()

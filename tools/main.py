@@ -100,7 +100,7 @@ class RF4SApp(App):
             shlex.split(self.cfg.SCRIPT.LAUNCH_OPTIONS) + sys.argv[1:]
         )
         if not self.is_args_valid(self.args):
-            sys.exit(1)
+            utils.safe_exit()
         self.cfg.merge_from_other_cfg(CN({"ARGS": config.dict_to_cfg(vars(self.args))}))
 
     def create_parser(self) -> ArgumentParser:
@@ -384,7 +384,7 @@ class RF4SApp(App):
             profile_name = list(self.cfg.PROFILE)[self.cfg.ARGS.PID]
 
         if not self.is_profile_valid(profile_name):
-            sys.exit(1)
+            utils.safe_exit()
 
         # Merge args.opts here because we can only overwrite cfg.SELECTED
         # after it's constructed using profile id or name.
@@ -415,7 +415,7 @@ class RF4SApp(App):
             or not self.is_images_valid()
             or not self.is_discord_webhook_url_valid()
         ):
-            sys.exit(1)
+            utils.safe_exit()
         config.print_cfg(self.cfg.ARGS)
         config.print_cfg(self.cfg.SELECTED)
 
@@ -492,7 +492,7 @@ class RF4SApp(App):
         """
         self.create_user_profile()
         if not self.is_window_valid() or not self.is_electro_valid():
-            sys.exit(1)
+            utils.safe_exit()
         self.cfg.freeze()
 
         if self.cfg.KEY.QUIT != "CTRL-C":
@@ -519,4 +519,9 @@ class RF4SApp(App):
 
 if __name__ == "__main__":
     print(Panel.fit(LOGO, box=box.HEAVY), GITHUB_LINK, DISCORD_LINK, sep="\n")
-    RF4SApp().start()
+    utils.update_argv()
+    try:
+        RF4SApp().start()
+    except Exception as e:
+        logger.critical(e, exc_info=True)
+    utils.safe_exit()

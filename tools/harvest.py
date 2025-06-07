@@ -21,7 +21,7 @@ from rf4s.app.app import ToolApp
 from rf4s.config.config import print_cfg
 from rf4s.controller.timer import Timer
 from rf4s.result.result import HarvestResult
-from rf4s.utils import create_rich_logger
+from rf4s.utils import create_rich_logger, update_argv, safe_exit
 
 ROOT = Path(__file__).resolve().parents[1]
 DIG_DELAY = 5  # 4 + 1 s
@@ -163,4 +163,9 @@ class HarvestApp(ToolApp):
 
 
 if __name__ == "__main__":
-    HarvestApp().start()
+    update_argv()
+    try:
+        HarvestApp().start()
+    except Exception as e:
+        logger.critical(e, exc_info=True)
+    safe_exit()
