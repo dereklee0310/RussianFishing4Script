@@ -3,7 +3,7 @@
 from yacs.config import CfgNode as CN
 
 _C = CN()
-_C.VERSION = "0.5.1"
+_C.VERSION = "0.5.2"
 
 # ---------------------------------------------------------------------------- #
 #                                    General                                   #
