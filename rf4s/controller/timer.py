@@ -6,14 +6,23 @@ for logging and automation purposes in Russian Fishing 4.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
+import sys
 import datetime
 import logging
 import time
+from pathlib import Path
 
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
+from rf4s.utils import is_compiled
 
 logger = logging.getLogger("rich")
+
+
+if is_compiled():
+    ROOT = Path(sys.executable).parent  # Running as .exe (Nuitka/PyInstaller)
+else:
+    ROOT = Path(__file__).resolve().parents[2]
 
 
 class Timer:
@@ -209,5 +218,5 @@ class Timer:
         ax[1].yaxis.set_major_locator(MaxNLocator(integer=True))
 
         # plt.tight_layout()
-        plt.savefig(f"../logs/{self.get_cur_timestamp()}.png")
+        plt.savefig(str(ROOT / f"logs/{self.get_cur_timestamp()}.png"))
         logger.info("Chart has been saved under logs/")

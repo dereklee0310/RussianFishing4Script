@@ -24,10 +24,10 @@ from rf4s.config import config
 from rf4s.controller.detection import Detection
 from rf4s.controller.window import Window
 from rf4s.result.result import Result
-from rf4s.utils import safe_exit
+from rf4s.utils import safe_exit, is_compiled
 
 # Get the base path depending on runtime environment
-if "__compiled__" in globals():
+if is_compiled():
     ROOT = Path(sys.executable).parent  # Running as .exe (Nuitka/PyInstaller)
 else:
     ROOT = Path(__file__).resolve().parents[2]

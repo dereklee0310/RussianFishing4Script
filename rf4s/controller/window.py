@@ -21,8 +21,12 @@ from rf4s import utils
 
 logger = logging.getLogger("rich")
 
-ROOT = Path(__file__).resolve().parents[2]
 ANIMATION_DELAY = 0.25
+
+if utils.is_compiled():
+    ROOT = Path(sys.executable).parent  # Running as .exe (Nuitka/PyInstaller)
+else:
+    ROOT = Path(__file__).resolve().parents[2]
 
 
 class Window:
