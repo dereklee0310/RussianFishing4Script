@@ -1,5 +1,16 @@
 **[[中文版]][CHANGELOG]**
 
+## 0.5.2 (2025-06-08)
+
+### 🐛 Bug Fixes
+- Fixed an issue where the `-s` and `-d` flags were not functioning correctly when running the script via executables.
+- Fixed a bug causing the script to exit unexpectedly when using `telescopic` mode.
+- Fixed a bug where the script would fail to put down the tackle if it was unable to fetch the fish.
+
+### 🔧 Improvements
+- Integrated all features into a single executable.
+
+
 ## 0.5.1 (2025-06-08)
 
 ### 🐛 Bug Fixes
