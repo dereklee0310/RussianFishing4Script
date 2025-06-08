@@ -22,12 +22,17 @@ from rich.table import Column, Table
 from yacs.config import CfgNode as CN
 
 sys.path.append(".")  # python -m module -> python file
+import auto_friction_brake
+import calculate
+import craft
+import harvest
+import move
+
 from rf4s import utils
 from rf4s.app.app import App
 from rf4s.config import config
 from rf4s.player import Player
 from rf4s.utils import create_rich_logger
-import auto_friction_brake, calculate, craft, harvest, move
 
 logger = create_rich_logger()
 

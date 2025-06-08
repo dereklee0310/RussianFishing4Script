@@ -100,8 +100,10 @@ def main():
         table.add_row("Maximum friction brake to use", f"{max_friction_brake}")
         print(table)
 
+
 def run_app_from_main():
     main()
+
 
 if __name__ == "__main__":
     main()

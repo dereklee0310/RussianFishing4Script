@@ -21,7 +21,7 @@ from rf4s.app.app import ToolApp
 from rf4s.config.config import print_cfg
 from rf4s.controller.timer import Timer
 from rf4s.result.result import HarvestResult
-from rf4s.utils import create_rich_logger, update_argv, safe_exit
+from rf4s.utils import create_rich_logger, safe_exit, update_argv
 
 ROOT = Path(__file__).resolve().parents[1]
 DIG_DELAY = 5  # 4 + 1 s
@@ -160,6 +160,7 @@ class HarvestApp(ToolApp):
             else:
                 sleep(self.cfg.ARGS.CHECK_DELAY)
             sleep(ANIMATION_DELAY)
+
 
 def run_app_from_main():
     try:

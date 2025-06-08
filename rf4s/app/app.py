@@ -8,10 +8,10 @@ Provides core functionality for:
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
+import logging
 import os
 import signal
 import sys
-import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
 
@@ -24,7 +24,7 @@ from rf4s.config import config
 from rf4s.controller.detection import Detection
 from rf4s.controller.window import Window
 from rf4s.result.result import Result
-from rf4s.utils import safe_exit, is_compiled
+from rf4s.utils import is_compiled, safe_exit
 
 # Get the base path depending on runtime environment
 if is_compiled():
@@ -33,6 +33,7 @@ else:
     ROOT = Path(__file__).resolve().parents[2]
 
 logger = logging.getLogger("rich")
+
 
 class App(ABC):
     """A base application class.

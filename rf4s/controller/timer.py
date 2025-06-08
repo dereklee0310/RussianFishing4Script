@@ -6,14 +6,15 @@ for logging and automation purposes in Russian Fishing 4.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
-import sys
 import datetime
 import logging
+import sys
 import time
 from pathlib import Path
 
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
+
 from rf4s.utils import is_compiled
 
 logger = logging.getLogger("rich")

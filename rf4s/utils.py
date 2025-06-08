@@ -7,9 +7,9 @@ key and mouse states during automation.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
-import msvcrt
 import ctypes
 import logging
+import msvcrt
 import shlex
 import sys
 from time import sleep
@@ -232,11 +232,12 @@ def reset_friction_brake_after(func):
 
 
 def is_compiled():
-    return "__compiled__" in globals() # Nuitka style
+    return "__compiled__" in globals()  # Nuitka style
+
 
 def is_run_by_clicking():
     # Load kernel32.dll
-    kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+    kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
     # Create an array to store the processes in.  This doesn't actually need to
     # be large enough to store the whole process list since GetConsoleProcessList()
     # just returns the number of processes if the array is too small.
@@ -247,10 +248,14 @@ def is_run_by_clicking():
     # We also need to check if it's an executable to make it work
     return is_compiled() and num_processes == 2
 
+
 def update_argv():
     if is_run_by_clicking():
         logger.info("No launch options used")
-        sys.argv = ["foo"] + shlex.split(input("Enter launch options (press Enter to skip): "))
+        sys.argv = ["foo"] + shlex.split(
+            input("Enter launch options (press Enter to skip): ")
+        )
+
 
 def safe_exit():
     if is_run_by_clicking():

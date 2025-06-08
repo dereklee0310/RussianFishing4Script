@@ -20,7 +20,7 @@ sys.path.append(".")
 from rf4s.app.app import ToolApp
 from rf4s.config.config import print_cfg
 from rf4s.result.result import CraftResult
-from rf4s.utils import create_rich_logger, update_argv, safe_exit
+from rf4s.utils import create_rich_logger, safe_exit, update_argv
 
 CRAFT_DELAY = 4.0
 CRAFT_DELAY_3X = CRAFT_DELAY * 3
@@ -157,12 +157,14 @@ class CraftApp(ToolApp):
                 return
             self.craft_item(*self.get_action_delays(), accept_key)
 
+
 def run_app_from_main():
     try:
         CraftApp().start()
     except Exception as e:
         logger.critical(e, exc_info=True)
     safe_exit()
+
 
 if __name__ == "__main__":
     update_argv()
