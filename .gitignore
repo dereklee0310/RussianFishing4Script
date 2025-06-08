@@ -11,3 +11,5 @@ tests/
 logs/
 
 /config.yaml
+/dev-tools
+/dist
