@@ -27,6 +27,7 @@ from rf4s.app.app import App
 from rf4s.config import config
 from rf4s.player import Player
 from rf4s.utils import create_rich_logger
+import auto_friction_brake, calculate, craft, harvest, move
 
 logger = create_rich_logger()
 
@@ -72,6 +73,15 @@ DISCORD_LINK = "Discord: https://discord.gg/BZQWQnAMbY"
 # https://patorjk.com/software/taag/#p=testall&f=3D-ASCII&t=RF4S%0A, ANSI Shadow
 
 ROOT = Path(__file__).resolve().parents[1]
+
+FEATURES = (
+    "Fishing Bot",
+    "Craft Items",
+    "Harvest Baits",
+    "Toggle Moving Forward",
+    "Automate Friction Brake",
+    "Calculate tackle's stats",
+)
 
 
 class RF4SApp(App):
@@ -332,14 +342,14 @@ class RF4SApp(App):
                 logger.warning("Missing setting: '%s'", key)
         return True
 
-    def display_available_profiles(self) -> None:
+    def display_profiles(self) -> None:
         """Display a table of available profiles for user selection.
 
         Shows a formatted table with profile IDs and names.
         """
         table = Table(
-            "Profile",
-            title="Select a profile to start :rocket:",
+            "Profiles",
+            title="Select a profile to start ⚙️",
             show_header=False,
             min_width=36,
         )
@@ -379,7 +389,7 @@ class RF4SApp(App):
             profile_name = self.cfg.ARGS.PNAME
         else:
             if self.cfg.ARGS.PID is None:
-                self.display_available_profiles()
+                self.display_profiles()
                 self.get_pid()
             profile_name = list(self.cfg.PROFILE)[self.cfg.ARGS.PID]
 
@@ -517,11 +527,62 @@ class RF4SApp(App):
         )
 
 
+def display_features() -> None:
+    """Display a table of available features for user selection.
+
+    Shows a formatted table with feature IDs and names.
+    """
+    table = Table(
+        "Features",
+        title="Select a feature to start 🚀",
+        show_header=False,
+        min_width=36,
+    )
+
+    for i, feature in enumerate(FEATURES):
+        table.add_row(f"{i:>2}. {feature}")
+    print(table)
+
+
+def get_pid() -> None:
+    """Prompt the user to enter a profile ID and validate the input.
+
+    Continuously prompts until a valid profile ID is entered or the
+    user chooses to quit.
+    """
+    # print("Enter profile id to use, h to see help message, q to quit:")
+    print("Enter feature id to use, q to quit:")
+
+    while True:
+        user_input = input(">>> ")
+        if user_input.isdigit() and 0 <= int(user_input) < len(FEATURES):
+            break
+        if user_input == "q":
+            print("Bye.")
+            sys.exit()
+        utils.print_error("Invalid feature id, please try again.")
+
+    return int(user_input)
+
+
 if __name__ == "__main__":
     print(Panel.fit(LOGO, box=box.HEAVY), GITHUB_LINK, DISCORD_LINK, sep="\n")
     utils.update_argv()
-    try:
-        RF4SApp().start()
-    except Exception as e:
-        logger.critical(e, exc_info=True)
-    utils.safe_exit()
+    display_features()
+    match get_pid():
+        case 0:
+            try:
+                RF4SApp().start()
+            except Exception as e:
+                logger.critical(e, exc_info=True)
+            utils.safe_exit()
+        case 1:
+            craft.run_app_from_main()
+        case 2:
+            harvest.run_app_from_main()
+        case 3:
+            move.run_app_from_main()
+        case 4:
+            auto_friction_brake.run_app_from_main()
+        case 5:
+            calculate.run_app_from_main()

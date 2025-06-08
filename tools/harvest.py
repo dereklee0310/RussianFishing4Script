@@ -161,6 +161,13 @@ class HarvestApp(ToolApp):
                 sleep(self.cfg.ARGS.CHECK_DELAY)
             sleep(ANIMATION_DELAY)
 
+def run_app_from_main():
+    try:
+        HarvestApp().start()
+    except Exception as e:
+        logger.critical(e, exc_info=True)
+    safe_exit()
+
 
 if __name__ == "__main__":
     update_argv()

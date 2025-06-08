@@ -111,6 +111,13 @@ class MoveApp(ToolApp):
         with keyboard.Listener(on_release=self._on_release) as listener:
             listener.join()
 
+def run_app_from_main():
+    try:
+        MoveApp().start()
+    except Exception as e:
+        logger.critical(e, exc_info=True)
+    safe_exit()
+
 
 if __name__ == "__main__":
     update_argv()
