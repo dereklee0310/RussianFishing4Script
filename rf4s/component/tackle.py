@@ -36,7 +36,7 @@ RETRIEVAL_TIMEOUT = 32
 PULL_TIMEOUT = 16
 RETRIEVAL_WITH_PAUSE_TIMEOUT = 128
 LIFT_DURATION = 3
-TELESCOPIC_RETRIEVAL_TIMEOUT = 8
+TELESCOPIC_PULL_TIMEOUT = 8
 LANDING_NET_DURATION = 6
 LANDING_NET_DELAY = 0.5
 SINK_DELAY = 2
@@ -343,7 +343,7 @@ class Tackle:
         if not self.landing_net_out:
             pag.press("space")
             self.landing_net_out = True
-        i = TELESCOPIC_RETRIEVAL_TIMEOUT
+        i = TELESCOPIC_PULL_TIMEOUT
         while i > 0:
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
             if self.detection.is_fish_captured():

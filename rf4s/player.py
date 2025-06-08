@@ -578,13 +578,13 @@ class Player:
                     self.handle_fish()
                     break
                 except TimeoutError:
+                    self.disable_clicklock()
+                    sleep(PUT_DOWN_DELAY)
                     if not self.clicklock_enabled:
                         self.enable_clicklock()
 
-                    if self.cfg.SELECTED.MODE == "float":
-                        sleep(PUT_DOWN_DELAY)
-                        continue
-                    self.retrieve_line()
+                    if self.cfg.SELECTED.MODE != "telescopic":
+                        self.retrieve_line()
 
     def _put_down_tackle(self, check_miss_counts: list[int]) -> None:
         """Put down the tackle and wait for a while.
