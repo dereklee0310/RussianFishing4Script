@@ -776,7 +776,7 @@ class Player:
             EmailNotification(self.cfg, result).send()
         if self.cfg.ARGS.MIAOTIXING:
             MiaotixingNotification(self.cfg, result).send()
-        if self.cfg.ARGS.PLOT and self.result.kept != 0:
+        if self.cfg.ARGS.DATA and self.result.kept != 0:
             self.timer.plot_and_save()
         if shutdown and self.cfg.ARGS.SHUTDOWN:
             os.system("shutdown /s /t 5")
