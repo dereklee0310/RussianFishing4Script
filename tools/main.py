@@ -85,7 +85,7 @@ FEATURES = (
     "Harvest Baits",
     "Toggle Moving Forward",
     "Automate Friction Brake",
-    "Calculate tackle's stats",
+    "Calculate Tackle's Stats",
 )
 
 

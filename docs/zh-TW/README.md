@@ -4,7 +4,7 @@
 ![rf4s_logo]
 <h1 align="center">RF4S: 俄羅斯釣魚4腳本</h1>
 
-**俄羅斯釣魚4的簡易釣魚機器人，支援路亞、水底、海釣及手竿等模式。**
+**俄羅斯釣魚4自動釣魚機器人，支援紡車、底釣、海釣、維基釣組及手竿等模式。**
 
 <a target="_blank" href="https://opensource.org/license/gpl-3-0" style="background:none">
     <img src="https://img.shields.io/badge/License-GPLv3-blue.svg" style="height: 22px;" />
@@ -31,101 +31,105 @@
 </div>
 
 > [!TIP]
-> 若想建議新功能、回報錯誤或取得使用幫助，請加入 [Discord 伺服器discordDiscord]。
+> 若需建議新功能、回報錯誤或取得使用幫助，請加入我們的 [Discord 伺服器][discord]。
 
 
-## 快速入門
-### 安裝步驟
-可執行檔可在 [Releases][releases] 下載。
-如果想使用 Python 直譯器執行，請參閱 **[安裝指南][installation]**。
+## 快速開始
+### 環境需求
+**[Python 3.12.*][python]** (若需直接執行原始碼而非可執行檔)。
+> [!WARNING] 
+> 不支援 Python 3.13 以上版本。
+
+### 安裝
+#### 可執行檔
+從 [Releases][releases] 下載 `rf4s.zip` 並解壓縮。
+#### Python 原始碼 (開發者適用)
+```
+git clone https://github.com/dereklee0310/RussianFishing4Script.git
+cd RussianFishing4Script
+.\setup.bat
+```
+> [!WARNING] 
+> 路徑不可包含非英文字符。
+
+### 環境設定
+#### 語言
+- 確認遊戲語言與 config.yaml 中的設定一致（預設為 "en"）。
+#### 顯示設定
+- 系統與遊戲介面縮放比例皆設為 "1x"。
+- 遊戲視窗模式設為「視窗化」或「無邊框視窗。
+#### 線杯偵測
+- 預設透過線杯（紅框區域）偵測收線進度，請確保線杯已裝滿線以獲得準確偵測結果。
+- 若使用彩虹線，請啟用 `-R` 參數切換至儀表板（綠框區域）偵測模式。
+- 啟動參數說明詳見 **[配置說明][configuration]**。
+
+![status]
+
 ## 使用方式
-### 開始前注意事項...
-- 執行腳本前，請先將角色移動至釣點
-- 路亞/海釣/手竿/維基模式：手持要使用的釣竿。
-- 底釣模式：
-    - 將釣組添加至快捷欄位。
-    - 拋竿後將釣竿放置在附近，以便腳本可透過快捷鍵（1 ~ 3）操作。
+### 開始前準備...
+#### 底釣模式
+將釣竿加入快速選擇欄位，並在拋竿後置於附近，確保腳本能透過快捷鍵 (1~3) 操作。
+#### 其他模式
+拿起要使用的釣竿即可。
 > [!NOTE]
 > 目前僅底釣模式支援多竿操作。
 
 ### 開始執行！
-> [!IMPORTANT]
-> 如果下載的是可執行檔，將下方的 `python tools\xxx.py` 改為 `.\xxx` 或是直接雙擊檔案即可執行。
-
-> [!TIP]
-> 進階設定和使用方式請參閱 **[設定指南][configuration]**。
-
-1. 開啟 cmd/PowerShell
-2. 進入專案目錄並執行腳本（按 `CTRL-C` 退出）：
+#### 可執行檔
+雙擊執行檔即可運行
+#### Python 原始碼 (開發者適用)
 ```
-cd "專案目錄路徑"
+cd "專案路徑"
 python tools\main.py
 ```
-> [!TIP]
-> `專案目錄路徑` 是克隆或解壓縮專案後存放檔案的目錄。  
-> ![路徑示意][path]
 
-## 工具集
-### 製作物品
-執行前選取材料，按 `Ctrl-C` 退出。
-```
-python tools\craft.py
-```
-### 自動挖餌
-按 `Ctrl-C` 退出。
-```
-python tools\harvest.py
-```
-### 自動前進
-按 `W` 暫停，按 `S` 退出。
-```
-python tools\move.py
-```
-### 自動調整摩擦
-按 `G` 重置，按 `H` 退出。
-```
-python tools\auto_friction_brake.py
-```
-### 計算釣組數值與摩擦
-```
-python tools\calculate.py
-```
+> [!TIP]
+> 進階用法請參閱 **[配置說明][configuration]**
+
+## 功能列表
+| 功能         | 說明                           |
+| ------------ | ------------------------------ |
+| 釣魚機器人   | 主腳本                         |
+| 物品製作     | 自動製作物品                   |
+| 自動挖餌     | 閒置並自動挖餌                 |
+| 自動前進     | 自動按 `W` (或 `Shift+W` 衝刺) |
+| 自動摩擦     | 自動調整摩擦                   |
+| 釣具參數計算 | 計算釣組實際拉力/負載          |
 
 ## 疑難排解
 <details>
 <summary>如何停止腳本？</summary>
 
-- 在終端機中輸入 `CTRL-C`。 
+- 在終端機輸入 `Ctrl-C`。
 </details>
 <!-- ------------------------------- 分隔線 -------------------------------- -->
 <details>
 <summary>無法停止腳本？</summary>
 
-- 可能按鍵被卡住（如 `CTRL-C`、`SHIFT`、滑鼠按鍵等），  
-  重新按壓卡住的按鍵後，再輸入 `CTRL-C`。
+- 可能因部分按鍵處於按下狀態 (如 `Ctrl`, `Shift`, 滑鼠按鍵等)，  
+  重新按下對應按鍵釋放後，再輸入 `Ctrl-C`。
 </details>
 <!-- ------------------------------- 分隔線 -------------------------------- -->
 <details>
-<summary>拋竿卡在128%？</summary>
+<summary>拋竿卡在 12x%？</summary>
 
-- 確認遊戲語言與腳本語言設定一致。
-- 確保線軸已纏滿釣線，或裝備彩虹線並使用 `-R` 參數。 
+- 確認遊戲語言與腳本設定一致。
+- 確保線杯已裝滿線，或使用彩虹線並啟用 `-R` 參數。
 </details>
-
 <!-- ------------------------------- 分隔線 -------------------------------- -->
 <details>
-<summary>收線完成後未抬竿？</summary>
+<summary>收線完成後未提竿？</summary>
 
-- 確保線軸已纏滿釣線，或裝備彩虹線並使用 `-R` 參數。 
+- 確保線杯已裝滿線，或使用彩虹線並啟用 `-R` 參數。
 - 調整遊戲視窗大小。
-- 降低 `config.yaml` 中的 `SPOOL_CONFIDENCE` 數值。
-- 遠離光源或關閉船燈。
+- 降低 config.yaml 中的 `SPOOL_CONFIDENCE` 數值。
+- 避免強光源直射（如陽光直射）或關閉船燈。
 </details>
 <!-- ------------------------------- 分隔線 -------------------------------- -->
 <details>
-<summary>腳本執行但無反應？</summary>
+<summary>腳本運行但無反應？</summary>
 
-- 以系統管理員身份開啟 cmd/Powershell 並重新執行。
+- 以系統管理員身分執行腳本。
 </details>
 <!-- ------------------------------- 分隔線 -------------------------------- -->
 
@@ -136,13 +140,12 @@ python tools\calculate.py
 **[GNU General Public License version 3][license]**
 
 ## 貢獻指南
-歡迎提交錯誤報告、功能建議或任何形式的貢獻。
+歡迎提交任何功能建議、錯誤回報或新功能構想。
 
-## 聯絡作者
+## 聯絡方式
 dereklee0310@gmail.com 
 
 [readme]: /README.md
-
 [rf4s_logo]: /static/readme/RF4S.png
 [python_badge]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
 [windows_badge]: https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white
@@ -150,8 +153,7 @@ dereklee0310@gmail.com
 [discord]: https://discord.gg/BZQWQnAMbY
 [python]: https://www.python.org/downloads/
 [releases]: https://github.com/dereklee0310/RussianFishing4Script/releases
-[installation]: /docs/zh-TW/INSTALLATION.md
+[status]: /static/readme/status.png
 [configuration]: /docs/zh-TW/CONFIGURATION.md
 [changelog]: /docs/zh-TW/CHANGELOG.md
-[path]: /static/readme/path.png
 [license]: /LICENSE

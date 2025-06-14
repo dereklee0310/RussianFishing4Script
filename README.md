@@ -31,66 +31,70 @@
 </div>
 
 > [!TIP]
-> Join the [Discord server][discord] if you want to suggest new features, report bugs or get help on how to use the script.
+> Join our [Discord server][discord] if you want to suggest new features, report bugs or get help on how to use the script.
 
 
 ## Getting Started
+### Prerequisites
+**[Python 3.12.*][python]** is required if you want to run the Python code instead of the executable file.
+> [!WARNING] 
+> Python 3.13+ are not supported.
+
 ### Installation
-You can download executables from [Releases][releases] directly.
-To run it from Python interpreter, see **[INSTALLATION][installation]**.
+#### Executable File
+Download `rf4s.zip` from [Releases][releases] and unzip it.  
+#### Python Code and Environment (for developer)
+```
+git clone https://github.com/dereklee0310/RussianFishing4Script.git
+cd RussianFishing4Script
+.\setup.bat
+```
+> [!WARNING] 
+> The download path cannot contain non-English characters.
+
+### Environment Setup
+#### Language
+- Confirm your game language matches the language setting in config.yaml ("en" by default).
+#### Display
+- Set both system and in-game interface scales to "1x".
+- Set game window mode to "window mode" or "borderless windowed".
+#### Spool Detection
+- By default, the bot monitors the spool (red box) to detect retrieval progress.  
+  Ensure the spool is fully loaded with fishing line for accurate detection of retrieval completion.
+- If using a rainbow line, enable the `-R` flag to switch detection to the meter (green box) for better precision.
+- Please refer to **[CONFIGURATION][configuration]** to see how to use it.
+
+![status]
+
 ## Usage
 ### Before you start...
-- Move your character to the fishing spot before running the script
-- For Spin/Marine/Float/Wakey Rig Fishing: Pick up the rod you want to use.
-- For Bottom Fishing:
-    - Add tackles to quick selection slots.
-    - Cast them and place them nearby so the bot can access them via shortcuts (1 ~ 3).
+#### Bottom Mode
+Add your rods to quick selection slots, cast and place them nearby so the bot can access them via shortcuts (1 ~ 3).
+#### Other Modes 
+Pick up the rod you want to use.
 > [!NOTE]
-> Currently, only bottom fishing mode support multiple rods.
+> Currently, only bottom mode support multiple rods.
 
 ### Let's Run it!
-> [!IMPORTANT]
-> For executables, replace `python tools\xxx.py` with `.\xxx` or double-click the file to run it.
-
-> [!TIP]
-> See **[CONFIGURATION][configuration]** for advanced usage and configuration options.
-
-
-1. Open cmd/PowerShell
-2. Navigate into the project directory and run the script with default configuration. Type `CTRL-C` to quit.
+#### Executable File
+Double-click the executable file to run it.
+#### Python Code (for developer)
 ```
 cd "path\to\the\project"
 python tools\main.py
 ```
 > [!TIP]
-> `path\to\the\project` is the directory where you placed the files after cloning or extracting the project.  
-> ![path]
+> See **[CONFIGURATION][configuration]** for advanced usage and configuration options.
 
-## Tools
-### Craft items
-Select materials before you run it, press `Ctrl-C` to quit.
-```
-python tools\craft.py
-```
-### Harvest baits
-Press `Ctrl-C` to quit.
-```
-python tools\harvest.py
-```
-### Toggle moving forward
-Press `W`to pause, `S` to quit.
-```
-python tools\move.py
-```
-### Automate friction brake
-Press `G` to reset, `H` to quit.
-```
-python tools\auto_friction_brake.py
-```
-### Calculate tackle's stats and friction brake
-```
-python tools\calculate.py
-```
+## Features
+| Feature                  | Functionality                                            |
+| ------------------------ | -------------------------------------------------------- |
+| Fishing Bot              | Main script                                              |
+| Craft Items              | Automatically harvest baits while staying idle           |
+| Harvest Baits            | Stay idle and harvest baits automatically                |
+| Toggle Moving Forward    | Automatically presses `W` (or `Shift + W` for sprinting) |
+| Automate Friction Brake  | Adjust the friction brake automatically                  |
+| Calculate Tackle's Stats | Calculate the real drag or load capacity of the loadout  |
 
 ## Troubleshooting
 <details>
@@ -102,12 +106,12 @@ python tools\calculate.py
 <details>
 <summary>Can't stop the script?</summary>
 
-- Some keys might have been pressed down (e.g. `Ctrl`, `Shift`, `Mouse button`, etc.),  
-  press them again to release it and type `Ctrl-C` as usual.
+- Some keys might have been pressed down (e.g. `Ctrl`, `Shift`, `Mouse button`, etc.).  
+  Press them again to release it and type `Ctrl-C` as usual.
 </details>
 <!-- ------------------------------- divide -------------------------------- -->
 <details>
-<summary>Stuck at casting 128%?</summary>
+<summary>Stuck at casting 12x%?</summary>
 
 - Check that the game language and script language settings are the same.
 - Make sure your reel is fully loaded, or equip a rainbow line and use `-R` flag. 
@@ -118,15 +122,15 @@ python tools\calculate.py
 <summary>Didn't lift the rod after the retrieval is finished?</summary>
 
 - Make sure your reel is fully loaded, or equip a rainbow line and use `-R` flag. 
-- Change the game window size.
-- Reduce the value of `SPOOL_CONFIDENCE` in `config.yaml`.
-- Keep away from light sources or turn off the boat light.
+- Resize the game window.
+- Reduce the value of `SPOOL_CONFIDENCE` in config.yaml.
+- Avoid bright light sources (e.g., direct sunlight) or turn off the boat’s onboard lights.
 </details>
 <!-- ------------------------------- divide -------------------------------- -->
 <details>
 <summary>Script is running but nothing happen?</summary>
 
-- Open cmd/Powershell as administrator and run it again.
+- Run the script as administrator.
 </details>
 <!-- ------------------------------- divide -------------------------------- -->
 
@@ -150,8 +154,7 @@ dereklee0310@gmail.com
 [discord]: https://discord.gg/BZQWQnAMbY
 [python]: https://www.python.org/downloads/
 [releases]: https://github.com/dereklee0310/RussianFishing4Script/releases
-[installation]: /docs/en/INSTALLATION.md
+[status]: /static/readme/status.png
 [configuration]: /docs/en/CONFIGURATION.md
 [changelog]: /docs/en/CHANGELOG.md
-[path]: /static/readme/path.png
 [license]: /LICENSE
