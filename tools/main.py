@@ -522,7 +522,7 @@ class RF4SApp(App):
 
         self.display_result()
         if self.cfg.ARGS.DATA:
-            self.player.timer.plot_and_save()
+            self.player.timer.save_data()
 
     def display_result(self):
         print(

@@ -190,11 +190,15 @@ class Timer:
             return True
         return False
 
-    def plot_and_save(self) -> None:
+    def save_data(self) -> None:
         """Plot and save an image using rhour and ghour lists from the timer object."""
+        cast_rhour_list, cast_ghour_list = self.get_cast_time_list()
+        if not cast_rhour_list:
+            logger.warning("No cast record, skip plotting")
+            return
+
         logger.info("Plotting line chart")
 
-        cast_rhour_list, cast_ghour_list = self.get_cast_time_list()
         _, ax = plt.subplots(nrows=1, ncols=2)
         # _.canvas.manager.set_window_title('Record')
         ax[0].set_ylabel("Fish")
@@ -203,7 +207,7 @@ class Timer:
         fish_per_rhour = [0] * (last_rhour + 1)  # Idx: (0, 1, 2, 3, 4, 5) = 6
         for hour in cast_rhour_list:
             fish_per_rhour[hour] += 1
-        ax[0].plot(range(last_rhour + 1), fish_per_rhour)
+        ax[0].plot(range(last_rhour + 1), fish_per_rhour, marker=".")
         ax[0].set_title("Fish Caughted per Real Hour")
         ax[0].set_xticks(range(last_rhour + 2))
         ax[0].set_xlabel("Hour (real running time)")
