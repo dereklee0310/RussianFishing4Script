@@ -54,7 +54,7 @@ cd RussianFishing4Script
 
 ### Environment Setup
 #### Language
-- Confirm your game language matches the language setting in config.yaml ("en" by default).
+- Confirm your game language matches the language setting in `config.yaml` ("en" by default).
 #### Display
 - Set both system and in-game interface scales to "1x".
 - Set game window mode to "window mode" or "borderless windowed".
@@ -123,7 +123,7 @@ python tools\main.py
 
 - Make sure your reel is fully loaded, or equip a rainbow line and use `-R` flag. 
 - Resize the game window.
-- Reduce the value of `SPOOL_CONFIDENCE` in config.yaml.
+- Reduce the value of `SPOOL_CONFIDENCE` in `config.yaml`.
 - Avoid bright light sources (e.g., direct sunlight) or turn off the boat’s onboard lights.
 </details>
 <!-- ------------------------------- divide -------------------------------- -->

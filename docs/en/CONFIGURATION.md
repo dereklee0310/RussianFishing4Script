@@ -1,11 +1,22 @@
 **[[中文版]][configuration]**
 ## Using Launch Options
 You can use launch options to enable one or more features at startup.
-### Display Help Message
+### Display Help 
+#### Executable File
 ```
+cd "path\to\the\project"
+.\main.exe -h
+```
+#### Python Code (for developer)
+```
+cd "path\to\the\project"
 python tools\main.py -h
 ```
-### Help Message
+> [!TIP]
+> `path\to\the\project` is the directory where you placed the executable file or source code.  
+> ![path]
+
+### Help Message Example
 ```
 usage: main.py [-h] [-R] [-t] [-c] [-a] [-r] [-H] [-L] [-m] [-P] [-RC] [-SC] [-l] [-e] [-FB] [-GR] [-b] [-s] [-d] [-E]
                [-M] [-D] [-S] [-SO] [-SR] [-DM] [-GB] [-PVA] [-p PID | -N PROFILE_NAME] [-n FISH_COUNT]
@@ -59,8 +70,6 @@ options:
   -BL [ACTION], --broken-lure [ACTION]
                         replace broken lure, ACTION: 'replace' or 'alarm', 'replace' by default
 ```
-> [!TIP]
-> Other tools like `craft.py` or `move.py` also support `-h` for displaying help messages. 
 
 > [!IMPORTANT]
 > Add tea and carrot/coffee to your **[favorites][favorite_food]** if you want to use `-r` or `-c` options.  
@@ -532,6 +541,7 @@ def get_cfg_defaults():
 
 ```
 
+[path]: /static/readme/path.png
 [configuration]: /docs/zh-TW/CONFIGURATION.md
 [favorite_food]: /static/readme/favorite_food.png
 [favorite_lure]: /static/readme/favorite_lure.png

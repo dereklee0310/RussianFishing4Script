@@ -2,13 +2,23 @@
 ## 使用啟動參數  
 可通過啟動參數啟用一項或多項功能。  
 
-### 顯示幫助信息  
-```  
-python tools\main.py -h  
-```  
+### 顯示幫助信息
+#### 可執行檔
+```
+cd "專案路徑"
+.\main.exe -h
+```
+#### Python 原始碼 (開發者適用)
+```
+cd "專案路徑"
+python tools\main.py -h
+```
+> [!TIP]
+> `專案路徑`為解壓縮後的資料夾路徑.  
+> ![path]
 
 ### 幫助信息說明  
-```bash
+```
 usage: main.py [-h] [-R] [-t] [-c] [-a] [-r] [-H] [-L] [-m] [-P] [-RC] [-SC] [-l] [-e] [-FB] [-GR] [-b] [-s] [-d] [-E]
                [-M] [-D] [-S] [-SO] [-SR] [-DM] [-GB] [-PVA] [-p PID | -N PROFILE_NAME] [-n FISH_COUNT]
                [-BT [DURATION]] [-T [DIRECTION]] [-BL [ACTION]]
@@ -60,9 +70,6 @@ usage: main.py [-h] [-R] [-t] [-c] [-a] [-r] [-H] [-L] [-m] [-P] [-RC] [-SC] [-l
   -BL [ACTION], --broken-lure [ACTION]
                         斷餌自動處理，操作：'replace'或'alarm'（預設更換）
 ``` 
-
-> [!TIP]  
-> 其他工具如`craft.py`或`move.py`也支持`-h`參數顯示幫助信息。
 
 > [!IMPORTANT]
 > 若需使用 `-r` 或 `-c` 參數，請將茶和胡蘿蔔/咖啡加入 **[收藏物品][favorite_food]**。  
