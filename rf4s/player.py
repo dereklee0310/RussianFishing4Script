@@ -52,12 +52,10 @@ TICKET_EXPIRE_DELAY = 16
 DISCONNECTED_DELAY = 8
 WEAR_TEXT_UPDATE_DELAY = 2
 PUT_DOWN_DELAY = 4
-
+QUIT_BUTTON_DELAY = 4
 SCREENSHOT_DELAY = 2
 
 TROLLING_KEY = "j"
-
-FORWARD = "w"
 LEFT_KEY = "a"
 RIGHT_KEY = "d"
 
@@ -877,6 +875,7 @@ class Player:
             pag.keyDown("shift")
         pag.moveTo(self.detection.get_quit_position())
         pag.click()
+        sleep(QUIT_BUTTON_DELAY)
         pag.keyUp("shift")
         sleep(ANIMATION_DELAY)
         pag.moveTo(self.detection.get_yes_position())
