@@ -65,7 +65,7 @@ class DiscordNotification:
 
         embed = DiscordEmbed(
             title="Running Result",
-            color=color,
+            color=color.value,
             timestamp=datetime.now(timezone.utc).isoformat(),
             footer={"text": "RF4S: Russian Fishing 4 Script", "icon_url": ICON_URL},
         )
