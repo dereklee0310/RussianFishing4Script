@@ -126,6 +126,8 @@ class Player:
                 "try moving your camera, "
                 "changing your game window size or fishing line"
             )
+            if self.friction_brake.monitor_process.is_alive():
+                self.friction_brake.monitor_process.terminate()
             utils.safe_exit()
 
         logger.info("Starting fishing mode: '%s'", self.cfg.SELECTED.MODE)
@@ -776,6 +778,8 @@ class Player:
         if shutdown and self.cfg.ARGS.SHUTDOWN:
             os.system("shutdown /s /t 5")
         print(table)
+        if self.friction_brake.monitor_process.is_alive():
+                self.friction_brake.monitor_process.terminate()
         utils.safe_exit()
 
     def _handle_snagged_line(self) -> None:
