@@ -141,6 +141,7 @@ class CraftApp(ToolApp):
         the crafting limit is reached. Supports fast crafting mode and discarding items.
         """
         logger.warning("This might get you banned, use at your own risk")
+        logger.warning("Use Razor or Logitech macros instead")
         if self.cfg.KEY.QUIT != "CTRL-C":
             listener = keyboard.Listener(on_release=self._on_release)
             listener.start()

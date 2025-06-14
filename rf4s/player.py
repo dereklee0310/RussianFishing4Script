@@ -779,7 +779,7 @@ class Player:
             os.system("shutdown /s /t 5")
         print(table)
         if self.friction_brake.monitor_process.is_alive():
-                self.friction_brake.monitor_process.terminate()
+            self.friction_brake.monitor_process.terminate()
         utils.safe_exit()
 
     def _handle_snagged_line(self) -> None:
