@@ -580,6 +580,8 @@ class Player:
                 except TimeoutError:
                     self.disable_clicklock()
                     sleep(PUT_DOWN_DELAY)
+                    if self.cfg.SELECTED.MODE != "telescopic":
+                        self.retrieve_line()
                     if not self.clicklock_enabled:
                         self.enable_clicklock()
 
