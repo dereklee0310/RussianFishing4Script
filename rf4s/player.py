@@ -52,7 +52,6 @@ TICKET_EXPIRE_DELAY = 16
 DISCONNECTED_DELAY = 8
 WEAR_TEXT_UPDATE_DELAY = 2
 PUT_DOWN_DELAY = 4
-QUIT_BUTTON_DELAY = 4
 SCREENSHOT_DELAY = 2
 
 TROLLING_KEY = "j"
@@ -575,7 +574,6 @@ class Player:
                 try:
                     with self.error_handler(), self.clicklock_disable_handler():
                         self.tackle.pull()
-                    self.handle_fish()
                     break
                 except TimeoutError:
                     self.disable_clicklock()
@@ -584,6 +582,7 @@ class Player:
                         self.retrieve_line()
                     if not self.clicklock_enabled:
                         self.enable_clicklock()
+        self.handle_fish()
 
     def _put_down_tackle(self, check_miss_counts: list[int]) -> None:
         """Put down the tackle and wait for a while.
@@ -800,6 +799,10 @@ class Player:
             sleep(self.cfg.KEEPNET.GIFT_DELAY)
             pag.press("space")
 
+        limit = self.cfg.KEEPNET.CAPACITY - self.cfg.ARGS.FISHES_IN_KEEPNET
+        if self.result.kept == limit:
+            self._handle_full_keepnet()
+
     def _handle_fish(self) -> None:
         """Keep or release the fish and record the fish count."""
         tagged = False
@@ -836,9 +839,6 @@ class Player:
         pag.press("space")
 
         self.result.kept += 1
-        limit = self.cfg.KEEPNET.CAPACITY - self.cfg.ARGS.FISHES_IN_KEEPNET
-        if self.result.kept == limit:
-            self._handle_full_keepnet()
 
         # Avoid wrong cast hour
         if self.cfg.SELECTED.MODE in ["bottom", "pirk", "elevator"]:
@@ -881,7 +881,6 @@ class Player:
             pag.keyDown("shift")
         pag.moveTo(self.detection.get_quit_position())
         pag.click()
-        sleep(QUIT_BUTTON_DELAY)
         pag.keyUp("shift")
         sleep(ANIMATION_DELAY)
         pag.moveTo(self.detection.get_yes_position())
