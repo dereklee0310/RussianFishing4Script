@@ -1,0 +1,2 @@
+python -m nuitka tools\main.py --windows-icon-from-ico=./dev-tools/main.ico --output-dir=dist --standalone --onefile --mingw64 --include-data-dir=static=static
+tar.exe -a -c -f dist\rf4s.zip LICENSE config.yaml -C dist main.exe screenshots logs

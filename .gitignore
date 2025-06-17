@@ -9,7 +9,6 @@ screenshots/
 static/tmp/
 tests/
 logs/
+dist/
 
-/config.yaml
-/dev-tools
-/dist
+config.yaml
