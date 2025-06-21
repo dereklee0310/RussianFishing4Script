@@ -90,11 +90,10 @@ python tools\main.py
 | Feature                  | Functionality                                            |
 | ------------------------ | -------------------------------------------------------- |
 | Fishing Bot              | Main script                                              |
-| Craft Items              | Automatically harvest baits while staying idle           |
 | Harvest Baits            | Stay idle and harvest baits automatically                |
 | Toggle Moving Forward    | Automatically presses `W` (or `Shift + W` for sprinting) |
 | Automate Friction Brake  | Adjust the friction brake automatically                  |
-| Calculate Tackle's Stats | Calculate the real drag or load capacity of the loadout  |
+<!-- | Calculate Tackle's Stats | Calculate the real drag or load capacity of the loadout  | -->
 
 ## Troubleshooting
 <details>

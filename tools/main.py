@@ -81,11 +81,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 FEATURES = (
     "Fishing Bot",
-    "Craft Items",
+    # "Craft Items",
     "Harvest Baits",
     "Toggle Moving Forward",
     "Automate Friction Brake",
-    "Calculate Tackle's Stats",
+    # "Calculate Tackle's Stats",
 )
 
 
@@ -582,12 +582,10 @@ if __name__ == "__main__":
                 logger.critical(e, exc_info=True)
             utils.safe_exit()
         case 1:
-            craft.run_app_from_main()
-        case 2:
             harvest.run_app_from_main()
-        case 3:
+        case 2:
             move.run_app_from_main()
-        case 4:
+        case 3:
             auto_friction_brake.run_app_from_main()
-        case 5:
-            calculate.run_app_from_main()
+        # case 4:
+        #     calculate.run_app_from_main()
