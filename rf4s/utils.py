@@ -256,11 +256,17 @@ def update_argv():
             input("Enter launch options (press Enter to skip): ")
         )
 
-
 def safe_exit():
     if is_run_by_clicking():
         print("Press any key to quit.")
         # KeyboardInterrupt will mess with stdin, input will crash silently
         # Use msvcrt.getch() because it doesn't depends on stdin
         msvcrt.getch()
+    pag.mouseUp(button="left")
+    pag.mouseUp(button="right")
+    pag.keyUp("ctrl")
+    pag.keyUp("shift")
+    pag.keyUp("w")
+    pag.keyUp("a")
+    pag.keyUp("d")
     sys.exit()

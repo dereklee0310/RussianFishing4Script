@@ -756,7 +756,6 @@ class Player:
             case _:
                 self.general_quit("Lure is broken")
 
-    @utils.release_keys_after(arrow_keys=True)
     def _handle_termination(self, msg: str, shutdown: bool) -> None:
         """Handle script termination.
 
