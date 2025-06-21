@@ -11,6 +11,7 @@ import logging
 import sys
 import time
 from pathlib import Path
+import json
 
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
@@ -196,6 +197,18 @@ class Timer:
         if not cast_rhour_list:
             logger.warning("No cast record, skip plotting")
             return
+
+        with open(f"logs/{self.get_cur_timestamp()}_result.json", "w") as f:
+            json.dump(
+                {
+                    "start_time": self.start_datetime,
+                    "end_time": self.get_cur_datetime(),
+                    "cast_rhour_list": cast_rhour_list,
+                    "cast_ghour_list": cast_ghour_list,
+                },
+                f,
+                indent=4,
+            )
 
         logger.info("Plotting line chart")
 
