@@ -1,5 +1,18 @@
 **[[中文版]][CHANGELOG]**
 
+## 0.5.3 (2025-06-21)
+
+### 🐛 Bug Fixes
+- Fixed an issue where the Discord notification feature was not functioning properly.  
+- Resolved a bug that prevented the script from displaying results after the Keepnet was full.  
+- Fixed an issue where the script did not exit correctly when `-FB` mode was enabled.  
+- Addressed a bug that caused the script to fail to quit when receiving a gift.  
+- Removed the "Craft Items" feature due to potential ban risks.  
+- Temporarily removed the "Calculate Tackle's Stats" feature as it was providing misleading results.
+
+### 🔧 Improvements
+- Added a build script to compile the source code into an executable file for easier distribution.
+
 ## 0.5.2 (2025-06-08)
 
 ### 🐛 Bug Fixes
