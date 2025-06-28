@@ -114,9 +114,9 @@ class Tackle:
                 raise exceptions.FishHookedError
             if self.detection.is_fish_captured():
                 raise exceptions.FishCapturedError
-            if self.cfg.SCRIPT.SPOOLING_DETECTION and self.detection.is_line_at_end():
+            if self.cfg.BOT.SPOOLING_DETECTION and self.detection.is_line_at_end():
                 raise exceptions.LineAtEndError
-            if self.cfg.SCRIPT.SNAG_DETECTION and self.detection.is_line_snagged():
+            if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged():
                 raise exceptions.LineSnaggedError
             if self.detection.is_lure_broken():
                 raise exceptions.LureBrokenError
@@ -137,7 +137,7 @@ class Tackle:
         logger.info("Casting rod")
         if self.cfg.ARGS.MOUSE:
             self.move_mouse_randomly()
-        match self.cfg.SELECTED.CAST_POWER_LEVEL:
+        match self.cfg.PROFILE.CAST_POWER_LEVEL:
             case 1:  # 0%
                 pag.click()
             case 5:  # power cast
@@ -145,17 +145,17 @@ class Tackle:
                     utils.hold_mouse_button(1)
             case _:
                 # -1 for backward compatibility
-                duration = CAST_SCALE * (self.cfg.SELECTED.CAST_POWER_LEVEL - 1)
+                duration = CAST_SCALE * (self.cfg.PROFILE.CAST_POWER_LEVEL - 1)
                 utils.hold_mouse_button(duration)
 
-        sleep(self.cfg.SELECTED.CAST_DELAY)
+        sleep(self.cfg.PROFILE.CAST_DELAY)
         if lock:
             pag.click()
 
     def sink(self) -> None:
         """Sink the lure until an event happens, designed for marine and wakey rig."""
         logger.info("Sinking lure")
-        i = self.cfg.SELECTED.SINK_TIMEOUT
+        i = self.cfg.PROFILE.SINK_TIMEOUT
         while i > 0:
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
             if self.detection.is_moving_in_bottom_layer():
@@ -167,7 +167,7 @@ class Tackle:
                 pag.click()  # Lock reel
                 return
 
-        utils.hold_mouse_button(self.cfg.SELECTED.TIGHTEN_DURATION)
+        utils.hold_mouse_button(self.cfg.PROFILE.TIGHTEN_DURATION)
 
     @_check_status
     @utils.release_keys_after()
@@ -187,9 +187,9 @@ class Tackle:
         i = RETRIEVAL_TIMEOUT
         while i > 0:
             if self.detection.is_fish_hooked():
-                if self.cfg.SELECTED.POST_ACCELERATION == "on":
+                if self.cfg.PROFILE.POST_ACCELERATION == "on":
                     pag.keyDown("shift")
-                elif self.cfg.SELECTED.POST_ACCELERATION == "auto" and first:
+                elif self.cfg.PROFILE.POST_ACCELERATION == "auto" and first:
                     pag.keyDown("shift")
 
                 if self.cfg.ARGS.LIFT:
@@ -201,9 +201,9 @@ class Tackle:
 
             if self.detection.is_fish_captured():
                 raise exceptions.FishCapturedError
-            if self.cfg.SCRIPT.SPOOLING_DETECTION and self.detection.is_line_at_end():
+            if self.cfg.BOT.SPOOLING_DETECTION and self.detection.is_line_at_end():
                 raise exceptions.LineAtEndError
-            if self.cfg.SCRIPT.SNAG_DETECTION and self.detection.is_line_snagged():
+            if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged():
                 raise exceptions.LineSnaggedError
             if self.detection.is_tackle_broken():
                 raise exceptions.TackleBrokenError
@@ -219,13 +219,13 @@ class Tackle:
         :param button: The mouse button to use for retrieval.
         :type button: str
         """
-        if self.cfg.SELECTED.PRE_ACCELERATION:
+        if self.cfg.PROFILE.PRE_ACCELERATION:
             pag.keyDown("shift")
         i = RETRIEVAL_WITH_PAUSE_TIMEOUT
         while i > 0:
-            utils.hold_mouse_button(self.cfg.SELECTED.RETRIEVAL_DURATION, button)
-            i -= self.cfg.SELECTED.RETRIEVAL_DURATION
-            i = utils.sleep_and_decrease(i, self.cfg.SELECTED.RETRIEVAL_DELAY)
+            utils.hold_mouse_button(self.cfg.PROFILE.RETRIEVAL_DURATION, button)
+            i -= self.cfg.PROFILE.RETRIEVAL_DURATION
+            i = utils.sleep_and_decrease(i, self.cfg.PROFILE.RETRIEVAL_DELAY)
             if (
                 self.detection.is_fish_hooked()
                 or self.detection.is_retrieval_finished()
@@ -240,7 +240,7 @@ class Tackle:
         """
         logger.info("Pirking")
 
-        i = self.cfg.SELECTED.PIRK_TIMEOUT
+        i = self.cfg.PROFILE.PIRK_TIMEOUT
         while i > 0:
             if self.detection.is_tackle_ready():
                 return
@@ -249,14 +249,14 @@ class Tackle:
                 pag.click()
                 return
 
-            if self.cfg.SELECTED.PIRK_DURATION > 0:
-                if self.cfg.SELECTED.CTRL:
+            if self.cfg.PROFILE.PIRK_DURATION > 0:
+                if self.cfg.PROFILE.CTRL:
                     pag.keyDown("ctrl")
-                if self.cfg.SELECTED.SHIFT:
+                if self.cfg.PROFILE.SHIFT:
                     pag.keyDown("shift")
-                utils.hold_mouse_button(self.cfg.SELECTED.PIRK_DURATION, button="right")
-                i -= self.cfg.SELECTED.PIRK_DURATION
-                i = utils.sleep_and_decrease(i, self.cfg.SELECTED.PIRK_DELAY)
+                utils.hold_mouse_button(self.cfg.PROFILE.PIRK_DURATION, button="right")
+                i -= self.cfg.PROFILE.PIRK_DURATION
+                i = utils.sleep_and_decrease(i, self.cfg.PROFILE.PIRK_DELAY)
             else:
                 i = utils.sleep_and_decrease(i, LOOP_DELAY)
 
@@ -271,25 +271,25 @@ class Tackle:
         :raises exceptions.TimeoutError: The loop timed out.
         """
         locked = True  # Reel is locked after tackle.sink()
-        i = self.cfg.SELECTED.ELEVATE_TIMEOUT
+        i = self.cfg.PROFILE.ELEVATE_TIMEOUT
         while i > 0:
             if self.detection.is_fish_hooked_twice():
                 pag.click()
                 return
 
-            if self.cfg.SELECTED.DROP and not dropped:
+            if self.cfg.PROFILE.DROP and not dropped:
                 pag.press("enter")
                 if locked:
-                    delay = self.cfg.SELECTED.ELEVATE_DELAY
+                    delay = self.cfg.PROFILE.ELEVATE_DELAY
                 else:
-                    delay = self.cfg.SELECTED.ELEVATE_DURATION
+                    delay = self.cfg.PROFILE.ELEVATE_DURATION
                 i = utils.sleep_and_decrease(i, delay)
             else:
                 if locked:
-                    i = utils.sleep_and_decrease(i, self.cfg.SELECTED.ELEVATE_DELAY)
+                    i = utils.sleep_and_decrease(i, self.cfg.PROFILE.ELEVATE_DELAY)
                 else:
-                    utils.hold_mouse_button(self.cfg.SELECTED.ELEVATE_DURATION)
-                    i -= self.cfg.SELECTED.ELEVATE_DURATION
+                    utils.hold_mouse_button(self.cfg.PROFILE.ELEVATE_DURATION)
+                    i -= self.cfg.PROFILE.ELEVATE_DURATION
             locked = not locked
 
         self.is_disconnected_or_ticketed_expired()
@@ -299,7 +299,7 @@ class Tackle:
     def pull(self) -> None:
         """Pull the fish until it's captured."""
         logger.info("Pulling fish")
-        if self.cfg.SELECTED.MODE == "telescopic":
+        if self.cfg.PROFILE.MODE == "telescopic":
             self._telescopic_pull()
         else:
             self._pull()
@@ -312,7 +312,7 @@ class Tackle:
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
             if self.detection.is_fish_captured():
                 return
-            if self.cfg.SCRIPT.SNAG_DETECTION and self.detection.is_line_snagged():
+            if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged():
                 raise exceptions.LineSnaggedError
 
         if not self.detection.is_fish_hooked():
@@ -464,9 +464,9 @@ class Tackle:
         """Monitor the state of the float."""
         logger.info("Monitoring float state")
         reference_img = pag.screenshot(region=self.detection.float_camera_rect)
-        i = self.cfg.SELECTED.DRIFT_TIMEOUT
+        i = self.cfg.PROFILE.DRIFT_TIMEOUT
         while i > 0:
-            i = utils.sleep_and_decrease(i, self.cfg.SELECTED.CHECK_DELAY)
+            i = utils.sleep_and_decrease(i, self.cfg.PROFILE.CHECK_DELAY)
             if self.detection.is_float_state_changed(reference_img):
                 logger.info("Float status changed")
                 return
@@ -476,9 +476,9 @@ class Tackle:
 
     def _monitor_clip_state(self) -> None:
         """Monitor the state of the bolognese clip."""
-        i = self.cfg.SELECTED.DRIFT_TIMEOUT
+        i = self.cfg.PROFILE.DRIFT_TIMEOUT
         while i > 0:
-            i = utils.sleep_and_decrease(i, self.cfg.SELECTED.CHECK_DELAY)
+            i = utils.sleep_and_decrease(i, self.cfg.PROFILE.CHECK_DELAY)
             if self.detection.is_clip_open():
                 logger.info("Clip status changed")
                 return

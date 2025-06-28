@@ -50,7 +50,7 @@ class FrictionBrake:
         self.cfg = cfg
         self.lock = lock
         self.detection = detection
-        self.cur = Value("i", cfg.FRICTION_BRAKE.INITIAL)
+        self.cur = Value("i", cfg.BOT.FRICTION_BRAKE.INITIAL)
         self.monitor_process = Process(target=monitor_friction_brake, args=(self,))
 
     def reset(self, target: int) -> None:
@@ -75,7 +75,7 @@ class FrictionBrake:
         :type increase: bool
         """
         if increase:
-            if self.cur.value < self.cfg.FRICTION_BRAKE.MAX:
+            if self.cur.value < self.cfg.BOT.FRICTION_BRAKE.MAX:
                 pag.scroll(UP, _pause=False)
                 self.cur.value = min(self.cur.value + 1, MAX_FRICTION_BRAKE)
         else:
@@ -106,7 +106,7 @@ def monitor_friction_brake(friction_brake: FrictionBrake) -> None:
                 fish_hooked = False
                 continue
             if not fish_hooked:
-                sleep(friction_brake.cfg.FRICTION_BRAKE.START_DELAY)
+                sleep(friction_brake.cfg.BOT.FRICTION_BRAKE.START_DELAY)
                 fish_hooked = True
             with friction_brake.lock:
                 if friction_brake.detection.is_friction_brake_high():
@@ -118,7 +118,7 @@ def monitor_friction_brake(friction_brake: FrictionBrake) -> None:
                     cur_time = time()
                     if (
                         cur_time - pre_time
-                        < friction_brake.cfg.FRICTION_BRAKE.INCREASE_DELAY
+                        < friction_brake.cfg.BOT.FRICTION_BRAKE.INCREASE_DELAY
                     ):
                         continue
                     pre_time = cur_time

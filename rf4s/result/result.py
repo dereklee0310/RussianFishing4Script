@@ -12,7 +12,7 @@ class Result:
 
 
 @dataclass
-class RF4SResult:
+class BotResult:
     tea: int = 0
     carrot: int = 0
     alcohol: int = 0

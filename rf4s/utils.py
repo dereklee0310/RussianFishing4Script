@@ -10,7 +10,6 @@ key and mouse states during automation.
 import ctypes
 import logging
 import msvcrt
-import shlex
 import sys
 from time import sleep
 
@@ -226,7 +225,7 @@ def reset_friction_brake_after(func):
             return
 
         with self.friction_brake_lock:
-            self.friction_brake.reset(self.cfg.FRICTION_BRAKE.INITIAL)
+            self.friction_brake.reset(self.cfg.BOT.FRICTION_BRAKE.INITIAL)
 
     return wrapper
 
@@ -249,12 +248,12 @@ def is_run_by_clicking():
     return is_compiled() and num_processes == 2
 
 
-def update_argv():
-    if is_run_by_clicking():
-        logger.info("No launch options used")
-        sys.argv = ["foo"] + shlex.split(
-            input("Enter launch options (press Enter to skip): ")
-        )
+def get_launch_options_from_user():
+    if not is_run_by_clicking():
+        return ""
+    logger.info("Run by double-clicking detected")
+    return input("Enter launch options (press Enter to skip): ")
+
 
 def safe_exit():
     if is_run_by_clicking():

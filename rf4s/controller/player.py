@@ -8,7 +8,6 @@ automating various fishing techniques.
 """
 
 import logging
-import msvcrt
 import os
 import random
 import sys
@@ -17,11 +16,9 @@ from datetime import datetime
 from multiprocessing import Lock
 
 # from email.mime.image import MIMEImage
-from pathlib import Path
 from time import sleep
 
 import pyautogui as pag
-from playsound import playsound
 from pynput import keyboard
 from rich import box, print
 from rich.table import Table
@@ -37,8 +34,7 @@ from rf4s.controller.notification import (
     MiaotixingNotification,
 )
 from rf4s.controller.timer import Timer
-from rf4s.controller.window import Window
-from rf4s.result.result import RF4SResult
+from rf4s.result.result import BotResult
 
 logger = logging.getLogger("rich")
 random.seed(datetime.now().timestamp())
@@ -52,7 +48,7 @@ TICKET_EXPIRE_DELAY = 16
 DISCONNECTED_DELAY = 8
 WEAR_TEXT_UPDATE_DELAY = 2
 PUT_DOWN_DELAY = 4
-SCREENSHOT_DELAY = 2
+GIFT_DELAY = 2
 
 TROLLING_KEY = "j"
 LEFT_KEY = "a"
@@ -72,7 +68,7 @@ class Player:
     :type window: Window
     """
 
-    def __init__(self, cfg, window: Window):
+    def __init__(self, cfg, timer: Timer, detection: Detection, result: BotResult):
         """Initialize monitor, timer, and some trivial counters.
 
         :param cfg: Configuration object containing settings for the fishing process.
@@ -81,12 +77,12 @@ class Player:
         :type window: Window
         """
         self.cfg = cfg
-        self.window = window
-        self.timer = Timer(cfg)
-        self.detection = Detection(cfg, window)
+        self.timer = timer
+        self.detection = detection
+        self.result = result
 
         self.tackle_idx = 0
-        if self.cfg.SELECTED.MODE == "bottom":
+        if self.cfg.PROFILE.MODE == "bottom":
             self.num_tackle = len(self.cfg.KEY.BOTTOM_RODS)
         else:
             self.num_tackle = 1
@@ -105,7 +101,7 @@ class Player:
         self.have_new_groundbait = True
         self.have_new_dry_mix = True
         self.have_new_pva = True
-        self.result = RF4SResult()
+        self.result = BotResult()
 
         self.clicklock_enabled = False
 
@@ -116,7 +112,7 @@ class Player:
             self.friction_brake.monitor_process.start()
 
         if (
-            self.cfg.SELECTED.MODE not in ("telescopic", "bottom")
+            self.cfg.PROFILE.MODE not in ("telescopic", "bottom")
             and not self.cfg.ARGS.SKIP_CAST
             and not self.detection.is_retrieval_finished()
         ):
@@ -129,9 +125,9 @@ class Player:
                 self.friction_brake.monitor_process.terminate()
             utils.safe_exit()
 
-        logger.info("Starting fishing mode: '%s'", self.cfg.SELECTED.MODE)
+        logger.info("Starting fishing mode: '%s'", self.cfg.PROFILE.MODE)
         self._start_trolling()
-        getattr(self, f"start_{self.cfg.SELECTED.MODE}_mode")()
+        getattr(self, f"start_{self.cfg.PROFILE.MODE}_mode")()
 
     # ---------------------------------------------------------------------------- #
     #                              main fishing loops                              #
@@ -148,9 +144,9 @@ class Player:
                 self._cast_tackle()
             skip_cast = False
 
-            if self.cfg.SELECTED.TYPE != "normal":
-                utils.hold_mouse_button(self.cfg.SELECTED.TIGHTEN_DURATION)
-                getattr(self, f"retrieve_with_{self.cfg.SELECTED.TYPE}")()
+            if self.cfg.PROFILE.TYPE != "normal":
+                utils.hold_mouse_button(self.cfg.PROFILE.TIGHTEN_DURATION)
+                getattr(self, f"retrieve_with_{self.cfg.PROFILE.TYPE}")()
             self.retrieve_line()
 
             if self.detection.is_fish_hooked():
@@ -184,7 +180,7 @@ class Player:
                 check_miss_counts[self.tackle_idx] = 0
                 self.retrieve_and_recast()
             else:
-                sleep(self.cfg.SELECTED.PUT_DOWN_DELAY)
+                sleep(self.cfg.PROFILE.PUT_DOWN_DELAY)
                 if self.detection.is_fish_hooked():
                     check_miss_counts[self.tackle_idx] = 0
                     self.retrieve_and_recast()
@@ -253,7 +249,7 @@ class Player:
             try:
                 with self.error_handler():
                     monitor()
-                sleep(self.cfg.SELECTED.PULL_DELAY)
+                sleep(self.cfg.PROFILE.PULL_DELAY)
                 hold_mouse_button(PRE_RETRIEVAL_DURATION)
                 self.pull_fish()
             except TimeoutError:
@@ -471,11 +467,11 @@ class Player:
             self._pause_script()
 
         if self.cfg.ARGS.BITE:
-            self.window.save_screenshot(self.timer.get_cur_timestamp())
+            self.detection.window.save_screenshot(self.timer.get_cur_timestamp())
 
         if (
             self.cfg.ARGS.RANDOM_CAST
-            and random.random() <= self.cfg.SCRIPT.RANDOM_CAST_PROBABILITY
+            and random.random() <= self.cfg.BOT.RANDOM_CAST_PROBABILITY
         ):
             logger.info("Casting rod redundantly")
             pag.click()
@@ -523,7 +519,7 @@ class Player:
 
     def do_pirking(self) -> None:
         """Perform pirking until a fish is hooked."""
-        if self.cfg.SELECTED.PIRK_RETRIEVAL:
+        if self.cfg.PROFILE.PIRK_RETRIEVAL:
             with self.toggle_clicklock():
                 self._do_pirking()
         else:
@@ -536,16 +532,16 @@ class Player:
                     self.tackle.pirk()
                 break
             except TimeoutError:
-                if self.cfg.SELECTED.PIRK_RETRIEVAL:
+                if self.cfg.PROFILE.PIRK_RETRIEVAL:
                     if not self.clicklock_enabled:
                         self.enable_clicklock()
                     continue
 
-                if self.cfg.SELECTED.DEPTH_ADJUST_DELAY > 0:
+                if self.cfg.PROFILE.DEPTH_ADJUST_DELAY > 0:
                     logger.info("Adjusting lure depth")
                     pag.press("enter")  # Open reel
-                    sleep(self.cfg.SELECTED.DEPTH_ADJUST_DELAY)
-                    utils.hold_mouse_button(self.cfg.SELECTED.DEPTH_ADJUST_DURATION)
+                    sleep(self.cfg.PROFILE.DEPTH_ADJUST_DELAY)
+                    utils.hold_mouse_button(self.cfg.PROFILE.DEPTH_ADJUST_DURATION)
                 else:
                     self.reset_tackle()
                     self._cast_tackle()
@@ -578,7 +574,7 @@ class Player:
                 except TimeoutError:
                     self.disable_clicklock()
                     sleep(PUT_DOWN_DELAY)
-                    if self.cfg.SELECTED.MODE != "telescopic":
+                    if self.cfg.PROFILE.MODE != "telescopic":
                         self.retrieve_line()
                     if not self.clicklock_enabled:
                         self.enable_clicklock()
@@ -591,7 +587,7 @@ class Player:
         :type check_miss_counts: list[int]
         """
         check_miss_counts[self.tackle_idx] += 1
-        if check_miss_counts[self.tackle_idx] >= self.cfg.SELECTED.CHECK_MISS_LIMIT:
+        if check_miss_counts[self.tackle_idx] >= self.cfg.PROFILE.CHECK_MISS_LIMIT:
             check_miss_counts[self.tackle_idx] = 0
             self.reset_tackle()
             self._refill_groundbait()
@@ -599,9 +595,9 @@ class Player:
             self._cast_tackle(lock=True)
 
         pag.press("0")
-        bound = self.cfg.SELECTED.CHECK_DELAY // 5
+        bound = self.cfg.PROFILE.CHECK_DELAY // 5
         random_offset = random.uniform(-bound, bound)
-        sleep(self.cfg.SELECTED.CHECK_DELAY + random_offset)
+        sleep(self.cfg.PROFILE.CHECK_DELAY + random_offset)
 
     def _start_trolling(self) -> None:
         """Start trolling and change moving direction based on the trolling setting."""
@@ -618,7 +614,7 @@ class Player:
         candidates = self._get_available_rods()
         if not candidates:
             self.general_quit("All rods are unavailable")
-        if self.cfg.SCRIPT.RANDOM_ROD_SELECTION:
+        if self.cfg.PROFILE.RANDOM_ROD_SELECTION:
             self.tackle_idx = random.choice(candidates)
         else:
             self.tackle_idx = candidates[0]
@@ -725,9 +721,9 @@ class Player:
         """Pause the script for a specified duration."""
         logger.info("Pausing script")
         pag.press("esc")
-        bound = self.cfg.PAUSE.DURATION // 5
+        bound = self.cfg.BOT.PAUSE_DURATION // 5
         offset = random.randint(-bound, bound)
-        sleep(self.cfg.PAUSE.DURATION + offset)
+        sleep(self.cfg.BOT.PAUSE_DURATION + offset)
         pag.press("esc")
 
     def _handle_timeout(self) -> None:
@@ -743,18 +739,10 @@ class Player:
 
     def _handle_broken_lure(self) -> None:
         """Handle the broken lure event according to the settings."""
-        match self.cfg.ARGS.BROKEN_LURE:
-            case "replace":
-                self._replace_broken_lures()
-            case "alarm":
-                playsound(str(Path(self.cfg.SCRIPT.ALARM_SOUND).resolve()))
-                self.window.activate_script_window()
-                print("Please replace your lure.")
-                print("Press any key to continue...")
-                msvcrt.getch()
-                self.window.activate_game_window()
-            case _:
-                self.general_quit("Lure is broken")
+        if self.cfg.ARGS.BROKEN_LURE:
+            self._replace_broken_lures()
+        else:
+            self.general_quit("Lure is broken")
 
     def _handle_termination(self, msg: str, shutdown: bool) -> None:
         """Handle script termination.
@@ -795,22 +783,24 @@ class Player:
         self._handle_fish()
         sleep(ANIMATION_DELAY)
         while self.detection.is_gift_receieved():
-            sleep(self.cfg.KEEPNET.GIFT_DELAY)
+            if self.cfg.ARGS.SCREENSHOT:
+                self.detection.window.save_screenshot(self.timer.get_cur_timestamp())
+            sleep(GIFT_DELAY)
             pag.press("space")
 
-        limit = self.cfg.KEEPNET.CAPACITY - self.cfg.ARGS.FISHES_IN_KEEPNET
+        limit = self.cfg.BOT.KEEPNET.CAPACITY - self.cfg.ARGS.FISHES_IN_KEEPNET
         if self.result.kept == limit:
             self._handle_full_keepnet()
 
     def _handle_fish(self) -> None:
         """Keep or release the fish and record the fish count."""
         tagged = False
-        for tag in self.cfg.SCRIPT.SCREENSHOT_TAGS:
+        for tag in self.cfg.BOT.SCREENSHOT_TAGS:
             if self.detection.is_tag_exist(TagColor[tag.upper()]):
                 tagged = True
-        tagged = not self.cfg.SCRIPT.SCREENSHOT_TAGS or tagged
+        tagged = not self.cfg.BOT.SCREENSHOT_TAGS or tagged
         if self.cfg.ARGS.SCREENSHOT and tagged:
-            self.window.save_screenshot(self.timer.get_cur_timestamp())
+            self.detection.window.save_screenshot(self.timer.get_cur_timestamp())
 
         self.result.total += 1
         if self.detection.is_fish_blacklisted():
@@ -822,7 +812,7 @@ class Player:
             if self.detection.is_tag_exist(tag):
                 tag_color = tag.name.lower()
                 setattr(self.result, tag_color, getattr(self.result, tag_color) + 1)
-                if tag_color in self.cfg.KEEPNET.TAGS:
+                if tag_color in self.cfg.BOT.KEEPNET.TAGS:
                     tagged = True
 
         if (
@@ -833,33 +823,18 @@ class Player:
             pag.press("backspace")
             return
 
-        # Fish is tagged, ARGS.TAG is disabled, or fish is in whitelist
-        sleep(self.cfg.KEEPNET.FISH_DELAY)
         pag.press("space")
 
         self.result.kept += 1
 
         # Avoid wrong cast hour
-        if self.cfg.SELECTED.MODE in ["bottom", "pirk", "elevator"]:
+        if self.cfg.PROFILE.MODE in ["bottom", "pirk", "elevator"]:
             self.timer.update_cast_time()
         self.timer.add_cast_time()
 
     def _handle_full_keepnet(self) -> None:
         """Handle a full keepnet event."""
-        match self.cfg.KEEPNET.FULL_ACTION:
-            case "alarm":
-                playsound(str(Path(self.cfg.SCRIPT.ALARM_SOUND).resolve()))
-                self.window.activate_script_window()
-                print("Press any key to continue...")
-                msvcrt.getch()
-                self.window.activate_game_window()
-                with keyboard.Listener(on_release=self._on_release) as listner:
-                    listner.join()
-                logger.info("Continue running script")
-            case "quit":
-                self.general_quit("Keepnet is full")
-            case _:
-                raise ValueError
+        self.general_quit("Keepnet is full")
 
     def _on_release(self, _: keyboard.KeyCode) -> None:
         """Handle key release events."""
@@ -912,9 +887,7 @@ class Player:
         :return: formatted running result table
         :rtype: Table
         """
-        table = Table(
-            "Field", "Value", title="Running Result", box=box.DOUBLE, show_header=False
-        )
+        table = Table(title="Running Result", box=box.HEAVY, show_header=False)
 
         for k, v in result.items():
             table.add_row(k, str(v))

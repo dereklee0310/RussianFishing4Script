@@ -147,7 +147,7 @@ Since trolling on a boat is just bottom fishing with trolling and direction keys
 you can combine a bottom fishing profile with the `-T` flag to get things done.  
 There's no 3rd rod pod on the boat, so you should overwrite the bottom rod keys like this:
 ```
-python tools\main.py -T KEY.BOTTOM_RODS "1, 2"
+python tools\main.py -T KEY.BOTTOM_RODS "(1, 2)"
 ```
 
 ## Configuration References

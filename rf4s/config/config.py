@@ -5,9 +5,20 @@ This module provides utilities for setting up, converting, and printing
 configuration nodes using the YACS library.
 """
 
+import sys
+from pathlib import Path
+
 from yacs.config import CfgNode as CN
 
-from rf4s.config.defaults import get_cfg_defaults
+from rf4s import config, utils
+
+logger = utils.create_rich_logger()
+
+# Get the base path depending on runtime environment
+if utils.is_compiled():
+    ROOT = Path(sys.executable).parent  # Running as .exe (Nuitka/PyInstaller)
+else:
+    ROOT = Path(__file__).resolve().parents[2]
 
 
 def setup_cfg() -> CN:
@@ -20,7 +31,7 @@ def setup_cfg() -> CN:
     :return: A cloned configuration node with default settings.
     :rtype: CN
     """
-    cfg = get_cfg_defaults()
+    cfg = config.get_cfg_defaults()
     cfg.set_new_allowed(True)
     return cfg.clone()
 
@@ -60,13 +71,23 @@ def print_cfg(cfg: CN, level: int = 0) -> None:
     :type level: int
     """
     cfg = dict(cfg)
-    indent = "  " * level if level > 0 else ""
+    # Two-space indentation style
+    # indent = "  " * level if level > 0 else ""
+    # for k, v in cfg.items():
+    #     if isinstance(v, CN):
+    #         print(f"{indent}{k}:")
+    #         print_cfg(v, level + 1)
+    #     else:
+    #         print(f"{indent}{k}: {v}")
+
+    # Two-Space separated style
+    # Need to add a newline manually
     for k, v in cfg.items():
         if isinstance(v, CN):
-            print(f"{indent}{k}:")
+            print(f"{k}:", end=" ")
             print_cfg(v, level + 1)
         else:
-            print(f"{indent}{k}: {v}")
+            print(f"{k}: {v}", end=" ")
 
 
 def to_list(profile: dict) -> list:
@@ -85,3 +106,13 @@ def to_list(profile: dict) -> list:
     for k, v in profile.items():
         pairs.extend([k, v])
     return pairs
+
+
+def load_cfg() -> CN:
+    cfg = setup_cfg()
+    config_path = ROOT / "config.yaml"
+    if not config_path.exists():
+        logger.critical("config.yaml not found at %s", config_path)
+        utils.safe_exit()
+    cfg.merge_from_file(config_path)
+    return cfg
