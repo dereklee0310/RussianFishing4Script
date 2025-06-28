@@ -7,24 +7,28 @@ for logging and automation purposes in Russian Fishing 4.
 """
 
 import datetime
+import json
 import logging
 import sys
 import time
 from pathlib import Path
-import json
 
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
-from rf4s.utils import is_compiled
+from rf4s import utils
 
 logger = logging.getLogger("rich")
 
-
-if is_compiled():
+# When running as an executable, use sys.executable to find the path to save file.
+# This file is not included during compilation and could not be resolved automatically
+# by Nuitka.
+if utils.is_compiled():
     ROOT = Path(sys.executable).parent  # Running as .exe (Nuitka/PyInstaller)
 else:
     ROOT = Path(__file__).resolve().parents[2]
+
+TEA_DELAY = 300
 
 
 class Timer:
@@ -137,7 +141,7 @@ class Timer:
         :rtype: bool
         """
         cur_time = time.time()
-        if cur_time - self.last_tea_drink > self.cfg.STAT.TEA_DELAY:
+        if cur_time - self.last_tea_drink > TEA_DELAY:
             self.last_tea_drink = cur_time
             return True
         return False
@@ -149,7 +153,7 @@ class Timer:
         :rtype: bool
         """
         cur_time = time.time()
-        if cur_time - self.last_alcohol_drink > self.cfg.STAT.ALCOHOL_DELAY:
+        if cur_time - self.last_alcohol_drink > self.cfg.BOT.ALCOHOL_DRINK_DELAY:
             self.last_alcohol_drink = cur_time
             self.last_tea_drink = cur_time  # Alcohol also refill comfort
             return True
@@ -162,7 +166,7 @@ class Timer:
         :rtype: bool
         """
         cur_time = time.time()
-        if cur_time - self.last_lure_change > self.cfg.SCRIPT.LURE_CHANGE_DELAY:
+        if cur_time - self.last_lure_change > self.cfg.BOT.LURE_CHANGE_DELAY:
             self.last_lure_change = cur_time
             return True
         return False
@@ -174,7 +178,7 @@ class Timer:
         :rtype: bool
         """
         cur_time = time.time()
-        if cur_time - self.last_spod_rod_recast > self.cfg.SCRIPT.SPOD_ROD_RECAST_DELAY:
+        if cur_time - self.last_spod_rod_recast > self.cfg.BOT.SPOD_ROD_RECAST_DELAY:
             self.last_spod_rod_recast = cur_time
             return True
         return False
@@ -186,7 +190,7 @@ class Timer:
         :rtype: bool
         """
         cur_time = time.time()
-        if cur_time - self.last_pause > self.cfg.PAUSE.DELAY:
+        if cur_time - self.last_pause > self.cfg.BOT.PAUSE_DELAY:
             self.last_pause = cur_time
             return True
         return False

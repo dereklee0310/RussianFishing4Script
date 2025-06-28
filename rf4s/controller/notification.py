@@ -44,7 +44,7 @@ class DiscordNotification:
 
     def build_raw_table(self) -> str:
         console = Console(width=100, force_terminal=True, color_system=None)
-        table = Table("Field", "Value", box=box.DOUBLE, show_header=False)
+        table = Table(box=box.HEAVY, show_header=False)
 
         for key, value in self.result.items():
             table.add_row(key, str(value))
@@ -58,7 +58,7 @@ class DiscordNotification:
         logger.info("Sending Discord notification")
         raw_table = self.build_raw_table()
         webhook = DiscordWebhook(
-            url=self.cfg.NOTIFICATION.DISCORD_WEBHOOK_URL,
+            url=self.cfg.BOT.NOTIFICATION.DISCORD_WEBHOOK_URL,
             username="RF4S",
             avatar_url=ICON_URL,
         )
@@ -91,8 +91,8 @@ class EmailNotification:
 
         msg = MIMEMultipart()
         msg["Subject"] = "RF4S: Notice of Program Termination"
-        msg["From"] = self.cfg.NOTIFICATION.EMAIL
-        recipients = [self.cfg.NOTIFICATION.EMAIL]
+        msg["From"] = self.cfg.BOT.NOTIFICATION.EMAIL
+        recipients = [self.cfg.BOT.NOTIFICATION.EMAIL]
         msg["To"] = ", ".join(recipients)
 
         text = ""
@@ -101,13 +101,13 @@ class EmailNotification:
         msg.attach(MIMEText(text))
 
         try:
-            with smtplib.SMTP_SSL(self.cfg.NOTIFICATION.SMTP_SERVER, 465) as server:
+            with smtplib.SMTP_SSL(self.cfg.BOT.NOTIFICATION.SMTP_SERVER, 465) as server:
                 # smtp_server.ehlo()
                 server.login(
-                    self.cfg.NOTIFICATION.EMAIL, self.cfg.NOTIFICATION.PASSWORD
+                    self.cfg.BOT.NOTIFICATION.EMAIL, self.cfg.BOT.NOTIFICATION.PASSWORD
                 )
                 server.sendmail(
-                    self.cfg.NOTIFICATION.EMAIL, recipients, msg.as_string()
+                    self.cfg.BOT.NOTIFICATION.EMAIL, recipients, msg.as_string()
                 )
             logger.info("Email sent successfully")
         except Exception as e:
@@ -132,7 +132,7 @@ class MiaotixingNotification:
             text += f"{k}: {v}\n"
 
         url = "http://miaotixing.com/trigger?" + parse.urlencode(
-            {"id": self.cfg.NOTIFICATION.MIAO_CODE, "text": text, "type": "json"}
+            {"id": self.cfg.BOT.NOTIFICATION.MIAO_CODE, "text": text, "type": "json"}
         )
 
         with request.urlopen(url) as page:

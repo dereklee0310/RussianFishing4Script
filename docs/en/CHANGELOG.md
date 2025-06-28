@@ -1,5 +1,20 @@
 **[[中文版]][CHANGELOG]**
 
+## TBD
+
+- KEY.BOTTOM_RODS "1, 2" -> KEY.BOTTOM_RODS "(1, 2)"
+- Add calculate and craft
+- Rework parser
+- Fix quit result disappear bug?
+- Improve settings display at startup
+- TODO: clicklock warning for electro mode
+- Remove sound files and alarm_sound and alarm feature
+- move screenshot_tags
+- move random_rod_selection
+- add keybinds for move and friction brake
+- remove friction_brake.max
+- TODO: remove tea_delay? add it back?
+
 ## 0.5.3 (2025-06-21)
 
 ### 🐛 Bug Fixes

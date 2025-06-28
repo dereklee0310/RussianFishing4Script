@@ -121,7 +121,7 @@ class Detection:
         """
         self.cfg = cfg
         self.window = window
-        self.image_dir = ROOT / "static" / cfg.SCRIPT.LANGUAGE
+        self.image_dir = ROOT / "static" / cfg.LANGUAGE
 
         if window.is_size_supported():
             self._set_absolute_coords()
@@ -162,12 +162,15 @@ class Detection:
             setattr(self, f"{key}_coord", self._get_absolute_coord(key))
 
         self.bait_icon_coord = self._get_absolute_coord("bait_icon") + [44, 52]
-        friction_brake_key = f"friction_brake_{self.cfg.FRICTION_BRAKE.SENSITIVITY}"
+        friction_brake_key = f"friction_brake_{self.cfg.BOT.FRICTION_BRAKE.SENSITIVITY}"
         self.friction_brake_coord = self._get_absolute_coord(friction_brake_key)
 
         bases = self._get_absolute_coord("float_camera")
-        if self.cfg.SELECTED.MODE in ("telescopic", "bolognese"):
-            match self.cfg.SELECTED.CAMERA_SHAPE:
+        if hasattr(self.cfg.PROFILE, "MODE") and self.cfg.PROFILE.MODE in (
+            "telescopic",
+            "bolognese",
+        ):
+            match self.cfg.PROFILE.CAMERA_SHAPE:
                 case "tall":
                     bases[0] += CAMERA_OFFSET
                     width, height = SIDE_LENGTH_HALF, SIDE_LENGTH
@@ -177,7 +180,7 @@ class Detection:
                 case "square":
                     width, height = SIDE_LENGTH, SIDE_LENGTH
                 case _:
-                    raise ValueError(self.cfg.SELECTED.CAMERA_SHAPE)
+                    raise ValueError(self.cfg.PROFILE.CAMERA_SHAPE)
             self.float_camera_rect = (*bases, width, height)  # (left, top, w, h)
 
     def _get_absolute_coord(self, offset_key: str) -> list[int]:
@@ -232,7 +235,7 @@ class Detection:
             return False
 
         # check if the fish got away after a short delay
-        time.sleep(self.cfg.SELECTED.HOOK_DELAY)
+        time.sleep(self.cfg.PROFILE.HOOK_DELAY)
         if self.is_fish_hooked():
             return True
         return False
@@ -246,7 +249,7 @@ class Detection:
         :return: True if the fish is in the whitelist, False otherwise.
         :rtype: bool
         """
-        return self._is_fish_in_list(self.cfg.KEEPNET.WHITELIST)
+        return self._is_fish_in_list(self.cfg.BOT.KEEPNET.WHITELIST)
 
     def is_fish_blacklisted(self) -> bool:
         """Check if the fish is in the blacklist.
@@ -254,7 +257,7 @@ class Detection:
         :return:  True if the fish is in the blacklist, False otherwise
         :rtype: bool
         """
-        return self._is_fish_in_list(self.cfg.KEEPNET.BLACKLIST)
+        return self._is_fish_in_list(self.cfg.BOT.KEEPNET.BLACKLIST)
 
     def _is_fish_in_list(self, fish_species_list: tuple | list) -> bool:
         """Check if the fish species matches any in the table.
@@ -278,11 +281,11 @@ class Detection:
 
     def _is_rainbow_line_0or5m(self):
         return self._get_image_box(
-            "5m", self.cfg.SCRIPT.SPOOL_CONFIDENCE
-        ) or self._get_image_box("0m", self.cfg.SCRIPT.SPOOL_CONFIDENCE)
+            "5m", self.cfg.BOT.SPOOL_CONFIDENCE
+        ) or self._get_image_box("0m", self.cfg.BOT.SPOOL_CONFIDENCE)
 
     def _is_spool_full(self):
-        return self._get_image_box("wheel", self.cfg.SCRIPT.SPOOL_CONFIDENCE)
+        return self._get_image_box("wheel", self.cfg.BOT.SPOOL_CONFIDENCE)
 
     def is_line_snagged(self) -> bool:
         return pag.pixel(*self.snag_icon_coord) == CRITICAL_COLOR
@@ -399,11 +402,11 @@ class Detection:
         return self._get_image_box("pva_icon", 0.6) is None
 
     def is_bait_chosen(self):
-        if self.cfg.SELECTED.MODE in ("pirk", "elevator"):
+        if self.cfg.PROFILE.MODE in ("pirk", "elevator"):
             return True
 
         # Two bait slots, check only the first one
-        if self.cfg.SELECTED.MODE in ("telescopic", "bolognese"):
+        if self.cfg.PROFILE.MODE in ("telescopic", "bolognese"):
             return (
                 pag.locate(
                     pag.screenshot(region=self.bait_icon_coord),
@@ -441,7 +444,7 @@ class Detection:
             current_img,
             reference_img,
             grayscale=True,
-            confidence=self.cfg.SELECTED.FLOAT_SENSITIVITY,
+            confidence=self.cfg.PROFILE.FLOAT_SENSITIVITY,
         )
 
     def get_ticket_position(self, duration: int):

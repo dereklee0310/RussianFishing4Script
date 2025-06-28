@@ -136,7 +136,7 @@ python tools\main.py SCRIPT.LANGUAGE "ru"  # 臨時設置腳本語言為俄語
 ### 雙竿拖釣模式  
 組合底釣配置與`-T`參數實現：  
 ```  
-python tools\main.py -T KEY.BOTTOM_RODS "1, 2"  # 指定使用1、2號快捷鍵位  
+python tools\main.py -T KEY.BOTTOM_RODS "(1, 2)"  # 指定使用1、2號快捷鍵位  
 ```  
 
 
