@@ -8,6 +8,7 @@ argument parsing, window management, and fishing automation.
 """
 
 import os
+import rich_argparse
 import shutil
 import argparse
 import shlex
@@ -94,7 +95,10 @@ Bug reports:   https://github.com/dereklee0310/RussianFishing4Script/issues
 """
 
 
-class Formatter(argparse.RawTextHelpFormatter, argparse.RawDescriptionHelpFormatter):
+class Formatter(
+    rich_argparse.RawTextRichHelpFormatter, argparse.RawDescriptionHelpFormatter
+):
+    # argparse.RawTextHelpFormatter, argparse.RawDescriptionHelpFormatter
     pass
 
 
@@ -194,8 +198,7 @@ def create_parser(cfg: CN) -> argparse.ArgumentParser:
     )
 
     craft_parser = feature_parsers.add_parser(
-        "craft",
-        help="craft items",
+        "craft", help="craft items", formatter_class=Formatter
     )
     craft_parser.add_argument(
         "-V", "--version", action="version", version=f"RF4S-craft {VERSION}"
@@ -216,7 +219,9 @@ def create_parser(cfg: CN) -> argparse.ArgumentParser:
         metavar="{number of items}",
     )
 
-    move_parser = feature_parsers.add_parser("move", help="toggle moving forward")
+    move_parser = feature_parsers.add_parser(
+        "move", help="toggle moving forward", formatter_class=Formatter
+    )
     move_parser.add_argument(
         "-V", "--version", action="version", version=f"RF4S-move {VERSION}"
     )
@@ -228,7 +233,9 @@ def create_parser(cfg: CN) -> argparse.ArgumentParser:
         help="Hold down the Shift key while moving",
     )
 
-    harvest_parser = feature_parsers.add_parser("harvest", help="harvest baits")
+    harvest_parser = feature_parsers.add_parser(
+        "harvest", help="harvest baits", formatter_class=Formatter
+    )
     harvest_parser.add_argument(
         "-V", "--version", action="version", version=f"RF4S-harvest {VERSION}"
     )
@@ -241,7 +248,10 @@ def create_parser(cfg: CN) -> argparse.ArgumentParser:
     )
 
     calculate_paser = feature_parsers.add_parser(
-        "calculate", help="calculate tackle's stats", aliases=["cal"]
+        "calculate",
+        help="calculate tackle's stats",
+        aliases=["cal"],
+        formatter_class=Formatter,
     )
     calculate_paser.add_argument(
         "-V", "--version", action="version", version=f"RF4S-calculate {VERSION}"
@@ -252,6 +262,7 @@ def create_parser(cfg: CN) -> argparse.ArgumentParser:
         "frictionbrake",
         help="automate friction brake",
         aliases=["fb"],
+        formatter_class=Formatter,
     )
     friction_brake_parser.add_argument(
         "-V", "--version", action="version", version=f"RF4S-frictionbrake {VERSION}"
@@ -308,8 +319,6 @@ def main() -> None:
     os.makedirs("logs", exist_ok=True)
     if not os.path.exists("config.yaml"):
         shutil.copy("rf4s/config/config.yaml", "config.yaml")
-
-
 
     cfg = config.load_cfg()
     parser = create_parser(cfg)
