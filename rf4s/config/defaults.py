@@ -116,7 +116,7 @@ _C.BOT.KEEPNET.BLACKLIST = ()
 _C.BOT.KEEPNET.SCREENSHOT_TAGS = ("yellow", "blue")
 # Only keep the fish with any of the following tags
 # (options: green, yellow, blue, purple, pink)
-_C.BOT.KEEPNET.TAGS = ("green", "yellow", "blue", "purple", "pink")
+_C.BOT.KEEPNET.KEEP_TAGS = ("green", "yellow", "blue", "purple", "pink")
 
 
 # ---------------------------------------------------------------------------- #
@@ -141,13 +141,17 @@ _C.BOT.NOTIFICATION.DISCORD_WEBHOOK_URL = ""
 _C.BOT.FRICTION_BRAKE = CN()
 # Initial friction brake value (1-30)
 _C.BOT.FRICTION_BRAKE.INITIAL = 29
+# Maximum friction brake value (1-30)
+_C.BOT.FRICTION_BRAKE.MAX = 30
 # Delay before starting to adjust the friction brake after a fish is hooked
 _C.BOT.FRICTION_BRAKE.START_DELAY = 2.0
 # Delay between each friction brake increment
 _C.BOT.FRICTION_BRAKE.INCREASE_DELAY = 1.0
+# Delay after decreasing the friction brake
+_C.BOT.FRICTION_BRAKE.DECREASE_DELAY = 1.0
 # Sensitivity of friction brake detection
 # (options: low, medium, high, very_high)
-_C.BOT.FRICTION_BRAKE.SENSITIVITY = "medium"
+_C.BOT.FRICTION_BRAKE.SENSITIVITY = "high"
 
 # ---------------------------------------------------------------------------- #
 #                                Craft Settings                                #
@@ -189,13 +193,17 @@ _C.FRICTION_BRAKE = CN()
 _C.FRICTION_BRAKE.LAUNCH_OPTIONS = ""
 # Initial friction brake value (1-30)
 _C.FRICTION_BRAKE.INITIAL = 29
+# Maximum friction brake value (1-30)
+_C.FRICTION_BRAKE.MAX = 30
 # Delay before starting to adjust the friction brake after a fish is hooked
 _C.FRICTION_BRAKE.START_DELAY = 2.0
 # Delay between each friction brake increment
 _C.FRICTION_BRAKE.INCREASE_DELAY = 1.0
+# Delay after decreasing the friction brake
+_C.FRICTION_BRAKE.DECREASE_DELAY = 1.0
 # Sensitivity of friction brake detection
 # (options: low, medium, high, very_high)
-_C.FRICTION_BRAKE.SENSITIVITY = "medium"
+_C.FRICTION_BRAKE.SENSITIVITY = "high"
 
 
 _C.PROFILE = CN()

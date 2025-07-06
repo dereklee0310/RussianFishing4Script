@@ -795,10 +795,10 @@ class Player:
     def _handle_fish(self) -> None:
         """Keep or release the fish and record the fish count."""
         tagged = False
-        for tag in self.cfg.BOT.SCREENSHOT_TAGS:
+        for tag in self.cfg.BOT.KEEPNET.KEEP_TAGS:
             if self.detection.is_tag_exist(TagColor[tag.upper()]):
                 tagged = True
-        tagged = not self.cfg.BOT.SCREENSHOT_TAGS or tagged
+        tagged = not self.cfg.BOT.KEEPNET.SCREENSHOT_TAGS or tagged
         if self.cfg.ARGS.SCREENSHOT and tagged:
             self.detection.window.save_screenshot(self.timer.get_cur_timestamp())
 
@@ -812,7 +812,7 @@ class Player:
             if self.detection.is_tag_exist(tag):
                 tag_color = tag.name.lower()
                 setattr(self.result, tag_color, getattr(self.result, tag_color) + 1)
-                if tag_color in self.cfg.BOT.KEEPNET.TAGS:
+                if tag_color in self.cfg.BOT.KEEPNET.KEEP_TAGS:
                     tagged = True
 
         if (

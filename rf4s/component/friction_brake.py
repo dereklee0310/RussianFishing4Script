@@ -50,7 +50,14 @@ class FrictionBrake:
         self.cfg = cfg
         self.lock = lock
         self.detection = detection
-        self.cur = Value("i", cfg.BOT.FRICTION_BRAKE.INITIAL)
+
+        if self.cfg.ARGS.FEATURE == "bot":
+            self.fb_cfg = self.cfg.BOT.FRICTION_BRAKE
+        else:
+            self.fb_cfg = self.cfg.FRICTION_BRAKE
+
+
+        self.cur = Value("i", self.fb_cfg.INITIAL)
         self.monitor_process = Process(target=monitor_friction_brake, args=(self,))
 
     def reset(self, target: int) -> None:
@@ -75,7 +82,7 @@ class FrictionBrake:
         :type increase: bool
         """
         if increase:
-            if self.cur.value < self.cfg.BOT.FRICTION_BRAKE.MAX:
+            if self.cur.value < self.fb_cfg.MAX:
                 pag.scroll(UP, _pause=False)
                 self.cur.value = min(self.cur.value + 1, MAX_FRICTION_BRAKE)
         else:
@@ -95,7 +102,6 @@ def monitor_friction_brake(friction_brake: FrictionBrake) -> None:
     :type friction_brake: FrictionBrake
     """
     logger.info("Monitoring friction brake")
-
     pre_time = time()
     fish_hooked = False
 
@@ -106,22 +112,23 @@ def monitor_friction_brake(friction_brake: FrictionBrake) -> None:
                 fish_hooked = False
                 continue
             if not fish_hooked:
-                sleep(friction_brake.cfg.BOT.FRICTION_BRAKE.START_DELAY)
+                sleep(friction_brake.fb_cfg.START_DELAY)
                 fish_hooked = True
+
             with friction_brake.lock:
-                if friction_brake.detection.is_friction_brake_high():
+                if (
+                    friction_brake.detection.is_friction_brake_high()
+                    or friction_brake.detection.is_reel_burning()
+                ):
                     friction_brake.change(increase=False)
-                if friction_brake.detection.is_reel_burning():
-                    logger.info("Reel burning detected, decreasing friction brake")
-                    friction_brake.change(increase=False)
+                    sleep(friction_brake.fb_cfg.DECREASE_DELAY)
                 else:
                     cur_time = time()
                     if (
                         cur_time - pre_time
-                        < friction_brake.cfg.BOT.FRICTION_BRAKE.INCREASE_DELAY
+                        >= friction_brake.fb_cfg.INCREASE_DELAY
                     ):
-                        continue
-                    pre_time = cur_time
-                    friction_brake.change(increase=True)
+                        pre_time = cur_time
+                        friction_brake.change(increase=True)
     except KeyboardInterrupt:
         pass

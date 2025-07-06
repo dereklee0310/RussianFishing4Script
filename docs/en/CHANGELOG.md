@@ -14,6 +14,8 @@
 - add keybinds for move and friction brake
 - remove friction_brake.max
 - TODO: remove tea_delay? add it back?
+- KEEPNET.TAGS -> BOT.KEEPNET.KEEP_TAGS
+- SCRIPT.SCREENSHOT_TAGS -> BOT.KEEPNET.SCREENSHOT_TAGS
 
 ## 0.5.3 (2025-06-21)
 
