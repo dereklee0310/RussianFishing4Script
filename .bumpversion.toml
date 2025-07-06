@@ -34,3 +34,8 @@ replace = "VERSION = \"{new_version}\""
 filename = "tools/main.py"
 search = "VERSION = \"{current_version}\""
 replace = "VERSION = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = "version = \"{current_version}\""
+replace = "version = \"{new_version}\""
