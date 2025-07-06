@@ -21,6 +21,7 @@
 - Add rich-argparse
 - Add telegram
 - Add file log
+- Fix wakey rig typo
 
 
 ## 0.5.3 (2025-06-21)

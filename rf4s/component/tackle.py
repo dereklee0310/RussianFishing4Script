@@ -152,7 +152,7 @@ class Tackle:
             pag.click()
 
     def sink(self) -> None:
-        """Sink the lure until an event happens, designed for marine and wakey rig."""
+        """Sink the lure until an event happens, designed for marine and wacky rig."""
         logger.info("Sinking lure")
         i = self.cfg.PROFILE.SINK_TIMEOUT
         while i > 0:
