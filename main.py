@@ -161,8 +161,7 @@ def create_parser(cfg: CN) -> argparse.ArgumentParser:
     parent_parser.add_argument("opts", nargs="*", help="overwrite configuration")
 
     main_parser = argparse.ArgumentParser(
-        epilog=EPILOG, formatter_class=Formatter, parents=[parent_parser]
-    )
+        epilog=EPILOG, formatter_class=Formatter)
     main_parser.add_argument(
         "-V", "--version", action="version", version=f"RF4S {VERSION}"
     )

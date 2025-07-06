@@ -209,7 +209,7 @@ class BotApp(App):
             )
             utils.safe_exit()
 
-    def is_profile_valid(self, profile_name: str) -> bool:
+    def validate_profile(self, profile_name: str) -> bool:
         """Check if a profile configuration is valid and complete.
 
         :param profile_name: Name of the profile to validate.
@@ -219,12 +219,12 @@ class BotApp(App):
         """
         if profile_name not in self.cfg.PROFILE:
             logger.critical("Invalid profile name: '%s'", profile_name)
-            return False
+            utils.safe_exit()
 
         mode = self.cfg.PROFILE[profile_name].MODE
         if mode.upper() not in self.cfg.PROFILE:
             logger.critical("Invalid mode: '%s'", mode)
-            return False
+            utils.safe_exit()
 
         expected_keys = set(self.cfg.PROFILE[mode.upper()])
         actual_keys = set(self.cfg.PROFILE[profile_name])
@@ -234,10 +234,9 @@ class BotApp(App):
 
         if invalid_keys or missing_keys:
             for key in invalid_keys:
-                logger.warning("Invalid setting: '%s'", key)
+                logger.warning("Invalid setting: 'PROFILE.%s.%s'", profile_name, key)
             for key in missing_keys:
-                logger.warning("Missing setting: '%s'", key)
-        return True
+                logger.warning("Missing setting: 'PROFILE.%s.%s'", profile_name, key)
 
     def display_profiles(self) -> None:
         """Display a table of available profiles for user selection.
@@ -290,8 +289,7 @@ class BotApp(App):
                 self.get_pid()
             profile_name = list(self.cfg.PROFILE)[self.args.pid]
 
-        if not self.is_profile_valid(profile_name):
-            utils.safe_exit()
+        self.validate_profile(profile_name)
 
         # Merge args.opts here because we can only overwrite cfg.PROFILE
         self.cfg.merge_from_list(self.args.opts)
