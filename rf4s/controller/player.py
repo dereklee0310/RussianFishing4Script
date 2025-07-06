@@ -111,6 +111,10 @@ class Player:
             logger.info("Spawing new process, do not quit the script")
             self.friction_brake.monitor_process.start()
 
+        if self.detection.get_quit_position():
+            logger.warning("Control panel detected, back to the game automatically")
+            pag.press("esc")
+
         if (
             self.cfg.PROFILE.MODE not in ("telescopic", "bottom")
             and not self.cfg.ARGS.SKIP_CAST
