@@ -8,7 +8,6 @@ for logging and automation purposes in Russian Fishing 4.
 
 import datetime
 import json
-import logging
 import sys
 import time
 from pathlib import Path
@@ -18,7 +17,7 @@ from matplotlib.ticker import MaxNLocator
 
 from rf4s import utils
 
-logger = logging.getLogger("rich")
+from rf4s.controller import logger
 
 # When running as an executable, use sys.executable to find the path to save file.
 # This file is not included during compilation and could not be resolved automatically

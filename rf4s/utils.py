@@ -8,7 +8,6 @@ key and mouse states during automation.
 """
 
 import ctypes
-import logging
 import msvcrt
 import sys
 from time import sleep
@@ -16,7 +15,6 @@ from time import sleep
 import pyautogui as pag
 from pyscreeze import Box
 from rich.console import Console
-from rich.logging import RichHandler
 from rich.text import Text
 
 # BASE_DELAY + LOOP_DELAY >= 2.2 to trigger clicklock
@@ -24,8 +22,6 @@ BASE_DELAY = 1.2
 LOOP_DELAY = 1
 
 ANIMATION_DELAY = 1
-
-logger = logging.getLogger("rich")
 
 # ---------------------------------------------------------------------------- #
 #                            common functionalities                            #
@@ -104,23 +100,6 @@ def get_box_center(box: Box) -> tuple[int, int]:
     :rtype: tuple[int, int]
     """
     return int(box.left + box.width // 2), int(box.top + box.height // 2)
-
-
-def create_rich_logger() -> RichHandler:
-    """Create a default RichHandler for logging.
-
-    :return: Logging handler from rich.
-    :rtype: RichHandler
-    """
-    # Ignore %(name)s because it's too verbose
-    # https://rich.readthedocs.io/en/latest/logging.html
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-        handlers=[RichHandler(rich_tracebacks=True)],
-    )
-    return logging.getLogger("rich")
 
 
 # ---------------------------------------------------------------------------- #
@@ -248,11 +227,11 @@ def is_run_by_clicking():
     return is_compiled() and num_processes == 2
 
 
-def get_launch_options_from_user():
-    if not is_run_by_clicking():
-        return ""
-    logger.info("Run by double-clicking detected")
-    return input("Enter launch options (press Enter to skip): ")
+# def get_launch_options_from_user():
+#     if not is_run_by_clicking():
+#         return ""
+#     logger.info("Run by double-clicking detected")
+#     return input("Enter launch options (press Enter to skip): ")
 
 
 def safe_exit():

@@ -1,5 +1,4 @@
 import json
-import logging
 import smtplib
 import requests
 from datetime import datetime, timezone
@@ -13,7 +12,7 @@ from rich import box
 from rich.console import Console
 from rich.table import Table
 
-logger = logging.getLogger("rich")
+from rf4s.controller import logger
 
 ICON_URL = "https://i.ibb.co/RpLYcdkm/icon.png"
 

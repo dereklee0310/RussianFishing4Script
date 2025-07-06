@@ -12,8 +12,6 @@ from yacs.config import CfgNode as CN
 
 from rf4s import config, utils
 
-logger = utils.create_rich_logger()
-
 # Get the base path depending on runtime environment
 if utils.is_compiled():
     ROOT = Path(sys.executable).parent  # Running as .exe (Nuitka/PyInstaller)
@@ -110,9 +108,5 @@ def to_list(profile: dict) -> list:
 
 def load_cfg() -> CN:
     cfg = setup_cfg()
-    config_path = ROOT / "config.yaml"
-    if not config_path.exists():
-        logger.critical("config.yaml not found at %s", config_path)
-        utils.safe_exit()
-    cfg.merge_from_file(config_path)
+    cfg.merge_from_file(ROOT / "config.yaml")
     return cfg

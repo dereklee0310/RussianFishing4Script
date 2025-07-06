@@ -6,7 +6,6 @@ and terminal window in Russian Fishing 4.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
-import logging
 import sys
 from pathlib import Path
 from time import sleep
@@ -18,8 +17,7 @@ import win32gui
 
 sys.path.append(".")  # python -m module -> python file
 from rf4s import utils
-
-logger = logging.getLogger("rich")
+from rf4s.controller import logger
 
 ANIMATION_DELAY = 0.25
 
@@ -61,7 +59,10 @@ class Window:
         """
         hwnd = win32gui.FindWindow(None, self.game_title)  # class name: UnityWndClass
         if hwnd == 0:
-            logger.critical("Failed to locate the game window: %s", self.game_title)
+            # logger.critical("Failed to locate the game window: %s", self.game_title)
+            logger.critical("Failed to locate the game window, "
+                            "please open the game and try again")
+
             utils.safe_exit()
         return hwnd
 

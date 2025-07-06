@@ -7,7 +7,6 @@ automating various fishing techniques.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
-import logging
 import os
 import random
 import sys
@@ -32,12 +31,12 @@ from rf4s.controller.notification import (
     DiscordNotification,
     EmailNotification,
     MiaotixingNotification,
-    TelegramNotification
+    TelegramNotification,
 )
 from rf4s.controller.timer import Timer
 from rf4s.result.result import BotResult
+from rf4s.controller import logger
 
-logger = logging.getLogger("rich")
 random.seed(datetime.now().timestamp())
 
 PRE_RETRIEVAL_DURATION = 0.5
@@ -108,18 +107,6 @@ class Player:
 
     def start_fishing(self) -> None:
         """Start the main fishing loop with the specified fishing strategy."""
-        result = self.build_result_dict("shit shit shit")
-        if self.cfg.ARGS.DISCORD:
-            # TODO: dynamic color
-            DiscordNotification(self.cfg, result).send(DiscordColor.BLURPLE)
-        if self.cfg.ARGS.EMAIL:
-            EmailNotification(self.cfg, result).send()
-        if self.cfg.ARGS.MIAOTIXING:
-            MiaotixingNotification(self.cfg, result).send()
-        if self.cfg.ARGS.TELEGRAM:
-            TelegramNotification(self.cfg, result).send()
-        exit()
-
         if self.cfg.ARGS.FRICTION_BRAKE:
             logger.info("Spawing new process, do not quit the script")
             self.friction_brake.monitor_process.start()
@@ -130,9 +117,8 @@ class Player:
             and not self.detection.is_retrieval_finished()
         ):
             logger.critical(
-                "The spool is not fully loaded, "
-                "try moving your camera, "
-                "changing your game window size or fishing line"
+                "The spool is not fully loaded, please refer to:\n"
+                "https://github.com/dereklee0310/RussianFishing4Script/tree/main?tab=readme-ov-file#spool-detection"
             )
             if self.friction_brake.monitor_process.is_alive():
                 self.friction_brake.monitor_process.terminate()

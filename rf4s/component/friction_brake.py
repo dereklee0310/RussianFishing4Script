@@ -6,13 +6,13 @@ including resetting, adjusting, and monitoring the friction brake.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
-import logging
 from multiprocessing import Process, Value
 from time import sleep, time
 
 import pyautogui as pag
 
 from rf4s.controller.detection import Detection
+from rf4s.controller import logger
 
 MAX_FRICTION_BRAKE = 30
 MIN_FRICTION_BRAKE = 0
@@ -20,8 +20,6 @@ UP = 1
 DOWN = -1
 FRICTION_BRAKE_MONITOR_DELAY = 2
 LOOP_DELAY = 0.04
-
-logger = logging.getLogger("rich")
 
 
 class FrictionBrake:

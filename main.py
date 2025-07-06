@@ -7,6 +7,7 @@ argument parsing, window management, and fishing automation.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
+import logging.config
 import rich_argparse
 import shutil
 import argparse
@@ -98,7 +99,6 @@ if utils.is_compiled():
 else:
     ROOT = Path(__file__).resolve().parents[2]
 
-logger = utils.create_rich_logger()
 
 class Formatter(
     rich_argparse.RawTextRichHelpFormatter, argparse.RawDescriptionHelpFormatter
@@ -107,26 +107,77 @@ class Formatter(
     pass
 
 
+def setup_logging(args: argparse.Namespace):
+    logging_config = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        # "filters": {}
+        "formatters": {
+            # RichHandler do the job for us, so we don't need to incldue time & level
+            "iso-8601-simple": {
+                "format": "%(message)s",
+                "datefmt": "%Y-%m-%dT%H:%M:%S%z",
+            },
+            "iso-8601-detailed": {
+                "format": "%(asctime)s [%(levelname)s] %(message)s",
+                "datefmt": "%Y-%m-%dT%H:%M:%S%z",
+            },
+        },
+        "handlers": {
+            "stdout": {
+                "level": "INFO",
+                "formatter": "iso-8601-simple",
+                "()": "rich.logging.RichHandler",
+                "rich_tracebacks": True,
+            },
+            "file": {
+                "class": "logging.handlers.RotatingFileHandler",
+                "level": "INFO",
+                "formatter": "iso-8601-detailed",
+                "filename": "logs/.log",
+                "maxBytes": 10000,
+                "backupCount": 0,
+            },
+        },
+        "loggers": {"root": {"level": "INFO", "handlers": ["stdout", "file"]}},
+    }
+    if not args.log:
+        logging_config["loggers"]["root"]["handlers"] = ["stdout"]
+    logging.config.dictConfig(config=logging_config)
+    global logger
+    logger = logging.getLogger(__name__)
+
+
 def create_parser(cfg: CN) -> argparse.ArgumentParser:
     """Configure the argument parser with all supported command-line options.
 
     :return: Configured ArgumentParser instance with all options and flags.
     :rtype: ArgumentParser
     """
-    parser = argparse.ArgumentParser(epilog=EPILOG, formatter_class=Formatter)
-    parser.add_argument("-V", "--version", action="version", version=f"RF4S {VERSION}")
-    feature_parsers = parser.add_subparsers(
-        title="features",
-        dest="feature",
+    parent_parser = argparse.ArgumentParser(add_help=False)
+    parent_parser.add_argument(
+        "-LOG", "--log", action="store_true", help="save logging messages in /logs/.log"
+    )
+    parent_parser.add_argument("opts", nargs="*", help="overwrite configuration")
+
+    main_parser = argparse.ArgumentParser(
+        epilog=EPILOG, formatter_class=Formatter, parents=[parent_parser]
+    )
+    main_parser.add_argument(
+        "-V", "--version", action="version", version=f"RF4S {VERSION}"
     )
 
+    feature_parsers = main_parser.add_subparsers(title="features", dest="feature")
+
     bot_parser = feature_parsers.add_parser(
-        "bot", help="start fishing bot", formatter_class=Formatter
+        "bot",
+        help="start fishing bot",
+        parents=[parent_parser],
+        formatter_class=Formatter,
     )
     bot_parser.add_argument(
         "-V", "--version", action="version", version=f"RF4S-bot {VERSION}"
     )
-    bot_parser.add_argument("opts", nargs="*", help="overwrite configuration")
 
     for argument in BOT_BOOLEAN_ARGUMENTS:
         flag1 = f"-{argument[0]}"
@@ -203,7 +254,7 @@ def create_parser(cfg: CN) -> argparse.ArgumentParser:
     )
 
     craft_parser = feature_parsers.add_parser(
-        "craft", help="craft items", formatter_class=Formatter
+        "craft", help="craft items", parents=[parent_parser], formatter_class=Formatter
     )
     craft_parser.add_argument(
         "-V", "--version", action="version", version=f"RF4S-craft {VERSION}"
@@ -225,7 +276,10 @@ def create_parser(cfg: CN) -> argparse.ArgumentParser:
     )
 
     move_parser = feature_parsers.add_parser(
-        "move", help="toggle moving forward", formatter_class=Formatter
+        "move",
+        help="toggle moving forward",
+        parents=[parent_parser],
+        formatter_class=Formatter,
     )
     move_parser.add_argument(
         "-V", "--version", action="version", version=f"RF4S-move {VERSION}"
@@ -239,7 +293,10 @@ def create_parser(cfg: CN) -> argparse.ArgumentParser:
     )
 
     harvest_parser = feature_parsers.add_parser(
-        "harvest", help="harvest baits", formatter_class=Formatter
+        "harvest",
+        help="harvest baits",
+        parents=[parent_parser],
+        formatter_class=Formatter,
     )
     harvest_parser.add_argument(
         "-V", "--version", action="version", version=f"RF4S-harvest {VERSION}"
@@ -256,6 +313,7 @@ def create_parser(cfg: CN) -> argparse.ArgumentParser:
         "calculate",
         help="calculate tackle's stats",
         aliases=["cal"],
+        parents=[parent_parser],
         formatter_class=Formatter,
     )
     calculate_paser.add_argument(
@@ -267,6 +325,7 @@ def create_parser(cfg: CN) -> argparse.ArgumentParser:
         "frictionbrake",
         help="automate friction brake",
         aliases=["fb"],
+        parents=[parent_parser],
         formatter_class=Formatter,
     )
     friction_brake_parser.add_argument(
@@ -276,7 +335,7 @@ def create_parser(cfg: CN) -> argparse.ArgumentParser:
         "opts", nargs="*", help="overwrite configuration"
     )
 
-    return parser
+    return main_parser
 
 
 def display_features() -> None:
@@ -329,6 +388,7 @@ def main() -> None:
     cfg = config.load_cfg()
     parser = create_parser(cfg)
     args = parser.parse_args()  # First parse to get {command} {flags}
+    setup_logging(args)
     # Print logo here so the help message will not show it
     print(Panel.fit(LOGO, box=box.HEAVY), LINKS, sep="\n")
 

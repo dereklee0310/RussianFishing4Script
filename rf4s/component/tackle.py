@@ -7,7 +7,6 @@ common tasks like clicklock and key releases.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
-import logging
 import random
 from time import sleep
 from typing import Literal
@@ -21,7 +20,7 @@ from rf4s import exceptions, utils
 from rf4s.controller.detection import Detection
 from rf4s.controller.timer import Timer
 
-logger = logging.getLogger("rich")
+from rf4s.controller import logger
 
 RESET_TIMEOUT = 16
 CAST_SCALE = 0.4  # 25% / 0.4s

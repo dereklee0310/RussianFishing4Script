@@ -9,7 +9,6 @@ Provides core functionality for:
 """
 
 import argparse
-import logging
 import os
 import random
 import shlex
@@ -38,6 +37,7 @@ from rf4s.controller.player import Player
 from rf4s.controller.timer import Timer
 from rf4s.controller.window import Window
 from rf4s.result import BotResult, CraftResult, HarvestResult, Result
+from rf4s.app.core import logger
 
 # When running as an executable, use sys.executable to find the config.yaml.
 # This file is not included during compilation and could not be resolved automatically
@@ -47,7 +47,6 @@ if utils.is_compiled():
 else:
     ROOT = Path(__file__).resolve().parents[2]
 
-logger = logging.getLogger("rich")
 
 DIG_DELAY = 5  # 4 + 1 s
 CHECK_DELAY = 0.5
@@ -172,16 +171,15 @@ class BotApp(App):
             )
             utils.safe_exit()
         except (TimeoutError, gaierror):
-            logger.critical("Invalid SMTP Server or connection timed out")
+            logger.critical("Invalid BOT.NOTIFICATION.SMTP_SERVER or connection timed out")
             utils.safe_exit()
 
     def validate_discord_webhook(self) -> bool:
         if not self.cfg.ARGS.DISCORD or self.cfg.BOT.NOTIFICATION.DISCORD_WEBHOOK_URL:
             return
         logger.critical(
-            "Discord Webhook url is not set\n"
-            "Check BOT.NOTIFICATION.DISCORD_WEBHOOK_URL\n"
-            "Please refer to "
+            "BOT.NOTIFICATION.DISCORD_WEBHOOK_URL is not set\n"
+            "To make a webhook, please refer to "
             "https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks"
         )
         utils.safe_exit()
@@ -199,16 +197,10 @@ class BotApp(App):
 
         valid = True
         if not _is_telegram_bot_valid():
-            logger.critical(
-                "Invalid Telegram Bot token"
-                "Check BOT.NOTIFICATION.TELEGRAM_BOT_TOKEN"
-            )
+            logger.critical("Invalid BOT.NOTIFICATION.TELEGRAM_BOT_TOKEN")
             valid = False
         if self.cfg.BOT.NOTIFICATION.TELEGRAM_CHAT_ID == -1:
-            logger.critical(
-                "Telegram chat id is not set"
-                "Check BOT.NOTIFICATION.TELEGRAM_CHAT_ID"
-            )
+            logger.critical("BOT.NOTIFICATION.TELEGRAM_CHAT_ID is not set")
             valid = False
         if not valid:
             logger.critical(

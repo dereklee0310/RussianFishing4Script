@@ -20,6 +20,7 @@
 - Add uv
 - Add rich-argparse
 - Add telegram
+- Add file log
 
 
 ## 0.5.3 (2025-06-21)

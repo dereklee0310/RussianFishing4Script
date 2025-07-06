@@ -3899,7 +3899,7 @@ wheels = [
 
 [[package]]
 name = "russianfishing4script"
-version = "0.1.0"
+version = "0.5.3"
 source = { virtual = "." }
 dependencies = [
     { name = "bump-my-version" },
