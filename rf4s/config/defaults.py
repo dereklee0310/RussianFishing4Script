@@ -53,6 +53,8 @@ _C.STAT.ENERGY_THRESHOLD = 0.74
 _C.STAT.HUNGER_THRESHOLD = 0.5
 # Minimum comfort level before consuming tea (0.0-1.0)
 _C.STAT.COMFORT_THRESHOLD = 0.51
+# Delay between tea drinks
+_C.STAT.TEA_DRINK_DELAY = 300
 # Maximum coffee drinks per fish fight.
 # The script will stop and let the game stay idle after the limit is reached.
 _C.STAT.COFFEE_LIMIT = 10

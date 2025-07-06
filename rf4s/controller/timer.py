@@ -28,8 +28,6 @@ if utils.is_compiled():
 else:
     ROOT = Path(__file__).resolve().parents[2]
 
-TEA_DELAY = 300
-
 
 class Timer:
     """Class for calculating and generating timestamps for logs.
@@ -141,7 +139,7 @@ class Timer:
         :rtype: bool
         """
         cur_time = time.time()
-        if cur_time - self.last_tea_drink > TEA_DELAY:
+        if cur_time - self.last_tea_drink > self.cfg.STAT.TEA_DRINK_DELAY:
             self.last_tea_drink = cur_time
             return True
         return False
@@ -153,7 +151,7 @@ class Timer:
         :rtype: bool
         """
         cur_time = time.time()
-        if cur_time - self.last_alcohol_drink > self.cfg.BOT.ALCOHOL_DRINK_DELAY:
+        if cur_time - self.last_alcohol_drink > self.cfg.STAT.ALCOHOL_DRINK_DELAY:
             self.last_alcohol_drink = cur_time
             self.last_tea_drink = cur_time  # Alcohol also refill comfort
             return True
