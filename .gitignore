@@ -1,5 +1,6 @@
 build/
 .idea/
+.venv/
 .vscode/
 .ruff_cache
 __pycache__/

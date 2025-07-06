@@ -1,0 +1,22 @@
+[project]
+name = "russianfishing4script"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "bump-my-version==0.32.1",
+    "discord-webhook==1.4.1",
+    "keyboard==0.13.5",
+    "matplotlib==3.8.0",
+    "opencv-python==4.8.0.76",
+    "pillow==10.1.0",
+    "pyautogui==0.9.54",
+    "pynput==1.7.6",
+    "pyscreeze==0.1.29",
+    "python-dotenv==1.0.1",
+    "pywin32==306",
+    "pyyaml==6.0.2",
+    "rich==13.9.4",
+    "yacs==0.1.8",
+]

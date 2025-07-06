@@ -43,12 +43,19 @@
 ### Installation
 #### Executable File
 Download `rf4s.zip` from [Releases][releases] and unzip it.  
-#### Python Code and Environment (for developer)
+#### pip
 ```
 git clone https://github.com/dereklee0310/RussianFishing4Script.git
 cd RussianFishing4Script
-.\setup.bat
+python -m pip install -r requirements.txt
 ```
+#### uv
+```
+git clone https://github.com/dereklee0310/RussianFishing4Script.git
+cd RussianFishing4Script
+uv sync
+```
+
 > [!WARNING] 
 > The download path cannot contain non-English characters.
 
@@ -78,10 +85,15 @@ Pick up the rod you want to use.
 ### Let's Run it!
 #### Executable File
 Double-click the executable file to run it.
-#### Python Code (for developer)
+#### Python Interpreter (for developer)
 ```
 cd "path\to\the\project"
-python tools\main.py
+python main.py
+```
+#### uv
+```
+cd "path\to\the\project"
+uv main.py
 ```
 > [!TIP]
 > See **[CONFIGURATION][configuration]** for advanced usage and configuration options.

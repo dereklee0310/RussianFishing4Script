@@ -43,11 +43,17 @@
 ### 安裝
 #### 可執行檔
 從 [Releases][releases] 下載 `rf4s.zip` 並解壓縮。
-#### Python 原始碼 (開發者適用)
+#### pip
 ```
 git clone https://github.com/dereklee0310/RussianFishing4Script.git
 cd RussianFishing4Script
-.\setup.bat
+python -m pip install -r requirements.txt
+```
+#### uv
+```
+git clone https://github.com/dereklee0310/RussianFishing4Script.git
+cd RussianFishing4Script
+uv sync
 ```
 > [!WARNING] 
 > 路徑不可包含非英文字符。
@@ -77,10 +83,15 @@ cd RussianFishing4Script
 ### 開始執行！
 #### 可執行檔
 雙擊執行檔即可運行
-#### Python 原始碼 (開發者適用)
+#### Python 直譯器
 ```
 cd "專案路徑"
-python tools\main.py
+python main.py
+```
+#### uv
+```
+cd "專案路徑"
+python main.py
 ```
 
 > [!TIP]

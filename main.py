@@ -7,6 +7,8 @@ argument parsing, window management, and fishing automation.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
+import os
+import shutil
 import argparse
 import shlex
 import sys
@@ -302,6 +304,13 @@ def get_fid(parser) -> None:
 
 
 def main() -> None:
+    os.makedirs("screenshots", exist_ok=True)
+    os.makedirs("logs", exist_ok=True)
+    if not os.path.exists("config.yaml"):
+        shutil.copy("rf4s/config/config.yaml", "config.yaml")
+
+
+
     cfg = config.load_cfg()
     parser = create_parser(cfg)
     args = parser.parse_args()  # First parse to get {command} {flags}
