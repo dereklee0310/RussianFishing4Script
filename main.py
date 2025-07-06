@@ -7,12 +7,12 @@ argument parsing, window management, and fishing automation.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
-import os
 import rich_argparse
 import shutil
 import argparse
 import shlex
 import sys
+from pathlib import Path
 
 from rich import box, print
 from rich.panel import Panel
@@ -28,11 +28,6 @@ from rf4s.app import (
     HarvestApp,
     MoveApp,
 )
-
-# sys.path.append(".")  # python -m module -> python file
-
-
-logger = utils.create_rich_logger()
 
 VERSION = "0.5.3"
 LOGO = """
@@ -95,6 +90,15 @@ Changelog:     https://github.com/dereklee0310/RussianFishing4Script/blob/main/d
 Bug reports:   https://github.com/dereklee0310/RussianFishing4Script/issues
 """
 
+# When running as an executable, use sys.executable to find the config.yaml.
+# This file is not included during compilation and could not be resolved automatically
+# by Nuitka.
+if utils.is_compiled():
+    ROOT = Path(sys.executable).parent
+else:
+    ROOT = Path(__file__).resolve().parents[2]
+
+logger = utils.create_rich_logger()
 
 class Formatter(
     rich_argparse.RawTextRichHelpFormatter, argparse.RawDescriptionHelpFormatter
@@ -316,10 +320,11 @@ def get_fid(parser) -> None:
 
 
 def main() -> None:
-    os.makedirs("screenshots", exist_ok=True)
-    os.makedirs("logs", exist_ok=True)
-    if not os.path.exists("config.yaml"):
-        shutil.copy("rf4s/config/config.yaml", "config.yaml")
+    (ROOT / "screenshots").mkdir(parents=True, exist_ok=True)
+    (ROOT / "logs").mkdir(parents=True, exist_ok=True)
+    config_path = ROOT / "config.yaml"
+    if not config_path.exists():
+        shutil.copy(Path("rf4s/config/config.yaml"), config_path)
 
     cfg = config.load_cfg()
     parser = create_parser(cfg)
@@ -338,47 +343,32 @@ def main() -> None:
         sys.argv = [sys.argv[0]] + [FEATURES[get_fid(parser)]["command"]] + sys.argv[1:]
         sys.argv += shlex.split(input("Enter launch options (press Enter to skip): "))
         args = parser.parse_args()
-    match args.feature:
-        case "bot":
-            sys.argv += shlex.split(cfg.BOT.LAUNCH_OPTIONS)
-            args = parser.parse_args()
-            try:
+    try:
+        match args.feature:
+            case "bot":
+                sys.argv += shlex.split(cfg.BOT.LAUNCH_OPTIONS)
+                args = parser.parse_args()
                 BotApp(cfg, args, parser).start()
-            except Exception as e:
-                logger.critical(e, exc_info=True)
-        case "frictionbrake" | "fb":
-            sys.argv += shlex.split(cfg.FRICTION_BRAKE.LAUNCH_OPTIONS)
-            args = parser.parse_args()
-            try:
+            case "frictionbrake" | "fb":
+                sys.argv += shlex.split(cfg.FRICTION_BRAKE.LAUNCH_OPTIONS)
+                args = parser.parse_args()
                 FrictionBrakeApp(cfg, args, parser).start()
-            except Exception as e:
-                logger.critical(e, exc_info=True)
-        case "harvest":
-            sys.argv += shlex.split(cfg.HARVEST.LAUNCH_OPTIONS)
-            args = parser.parse_args()
-            try:
+            case "harvest":
+                sys.argv += shlex.split(cfg.HARVEST.LAUNCH_OPTIONS)
+                args = parser.parse_args()
                 HarvestApp(cfg, args, parser).start()
-            except Exception as e:
-                logger.critical(e, exc_info=True)
-        case "move":
-            sys.argv += shlex.split(cfg.MOVE.LAUNCH_OPTIONS)
-            args = parser.parse_args()
-            try:
+            case "move":
+                sys.argv += shlex.split(cfg.MOVE.LAUNCH_OPTIONS)
+                args = parser.parse_args()
                 MoveApp(cfg, args, parser).start()
-            except Exception as e:
-                logger.critical(e, exc_info=True)
-        case "calculate" | "cal":
-            try:
+            case "calculate" | "cal":
                 CalculateApp().start()
-            except Exception as e:
-                logger.critical(e, exc_info=True)
-        case "craft":
-            try:
+            case "craft":
                 CraftApp(cfg, args, parser).start()
-            except Exception as e:
-                logger.critical(e, exc_info=True)
-        case _:
-            raise NotImplementedError("This feature is not implemented.")
+            case _:
+                raise NotImplementedError("You should not reach here.")
+    except Exception as e:
+        logger.critical(e, exc_info=True)
 
     utils.safe_exit()
 
