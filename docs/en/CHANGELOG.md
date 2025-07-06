@@ -23,7 +23,7 @@
 - Add file log
 - Fix wakey rig typo
 - Add control pannel detection
-
+- Add profile description
 
 ## 0.5.3 (2025-06-21)
 

@@ -141,7 +141,7 @@ def setup_logging(args: argparse.Namespace):
         },
         "loggers": {"root": {"level": "INFO", "handlers": ["stdout", "file"]}},
     }
-    if not args.log:
+    if args.feature and not args.log:
         logging_config["loggers"]["root"]["handlers"] = ["stdout"]
     logging.config.dictConfig(config=logging_config)
     global logger

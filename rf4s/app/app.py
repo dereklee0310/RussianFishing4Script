@@ -26,6 +26,7 @@ from time import sleep
 import pyautogui as pag
 from pynput import keyboard
 from rich import box, print
+from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.table import Table
 from yacs.config import CfgNode as CN
@@ -133,8 +134,11 @@ class BotApp(App):
         table = Table(title="Settings", show_header=False, box=box.HEAVY, min_width=36)
         table.add_row("Launch options", " ".join(sys.argv[1:]))
         for k, v in self.cfg.PROFILE.items():
-            table.add_row(k, str(v))
+            if k != "DESCRIPTION":
+                table.add_row(k, str(v))
         print(table)
+        if self.cfg.PROFILE.DESCRIPTION:
+            print(Panel.fit(f"[not bold]You're now using:[/not bold] {self.cfg.PROFILE.DESCRIPTION}", style="bold"))
         print(f"Press {self.cfg.KEY.QUIT} to quit.")
 
         self.result = BotResult()

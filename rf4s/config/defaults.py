@@ -217,6 +217,9 @@ _C.PROFILE = CN()
 #                             Spin Fishing Profile                             #
 # ---------------------------------------------------------------------------- #
 _C.PROFILE.SPIN = CN()
+# Profile description (optional)
+_C.PROFILE.SPIN.DESCRIPTION = "Default spin fishing profile."
+# Fishing mode
 _C.PROFILE.SPIN.MODE = "spin"
 # Type of special spin fishing technique to perform
 # (options: normal, pause, lift)
@@ -246,6 +249,7 @@ _C.PROFILE.SPIN.PRE_ACCELERATION = False
 _C.PROFILE.SPIN.POST_ACCELERATION = "off"
 
 _C.PROFILE.SPIN_WITH_PAUSE = CN()
+_C.PROFILE.SPIN_WITH_PAUSE.DESCRIPTION = "Spin fishing with short pauses."
 _C.PROFILE.SPIN_WITH_PAUSE.MODE = "spin"
 _C.PROFILE.SPIN_WITH_PAUSE.LAUNCH_OPTIONS = ""
 _C.PROFILE.SPIN_WITH_PAUSE.CAST_POWER_LEVEL = 5.0
@@ -260,6 +264,7 @@ _C.PROFILE.SPIN_WITH_PAUSE.TYPE = "pause"
 
 
 _C.PROFILE.SPIN_WITH_LIFT = CN()
+_C.PROFILE.SPIN_WITH_LIFT.DESCRIPTION = "Spin fishing with short lifts."
 _C.PROFILE.SPIN_WITH_LIFT.MODE = "spin"
 _C.PROFILE.SPIN_WITH_LIFT.LAUNCH_OPTIONS = ""
 _C.PROFILE.SPIN_WITH_LIFT.CAST_POWER_LEVEL = 5.0
@@ -277,6 +282,9 @@ _C.PROFILE.SPIN_WITH_LIFT.TYPE = "lift"
 #                            Bottom Fishing Profile                            #
 # ---------------------------------------------------------------------------- #
 _C.PROFILE.BOTTOM = CN()
+# Profile description (optional)
+_C.PROFILE.BOTTOM.DESCRIPTION = "Default bottom fishing profile."
+# Fishing mode
 _C.PROFILE.BOTTOM.MODE = "bottom"
 # Profile-level launch options that will be merged with the global BOT.LAUNCH_OPTIONS
 _C.PROFILE.BOTTOM.LAUNCH_OPTIONS = ""
@@ -303,6 +311,9 @@ _C.PROFILE.BOTTOM.RANDOM_ROD_SELECTION = True
 #                      Marine / Wacky Rig Pirking Profile                      #
 # ---------------------------------------------------------------------------- #
 _C.PROFILE.PIRK = CN()
+# Profile description (optional)
+_C.PROFILE.PIRK.DESCRIPTION = "A marine fishing profile that perform pirking at the bottom layer for 34/41 holes in Norwegian Sea."
+# Fishing mode
 _C.PROFILE.PIRK.MODE = "pirk"
 # Profile-level launch options that will be merged with the global BOT.LAUNCH_OPTIONS
 _C.PROFILE.PIRK.LAUNCH_OPTIONS = ""
@@ -341,6 +352,7 @@ _C.PROFILE.PIRK.HOOK_DELAY = 0.5
 _C.PROFILE.PIRK.POST_ACCELERATION = "auto"
 
 _C.PROFILE.PIRK_WITH_RETRIEVAL = CN()
+_C.PROFILE.PIRK_WITH_RETRIEVAL.DESCRIPTION = "A marine fishing profile that retrieves the fishing line while parking."
 _C.PROFILE.PIRK_WITH_RETRIEVAL.MODE = "pirk"
 _C.PROFILE.PIRK_WITH_RETRIEVAL.LAUNCH_OPTIONS = ""
 _C.PROFILE.PIRK_WITH_RETRIEVAL.CAST_POWER_LEVEL = 1.0
@@ -358,8 +370,8 @@ _C.PROFILE.PIRK_WITH_RETRIEVAL.PIRK_RETRIEVAL = True
 _C.PROFILE.PIRK_WITH_RETRIEVAL.HOOK_DELAY = 0.5
 _C.PROFILE.PIRK_WITH_RETRIEVAL.POST_ACCELERATION = "auto"
 
-# Spin fishing with wacky rig at Ladoga Archipelago
 _C.PROFILE.WACKY_RIG = CN()
+_C.PROFILE.WACKY_RIG.DESCRIPTION = "A variation of marine fishing profile for pirking at the bottom layer at Ladoga Archipelago using wacky rig."
 _C.PROFILE.WACKY_RIG.MODE = "pirk"
 _C.PROFILE.WACKY_RIG.LAUNCH_OPTIONS = ""
 _C.PROFILE.WACKY_RIG.CAST_POWER_LEVEL = 1.0
@@ -368,8 +380,8 @@ _C.PROFILE.WACKY_RIG.SINK_TIMEOUT = 45.0
 _C.PROFILE.WACKY_RIG.TIGHTEN_DURATION = 1.0
 _C.PROFILE.WACKY_RIG.DEPTH_ADJUST_DELAY = 4.0
 _C.PROFILE.WACKY_RIG.DEPTH_ADJUST_DURATION = 1.0
-_C.PROFILE.WACKY_RIG.CTRL = True
 _C.PROFILE.WACKY_RIG.CTRL = False
+_C.PROFILE.WACKY_RIG.SHIFT = False
 _C.PROFILE.WACKY_RIG.PIRK_DURATION = 1.5
 _C.PROFILE.WACKY_RIG.PIRK_DELAY = 4.0
 _C.PROFILE.WACKY_RIG.PIRK_TIMEOUT = 32.0
@@ -381,6 +393,9 @@ _C.PROFILE.WACKY_RIG.POST_ACCELERATION = "auto"
 #                            Marine Elevator Profile                           #
 # ---------------------------------------------------------------------------- #
 _C.PROFILE.ELEVATOR = CN()
+# Profile description (optional)
+_C.PROFILE.ELEVATOR.DESCRIPTION = "A marine fishing profile for elevator while fishing/trolling."
+# Fishing mode
 _C.PROFILE.ELEVATOR.MODE = "elevator"
 # Profile-level launch options that will be merged with the global BOT.LAUNCH_OPTIONS
 _C.PROFILE.ELEVATOR.LAUNCH_OPTIONS = ""
@@ -425,9 +440,12 @@ _C.PROFILE.ELEVATOR_WITH_DROP.HOOK_DELAY = 0.5
 _C.PROFILE.ELEVATOR_WITH_DROP.POST_ACCELERATION = "auto"
 
 # ---------------------------------------------------------------------------- #
-#                          Telescopic fishing Profile                          #
+#                             Float fishing profile                            #
 # ---------------------------------------------------------------------------- #
 _C.PROFILE.TELESCOPIC = CN()
+# Profile description (optional)
+_C.PROFILE.TELESCOPIC.DESCRIPTION = "Default float fishing profile for telescopic rod."
+# Fishing mode
 _C.PROFILE.TELESCOPIC.MODE = "telescopic"
 # Profile-level launch options that will be merged with the global BOT.LAUNCH_OPTIONS
 _C.PROFILE.TELESCOPIC.LAUNCH_OPTIONS = ""
@@ -450,10 +468,10 @@ _C.PROFILE.TELESCOPIC.DRIFT_TIMEOUT = 16.0
 _C.PROFILE.TELESCOPIC.CAMERA_SHAPE = "square"
 
 
-# ---------------------------------------------------------------------------- #
-#                           Bolognese Fishing Profile                          #
-# ---------------------------------------------------------------------------- #
 _C.PROFILE.BOLOGNESE = CN()
+# Profile description (optional)
+_C.PROFILE.BOLOGNESE.DESCRIPTION = "Default float fishing profile for bolognese rod."
+# Fishing mode
 _C.PROFILE.BOLOGNESE.MODE = "bolognese"
 # Profile-level launch options that will be merged with the global BOT.LAUNCH_OPTIONS
 _C.PROFILE.BOLOGNESE.LAUNCH_OPTIONS = ""
@@ -478,6 +496,36 @@ _C.PROFILE.BOLOGNESE.CAMERA_SHAPE = "square"
 # Hold down the Shift key during fish fight
 # (options: on, off, auto)
 _C.PROFILE.BOLOGNESE.POST_ACCELERATION = "off"
+
+
+_C.PROFILE.MATCH = CN()
+# Profile description (optional)
+_C.PROFILE.MATCH.DESCRIPTION = "Default float fishing profile for match rod."
+# Fishing mode
+_C.PROFILE.MATCH.MODE = "bolognese"
+# Profile-level launch options that will be merged with the global BOT.LAUNCH_OPTIONS
+_C.PROFILE.MATCH.LAUNCH_OPTIONS = ""
+# Power level for casting, (0.0-5.0).
+# 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+ (power cast), FYR.
+# For instance, 2.5 cast_power_level equals to 37.5% casting power.
+_C.PROFILE.MATCH.CAST_POWER_LEVEL = 5.0
+# Time to wait before the lure touches the water and sinks after the rod is cast
+_C.PROFILE.MATCH.CAST_DELAY = 4.0
+# Sensitivity of float detection
+_C.PROFILE.MATCH.FLOAT_SENSITIVITY = 0.68
+# Delay between fish bite checks
+_C.PROFILE.MATCH.CHECK_DELAY = 1.0
+# Time to wait before pulling a fish after the float status changed
+_C.PROFILE.MATCH.PULL_DELAY = 0.0
+# Recast rod after timed out, designed for flowing water maps.
+_C.PROFILE.MATCH.DRIFT_TIMEOUT = 64.0
+# Shape of the float camera, the script tracks the whole camrea window by default.
+# (options: square, wide, tall)
+# (Fall back to float camera detection mode if the window size is not supported.)
+_C.PROFILE.MATCH.CAMERA_SHAPE = "square"
+# Hold down the Shift key during fish fight
+# (options: on, off, auto)
+_C.PROFILE.MATCH.POST_ACCELERATION = "off"
 
 
 def get_cfg_defaults():
