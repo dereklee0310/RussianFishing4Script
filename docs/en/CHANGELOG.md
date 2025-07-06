@@ -18,6 +18,8 @@
 - SCRIPT.SCREENSHOT_TAGS -> BOT.KEEPNET.SCREENSHOT_TAGS
 - TEA_DELAY -> TEA_DRINK_DELAY
 - Add uv
+- Add rich-argparse
+- Add telegram
 
 
 ## 0.5.3 (2025-06-21)

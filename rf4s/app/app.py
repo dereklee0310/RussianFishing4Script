@@ -16,6 +16,7 @@ import shlex
 import signal
 import smtplib
 import sys
+import requests
 from abc import ABC, abstractmethod
 from datetime import datetime
 from multiprocessing import Lock
@@ -124,6 +125,7 @@ class BotApp(App):
         # args is done now, start validation
         self.validate_smtp_connection()
         self.validate_discord_webhook()
+        self.validate_telegram_bot()
         self.validate_game_window()
         self.validate_electro_mode()
 
@@ -162,9 +164,10 @@ class BotApp(App):
                 )
         except smtplib.SMTPAuthenticationError:
             logger.critical(
-                "Email address or app password not accepted,\n"
-                "please check your email address and password.\n"
-                "For Gmail users, please refer to\n"
+                "Invalid email address or app password\n"
+                "Check BOT.NOTIFICATION.EMAIL\n"
+                "Check BOT.NOTIFICATION.PASSWORD\n"
+                "For Gmail users, please refer to: "
                 "https://support.google.com/accounts/answer/185833\n"
             )
             utils.safe_exit()
@@ -176,10 +179,43 @@ class BotApp(App):
         if not self.cfg.ARGS.DISCORD or self.cfg.BOT.NOTIFICATION.DISCORD_WEBHOOK_URL:
             return
         logger.critical(
-            "Discord Webhook url is not set, see the link below:\n"
+            "Discord Webhook url is not set\n"
+            "Check BOT.NOTIFICATION.DISCORD_WEBHOOK_URL\n"
+            "Please refer to "
             "https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks"
         )
         utils.safe_exit()
+
+    def validate_telegram_bot(self):
+        def _is_telegram_bot_valid():
+            url = (
+                "https://api.telegram.org/"
+                f"bot{self.cfg.BOT.NOTIFICATION.TELEGRAM_BOT_TOKEN}/getMe"
+            )
+            return requests.get(url).status_code == 200
+
+        if not self.cfg.ARGS.TELEGRAM:
+            return
+
+        valid = True
+        if not _is_telegram_bot_valid():
+            logger.critical(
+                "Invalid Telegram Bot token"
+                "Check BOT.NOTIFICATION.TELEGRAM_BOT_TOKEN"
+            )
+            valid = False
+        if self.cfg.BOT.NOTIFICATION.TELEGRAM_CHAT_ID == -1:
+            logger.critical(
+                "Telegram chat id is not set"
+                "Check BOT.NOTIFICATION.TELEGRAM_CHAT_ID"
+            )
+            valid = False
+        if not valid:
+            logger.critical(
+                "Please refer to: "
+                "https://gist.github.com/nafiesl/4ad622f344cd1dc3bb1ecbe468ff9f8a",
+            )
+            utils.safe_exit()
 
     def is_profile_valid(self, profile_name: str) -> bool:
         """Check if a profile configuration is valid and complete.
@@ -557,6 +593,7 @@ class MoveApp(App):
             pag.keyDown("shift")
         pag.keyDown("w")
         listener.join()  # Blocking listener loop
+
 
 class HarvestApp(App):
     """Main application class for automating bait harvesting and hunger/comfort refill.

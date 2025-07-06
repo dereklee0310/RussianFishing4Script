@@ -136,6 +136,10 @@ _C.BOT.NOTIFICATION.MIAO_CODE = "example"
 # Discord
 _C.BOT.NOTIFICATION.DISCORD_WEBHOOK_URL = ""
 
+# Telegram
+_C.BOT.NOTIFICATION.TELEGRAM_BOT_TOKEN = ""
+_C.BOT.NOTIFICATION.TELEGRAM_CHAT_ID = -1
+
 
 # ---------------------------------------------------------------------------- #
 #                       Friction Brake Settings (for bot)                      #

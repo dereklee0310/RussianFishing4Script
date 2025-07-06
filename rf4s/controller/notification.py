@@ -1,6 +1,7 @@
 import json
 import logging
 import smtplib
+import requests
 from datetime import datetime, timezone
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -146,3 +147,30 @@ class MiaotixingNotification:
                     str(json_object["code"]),
                     json_object["msg"],
                 )
+
+
+class TelegramNotification:
+    def __init__(self, cfg, result):
+        self.cfg = cfg
+        self.result = result
+
+    def send(self):
+        # Send a simple message, no need for fancy python-telegram-bot
+        text = "*Running Result*\n```\n"
+        for k, v in self.result.items():
+            text += f"{k}: {v}\n"
+        text += "```"
+        payload = {
+            "chat_id": self.cfg.BOT.NOTIFICATION.TELEGRAM_CHAT_ID,
+            "text": text,
+            "parse_mode": "MarkdownV2",
+        }
+        response = requests.post(
+            "https://api.telegram.org/"
+            f"bot{self.cfg.BOT.NOTIFICATION.TELEGRAM_BOT_TOKEN}/sendMessage",
+            json=payload,
+        )
+        if response.status_code == 200:
+            logger.info("Result successfully sent to Telegram")
+        else:
+            logger.error(f"Failed to send result to Telegram: {response.text}")

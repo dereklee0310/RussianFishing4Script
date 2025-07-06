@@ -32,6 +32,7 @@ from rf4s.controller.notification import (
     DiscordNotification,
     EmailNotification,
     MiaotixingNotification,
+    TelegramNotification
 )
 from rf4s.controller.timer import Timer
 from rf4s.result.result import BotResult
@@ -107,6 +108,18 @@ class Player:
 
     def start_fishing(self) -> None:
         """Start the main fishing loop with the specified fishing strategy."""
+        result = self.build_result_dict("shit shit shit")
+        if self.cfg.ARGS.DISCORD:
+            # TODO: dynamic color
+            DiscordNotification(self.cfg, result).send(DiscordColor.BLURPLE)
+        if self.cfg.ARGS.EMAIL:
+            EmailNotification(self.cfg, result).send()
+        if self.cfg.ARGS.MIAOTIXING:
+            MiaotixingNotification(self.cfg, result).send()
+        if self.cfg.ARGS.TELEGRAM:
+            TelegramNotification(self.cfg, result).send()
+        exit()
+
         if self.cfg.ARGS.FRICTION_BRAKE:
             logger.info("Spawing new process, do not quit the script")
             self.friction_brake.monitor_process.start()
@@ -761,6 +774,8 @@ class Player:
             EmailNotification(self.cfg, result).send()
         if self.cfg.ARGS.MIAOTIXING:
             MiaotixingNotification(self.cfg, result).send()
+        if self.cfg.ARGS.TELEGRAM:
+            TelegramNotification(self.cfg, result).send()
         if self.cfg.ARGS.DATA:
             self.timer.save_data()
         if shutdown and self.cfg.ARGS.SHUTDOWN:

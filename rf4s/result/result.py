@@ -28,8 +28,12 @@ class BotResult:
 
     def as_dict(self, msg: str, timer: Timer) -> dict:
         # Will be 0 if total_fish_count = 0
-        kept_ratio = f"{int(self.kept / max(1, self.total) * 100)}%"
-        bite_rate = f"{int((self.total / (timer.get_running_time() / 3600)))}/hr"
+        try:
+            kept_ratio = f"{int(self.kept / self.total * 100)}%"
+            bite_rate = f"{int((self.total / (timer.get_running_time() / 3600)))}/hr"
+        except ZeroDivisionError:
+            kept_ratio = "0%"
+            bite_rate = "0/hr"
 
         return {
             "Stop reason": msg,

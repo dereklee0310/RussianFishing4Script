@@ -79,6 +79,7 @@ BOT_BOOLEAN_ARGUMENTS = (
     ("E", "email", "send email noticication after the script stop"),
     ("M", "miaotixing", "send miaotixing notification after the script stop"),
     ("D", "discord", "send Discord notification after the script stop"),
+    ("TG", "telegram", "send Telegram notification after the script stop"),
     ("S", "shutdown", "shutdown computer after the script stop"),
     ("SO", "signout", "sign out instead of closing the game"),
     ("BL", "broken-lure", "replace broken lures with favorite ones"),
