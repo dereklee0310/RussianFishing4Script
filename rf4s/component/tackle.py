@@ -18,8 +18,7 @@ from pyscreeze import Box
 
 from rf4s import exceptions, utils
 from rf4s.controller.detection import Detection
-from rf4s.controller.timer import Timer
-
+from rf4s.controller.timer import Timer, add_jitter
 from rf4s.controller import logger
 
 RESET_TIMEOUT = 16
@@ -29,7 +28,7 @@ CAST_SCALE = 0.4  # 25% / 0.4s
 BASE_DELAY = 1.2
 LOOP_DELAY = 1
 
-ANIMATION_DELAY = 1
+ANIMATION_DELAY = 0.5
 
 RETRIEVAL_TIMEOUT = 32
 PULL_TIMEOUT = 16
@@ -37,7 +36,6 @@ RETRIEVAL_WITH_PAUSE_TIMEOUT = 128
 LIFT_DURATION = 3
 TELESCOPIC_PULL_TIMEOUT = 8
 LANDING_NET_DURATION = 6
-LANDING_NET_DELAY = 0.5
 SINK_DELAY = 2
 
 
@@ -195,6 +193,7 @@ class Tackle:
                     utils.hold_mouse_button(LIFT_DURATION, button="right")
 
             if self.detection.is_retrieval_finished():
+                #TODO: FIX THIS
                 sleep(0 if self.cfg.ARGS.RAINBOW else 2)
                 return
 
@@ -322,7 +321,7 @@ class Tackle:
             if self.detection.is_fish_captured():
                 return
             pag.press("space")
-            sleep(LANDING_NET_DELAY)
+            sleep(ANIMATION_DELAY)
         if self.detection.is_tackle_broken():
             raise exceptions.TackleBrokenError
 
@@ -370,7 +369,7 @@ class Tackle:
         coords.append((-sum(x for x, _ in coords), -sum(y for _, y in coords)))
         for x, y in coords:
             win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, x, y, 0, 0)
-            sleep(ANIMATION_DELAY)
+            sleep(add_jitter(ANIMATION_DELAY))
 
     def equip_item(self, item) -> None:
         """Equip an item from the menu or inventory.

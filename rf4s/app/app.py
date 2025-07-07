@@ -35,7 +35,7 @@ from rf4s import config, utils
 from rf4s.component.friction_brake import FrictionBrake
 from rf4s.controller.detection import Detection
 from rf4s.controller.player import Player
-from rf4s.controller.timer import Timer
+from rf4s.controller.timer import Timer, add_jitter
 from rf4s.controller.window import Window
 from rf4s.result import BotResult, CraftResult, HarvestResult, Result
 from rf4s.app.core import logger
@@ -48,17 +48,10 @@ if utils.is_compiled():
 else:
     ROOT = Path(__file__).resolve().parents[2]
 
-
-DIG_DELAY = 5  # 4 + 1 s
-CHECK_DELAY = 0.5
 ANIMATION_DELAY = 0.5
-
-BIAS = 1e-6
-
 CRAFT_DELAY = 4.0
-CRAFT_DELAY_3X = CRAFT_DELAY * 3
 LOOP_DELAY = 0.5
-LOOP_DELAY_3X = LOOP_DELAY * 3
+BIAS = 1e-6
 
 
 class App(ABC):
@@ -430,7 +423,6 @@ class CraftApp(App):
 
         table = Table(title="Settings", show_header=False, box=box.HEAVY, min_width=36)
         table.add_row("Launch options", " ".join(sys.argv[1:]))
-        # TODO: TBD
         print(table)
 
         self.result = CraftResult()
@@ -453,9 +445,7 @@ class CraftApp(App):
             utils.safe_exit()
         pag.moveTo(make_button_position)
 
-    def craft_item(
-        self, craft_delay: float, accept_delay: float, accept_key: str
-    ) -> None:
+    def craft_item(self, accept_key: str) -> None:
         """Craft an item.
 
         :param craft_delay: Delay in seconds before accepting the crafted item.
@@ -467,7 +457,7 @@ class CraftApp(App):
         """
         logger.info("Crafting item")
         pag.click()
-        sleep(craft_delay)
+        sleep(add_jitter(CRAFT_DELAY))
         self.result.material += 1
         while True:
             if self.detection.is_operation_success():
@@ -479,9 +469,9 @@ class CraftApp(App):
                 logger.warning("Crafting failed")
                 self.result.fail += 1
                 break
-            sleep(LOOP_DELAY)
+            sleep(add_jitter(LOOP_DELAY))
         pag.press(accept_key)
-        sleep(accept_delay)
+        sleep(add_jitter(LOOP_DELAY))
 
     def _on_release(self, key: keyboard.KeyCode) -> None:
         """Handle keyboard release events for script control.
@@ -518,11 +508,7 @@ class CraftApp(App):
                 if self.result.succes == self.cfg.ARGS.CRAFT_LIMIT:
                     logger.info("Crafting limit reached")
                     break
-                self.craft_item(
-                    random.uniform(CRAFT_DELAY, CRAFT_DELAY_3X),
-                    random.uniform(LOOP_DELAY, LOOP_DELAY_3X),
-                    accept_key,
-                )
+                self.craft_item(accept_key)
         except KeyboardInterrupt:
             pass
         self.display_result()
@@ -637,9 +623,8 @@ class HarvestApp(App):
         """
         logger.info("Harvesting baits")
         pag.click()
-        sleep(DIG_DELAY)
         while not self.detection.is_harvest_success():
-            sleep(CHECK_DELAY)
+            sleep(add_jitter(LOOP_DELAY))
         pag.press("space")
         logger.info("Baits harvested succussfully")
         sleep(ANIMATION_DELAY)
@@ -687,7 +672,7 @@ class HarvestApp(App):
                 food_position = self.detection.get_food_position(item)
                 pag.moveTo(food_position)
                 pag.click()
-        sleep(ANIMATION_DELAY)
+        sleep(add_jitter(ANIMATION_DELAY))
 
     def start(self) -> None:
         """Wrapper method that handle window activation and result display."""
@@ -711,9 +696,9 @@ class HarvestApp(App):
                     pag.press("esc")
                     sleep(self.cfg.HARVEST.CHECK_DELAY)
                     pag.press("esc")
+                    sleep(ANIMATION_DELAY)
                 else:
                     sleep(self.cfg.HARVEST.CHECK_DELAY)
-                sleep(ANIMATION_DELAY)
         except KeyboardInterrupt:
             pass
         self.display_result()

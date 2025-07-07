@@ -24,6 +24,7 @@
 - Fix wakey rig typo
 - Add control pannel detection
 - Add profile description
+- Add delay time jitter
 
 ## 0.5.3 (2025-06-21)
 

@@ -21,7 +21,7 @@ from rich.text import Text
 BASE_DELAY = 1.2
 LOOP_DELAY = 1
 
-ANIMATION_DELAY = 1
+ANIMATION_DELAY = 0.5
 
 # ---------------------------------------------------------------------------- #
 #                            common functionalities                            #

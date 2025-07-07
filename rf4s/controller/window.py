@@ -19,7 +19,7 @@ sys.path.append(".")  # python -m module -> python file
 from rf4s import utils
 from rf4s.controller import logger
 
-ANIMATION_DELAY = 0.25
+ANIMATION_DELAY = 0.5
 
 if utils.is_compiled():
     ROOT = Path(sys.executable).parent  # Running as .exe (Nuitka/PyInstaller)

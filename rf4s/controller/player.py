@@ -11,7 +11,6 @@ import os
 import random
 import sys
 from contextlib import contextmanager
-from datetime import datetime
 from multiprocessing import Lock
 
 # from email.mime.image import MIMEImage
@@ -33,22 +32,19 @@ from rf4s.controller.notification import (
     MiaotixingNotification,
     TelegramNotification,
 )
-from rf4s.controller.timer import Timer
+from rf4s.controller.timer import Timer, add_jitter
 from rf4s.result.result import BotResult
 from rf4s.controller import logger
 
-random.seed(datetime.now().timestamp())
-
+LOOP_DELAY = 1
 PRE_RETRIEVAL_DURATION = 0.5
-PULL_OUT_DELAY = 3
-DIG_DELAY = 5
-DIG_TIMEOUT = 32
-ANIMATION_DELAY = 1
-TICKET_EXPIRE_DELAY = 16
+GET_DIGGING_TOOL_DELAY = 3
+ANIMATION_DELAY = 0.5
+TICKET_EXPIRE_DELAY = 8
 DISCONNECTED_DELAY = 8
 WEAR_TEXT_UPDATE_DELAY = 2
-PUT_DOWN_DELAY = 4
-GIFT_DELAY = 2
+LOWER_TACKLE_DELAY = 4
+BAD_CAST_DELAY = 1
 
 TROLLING_KEY = "j"
 LEFT_KEY = "a"
@@ -268,23 +264,19 @@ class Player:
             return
         logger.info("Harvesting baits")
         self._use_item("digging_tool")
-        sleep(PULL_OUT_DELAY)
+        sleep(GET_DIGGING_TOOL_DELAY)
         pag.click()
 
-        i = DIG_TIMEOUT
-        while i > 0:
-            i = utils.sleep_and_decrease(i, DIG_DELAY)
-            if self.detection.is_harvest_success():
-                logger.info("Baits harvested successfully")
-                pag.press("space")
-                pag.press("backspace")
-                sleep(ANIMATION_DELAY)
-                self.result.bait += 1
-                break
+        while not self.detection.is_harvest_success():
+            sleep(add_jitter(LOOP_DELAY))
+        pag.press("space")
+        pag.press("backspace")
+        sleep(ANIMATION_DELAY)
+        self.result.bait += 1
 
         if pickup:
             self._use_item("main_rod")
-            sleep(PULL_OUT_DELAY)
+            sleep(GET_DIGGING_TOOL_DELAY)
 
         # When timed out, do not raise a TimeoutError but defer it to resetting stage
 
@@ -344,7 +336,7 @@ class Player:
                 food_position = self.detection.get_food_position(item)
                 pag.moveTo(food_position)
                 pag.click()
-        sleep(ANIMATION_DELAY)
+        sleep(add_jitter(ANIMATION_DELAY)) # Could be followed by another _use_item()
 
     def enable_clicklock(self):
         pag.mouseDown()
@@ -364,7 +356,6 @@ class Player:
     @utils.reset_friction_brake_after
     def reset_tackle(self) -> None:
         """Reset the tackle until it is ready."""
-        sleep(ANIMATION_DELAY)
         if self.detection.is_tackle_ready():
             return
 
@@ -478,7 +469,7 @@ class Player:
         ):
             logger.info("Casting rod redundantly")
             pag.click()
-            sleep(2)
+            sleep(BAD_CAST_DELAY)
             self.reset_tackle()
 
         self.tackle.cast(lock)
@@ -576,7 +567,7 @@ class Player:
                     break
                 except TimeoutError:
                     self.disable_clicklock()
-                    sleep(PUT_DOWN_DELAY)
+                    sleep(LOWER_TACKLE_DELAY)
                     if self.cfg.PROFILE.MODE != "telescopic":
                         self.retrieve_line()
                     if not self.clicklock_enabled:
@@ -598,9 +589,7 @@ class Player:
             self._cast_tackle(lock=True)
 
         pag.press("0")
-        bound = self.cfg.PROFILE.CHECK_DELAY // 5
-        random_offset = random.uniform(-bound, bound)
-        sleep(self.cfg.PROFILE.CHECK_DELAY + random_offset)
+        sleep(add_jitter(self.cfg.PROFILE.CHECK_DELAY))
 
     def _start_trolling(self) -> None:
         """Start trolling and change moving direction based on the trolling setting."""
@@ -724,10 +713,9 @@ class Player:
         """Pause the script for a specified duration."""
         logger.info("Pausing script")
         pag.press("esc")
-        bound = self.cfg.BOT.PAUSE_DURATION // 5
-        offset = random.randint(-bound, bound)
-        sleep(self.cfg.BOT.PAUSE_DURATION + offset)
+        sleep(add_jitter(self.cfg.BOT.PAUSE_DURATION))
         pag.press("esc")
+        sleep(ANIMATION_DELAY)
 
     def _handle_timeout(self) -> None:
         """Handle common timeout events."""
@@ -786,11 +774,11 @@ class Player:
             return
         logger.info("Handling fish")
         self._handle_fish()
-        sleep(ANIMATION_DELAY)
+        sleep(add_jitter(ANIMATION_DELAY))
         while self.detection.is_gift_receieved():
             if self.cfg.ARGS.SCREENSHOT:
                 self.detection.window.save_screenshot(self.timer.get_cur_timestamp())
-            sleep(GIFT_DELAY)
+            sleep(add_jitter(LOOP_DELAY))
             pag.press("space")
 
         limit = self.cfg.BOT.KEEPNET.CAPACITY - self.cfg.ARGS.FISHES_IN_KEEPNET
@@ -909,7 +897,6 @@ class Player:
         ticket_loc = self.detection.get_ticket_position(self.cfg.ARGS.BOAT_TICKET)
         if ticket_loc is None:
             pag.press("esc")  # Close ticket menu
-            sleep(ANIMATION_DELAY)
             self.general_quit("New boat ticket not found")
         pag.moveTo(ticket_loc)
         pag.click(clicks=2, interval=0.1)  # pag.doubleClick() not implemented
@@ -971,7 +958,6 @@ class Player:
                 pag.press("esc")
                 sleep(ANIMATION_DELAY)
                 pag.press("esc")
-                sleep(ANIMATION_DELAY)
                 self.general_quit("Favorite item not found")
 
             # Check if the lure for replacement is already broken

@@ -8,6 +8,7 @@ for logging and automation purposes in Russian Fishing 4.
 
 import datetime
 import json
+import random
 import sys
 import time
 from pathlib import Path
@@ -26,6 +27,14 @@ if utils.is_compiled():
     ROOT = Path(sys.executable).parent  # Running as .exe (Nuitka/PyInstaller)
 else:
     ROOT = Path(__file__).resolve().parents[2]
+
+
+TIME_JITTER = 0.2
+random.seed(datetime.datetime.now().timestamp())
+
+def add_jitter(time: float) -> float:
+    delta = time * abs(TIME_JITTER)
+    return round(random.uniform(time - delta, time + delta), 2)
 
 
 class Timer:
