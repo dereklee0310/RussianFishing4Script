@@ -17,9 +17,9 @@ import win32con
 from pyscreeze import Box
 
 from rf4s import exceptions, utils
+from rf4s.controller import logger
 from rf4s.controller.detection import Detection
 from rf4s.controller.timer import Timer, add_jitter
-from rf4s.controller import logger
 
 RESET_TIMEOUT = 16
 CAST_SCALE = 0.4  # 25% / 0.4s
@@ -193,7 +193,7 @@ class Tackle:
                     utils.hold_mouse_button(LIFT_DURATION, button="right")
 
             if self.detection.is_retrieval_finished():
-                #TODO: FIX THIS
+                # TODO: FIX THIS
                 sleep(0 if self.cfg.ARGS.RAINBOW else 2)
                 return
 

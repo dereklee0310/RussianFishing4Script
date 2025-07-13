@@ -17,7 +17,6 @@ from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
 from rf4s import utils
-
 from rf4s.controller import logger
 
 # When running as an executable, use sys.executable to find the path to save file.
@@ -31,6 +30,7 @@ else:
 
 TIME_JITTER = 0.2
 random.seed(datetime.datetime.now().timestamp())
+
 
 def add_jitter(time: float) -> float:
     delta = time * abs(TIME_JITTER)

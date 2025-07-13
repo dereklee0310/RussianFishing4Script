@@ -1,12 +1,12 @@
 import json
 import smtplib
-import requests
 from datetime import datetime, timezone
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from enum import Enum
 from urllib import parse, request
 
+import requests
 from discord_webhook import DiscordEmbed, DiscordWebhook
 from rich import box
 from rich.console import Console

@@ -7,14 +7,14 @@ argument parsing, window management, and fishing automation.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
-import logging.config
-import rich_argparse
-import shutil
 import argparse
+import logging.config
 import shlex
+import shutil
 import sys
 from pathlib import Path
 
+import rich_argparse
 from rich import box, print
 from rich.panel import Panel
 from rich.table import Table
@@ -38,10 +38,11 @@ LOGO = """
 ██╔══██╗██╔══╝  ╚════██║╚════██║
 ██║  ██║██║          ██║███████║
 ╚═╝  ╚═╝╚═╝          ╚═╝╚══════╝"""
-LINKS = """
-GitHub:  https://github.com/dereklee0310/RussianFishing4Script
-Discord: https://discord.gg/BZQWQnAMbY
-"""
+
+LINKS = """GitHub:  https://github.com/dereklee0310/RussianFishing4Script
+Docs:    https://github.com/dereklee0310/RussianFishing4Script/tree/main/docs/en
+Discord: https://discord.gg/BZQWQnAMbY"""
+
 # https://patorjk.com/software/taag/#p=testall&f=3D-ASCII&t=RF4S%0A, ANSI Shadow
 
 FEATURES = (
@@ -160,8 +161,7 @@ def create_parser(cfg: CN) -> argparse.ArgumentParser:
     )
     parent_parser.add_argument("opts", nargs="*", help="overwrite configuration")
 
-    main_parser = argparse.ArgumentParser(
-        epilog=EPILOG, formatter_class=Formatter)
+    main_parser = argparse.ArgumentParser(epilog=EPILOG, formatter_class=Formatter)
     main_parser.add_argument(
         "-V", "--version", action="version", version=f"RF4S {VERSION}"
     )
@@ -389,7 +389,9 @@ def main() -> None:
     args = parser.parse_args()  # First parse to get {command} {flags}
     setup_logging(args)
     # Print logo here so the help message will not show it
-    print(Panel.fit(LOGO, box=box.HEAVY), LINKS, sep="\n")
+    print(Panel.fit(LOGO, box=box.HEAVY, style="bright_white"))
+    print(Panel.fit(LINKS, highlight=True))
+    # print(Panel.fit(, style="bright_green"))
 
     # If user run the program without specifying a command or by double-clicking,
     # prompt user to input the feature and launch options. This handle both Python

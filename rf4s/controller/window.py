@@ -60,8 +60,9 @@ class Window:
         hwnd = win32gui.FindWindow(None, self.game_title)  # class name: UnityWndClass
         if hwnd == 0:
             # logger.critical("Failed to locate the game window: %s", self.game_title)
-            logger.critical("Failed to locate the game window, "
-                            "please open the game and try again")
+            logger.critical(
+                "Failed to locate the game window, please open the game and try again"
+            )
 
             utils.safe_exit()
         return hwnd

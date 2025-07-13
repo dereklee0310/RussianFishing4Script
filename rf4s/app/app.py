@@ -15,7 +15,6 @@ import shlex
 import signal
 import smtplib
 import sys
-import requests
 from abc import ABC, abstractmethod
 from datetime import datetime
 from multiprocessing import Lock
@@ -24,6 +23,7 @@ from socket import gaierror
 from time import sleep
 
 import pyautogui as pag
+import requests
 from pynput import keyboard
 from rich import box, print
 from rich.panel import Panel
@@ -31,14 +31,14 @@ from rich.prompt import Prompt
 from rich.table import Table
 from yacs.config import CfgNode as CN
 
-from rf4s import config, utils
+from rf4s import config, exceptions, utils
+from rf4s.app.core import console, logger
 from rf4s.component.friction_brake import FrictionBrake
 from rf4s.controller.detection import Detection
 from rf4s.controller.player import Player
 from rf4s.controller.timer import Timer, add_jitter
 from rf4s.controller.window import Window
 from rf4s.result import BotResult, CraftResult, HarvestResult, Result
-from rf4s.app.core import logger
 
 # When running as an executable, use sys.executable to find the config.yaml.
 # This file is not included during compilation and could not be resolved automatically
@@ -131,7 +131,12 @@ class BotApp(App):
                 table.add_row(k, str(v))
         print(table)
         if self.cfg.PROFILE.DESCRIPTION:
-            print(Panel.fit(f"[not bold]You're now using:[/not bold] {self.cfg.PROFILE.DESCRIPTION}", style="bold"))
+            print(
+                Panel.fit(
+                    f"[not bold]You're now using:[/not bold] {self.cfg.PROFILE.DESCRIPTION}",
+                    style="bold",
+                )
+            )
         print(f"Press {self.cfg.KEY.QUIT} to quit.")
 
         self.result = BotResult()
@@ -168,7 +173,9 @@ class BotApp(App):
             )
             utils.safe_exit()
         except (TimeoutError, gaierror):
-            logger.critical("Invalid BOT.NOTIFICATION.SMTP_SERVER or connection timed out")
+            logger.critical(
+                "Invalid BOT.NOTIFICATION.SMTP_SERVER or connection timed out"
+            )
             utils.safe_exit()
 
     def validate_discord_webhook(self) -> bool:
@@ -705,39 +712,64 @@ class HarvestApp(App):
 
 
 class CalculateApp:
-    def get_tackle_stats(self):
-        """Get actual stats of reel and leader based on their wears.
+    def __init__(self):
+        self.weakest_part_name = None
+        self.table = None
+        self.parts = {
+            # Value, wear, base, result
+            "Rod": {
+                "stat": [0, 0, 0.3, None],
+                "prompt": "Load capacity (kg)",
+                "color": "orange1",
+            },
+            "Reel mechanism": {
+                "stat": [0, 0, 0.3, None],
+                "prompt": "Mech (kg)",
+                "color": "plum1",
+            },
+            "Reel friction brake": {
+                "stat": [0, 0, 0, None],
+                "prompt": "Drag (kg)",
+                "color": "gold1",
+            },
+            "Fishing line": {
+                "stat": [0, 0, 0, None],
+                "prompt": "Load capacity (kg)",
+                "color": "salmon1",
+            },
+            "Leader": {
+                "stat": [0, 0, 0, None],
+                "prompt": "Load capacity (kg)",
+                "color": "pale_green1",
+            },
+            "Hook": {
+                "stat": [0, 0, 0, None],
+                "prompt": "Load capacity (kg)",
+                "color": "sky_blue1",
+            },
+        }
 
-        Prompts the user for input and calculates the true max drag and load capacity
-        after accounting for wear.
+    def calculate_part_stat(self, stat) -> float:
+        load_capacity, wear, base, _ = stat
+        durability = 1 - wear / 100
+        stat[3] = load_capacity * (1 - base) * durability + load_capacity * base
 
-        :return: A tuple containing the true max drag and true load capacity.
-        :rtype: tuple[float, float]
-        """
-        prompts = (
-            "Reel's max drag (kg)",
-            "Reel's friction brake wear (%)",
-            "Leader's load capacity (kg)",
-            "Leader's wear (%)",
-        )
-
-        while True:
-            restart = False
-            stats = []
-            for prompt in prompts:
-                validated_input = self.get_validated_input(prompt)
-                if validated_input is None:
-                    restart = True
-                    break
-                stats.append(validated_input)
-
-            if restart:
+    def calculate_tackle_stats(self):
+        for name, part in self.parts.items():
+            try:
+                for i, prompt in enumerate((part["prompt"], "wear (%)")):
+                    prompt = f"[{part['color']}][{name}][/{part['color']}] {prompt}"
+                    part["stat"][i] = self.get_validated_input(prompt)
+            except exceptions.SkipError:
                 continue
-
-            max_drag, friction_brake_wear, leader_load_capacity, leader_wear = stats
-            true_max_drag = max_drag * (100 - friction_brake_wear) / 100
-            true_load_capacity = leader_load_capacity * (100 - leader_wear) / 100
-            return true_max_drag, true_load_capacity
+            self.calculate_part_stat(part["stat"])
+            if part["stat"][3] is not None:
+                self.table.add_row(name, f"{part['stat'][3]:.2f} kg")
+                if (
+                    self.weakest_part_name is None
+                    or part["stat"][3] < self.parts[self.weakest_part_name]["stat"][3]
+                ):
+                    self.weakest_part_name = name
 
     def get_validated_input(self, prompt: str) -> float | None:
         """Get validated input from the user.
@@ -751,42 +783,70 @@ class CalculateApp:
         """
         while True:
             user_input = Prompt.ask(prompt)
-            if user_input == "q":
-                print("Bye.")
-                sys.exit()
             if user_input == "r":
-                return None
+                raise exceptions.RestartError
+            if user_input == "s":
+                raise exceptions.SkipError
+            if user_input == "S":
+                raise exceptions.SkipRemainingError
+            if user_input == "q":
+                raise exceptions.QuitError
 
             try:
                 return float(user_input)
             except ValueError:
-                utils.print_error("Invalid input. Please enter a number.")
+                console.print("Invalid input. Please enter a number.", style="red")
 
     def start(self):
         """Main function to run the friction brake calculation.
 
         Prompts the user for input, calculates the result, and displays them in a table.
         """
-        print("Please enter your tackle's stats, type q to quit, r to restart:")
+        print(
+            Panel.fit(
+                "Type r to restart, s to skip a part, S to skip the remaining parts, q to quit.",
+                style="blue",
+            ),
+            Panel.fit(
+                "Hint: Press V and click the gear icon to view the parts.",
+                style="green",
+            ),
+        )
         while True:
-            max_drag, load_capacity = self.get_tackle_stats()
-            max_friction_brake = int(
-                min(load_capacity * 30 / (max_drag + BIAS) - 1, 29)
-            )
-            max_tension = max_drag * max_friction_brake / 30
-
-            table = Table(
-                "Result",
-                title="Your tackle's real stats 🎣",
-                box=box.HEAVY,
+            self.weakest_part_name = None
+            for name in self.parts:
+                self.parts[name]["stat"][3] = None
+            self.table = Table(
+                "Results",
+                title="Tackle's Stats",
                 show_header=False,
+                box=box.HEAVY,
                 min_width=36,
             )
-            table.add_row("Reel's true max drag", f"{max_drag:.2f} kg")
-            table.add_row("Leader's true load capacity", f"{load_capacity:.2f} kg")
-            table.add_row("Friction brake tension", f"{max_tension:.2f} kg")
-            table.add_row("Maximum friction brake to use", f"{max_friction_brake}")
-            print(table)
+            try:
+                self.calculate_tackle_stats()
+            except exceptions.SkipRemainingError:
+                pass
+            except exceptions.RestartError:
+                continue
+            except exceptions.QuitError:
+                print("Bye.")
+                break
+            if self.weakest_part_name is not None:
+                self.table.add_row("Weakest part", self.weakest_part_name)
+                if self.parts["Reel friction brake"]["stat"][3] is not None:
+                    # k / 30 * drag < weakest -> k < weakest * 30 / drag
+                    friction_brake = (
+                        self.parts[self.weakest_part_name]["stat"][3]
+                        * 30
+                        / self.parts["Reel friction brake"]["stat"][3]
+                    )
+                    self.table.add_row(
+                        "Recommend friction brake",
+                        f"{int(friction_brake):2d}",
+                    )
+            if self.table.rows:
+                print(self.table)
 
 
 class FrictionBrakeApp(App):

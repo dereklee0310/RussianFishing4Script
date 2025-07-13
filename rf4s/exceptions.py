@@ -37,3 +37,19 @@ class DisconnectedError(Exception):
 
 class TicketExpiredError(Exception):
     """Ticket expired."""
+
+
+class RestartError(Exception):
+    """User want to restart the app."""
+
+
+class SkipError(Exception):
+    """User want to skip a component during tackle's stat calculation."""
+
+
+class SkipRemainingError(Exception):
+    """User want to skip the remaing components during tackle's stat calculation."""
+
+
+class QuitError(Exception):
+    """User want to quit the app."""

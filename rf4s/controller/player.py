@@ -24,6 +24,7 @@ from rich.table import Table
 from rf4s import exceptions, utils
 from rf4s.component.friction_brake import FrictionBrake
 from rf4s.component.tackle import Tackle
+from rf4s.controller import logger
 from rf4s.controller.detection import Detection, TagColor
 from rf4s.controller.notification import (
     DiscordColor,
@@ -34,7 +35,6 @@ from rf4s.controller.notification import (
 )
 from rf4s.controller.timer import Timer, add_jitter
 from rf4s.result.result import BotResult
-from rf4s.controller import logger
 
 LOOP_DELAY = 1
 PRE_RETRIEVAL_DURATION = 0.5
@@ -336,7 +336,7 @@ class Player:
                 food_position = self.detection.get_food_position(item)
                 pag.moveTo(food_position)
                 pag.click()
-        sleep(add_jitter(ANIMATION_DELAY)) # Could be followed by another _use_item()
+        sleep(add_jitter(ANIMATION_DELAY))  # Could be followed by another _use_item()
 
     def enable_clicklock(self):
         pag.mouseDown()

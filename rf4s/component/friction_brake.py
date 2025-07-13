@@ -11,8 +11,8 @@ from time import sleep, time
 
 import pyautogui as pag
 
-from rf4s.controller.detection import Detection
 from rf4s.controller import logger
+from rf4s.controller.detection import Detection
 
 MAX_FRICTION_BRAKE = 30
 MIN_FRICTION_BRAKE = 0
@@ -53,7 +53,6 @@ class FrictionBrake:
             self.fb_cfg = self.cfg.BOT.FRICTION_BRAKE
         else:
             self.fb_cfg = self.cfg.FRICTION_BRAKE
-
 
         self.cur = Value("i", self.fb_cfg.INITIAL)
         self.monitor_process = Process(target=monitor_friction_brake, args=(self,))
@@ -122,10 +121,7 @@ def monitor_friction_brake(friction_brake: FrictionBrake) -> None:
                     sleep(friction_brake.fb_cfg.DECREASE_DELAY)
                 else:
                     cur_time = time()
-                    if (
-                        cur_time - pre_time
-                        >= friction_brake.fb_cfg.INCREASE_DELAY
-                    ):
+                    if cur_time - pre_time >= friction_brake.fb_cfg.INCREASE_DELAY:
                         pre_time = cur_time
                         friction_brake.change(increase=True)
     except KeyboardInterrupt:

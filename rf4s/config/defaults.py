@@ -352,7 +352,9 @@ _C.PROFILE.PIRK.HOOK_DELAY = 0.5
 _C.PROFILE.PIRK.POST_ACCELERATION = "auto"
 
 _C.PROFILE.PIRK_WITH_RETRIEVAL = CN()
-_C.PROFILE.PIRK_WITH_RETRIEVAL.DESCRIPTION = "A marine fishing profile that retrieves the fishing line while parking."
+_C.PROFILE.PIRK_WITH_RETRIEVAL.DESCRIPTION = (
+    "A marine fishing profile that retrieves the fishing line while parking."
+)
 _C.PROFILE.PIRK_WITH_RETRIEVAL.MODE = "pirk"
 _C.PROFILE.PIRK_WITH_RETRIEVAL.LAUNCH_OPTIONS = ""
 _C.PROFILE.PIRK_WITH_RETRIEVAL.CAST_POWER_LEVEL = 1.0
@@ -394,7 +396,9 @@ _C.PROFILE.WACKY_RIG.POST_ACCELERATION = "auto"
 # ---------------------------------------------------------------------------- #
 _C.PROFILE.ELEVATOR = CN()
 # Profile description (optional)
-_C.PROFILE.ELEVATOR.DESCRIPTION = "A marine fishing profile for elevator while fishing/trolling."
+_C.PROFILE.ELEVATOR.DESCRIPTION = (
+    "A marine fishing profile for elevator while fishing/trolling."
+)
 # Fishing mode
 _C.PROFILE.ELEVATOR.MODE = "elevator"
 # Profile-level launch options that will be merged with the global BOT.LAUNCH_OPTIONS

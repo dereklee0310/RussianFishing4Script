@@ -14,8 +14,6 @@ from time import sleep
 
 import pyautogui as pag
 from pyscreeze import Box
-from rich.console import Console
-from rich.text import Text
 
 # BASE_DELAY + LOOP_DELAY >= 2.2 to trigger clicklock
 BASE_DELAY = 1.2
@@ -187,12 +185,6 @@ def release_keys_after(arrow_keys: bool = False):
     return func_wrapper
 
 
-def print_error(msg):
-    text = Text(msg)
-    text.stylize("red")
-    Console().print(text)
-
-
 # There's lots of early return in player._resetting_stage(),
 # so use a decorator here to simplify the code
 def reset_friction_brake_after(func):
@@ -240,11 +232,11 @@ def safe_exit():
         # KeyboardInterrupt will mess with stdin, input will crash silently
         # Use msvcrt.getch() because it doesn't depends on stdin
         msvcrt.getch()
-    pag.mouseUp(button="left")
-    pag.mouseUp(button="right")
-    pag.keyUp("ctrl")
-    pag.keyUp("shift")
-    pag.keyUp("w")
-    pag.keyUp("a")
-    pag.keyUp("d")
+    pag.mouseUp(button="left", _pause=False)
+    pag.mouseUp(button="right", _pause=False)
+    pag.keyUp("ctrl", _pause=False)
+    pag.keyUp("shift", _pause=False)
+    pag.keyUp("w", _pause=False)
+    pag.keyUp("a", _pause=False)
+    pag.keyUp("d", _pause=False)
     sys.exit()
