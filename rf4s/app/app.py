@@ -137,7 +137,7 @@ class BotApp(App):
                     style="bold",
                 )
             )
-        print(f"Press {self.cfg.KEY.QUIT} to quit.")
+        print(Panel.fit(f"Press {self.cfg.KEY.QUIT} to quit.", style="blue"))
 
         self.result = BotResult()
         self.window = Window()
@@ -501,7 +501,7 @@ class CraftApp(App):
             listener.start()
 
         try:
-            print(f"Press {self.cfg.KEY.QUIT} to quit.")
+            print(Panel.fit(f"Press {self.cfg.KEY.QUIT} to quit.", style="blue"))
             logger.warning("This might get you banned, use at your own risk")
             logger.warning("Use Razor or Logitech macros instead")
             random.seed(datetime.now().timestamp())
@@ -547,8 +547,8 @@ class MoveApp(App):
         self.cfg.freeze()
 
         print(
-            f"Press {self.cfg.KEY.MOVE_PAUSE} to pause, "
-            f"{self.cfg.KEY.MOVE_QUIT} to quit.",
+            Panel.fit(f"Press {self.cfg.KEY.MOVE_PAUSE} to pause, "
+            f"{self.cfg.KEY.MOVE_QUIT} to quit.", style="blue")
         )
 
         self.result = Result()
@@ -615,7 +615,7 @@ class HarvestApp(App):
         table.add_row("Hunger threshold", str(self.cfg.STAT.HUNGER_THRESHOLD))
         table.add_row("Comfort threshold", str(self.cfg.STAT.COMFORT_THRESHOLD))
         print(table)
-        print(f"Press {self.cfg.KEY.QUIT} to quit.")
+        print(Panel.fit(f"Press {self.cfg.KEY.QUIT} to quit.", style="blue"))
 
         self.result = HarvestResult()
         self.timer = Timer(self.cfg)
@@ -885,8 +885,8 @@ class FrictionBrakeApp(App):
         print(table)
 
         print(
-            f"Press {self.cfg.KEY.FRICTION_BRAKE_RESET} to reset friction brake, "
-            f"{self.cfg.KEY.FRICTION_BRAKE_QUIT} to quit."
+            Panel.fit(f"Press {self.cfg.KEY.FRICTION_BRAKE_RESET} to reset friction brake, "
+            f"{self.cfg.KEY.FRICTION_BRAKE_QUIT} to quit.", style="blue")
         )
 
         self.window = Window()

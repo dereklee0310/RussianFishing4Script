@@ -39,10 +39,6 @@ LOGO = """
 ██║  ██║██║          ██║███████║
 ╚═╝  ╚═╝╚═╝          ╚═╝╚══════╝"""
 
-LINKS = """GitHub:  https://github.com/dereklee0310/RussianFishing4Script
-Docs:    https://github.com/dereklee0310/RussianFishing4Script/tree/main/docs/en
-Discord: https://discord.gg/BZQWQnAMbY"""
-
 # https://patorjk.com/software/taag/#p=testall&f=3D-ASCII&t=RF4S%0A, ANSI Shadow
 
 FEATURES = (
@@ -87,9 +83,9 @@ BOT_BOOLEAN_ARGUMENTS = (
 )
 
 EPILOG = """
-Documentation: https://github.com/dereklee0310/RussianFishing4Script/blob/main/docs/en/CONFIGURATION.md
-Changelog:     https://github.com/dereklee0310/RussianFishing4Script/blob/main/docs/en/CHANGELOG.md
-Bug reports:   https://github.com/dereklee0310/RussianFishing4Script/issues
+GitHub:  https://github.com/dereklee0310/RussianFishing4Script
+Docs:    https://github.com/dereklee0310/RussianFishing4Script/tree/main/docs/en
+Discord: https://discord.gg/BZQWQnAMbY
 """
 
 # When running as an executable, use sys.executable to find the config.yaml.
@@ -390,7 +386,7 @@ def main() -> None:
     setup_logging(args)
     # Print logo here so the help message will not show it
     print(Panel.fit(LOGO, box=box.HEAVY, style="bright_white"))
-    print(Panel.fit(LINKS, highlight=True))
+    print("https://github.com/dereklee0310/RussianFishing4Script")
     # print(Panel.fit(, style="bright_green"))
 
     # If user run the program without specifying a command or by double-clicking,
