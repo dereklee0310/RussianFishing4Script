@@ -26,6 +26,10 @@
 - Add delay time jitter
 - add calculate app
 - add clicklock setting
+- add bypass tags
+- add keepnet full protection
+- add card and gift record
+- 
 
 ## 0.5.3 (2025-06-21)
 

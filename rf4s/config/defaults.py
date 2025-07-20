@@ -119,6 +119,8 @@ _C.BOT.KEEPNET.BLACKLIST = ()
 # Always take a screenshot if it's left empty.
 # (options: green, yellow, blue, purple, pink)
 _C.BOT.KEEPNET.SCREENSHOT_TAGS = ("yellow", "blue")
+# Fish with any of the following tags will be kept regardless of the blacklist setting
+_C.BOT.KEEPNET.BYPASS_TAGS = ("yellow", "blue")
 # Only keep the fish with any of the following tags
 # (options: green, yellow, blue, purple, pink)
 _C.BOT.KEEPNET.KEEP_TAGS = ("green", "yellow", "blue", "purple", "pink")

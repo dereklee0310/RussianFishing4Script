@@ -25,6 +25,8 @@ class BotResult:
     blue: int = 0
     purple: int = 0
     pink: int = 0
+    card: int = 0
+    gift: int = 0
 
     def as_dict(self, msg: str, timer: Timer) -> dict:
         # Will be 0 if total_fish_count = 0

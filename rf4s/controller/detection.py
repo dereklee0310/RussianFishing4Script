@@ -243,23 +243,7 @@ class Detection:
     def is_fish_captured(self):
         return self._get_image_box("keep", 0.9)
 
-    def is_fish_whitelisted(self) -> bool:
-        """Check if the fish is in the whitelist.
-
-        :return: True if the fish is in the whitelist, False otherwise.
-        :rtype: bool
-        """
-        return self._is_fish_in_list(self.cfg.BOT.KEEPNET.WHITELIST)
-
-    def is_fish_blacklisted(self) -> bool:
-        """Check if the fish is in the blacklist.
-
-        :return:  True if the fish is in the blacklist, False otherwise
-        :rtype: bool
-        """
-        return self._is_fish_in_list(self.cfg.BOT.KEEPNET.BLACKLIST)
-
-    def _is_fish_in_list(self, fish_species_list: tuple | list) -> bool:
+    def is_fish_in_list(self, fish_species_list: tuple | list) -> bool:
         """Check if the fish species matches any in the table.
 
         :param fish_species_list: fish species list
@@ -317,6 +301,15 @@ class Detection:
 
     def is_ticket_expired(self):
         return self._get_image_box("ticket", 0.9)
+
+    def is_keepnet_full(self):
+        return self._get_image_box("keepnet_is_full", 0.9)
+
+    def is_gift_receieved(self):
+        return self._get_image_box("gift", 0.8)
+
+    def is_card_receieved(self):
+        return self._get_image_box("card", 0.8)
 
     # ------------------------------- Item crafting ------------------------------ #
     def is_operation_failed(self):
@@ -452,6 +445,3 @@ class Detection:
 
     def is_harvest_success(self):
         return self._get_image_box("harvest_confirm", 0.8)
-
-    def is_gift_receieved(self):
-        return self._get_image_box("gift", 0.8)

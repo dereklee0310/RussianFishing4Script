@@ -775,58 +775,69 @@ class Player:
     def handle_fish(self) -> None:
         if not self.detection.is_fish_captured():
             return
+
         logger.info("Handling fish")
+        keepnet_is_full = False
+        if self.detection.is_keepnet_full():
+            pag.press("esc")
+            sleep(ANIMATION_DELAY)
+            keepnet_is_full = True
         self._handle_fish()
         sleep(add_jitter(ANIMATION_DELAY))
+        # Avoid wrong cast hour
+        if self.cfg.PROFILE.MODE in ["bottom", "pirk", "elevator"]:
+            self.timer.update_cast_time()
+        self.timer.add_cast_time()
+
+        if self.detection.is_card_receieved():
+            self.result.card += 1
+
         while self.detection.is_gift_receieved():
             if self.cfg.ARGS.SCREENSHOT:
                 self.detection.window.save_screenshot(self.timer.get_cur_timestamp())
             sleep(add_jitter(LOOP_DELAY))
             pag.press("space")
+            self.result.gift += 1
 
         limit = self.cfg.BOT.KEEPNET.CAPACITY - self.cfg.ARGS.FISHES_IN_KEEPNET
-        if self.result.kept == limit:
+        if keepnet_is_full or self.result.kept == limit:
             self._handle_full_keepnet()
 
     def _handle_fish(self) -> None:
         """Keep or release the fish and record the fish count."""
-        tagged = False
-        for tag in self.cfg.BOT.KEEPNET.KEEP_TAGS:
-            if self.detection.is_tag_exist(TagColor[tag.upper()]):
-                tagged = True
-        tagged = not self.cfg.BOT.KEEPNET.SCREENSHOT_TAGS or tagged
-        if self.cfg.ARGS.SCREENSHOT and tagged:
-            self.detection.window.save_screenshot(self.timer.get_cur_timestamp())
-
         self.result.total += 1
-        if self.detection.is_fish_blacklisted():
-            pag.press("backspace")
-            return
-
-        tagged = False
+        bypass = keep = screenshot = False
         for tag in TagColor:
             if self.detection.is_tag_exist(tag):
                 tag_color = tag.name.lower()
                 setattr(self.result, tag_color, getattr(self.result, tag_color) + 1)
+                if tag_color in self.cfg.BOT.KEEPNET.BYPASS_TAGS:
+                    bypass = True
                 if tag_color in self.cfg.BOT.KEEPNET.KEEP_TAGS:
-                    tagged = True
+                    keep = True
+                if tag_color in self.cfg.BOT.KEEPNET.SCREENSHOT_TAGS:
+                    screenshot = True
 
-        if (
+        if self.cfg.ARGS.SCREENSHOT and (
+            not self.cfg.BOT.KEEPNET.SCREENSHOT_TAGS
+            or screenshot
+        ):
+            self.detection.window.save_screenshot(self.timer.get_cur_timestamp())
+
+        if bypass:
+            pag.press("space")
+            self.result.kept += 1
+        elif self.detection.is_fish_in_list(self.cfg.BOT.KEEPNET.BLACKLIST):
+            pag.press("backspace")
+        elif (
             self.cfg.ARGS.TAG
-            and not tagged
-            and not self.detection.is_fish_whitelisted()
+            and not keep
+            and not self.detection.is_fish_in_list(self.cfg.BOT.KEEPNET.WHITELIST)
         ):
             pag.press("backspace")
-            return
-
-        pag.press("space")
-
-        self.result.kept += 1
-
-        # Avoid wrong cast hour
-        if self.cfg.PROFILE.MODE in ["bottom", "pirk", "elevator"]:
-            self.timer.update_cast_time()
-        self.timer.add_cast_time()
+        else:
+            pag.press("space")
+            self.result.kept += 1
 
     def _handle_full_keepnet(self) -> None:
         """Handle a full keepnet event."""
