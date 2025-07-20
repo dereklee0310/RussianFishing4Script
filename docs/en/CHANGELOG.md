@@ -25,6 +25,7 @@
 - Add control pannel detection
 - Add profile description
 - Add delay time jitter
+- add calculate app
 
 ## 0.5.3 (2025-06-21)
 

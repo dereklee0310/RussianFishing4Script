@@ -16,7 +16,6 @@ from pathlib import Path
 
 import rich_argparse
 from rich import box, print
-from rich.panel import Panel
 from rich.table import Table
 from yacs.config import CfgNode as CN
 
@@ -83,9 +82,7 @@ BOT_BOOLEAN_ARGUMENTS = (
 )
 
 EPILOG = """
-GitHub:  https://github.com/dereklee0310/RussianFishing4Script
-Docs:    https://github.com/dereklee0310/RussianFishing4Script/tree/main/docs/en
-Discord: https://discord.gg/BZQWQnAMbY
+Docs: https://github.com/dereklee0310/RussianFishing4Script/tree/main/docs/en
 """
 
 # When running as an executable, use sys.executable to find the config.yaml.
@@ -357,7 +354,7 @@ def get_fid(parser) -> None:
     Continuously prompts until a valid feature ID is entered or the
     user chooses to quit.
     """
-    print("Enter feature id to use, h to see help message, q to quit:")
+    utils.print_usage_box("Enter feature id to use, h to see help message, q to quit:")
 
     while True:
         user_input = input(">>> ")
@@ -384,10 +381,7 @@ def main() -> None:
     parser = create_parser(cfg)
     args = parser.parse_args()  # First parse to get {command} {flags}
     setup_logging(args)
-    # Print logo here so the help message will not show it
-    print(Panel.fit(LOGO, box=box.HEAVY, style="bright_white"))
-    print("https://github.com/dereklee0310/RussianFishing4Script")
-    # print(Panel.fit(, style="bright_green"))
+    utils.print_logo_box(LOGO)  # Print logo here so the help message will not show it
 
     # If user run the program without specifying a command or by double-clicking,
     # prompt user to input the feature and launch options. This handle both Python

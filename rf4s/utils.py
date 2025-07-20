@@ -14,6 +14,10 @@ from time import sleep
 
 import pyautogui as pag
 from pyscreeze import Box
+from rich import box, print
+from rich.panel import Panel
+
+from rf4s.controller.console import console
 
 # BASE_DELAY + LOOP_DELAY >= 2.2 to trigger clicklock
 BASE_DELAY = 1.2
@@ -219,24 +223,38 @@ def is_run_by_clicking():
     return is_compiled() and num_processes == 2
 
 
-# def get_launch_options_from_user():
-#     if not is_run_by_clicking():
-#         return ""
-#     logger.info("Run by double-clicking detected")
-#     return input("Enter launch options (press Enter to skip): ")
-
-
 def safe_exit():
     if is_run_by_clicking():
         print("Press any key to quit.")
         # KeyboardInterrupt will mess with stdin, input will crash silently
         # Use msvcrt.getch() because it doesn't depends on stdin
         msvcrt.getch()
+    # Skip this because it will trigger a right click to open context menu
+    # pag.mouseUp(button="right", _pause=False)
     pag.mouseUp(button="left", _pause=False)
-    pag.mouseUp(button="right", _pause=False)
     pag.keyUp("ctrl", _pause=False)
     pag.keyUp("shift", _pause=False)
     pag.keyUp("w", _pause=False)
     pag.keyUp("a", _pause=False)
     pag.keyUp("d", _pause=False)
     sys.exit()
+
+
+def print_logo_box(logo: str) -> None:
+    print(Panel.fit(logo, box=box.HEAVY, style="bright_white"))
+
+
+def print_usage_box(msg: str) -> None:
+    print(Panel.fit(msg, style="steel_blue1"))
+
+
+def print_description_box(msg: str) -> None:
+    print(Panel.fit(f"You're now using: {msg}"))
+
+
+def print_hint_box(msg: str) -> None:
+    print(Panel.fit(f"Hint: {msg}", style="green"))
+
+
+def print_error(msg: str) -> None:
+    console.print(msg, style="red")

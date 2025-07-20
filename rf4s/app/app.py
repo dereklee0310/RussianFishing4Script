@@ -16,23 +16,25 @@ import signal
 import smtplib
 import sys
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
 from multiprocessing import Lock
 from pathlib import Path
 from socket import gaierror
 from time import sleep
+from typing import Optional
 
 import pyautogui as pag
 import requests
 from pynput import keyboard
 from rich import box, print
-from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.table import Table
 from yacs.config import CfgNode as CN
 
 from rf4s import config, exceptions, utils
-from rf4s.app.core import console, logger
+from rf4s.app.core import logger
 from rf4s.component.friction_brake import FrictionBrake
 from rf4s.controller.detection import Detection
 from rf4s.controller.player import Player
@@ -52,6 +54,9 @@ ANIMATION_DELAY = 0.5
 CRAFT_DELAY = 4.0
 LOOP_DELAY = 0.5
 BIAS = 1e-6
+
+FRICTION_BRAKE_ID = 2
+MAX_FRICTION_BRAKE = 30
 
 
 class App(ABC):
@@ -85,10 +90,10 @@ class App(ABC):
         if not result_dict:
             return
 
-        table = Table(title="Running Result", box=box.HEAVY, show_header=False)
+        result = Table(title="Running Result", box=box.HEAVY, show_header=False)
         for name, value in self.result.as_dict().items():
-            table.add_row(name, str(value))
-        print(table)
+            result.add_row(name, str(value))
+        print(result)
 
 
 class BotApp(App):
@@ -124,20 +129,17 @@ class BotApp(App):
 
         self.cfg.freeze()  # cfg is done now
 
-        table = Table(title="Settings", show_header=False, box=box.HEAVY, min_width=36)
-        table.add_row("Launch options", " ".join(sys.argv[1:]))
+        settings = Table(
+            title="Settings", show_header=False, box=box.HEAVY, min_width=36
+        )
+        settings.add_row("Launch options", " ".join(sys.argv[1:]))
         for k, v in self.cfg.PROFILE.items():
             if k != "DESCRIPTION":
-                table.add_row(k, str(v))
-        print(table)
+                settings.add_row(k, str(v))
+        print(settings)
         if self.cfg.PROFILE.DESCRIPTION:
-            print(
-                Panel.fit(
-                    f"[not bold]You're now using:[/not bold] {self.cfg.PROFILE.DESCRIPTION}",
-                    style="bold",
-                )
-            )
-        print(Panel.fit(f"Press {self.cfg.KEY.QUIT} to quit.", style="blue"))
+            utils.print_description_box(self.cfg.PROFILE.DESCRIPTION)
+        utils.print_usage_box(f"Press {self.cfg.KEY.QUIT} to quit.")
 
         self.result = BotResult()
         self.window = Window()
@@ -247,15 +249,15 @@ class BotApp(App):
 
         Shows a formatted table with profile IDs and names.
         """
-        table = Table(
+        profiles = Table(
             title="Select a profile to start ⚙️",
             box=box.HEAVY,
             show_header=False,
             min_width=36,
         )
         for i, profile in enumerate(self.cfg.PROFILE):
-            table.add_row(f"{i:>2}. {profile}")
-        print(table)
+            profiles.add_row(f"{i:>2}. {profile}")
+        print(profiles)
 
     def get_pid(self) -> None:
         """Prompt the user to enter a profile ID and validate the input.
@@ -263,7 +265,9 @@ class BotApp(App):
         Continuously prompts until a valid profile ID is entered or the
         user chooses to quit.
         """
-        print("Enter profile id to use, h to see help message, q to quit:")
+        utils.print_usage_box(
+            "Enter profile id to use, h to see help message, q to quit:"
+        )
 
         while True:
             user_input = input(">>> ")
@@ -428,9 +432,11 @@ class CraftApp(App):
         self.cfg.merge_from_list(args.opts)
         self.cfg.freeze()
 
-        table = Table(title="Settings", show_header=False, box=box.HEAVY, min_width=36)
-        table.add_row("Launch options", " ".join(sys.argv[1:]))
-        print(table)
+        settings = Table(
+            title="Settings", show_header=False, box=box.HEAVY, min_width=36
+        )
+        settings.add_row("Launch options", " ".join(sys.argv[1:]))
+        print(settings)
 
         self.result = CraftResult()
         self.window = Window()
@@ -501,7 +507,7 @@ class CraftApp(App):
             listener.start()
 
         try:
-            print(Panel.fit(f"Press {self.cfg.KEY.QUIT} to quit.", style="blue"))
+            utils.print_usage_box(f"Press {self.cfg.KEY.QUIT} to quit.", style="blue")
             logger.warning("This might get you banned, use at your own risk")
             logger.warning("Use Razor or Logitech macros instead")
             random.seed(datetime.now().timestamp())
@@ -546,9 +552,9 @@ class MoveApp(App):
         self.cfg.merge_from_list(args.opts)
         self.cfg.freeze()
 
-        print(
-            Panel.fit(f"Press {self.cfg.KEY.MOVE_PAUSE} to pause, "
-            f"{self.cfg.KEY.MOVE_QUIT} to quit.", style="blue")
+        utils.print_usage_box(
+            f"Press {self.cfg.KEY.MOVE_PAUSE} to pause, "
+            f"{self.cfg.KEY.MOVE_QUIT} to quit.",
         )
 
         self.result = Result()
@@ -607,15 +613,17 @@ class HarvestApp(App):
         self.cfg.merge_from_list(args.opts)
         self.cfg.freeze()
 
-        table = Table(title="Settings", show_header=False, box=box.HEAVY, min_width=36)
-        table.add_row("Launch options", " ".join(sys.argv[1:]))
-        table.add_row("Power saving", str(self.cfg.HARVEST.POWER_SAVING))
-        table.add_row("Check delay", str(self.cfg.HARVEST.CHECK_DELAY))
-        table.add_row("Energy threshold", str(self.cfg.STAT.ENERGY_THRESHOLD))
-        table.add_row("Hunger threshold", str(self.cfg.STAT.HUNGER_THRESHOLD))
-        table.add_row("Comfort threshold", str(self.cfg.STAT.COMFORT_THRESHOLD))
-        print(table)
-        print(Panel.fit(f"Press {self.cfg.KEY.QUIT} to quit.", style="blue"))
+        settings = Table(
+            title="Settings", show_header=False, box=box.HEAVY, min_width=36
+        )
+        settings.add_row("Launch options", " ".join(sys.argv[1:]))
+        settings.add_row("Power saving", str(self.cfg.HARVEST.POWER_SAVING))
+        settings.add_row("Check delay", str(self.cfg.HARVEST.CHECK_DELAY))
+        settings.add_row("Energy threshold", str(self.cfg.STAT.ENERGY_THRESHOLD))
+        settings.add_row("Hunger threshold", str(self.cfg.STAT.HUNGER_THRESHOLD))
+        settings.add_row("Comfort threshold", str(self.cfg.STAT.COMFORT_THRESHOLD))
+        print(settings)
+        utils.print_usage_box("Press {self.cfg.KEY.QUIT} to quit.", style="blue")
 
         self.result = HarvestResult()
         self.timer = Timer(self.cfg)
@@ -711,118 +719,132 @@ class HarvestApp(App):
         self.display_result()
 
 
+@dataclass
+class Part:
+    name: str
+    prompt: str
+    color: str
+    base: float = 0.0
+    load_capacity: Optional[float] = None
+    wear: Optional[float] = None
+    real_load_capacity: Optional[float] = None
+
+    def calculate_real_load_capacity(self) -> None:
+        self.real_load_capacity = (
+            self.load_capacity * (1 - self.base) * (1 - self.wear / 100)
+            + self.load_capacity * self.base
+        )
+
+
+class CalculateCommand(Enum):
+    RESTART = "r"
+    SKIP = "s"
+    SKIP_REMAINING = "S"
+    QUIT = "q"
+
+
 class CalculateApp:
     def __init__(self):
-        self.weakest_part_name = None
-        self.table = None
-        self.parts = {
-            # Value, wear, base, result
-            "Rod": {
-                "stat": [0, 0, 0.3, None],
-                "prompt": "Load capacity (kg)",
-                "color": "orange1",
-            },
-            "Reel mechanism": {
-                "stat": [0, 0, 0.3, None],
-                "prompt": "Mech (kg)",
-                "color": "plum1",
-            },
-            "Reel friction brake": {
-                "stat": [0, 0, 0, None],
-                "prompt": "Drag (kg)",
-                "color": "gold1",
-            },
-            "Fishing line": {
-                "stat": [0, 0, 0, None],
-                "prompt": "Load capacity (kg)",
-                "color": "salmon1",
-            },
-            "Leader": {
-                "stat": [0, 0, 0, None],
-                "prompt": "Load capacity (kg)",
-                "color": "pale_green1",
-            },
-            "Hook": {
-                "stat": [0, 0, 0, None],
-                "prompt": "Load capacity (kg)",
-                "color": "sky_blue1",
-            },
-        }
-
-    def calculate_part_stat(self, stat) -> float:
-        load_capacity, wear, base, _ = stat
-        durability = 1 - wear / 100
-        stat[3] = load_capacity * (1 - base) * durability + load_capacity * base
+        self.result = None
+        self.parts = [
+            Part(name="Rod", prompt="Load capacity (kg)", color="orange1", base=0.3),
+            Part(name="Reel mechanism", prompt="Mech (kg)", color="plum1", base=0.3),
+            Part(name="Reel friction brake", prompt="Drag (kg)", color="gold1"),
+            Part(name="Fishing line", prompt="Load capacity (kg)", color="salmon1"),
+            Part(name="Leader", prompt="Load capacity (kg)", color="pale_green1"),
+            Part(name="Hook", prompt="Load capacity (kg)", color="sky_blue1"),
+        ]
+        self.friction_brake = next(
+            part for part in self.parts if part.name == "Reel friction brake"
+        )
 
     def calculate_tackle_stats(self):
-        for name, part in self.parts.items():
+        for part in self.parts:
             try:
-                for i, prompt in enumerate((part["prompt"], "wear (%)")):
-                    prompt = f"[{part['color']}][{name}][/{part['color']}] {prompt}"
-                    part["stat"][i] = self.get_validated_input(prompt)
+                part.load_capacity = self.get_validated_input(part, part.prompt)
+                part.wear = self.get_validated_input(part, "Wear (%)")
             except exceptions.SkipError:
                 continue
-            self.calculate_part_stat(part["stat"])
-            if part["stat"][3] is not None:
-                self.table.add_row(name, f"{part['stat'][3]:.2f} kg")
-                if (
-                    self.weakest_part_name is None
-                    or part["stat"][3] < self.parts[self.weakest_part_name]["stat"][3]
-                ):
-                    self.weakest_part_name = name
+            part.calculate_real_load_capacity()
+            self.result.add_row(part.name, f"{part.real_load_capacity:.2f} kg")
 
-    def get_validated_input(self, prompt: str) -> float | None:
-        """Get validated input from the user.
-
-        Prompts the user for input and validates it. Supports quitting and restarting.
-
-        :param prompt: The prompt message to display to the user.
-        :type prompt: str
-        :return: The validated input as a float, or None if the user chooses to restart.
-        :rtype: float or None
-        """
+    def get_validated_input(self, part: Part, prompt: str) -> float:
         while True:
-            user_input = Prompt.ask(prompt)
-            if user_input == "r":
-                raise exceptions.RestartError
-            if user_input == "s":
-                raise exceptions.SkipError
-            if user_input == "S":
-                raise exceptions.SkipRemainingError
-            if user_input == "q":
-                raise exceptions.QuitError
+            user_input = Prompt.ask(
+                f"[{part.color}][{part.name}][/{part.color}] {prompt}"
+            )
+            match user_input.strip():
+                case CalculateCommand.RESTART.value:
+                    raise exceptions.RestartError
+                case CalculateCommand.SKIP.value:
+                    raise exceptions.SkipError
+                case CalculateCommand.SKIP_REMAINING.value:
+                    raise exceptions.SkipRemainingError
+                case CalculateCommand.QUIT.value:
+                    raise exceptions.QuitError
 
             try:
-                return float(user_input)
+                number = float(user_input)
+                if prompt.startswith("Wear"):
+                    if not (0 <= number <= 100):
+                        utils.print_error("Wear must be between 0 and 100.")
+                        continue
+                elif number < 0:
+                    utils.print_error("Value must be non-negative.")
+                    continue
+                return number
             except ValueError:
-                console.print("Invalid input. Please enter a number.", style="red")
+                utils.print_error("Invalid input. Please enter a number.")
+
+    def reset_stats(self) -> None:
+        for part in self.parts:
+            part.real_load_capacity = None
+        self.result = Table(
+            "Results",
+            title="Tackle's Stats",
+            show_header=False,
+            box=box.HEAVY,
+            min_width=36,
+        )
+
+    def update_result(self) -> None:
+        valid_parts = [p for p in self.parts if p.real_load_capacity is not None]
+        if not valid_parts:
+            return
+        weakest_part = min(valid_parts, key=lambda x: x.real_load_capacity)
+        self.result.add_row("Weakest part", weakest_part.name)
+
+        if self.friction_brake.real_load_capacity is None:
+            return
+        # k / 30 * drag < weakest -> k < weakest * 30 / drag
+        try:
+            recommend_friction_brake = min(
+                MAX_FRICTION_BRAKE - 1,
+                (
+                    weakest_part.real_load_capacity
+                    * MAX_FRICTION_BRAKE
+                    / self.friction_brake.real_load_capacity
+                ),
+            )
+            self.result.add_row(
+                "Recommend friction brake",
+                f"{int(recommend_friction_brake):2d}",
+            )
+        except ZeroDivisionError:
+            pass  # Fail silently
 
     def start(self):
         """Main function to run the friction brake calculation.
 
         Prompts the user for input, calculates the result, and displays them in a table.
         """
-        print(
-            Panel.fit(
-                "Type r to restart, s to skip a part, S to skip the remaining parts, q to quit.",
-                style="blue",
-            ),
-            Panel.fit(
-                "Hint: Press V and click the gear icon to view the parts.",
-                style="green",
-            ),
+        utils.print_usage_box(
+            "Type r to restart, s to skip a part, S to skip the remaining parts, q to quit."
         )
+        utils.print_hint_box("Press V and click the gear icon to view the parts.")
+
         while True:
-            self.weakest_part_name = None
-            for name in self.parts:
-                self.parts[name]["stat"][3] = None
-            self.table = Table(
-                "Results",
-                title="Tackle's Stats",
-                show_header=False,
-                box=box.HEAVY,
-                min_width=36,
-            )
+            self.reset_stats()
             try:
                 self.calculate_tackle_stats()
             except exceptions.SkipRemainingError:
@@ -832,21 +854,9 @@ class CalculateApp:
             except exceptions.QuitError:
                 print("Bye.")
                 break
-            if self.weakest_part_name is not None:
-                self.table.add_row("Weakest part", self.weakest_part_name)
-                if self.parts["Reel friction brake"]["stat"][3] is not None:
-                    # k / 30 * drag < weakest -> k < weakest * 30 / drag
-                    friction_brake = (
-                        self.parts[self.weakest_part_name]["stat"][3]
-                        * 30
-                        / self.parts["Reel friction brake"]["stat"][3]
-                    )
-                    self.table.add_row(
-                        "Recommend friction brake",
-                        f"{int(friction_brake):2d}",
-                    )
-            if self.table.rows:
-                print(self.table)
+            if self.result.rows:
+                self.update_result()
+                print(self.result)
 
 
 class FrictionBrakeApp(App):
@@ -876,17 +886,19 @@ class FrictionBrakeApp(App):
         self.cfg.merge_from_list(args.opts)
         self.cfg.freeze()
 
-        table = Table(title="Settings", show_header=False, box=box.HEAVY, min_width=36)
-        table.add_row("Launch options", " ".join(sys.argv[1:]))
-        table.add_row("Initial friction brake", str(self.cfg.FRICTION_BRAKE.INITIAL))
-        table.add_row("Start delay", str(self.cfg.FRICTION_BRAKE.START_DELAY))
-        table.add_row("Increase delay", str(self.cfg.FRICTION_BRAKE.INCREASE_DELAY))
-        table.add_row("Sensitivity", self.cfg.FRICTION_BRAKE.SENSITIVITY)
-        print(table)
+        settings = Table(
+            title="Settings", show_header=False, box=box.HEAVY, min_width=36
+        )
+        settings.add_row("Launch options", " ".join(sys.argv[1:]))
+        settings.add_row("Initial friction brake", str(self.cfg.FRICTION_BRAKE.INITIAL))
+        settings.add_row("Start delay", str(self.cfg.FRICTION_BRAKE.START_DELAY))
+        settings.add_row("Increase delay", str(self.cfg.FRICTION_BRAKE.INCREASE_DELAY))
+        settings.add_row("Sensitivity", self.cfg.FRICTION_BRAKE.SENSITIVITY)
+        print(settings)
 
-        print(
-            Panel.fit(f"Press {self.cfg.KEY.FRICTION_BRAKE_RESET} to reset friction brake, "
-            f"{self.cfg.KEY.FRICTION_BRAKE_QUIT} to quit.", style="blue")
+        utils.print_usage_box(
+            f"Press {self.cfg.KEY.FRICTION_BRAKE_RESET} to reset friction brake, "
+            f"{self.cfg.KEY.FRICTION_BRAKE_QUIT} to quit."
         )
 
         self.window = Window()

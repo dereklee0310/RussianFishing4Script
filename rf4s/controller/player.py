@@ -744,7 +744,7 @@ class Player:
         :type shutdown: bool
         """
         result = self.build_result_dict(msg)
-        table = self.build_result_table(result)
+        result_table = self.build_result_table(result)
         if self.cfg.ARGS.DISCORD:
             # TODO: dynamic color
             DiscordNotification(self.cfg, result).send(DiscordColor.BLURPLE)
@@ -758,7 +758,7 @@ class Player:
             self.timer.save_data()
         if shutdown and self.cfg.ARGS.SHUTDOWN:
             os.system("shutdown /s /t 5")
-        print(table)
+        print(result_table)
         if self.friction_brake.monitor_process.is_alive():
             self.friction_brake.monitor_process.terminate()
         utils.safe_exit()
