@@ -9,6 +9,7 @@ dependencies = [
     "discord-webhook==1.4.1",
     "keyboard==0.13.5",
     "matplotlib==3.8.0",
+    "nuitka>=2.7.12",
     "opencv-python==4.8.0.76",
     "pillow==10.1.0",
     "pyautogui==0.9.54",
