@@ -126,6 +126,7 @@ class BotApp(App):
         self.validate_telegram_bot()
         self.validate_game_window()
         self.validate_electro_mode()
+        self.validate_favorite_icon()
 
         self.cfg.freeze()  # cfg is done now
 
@@ -266,7 +267,7 @@ class BotApp(App):
         user chooses to quit.
         """
         utils.print_usage_box(
-            "Enter profile id to use, h to see help message, q to quit:"
+            "Enter profile id to use, h to see help message, q to quit."
         )
 
         while True:
@@ -373,6 +374,18 @@ class BotApp(App):
                 self.cfg.PROFILE.MODE,
             )
             self.cfg.ARGS.ELECTRO = False
+
+    def validate_favorite_icon(self):
+        if (
+            self.cfg.ARGS.COFFEE
+            or self.cfg.ARGS.REFILL
+            or self.cfg.ARGS.LURE
+            or self.cfg.ARGS.DRY_MIX
+            or self.cfg.ARGS.GROUNDBAIT
+            or self.cfg.ARGS.PVA
+        ):
+            logger.info("Some features require you to add the item to your favorites, "
+                        "make sure you have done so")
 
     def _on_release(self, key: keyboard.KeyCode) -> None:
         """Monitor user's keystrokes and convert a key press to a CTRL_C_EVENT.

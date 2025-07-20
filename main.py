@@ -135,8 +135,6 @@ def setup_logging(args: argparse.Namespace):
         },
         "loggers": {"root": {"level": "INFO", "handlers": ["stdout", "file"]}},
     }
-    if args.feature and not args.log:
-        logging_config["loggers"]["root"]["handlers"] = ["stdout"]
     logging.config.dictConfig(config=logging_config)
     global logger
     logger = logging.getLogger(__name__)
@@ -149,9 +147,6 @@ def create_parser(cfg: CN) -> argparse.ArgumentParser:
     :rtype: ArgumentParser
     """
     parent_parser = argparse.ArgumentParser(add_help=False)
-    parent_parser.add_argument(
-        "-LOG", "--log", action="store_true", help="save logging messages in /logs/.log"
-    )
     parent_parser.add_argument("opts", nargs="*", help="overwrite configuration")
 
     main_parser = argparse.ArgumentParser(epilog=EPILOG, formatter_class=Formatter)
@@ -354,7 +349,7 @@ def get_fid(parser) -> None:
     Continuously prompts until a valid feature ID is entered or the
     user chooses to quit.
     """
-    utils.print_usage_box("Enter feature id to use, h to see help message, q to quit:")
+    utils.print_usage_box("Enter feature id to use, h to see help message, q to quit.")
 
     while True:
         user_input = input(">>> ")
@@ -392,7 +387,8 @@ def main() -> None:
         display_features()
         # Merge selected feature and launch options
         sys.argv = [sys.argv[0]] + [FEATURES[get_fid(parser)]["command"]] + sys.argv[1:]
-        sys.argv += shlex.split(input("Enter launch options (press Enter to skip): "))
+        utils.print_usage_box("Enter launch options (press Enter to skip).")
+        sys.argv += shlex.split(input(">>> "))
         args = parser.parse_args()
     try:
         match args.feature:
