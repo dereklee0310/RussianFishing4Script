@@ -7,7 +7,6 @@
 - Rework parser
 - Fix quit result disappear bug?
 - Improve settings display at startup
-- TODO: clicklock warning for electro mode
 - Remove sound files and alarm_sound and alarm feature
 - move screenshot_tags
 - move random_rod_selection
@@ -26,6 +25,7 @@
 - Add profile description
 - Add delay time jitter
 - add calculate app
+- add clicklock setting
 
 ## 0.5.3 (2025-06-21)
 

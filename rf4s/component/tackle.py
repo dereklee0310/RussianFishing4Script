@@ -23,9 +23,6 @@ from rf4s.controller.timer import Timer, add_jitter
 
 RESET_TIMEOUT = 16
 CAST_SCALE = 0.4  # 25% / 0.4s
-
-# BASE_DELAY + LOOP_DELAY >= 2.2 to trigger clicklock
-BASE_DELAY = 1.2
 LOOP_DELAY = 1
 
 ANIMATION_DELAY = 0.5

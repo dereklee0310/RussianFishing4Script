@@ -45,6 +45,7 @@ DISCONNECTED_DELAY = 8
 WEAR_TEXT_UPDATE_DELAY = 2
 LOWER_TACKLE_DELAY = 4
 BAD_CAST_DELAY = 1
+CLICK_LOCK_DURATION = 2.2
 
 TROLLING_KEY = "j"
 LEFT_KEY = "a"
@@ -340,11 +341,13 @@ class Player:
 
     def enable_clicklock(self):
         pag.mouseDown()
-        sleep(2.2)
+        if self.cfg.BOT.CLICK_LOCK:
+            sleep(CLICK_LOCK_DURATION)
         self.clicklock_enabled = True
 
     def disable_clicklock(self):
-        pag.click()
+        if self.cfg.BOT.CLICK_LOCK:
+            pag.click()
         self.clicklock_enabled = False
 
     @contextmanager

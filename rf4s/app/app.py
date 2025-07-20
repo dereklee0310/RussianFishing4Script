@@ -363,7 +363,9 @@ class BotApp(App):
             return
 
         if self.cfg.PROFILE.MODE in ("pirk", "elevator"):
-            logger.info("Electric mode detected. Make sure you're using Electro Raptor")
+            logger.info(
+                "Electric mode detected. Make sure BOT.CLICK_LOCK is set correctly"
+            )
         else:
             logger.error(
                 "Electric mode is not compatible with mode '%s'\n"

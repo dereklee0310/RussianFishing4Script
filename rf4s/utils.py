@@ -19,8 +19,6 @@ from rich.panel import Panel
 
 from rf4s.controller.console import console
 
-# BASE_DELAY + LOOP_DELAY >= 2.2 to trigger clicklock
-BASE_DELAY = 1.2
 LOOP_DELAY = 1
 
 ANIMATION_DELAY = 0.5
@@ -107,32 +105,6 @@ def get_box_center(box: Box) -> tuple[int, int]:
 # ---------------------------------------------------------------------------- #
 #                                  decorators                                  #
 # ---------------------------------------------------------------------------- #
-
-
-# def toggle_clicklock(func):
-#     """Toggle clicklock before and after calling the function."""
-
-#     def wrapper(self, *args, **kwargs):
-#         # ELECTRO must be enabled, always use electric mode if GEAR_RATIO is disabled
-#         # otherwise, only use electric mode when it's the first time
-#         if self.cfg.ARGS.ELECTRO and (
-#             not self.cfg.ARGS.GEAR_RATIO or (not args or args[0])
-#         ):
-#             pag.click(clicks=2, interval=0.1)
-#         else:
-#             pag.mouseDown()
-#         sleep(BASE_DELAY + LOOP_DELAY)
-#         try:
-#             func(self, *args, **kwargs)
-#         finally:
-#             if self.cfg.ARGS.ELECTRO:
-#                 pag.click(clicks=2, interval=0.1)
-#             else:
-#                 pag.click()
-
-#     return wrapper
-
-
 def toggle_right_mouse_button(func):
     """Toggle right mouse button before and after calling the function."""
 

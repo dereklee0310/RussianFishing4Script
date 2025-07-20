@@ -91,6 +91,9 @@ _C.BOT.LURE_CHANGE_DELAY = 1800
 _C.BOT.PAUSE_DELAY = 1800
 # Duration of a single pause
 _C.BOT.PAUSE_DURATION = 600
+# Whether the Windows ClickLock is enabled.
+# The time you need to hold down the mouse button must be set to "long".
+_C.BOT.CLICK_LOCK = True
 
 
 # ---------------------------------------------------------------------------- #
