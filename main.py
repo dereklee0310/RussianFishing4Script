@@ -8,6 +8,7 @@ argument parsing, window management, and fishing automation.
 """
 
 import logging
+import rich.logging # noqa: F401
 import argparse
 import logging.config
 import shlex
