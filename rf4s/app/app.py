@@ -299,10 +299,6 @@ class BotApp(App):
             profile_name = list(self.cfg.PROFILE)[self.args.pid]
 
         self.validate_profile(profile_name)
-
-        # Merge args.opts here because we can only overwrite cfg.PROFILE
-        self.cfg.merge_from_list(self.args.opts)
-
         mode = self.cfg.PROFILE[profile_name].MODE.upper()
         user_profile = CN({"NAME": profile_name}, new_allowed=True)
         user_profile.merge_from_other_cfg(self.cfg.PROFILE[mode])
@@ -311,6 +307,7 @@ class BotApp(App):
 
     def merge_args_to_cfg(self) -> None:
         """Must be called after the profile is correctly configured."""
+        self.cfg.merge_from_list(self.args.opts)
         # Merge profile-level launch options
         if self.cfg.PROFILE.LAUNCH_OPTIONS:
             sys.argv += shlex.split(self.cfg.PROFILE.LAUNCH_OPTIONS)
@@ -442,9 +439,9 @@ class CraftApp(App):
         super().__init__(cfg, args, parser)
         sys.argv += shlex.split(self.cfg.CRAFT.LAUNCH_OPTIONS)
         self.args = parser.parse_args()
-        args_cfg = CN({"ARGS": config.dict_to_cfg(vars(args))})
+        args_cfg = CN({"ARGS": config.dict_to_cfg(vars(self.args))})
         self.cfg.merge_from_other_cfg(args_cfg)
-        self.cfg.merge_from_list(args.opts)
+        self.cfg.merge_from_list(self.args.opts)
         self.cfg.freeze()
 
         settings = Table(
@@ -562,9 +559,9 @@ class MoveApp(App):
 
         sys.argv += shlex.split(self.cfg.MOVE.LAUNCH_OPTIONS)
         self.args = parser.parse_args()
-        args_cfg = CN({"ARGS": config.dict_to_cfg(vars(args))})
+        args_cfg = CN({"ARGS": config.dict_to_cfg(vars(self.args))})
         self.cfg.merge_from_other_cfg(args_cfg)
-        self.cfg.merge_from_list(args.opts)
+        self.cfg.merge_from_list(self.args.opts)
         self.cfg.freeze()
 
         utils.print_usage_box(
@@ -623,9 +620,9 @@ class HarvestApp(App):
 
         sys.argv += shlex.split(self.cfg.HARVEST.LAUNCH_OPTIONS)
         self.args = parser.parse_args()
-        args_cfg = CN({"ARGS": config.dict_to_cfg(vars(args))})
+        args_cfg = CN({"ARGS": config.dict_to_cfg(vars(self.args))})
         self.cfg.merge_from_other_cfg(args_cfg)
-        self.cfg.merge_from_list(args.opts)
+        self.cfg.merge_from_list(self.args.opts)
         self.cfg.freeze()
 
         settings = Table(
@@ -896,9 +893,9 @@ class FrictionBrakeApp(App):
         super().__init__(cfg, args, parser)
         sys.argv += shlex.split(self.cfg.FRICTION_BRAKE.LAUNCH_OPTIONS)
         self.args = parser.parse_args()
-        args_cfg = CN({"ARGS": config.dict_to_cfg(vars(args))})
+        args_cfg = CN({"ARGS": config.dict_to_cfg(vars(self.args))})
         self.cfg.merge_from_other_cfg(args_cfg)
-        self.cfg.merge_from_list(args.opts)
+        self.cfg.merge_from_list(self.args.opts)
         self.cfg.freeze()
 
         settings = Table(
@@ -906,6 +903,7 @@ class FrictionBrakeApp(App):
         )
         settings.add_row("Launch options", " ".join(sys.argv[1:]))
         settings.add_row("Initial friction brake", str(self.cfg.FRICTION_BRAKE.INITIAL))
+        settings.add_row("Max friction brake", str(self.cfg.FRICTION_BRAKE.MAX))
         settings.add_row("Start delay", str(self.cfg.FRICTION_BRAKE.START_DELAY))
         settings.add_row("Increase delay", str(self.cfg.FRICTION_BRAKE.INCREASE_DELAY))
         settings.add_row("Sensitivity", self.cfg.FRICTION_BRAKE.SENSITIVITY)

@@ -246,7 +246,6 @@ def create_parser(cfg: CN) -> argparse.ArgumentParser:
     craft_parser.add_argument(
         "-V", "--version", action="version", version=f"RF4S-craft {VERSION}"
     )
-    craft_parser.add_argument("opts", nargs="*", help="overwrite configuration")
     craft_parser.add_argument(
         "-d",
         "--discard",
@@ -271,7 +270,6 @@ def create_parser(cfg: CN) -> argparse.ArgumentParser:
     move_parser.add_argument(
         "-V", "--version", action="version", version=f"RF4S-move {VERSION}"
     )
-    move_parser.add_argument("opts", nargs="*", help="overwrite configuration")
     move_parser.add_argument(
         "-s",
         "--shift",
@@ -288,7 +286,6 @@ def create_parser(cfg: CN) -> argparse.ArgumentParser:
     harvest_parser.add_argument(
         "-V", "--version", action="version", version=f"RF4S-harvest {VERSION}"
     )
-    harvest_parser.add_argument("opts", nargs="*", help="overwrite configuration")
     harvest_parser.add_argument(
         "-r",
         "--refill",
@@ -306,7 +303,6 @@ def create_parser(cfg: CN) -> argparse.ArgumentParser:
     calculate_paser.add_argument(
         "-V", "--version", action="version", version=f"RF4S-calculate {VERSION}"
     )
-    calculate_paser.add_argument("opts", nargs="*", help="overwrite configuration")
 
     friction_brake_parser = feature_parsers.add_parser(
         "frictionbrake",
@@ -317,9 +313,6 @@ def create_parser(cfg: CN) -> argparse.ArgumentParser:
     )
     friction_brake_parser.add_argument(
         "-V", "--version", action="version", version=f"RF4S-frictionbrake {VERSION}"
-    )
-    friction_brake_parser.add_argument(
-        "opts", nargs="*", help="overwrite configuration"
     )
 
     return main_parser
