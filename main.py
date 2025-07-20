@@ -7,6 +7,7 @@ argument parsing, window management, and fishing automation.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
+import logging
 import argparse
 import logging.config
 import shlex
@@ -101,7 +102,7 @@ class Formatter(
     pass
 
 
-def setup_logging(args: argparse.Namespace):
+def setup_logging():
     logging_config = {
         "version": 1,
         "disable_existing_loggers": False,
@@ -368,7 +369,7 @@ def main() -> None:
     cfg = config.load_cfg()
     parser = create_parser(cfg)
     args = parser.parse_args()  # First parse to get {command} {flags}
-    setup_logging(args)
+    setup_logging()
     utils.print_logo_box(LOGO)  # Print logo here so the help message will not show it
 
     # If user run the program without specifying a command or by double-clicking,

@@ -29,7 +29,7 @@
 - add bypass tags
 - add keepnet full protection
 - add card and gift record
-- 
+- remove support for zh-Tw and zh-CN
 
 ## 0.5.3 (2025-06-21)
 
