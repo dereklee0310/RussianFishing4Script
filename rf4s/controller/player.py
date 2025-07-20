@@ -15,6 +15,7 @@ from multiprocessing import Lock
 
 # from email.mime.image import MIMEImage
 from time import sleep
+from typing import Callable
 
 import pyautogui as pag
 from pynput import keyboard
@@ -691,13 +692,13 @@ class Player:
         self.retrieve_line()
 
     # TBD: Menu, Plotter, Result, Handler
-    def _get_controllers(self, telescopic: bool) -> tuple[callable, callable]:
+    def _get_controllers(self, telescopic: bool) -> tuple[Callable, Callable]:
         """Get the monitor and hold_mouse_button functions based on the fishing mode.
 
         :param telescopic: Whether the fishing mode is telescopic.
         :type telescopic: bool
         :return: Tuple containing the monitor and hold_mouse_button functions.
-        :rtype: tuple[callable, callable]
+        :rtype: tuple[Callable, Callable]
         """
         if telescopic:
             hold_mouse_button = utils.hold_mouse_button
@@ -819,8 +820,7 @@ class Player:
                     screenshot = True
 
         if self.cfg.ARGS.SCREENSHOT and (
-            not self.cfg.BOT.KEEPNET.SCREENSHOT_TAGS
-            or screenshot
+            not self.cfg.BOT.KEEPNET.SCREENSHOT_TAGS or screenshot
         ):
             self.detection.window.save_screenshot(self.timer.get_cur_timestamp())
 

@@ -79,11 +79,11 @@ class Timer:
         self.last_spod_rod_recast = self.start_time
         self.last_pause = self.start_time
 
-    def get_running_time(self) -> str:
+    def get_running_time(self) -> float:
         """Calculate the execution time of the program.
 
         :return: Formatted execution time (hh:mm:ss).
-        :rtype: str
+        :rtype: float
         """
         return time.time() - self.start_time
 
@@ -132,11 +132,11 @@ class Timer:
         self.cast_rhour_list.append(self.cast_rhour)
         self.cast_ghour_list.append(self.cast_ghour)
 
-    def get_cast_time_list(self) -> tuple[list[int]]:
+    def get_cast_time_list(self) -> tuple:
         """Get lists of real and in-game hours for casts.
 
         :return: Lists of real and in-game hours.
-        :rtype: tuple[list[int]]
+        :rtype: tuple
         """
         return self.cast_rhour_list, self.cast_ghour_list
 

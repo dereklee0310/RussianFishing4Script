@@ -7,15 +7,15 @@ argument parsing, window management, and fishing automation.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
-import logging
-import rich.logging # noqa: F401
 import argparse
+import logging
 import logging.config
 import shlex
 import shutil
 import sys
 from pathlib import Path
 
+import rich.logging  # noqa: F401
 import rich_argparse
 from rich import box, print
 from rich.table import Table
@@ -87,6 +87,7 @@ EPILOG = """
 Docs: https://github.com/dereklee0310/RussianFishing4Script/tree/main/docs/en
 """
 
+logger = None
 # When running as an executable, use sys.executable to find the config.yaml.
 # This file is not included during compilation and could not be resolved automatically
 # by Nuitka.
@@ -176,7 +177,7 @@ def create_parser(cfg: CN) -> argparse.ArgumentParser:
 
     profile_strategy = bot_parser.add_mutually_exclusive_group()
 
-    def pid(_pid: str) -> str:
+    def pid(_pid: str) -> int:
         return int(_pid)  # ValueError will be handled
 
     profile_strategy.add_argument(
@@ -202,7 +203,7 @@ def create_parser(cfg: CN) -> argparse.ArgumentParser:
         metavar="{profile name}",
     )
 
-    def num_fish(_num_fish: str) -> str:
+    def num_fish(_num_fish: str) -> int:
         return int(_num_fish)  # ValueError will be handled
 
     bot_parser.add_argument(
@@ -338,7 +339,7 @@ def display_features() -> None:
     print(table)
 
 
-def get_fid(parser) -> None:
+def get_fid(parser: argparse.ArgumentParser) -> int:
     """Prompt the user to enter a feature ID and validate the input.
 
     Continuously prompts until a valid feature ID is entered or the

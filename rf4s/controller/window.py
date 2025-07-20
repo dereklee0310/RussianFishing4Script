@@ -15,7 +15,6 @@ import pyautogui as pag
 import win32con
 import win32gui
 
-sys.path.append(".")  # python -m module -> python file
 from rf4s import utils
 from rf4s.controller import logger
 
@@ -99,11 +98,11 @@ class Window:
         """
         return self.get_box()[:2]
 
-    def get_resolution_str(self) -> tuple[int, int]:
+    def get_resolution_str(self) -> str:
         """Get the resolution of the game window.
 
-        :return: Tuple containing (width, height) of the game window.
-        :rtype: tuple[int, int]
+        :return: Game window resolution string (axb).
+        :rtype: str
         """
         width, height = self.get_box()[2:]
         return f"{width}x{height}"

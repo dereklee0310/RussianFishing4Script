@@ -68,10 +68,9 @@ def print_cfg(cfg: CN, level: int = 0) -> None:
     :param level: Current indentation level (used for recursion).
     :type level: int
     """
-    cfg = dict(cfg)
     # Two-space indentation style
     # indent = "  " * level if level > 0 else ""
-    # for k, v in cfg.items():
+    # for k, v in dict(cfg).items():
     #     if isinstance(v, CN):
     #         print(f"{indent}{k}:")
     #         print_cfg(v, level + 1)
@@ -80,7 +79,7 @@ def print_cfg(cfg: CN, level: int = 0) -> None:
 
     # Two-Space separated style
     # Need to add a newline manually
-    for k, v in cfg.items():
+    for k, v in dict(cfg).items():
         if isinstance(v, CN):
             print(f"{k}:", end=" ")
             print_cfg(v, level + 1)

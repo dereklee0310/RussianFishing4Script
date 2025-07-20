@@ -20,7 +20,6 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from multiprocessing import Lock
-from pathlib import Path
 from socket import gaierror
 from time import sleep
 from typing import Optional
@@ -41,14 +40,6 @@ from rf4s.controller.player import Player
 from rf4s.controller.timer import Timer, add_jitter
 from rf4s.controller.window import Window
 from rf4s.result import BotResult, CraftResult, HarvestResult, Result
-
-# When running as an executable, use sys.executable to find the config.yaml.
-# This file is not included during compilation and could not be resolved automatically
-# by Nuitka.
-if utils.is_compiled():
-    ROOT = Path(sys.executable).parent
-else:
-    ROOT = Path(__file__).resolve().parents[2]
 
 ANIMATION_DELAY = 0.5
 CRAFT_DELAY = 4.0
@@ -148,14 +139,11 @@ class BotApp(App):
             self.cfg, Timer(self.cfg), Detection(cfg, self.window), self.result
         )
 
-    def validate_smtp_connection(self) -> bool:
+    def validate_smtp_connection(self) -> None:
         """Verify SMTP server connection for email notifications.
 
         Tests the connection to the configured SMTP server using stored
         credentials if email notifications are enabled.
-
-        :return: Whether the SMTP configuration is valid or not needed.
-        :rtype: bool
         """
         if not self.cfg.ARGS.EMAIL or not self.cfg.BOT.SMTP_VERIFICATION:
             return
@@ -181,7 +169,7 @@ class BotApp(App):
             )
             utils.safe_exit()
 
-    def validate_discord_webhook(self) -> bool:
+    def validate_discord_webhook(self) -> None:
         if not self.cfg.ARGS.DISCORD or self.cfg.BOT.NOTIFICATION.DISCORD_WEBHOOK_URL:
             return
         logger.critical(
@@ -216,13 +204,11 @@ class BotApp(App):
             )
             utils.safe_exit()
 
-    def validate_profile(self, profile_name: str) -> bool:
+    def validate_profile(self, profile_name: str) -> None:
         """Check if a profile configuration is valid and complete.
 
         :param profile_name: Name of the profile to validate.
         :type profile_name: str
-        :return: Whether the profile is valid.
-        :rtype: bool
         """
         if profile_name not in self.cfg.PROFILE:
             logger.critical("Invalid profile name: '%s'", profile_name)
@@ -381,8 +367,10 @@ class BotApp(App):
             or self.cfg.ARGS.GROUNDBAIT
             or self.cfg.ARGS.PVA
         ):
-            logger.info("Some features require you to add the item to your favorites, "
-                        "make sure you have done so")
+            logger.info(
+                "Some features require you to add the item to your favorites, "
+                "make sure you have done so"
+            )
 
     def _on_release(self, key: keyboard.KeyCode) -> None:
         """Monitor user's keystrokes and convert a key press to a CTRL_C_EVENT.
@@ -519,7 +507,7 @@ class CraftApp(App):
             listener.start()
 
         try:
-            utils.print_usage_box(f"Press {self.cfg.KEY.QUIT} to quit.", style="blue")
+            utils.print_usage_box(f"Press {self.cfg.KEY.QUIT} to quit.")
             logger.warning("This might get you banned, use at your own risk")
             logger.warning("Use Razor or Logitech macros instead")
             random.seed(datetime.now().timestamp())
@@ -635,7 +623,7 @@ class HarvestApp(App):
         settings.add_row("Hunger threshold", str(self.cfg.STAT.HUNGER_THRESHOLD))
         settings.add_row("Comfort threshold", str(self.cfg.STAT.COMFORT_THRESHOLD))
         print(settings)
-        utils.print_usage_box("Press {self.cfg.KEY.QUIT} to quit.", style="blue")
+        utils.print_usage_box("Press {self.cfg.KEY.QUIT} to quit.")
 
         self.result = HarvestResult()
         self.timer = Timer(self.cfg)
