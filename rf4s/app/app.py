@@ -118,6 +118,7 @@ class BotApp(App):
         self.validate_game_window()
         self.validate_electro_mode()
         self.validate_favorite_icon()
+        self.validate_screenshot_notification()
 
         self.cfg.freeze()  # cfg is done now
 
@@ -372,6 +373,12 @@ class BotApp(App):
                 "make sure you have done so"
             )
 
+    def validate_screenshot_notification(self):
+        if self.cfg.ARGS.SCREENSHOT and self.cfg.ARGS.MIAOTIXING:
+            logger.warning(
+                "Miaotixing doesn't support image message, no screenshot will be sent"
+            )
+
     def _on_release(self, key: keyboard.KeyCode) -> None:
         """Monitor user's keystrokes and convert a key press to a CTRL_C_EVENT.
 
@@ -393,6 +400,7 @@ class BotApp(App):
         registers key listeners, and begins the fishing automation.
         Handles termination and displays result.
         """
+
         if self.cfg.KEY.QUIT != "'CTRL-C'":
             listener = keyboard.Listener(on_release=self._on_release)
             listener.start()
@@ -409,8 +417,8 @@ class BotApp(App):
     def display_result(self):
         # TODO: BUILT THIS FROM RESULT
         print(
-            self.player.build_result_table(
-                self.player.build_result_dict("Terminated by user")
+            self.player.get_result_table(
+                self.player.get_result_dict("Terminated by user")
             )
         )
 

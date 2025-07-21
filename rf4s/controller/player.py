@@ -12,6 +12,7 @@ import random
 import sys
 from contextlib import contextmanager
 from multiprocessing import Lock
+from pathlib import Path
 
 # from email.mime.image import MIMEImage
 from time import sleep
@@ -27,13 +28,7 @@ from rf4s.component.friction_brake import FrictionBrake
 from rf4s.component.tackle import Tackle
 from rf4s.controller import logger
 from rf4s.controller.detection import Detection, TagColor
-from rf4s.controller.notification import (
-    DiscordColor,
-    DiscordNotification,
-    EmailNotification,
-    MiaotixingNotification,
-    TelegramNotification,
-)
+from rf4s.controller.notification import send_result, send_screenshot
 from rf4s.controller.timer import Timer, add_jitter
 from rf4s.result.result import BotResult
 
@@ -51,6 +46,11 @@ CLICK_LOCK_DURATION = 2.2
 TROLLING_KEY = "j"
 LEFT_KEY = "a"
 RIGHT_KEY = "d"
+
+if utils.is_compiled():
+    ROOT = Path(sys.executable).parent  # Running as .exe (Nuitka/PyInstaller)
+else:
+    ROOT = Path(__file__).resolve().parents[2]
 
 
 class Player:
@@ -465,7 +465,9 @@ class Player:
             self._pause_script()
 
         if self.cfg.ARGS.BITE:
-            self.detection.window.save_screenshot(self.timer.get_cur_timestamp())
+            self.detection.window.save_screenshot(
+                ROOT / "screenshots" / f"{self.timer.get_cur_timestamp()}.png"
+            )
 
         if (
             self.cfg.ARGS.RANDOM_CAST
@@ -747,17 +749,9 @@ class Player:
         :param shutdown: Whether to shutdown the computer after termination.
         :type shutdown: bool
         """
-        result = self.build_result_dict(msg)
-        result_table = self.build_result_table(result)
-        if self.cfg.ARGS.DISCORD:
-            # TODO: dynamic color
-            DiscordNotification(self.cfg, result).send(DiscordColor.BLURPLE)
-        if self.cfg.ARGS.EMAIL:
-            EmailNotification(self.cfg, result).send()
-        if self.cfg.ARGS.MIAOTIXING:
-            MiaotixingNotification(self.cfg, result).send()
-        if self.cfg.ARGS.TELEGRAM:
-            TelegramNotification(self.cfg, result).send()
+        result = self.get_result_dict(msg)
+        result_table = self.get_result_table(result)
+        send_result(self.cfg, result)
         if self.cfg.ARGS.DATA:
             self.timer.save_data()
         if shutdown and self.cfg.ARGS.SHUTDOWN:
@@ -790,12 +784,13 @@ class Player:
             self.timer.update_cast_time()
         self.timer.add_cast_time()
 
-        if self.detection.is_card_receieved():
-            self.result.card += 1
-
         while self.detection.is_gift_receieved():
             if self.cfg.ARGS.SCREENSHOT:
-                self.detection.window.save_screenshot(self.timer.get_cur_timestamp())
+                filepath = (
+                    ROOT / "screenshots" / f"{self.timer.get_cur_timestamp()}.png"
+                )
+                self.detection.window.save_screenshot(filepath)
+                send_screenshot(self.cfg, filepath)
             sleep(add_jitter(LOOP_DELAY))
             pag.press("space")
             self.result.gift += 1
@@ -807,7 +802,7 @@ class Player:
     def _handle_fish(self) -> None:
         """Keep or release the fish and record the fish count."""
         self.result.total += 1
-        bypass = keep = screenshot = False
+        bypass = keep = screenshot = card = False
         for tag in TagColor:
             if self.detection.is_tag_exist(tag):
                 tag_color = tag.name.lower()
@@ -819,10 +814,16 @@ class Player:
                 if tag_color in self.cfg.BOT.KEEPNET.SCREENSHOT_TAGS:
                     screenshot = True
 
+        if self.detection.is_card_receieved():
+            card = True
+            self.result.card += 1
+
         if self.cfg.ARGS.SCREENSHOT and (
-            not self.cfg.BOT.KEEPNET.SCREENSHOT_TAGS or screenshot
+            (not self.cfg.BOT.KEEPNET.SCREENSHOT_TAGS or screenshot) or card
         ):
-            self.detection.window.save_screenshot(self.timer.get_cur_timestamp())
+            filepath = ROOT / "screenshots" / f"{self.timer.get_cur_timestamp()}.png"
+            self.detection.window.save_screenshot(filepath)
+            send_screenshot(self.cfg, filepath)
 
         if bypass:
             pag.press("space")
@@ -885,10 +886,10 @@ class Player:
 
         self._handle_termination("Game disconnected", shutdown=True)
 
-    def build_result_dict(self, msg: str):
+    def get_result_dict(self, msg: str):
         return self.result.as_dict(msg, self.timer)
 
-    def build_result_table(self, result) -> Table:
+    def get_result_table(self, result) -> Table:
         """Create a Rich table from running result.
 
         :return: formatted running result table

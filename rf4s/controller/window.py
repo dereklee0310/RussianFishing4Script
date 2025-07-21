@@ -6,7 +6,6 @@ and terminal window in Russian Fishing 4.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
-import sys
 from pathlib import Path
 from time import sleep
 
@@ -19,11 +18,6 @@ from rf4s import utils
 from rf4s.controller import logger
 
 ANIMATION_DELAY = 0.5
-
-if utils.is_compiled():
-    ROOT = Path(sys.executable).parent  # Running as .exe (Nuitka/PyInstaller)
-else:
-    ROOT = Path(__file__).resolve().parents[2]
 
 
 class Window:
@@ -131,14 +125,10 @@ class Window:
             "1600x900",
         )
 
-    def save_screenshot(self, time) -> None:
-        """Save a screenshot of the game window to the screenshots directory.
-
-        :param time: Timestamp for the filename.
-        :type time: str
-        """
+    def save_screenshot(self, filepath: Path) -> None:
+        """Save a screenshot of the game window to the screenshots directory."""
         pag.screenshot(
-            imageFilename=ROOT / "screenshots" / f"{time}.png",
+            imageFilename=filepath,
             region=self.get_box(),
         )
 

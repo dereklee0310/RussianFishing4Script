@@ -30,6 +30,8 @@
 - add keepnet full protection
 - add card and gift record
 - remove support for zh-Tw and zh-CN
+- add venv compile script
+- add screenshot notification (includes trophy, card, gift)
 
 ## 0.5.3 (2025-06-21)
 

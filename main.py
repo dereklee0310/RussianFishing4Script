@@ -87,7 +87,6 @@ EPILOG = """
 Docs: https://github.com/dereklee0310/RussianFishing4Script/tree/main/docs/en
 """
 
-logger = None
 # When running as an executable, use sys.executable to find the config.yaml.
 # This file is not included during compilation and could not be resolved automatically
 # by Nuitka.
@@ -104,7 +103,7 @@ class Formatter(
     pass
 
 
-def setup_logging():
+def setup_logging() -> logging.Logger:
     logging_config = {
         "version": 1,
         "disable_existing_loggers": False,
@@ -139,11 +138,13 @@ def setup_logging():
         "loggers": {"root": {"level": "INFO", "handlers": ["stdout", "file"]}},
     }
     logging.config.dictConfig(config=logging_config)
-    global logger
-    logger = logging.getLogger(__name__)
+    return logging.getLogger(__name__)
 
 
-def create_parser(cfg: CN) -> argparse.ArgumentParser:
+logger = setup_logging()
+
+
+def setup_parser(cfg: CN) -> argparse.ArgumentParser:
     """Configure the argument parser with all supported command-line options.
 
     :return: Configured ArgumentParser instance with all options and flags.
@@ -369,9 +370,8 @@ def main() -> None:
         shutil.copy(Path("rf4s/config/config.yaml"), config_path)
 
     cfg = config.load_cfg()
-    parser = create_parser(cfg)
+    parser = setup_parser(cfg)
     args = parser.parse_args()  # First parse to get {command} {flags}
-    setup_logging()
     utils.print_logo_box(LOGO)  # Print logo here so the help message will not show it
 
     # If user run the program without specifying a command or by double-clicking,

@@ -1,9 +1,11 @@
 import json
 import smtplib
 from datetime import datetime, timezone
+from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from enum import Enum
+from pathlib import Path
 from urllib import parse, request
 
 import requests
@@ -11,6 +13,7 @@ from discord_webhook import DiscordEmbed, DiscordWebhook
 from rich import box
 from rich.console import Console
 from rich.table import Table
+from yacs.config import CfgNode as CN
 
 from rf4s.controller import logger
 
@@ -27,6 +30,28 @@ ICON_URL = "https://i.ibb.co/RpLYcdkm/icon.png"
 # `BLACK`                          | 2303786   | `#23272A`
 
 
+def send_screenshot(cfg: CN, filepath: Path) -> None:
+    if cfg.ARGS.DISCORD:
+        DiscordNotification(cfg).send_screenshot(filepath)
+    if cfg.ARGS.EMAIL:
+        EmailNotification(cfg).send_screenshot(filepath)
+    if cfg.ARGS.MIAOTIXING:
+        MiaotixingNotification(cfg).send_screenshot(filepath)
+    if cfg.ARGS.TELEGRAM:
+        TelegramNotification(cfg).send_screenshot(filepath)
+
+
+def send_result(cfg: CN, result: dict) -> None:
+    if cfg.ARGS.DISCORD:
+        DiscordNotification(cfg).send_result(result)
+    if cfg.ARGS.EMAIL:
+        EmailNotification(cfg).send_result(result)
+    if cfg.ARGS.MIAOTIXING:
+        MiaotixingNotification(cfg).send_result(result)
+    if cfg.ARGS.TELEGRAM:
+        TelegramNotification(cfg).send_result(result)
+
+
 class DiscordColor(Enum):
     BLURPLE = 5793266
     GREEN = 5763719
@@ -38,68 +63,76 @@ class DiscordColor(Enum):
 
 
 class DiscordNotification:
-    def __init__(self, cfg, result):
+    def __init__(self, cfg):
         self.cfg = cfg
-        self.result = result
 
-    def build_raw_table(self) -> str:
+    def _get_raw_result_table(self, result: dict) -> str:
         console = Console(width=100, force_terminal=True, color_system=None)
         table = Table(box=box.HEAVY, show_header=False)
 
-        for key, value in self.result.items():
+        for key, value in result.items():
             table.add_row(key, str(value))
 
         with console.capture() as capture:
             console.print(table)
-
         return capture.get().strip()
 
-    def send(self, color: DiscordColor):
-        logger.info("Sending Discord notification")
-        raw_table = self.build_raw_table()
-        webhook = DiscordWebhook(
+    def _get_webhook(self) -> DiscordWebhook:
+        return DiscordWebhook(
             url=self.cfg.BOT.NOTIFICATION.DISCORD_WEBHOOK_URL,
             username="RF4S",
             avatar_url=ICON_URL,
         )
 
-        embed = DiscordEmbed(
-            title="Running Result",
-            color=color.value,
+    def _get_embed(self, title: str) -> DiscordEmbed:
+        return DiscordEmbed(
+            title=title,
+            color=DiscordColor.BLURPLE.value,  # TODO: dynamic color
             timestamp=datetime.now(timezone.utc).isoformat(),
             footer={"text": "RF4S: Russian Fishing 4 Script", "icon_url": ICON_URL},
         )
-        embed.description = f"```\n{raw_table}\n```"  # Wrap in code block
 
-        webhook.add_embed(embed)
+    def _send_webhook(self, webhook: DiscordWebhook) -> None:
         response = webhook.execute()
-
         if response.status_code == 200:
-            logger.info("Result successfully sent to Discord")
+            logger.info("Message sent successfully")
         else:
-            logger.error(f"Failed to send result to Discord: {response.text}")
+            logger.error(f"Failed to send the message: {response.text}")
+
+    def send_result(self, result: dict):
+        logger.info("Sending running result to Discord")
+        webhook = self._get_webhook()
+        embed = self._get_embed("Running Result")
+
+        # Wrap it with a code block
+        embed.description = f"```\n{self._get_raw_result_table(result)}\n```"
+        webhook.add_embed(embed)
+        self._send_webhook(webhook)
+
+    def send_screenshot(self, filepath: Path):
+        logger.info("Sending catch notification to Discord")
+        webhook = self._get_webhook()
+        embed = self._get_embed("Catch Notification")
+        with open(filepath, "rb") as f:
+            webhook.add_file(file=f.read(), filename=filepath.name)
+        embed.set_image(url=f"attachment://{filepath.name}")
+        webhook.add_embed(embed)
+        self._send_webhook(webhook)
 
 
 class EmailNotification:
-    def __init__(self, cfg, result):
+    def __init__(self, cfg):
         self.cfg = cfg
-        self.result = result
 
-    def send(self) -> None:
-        """Send a notification email to the user's email address."""
-        logger.info("Sending email notification")
-
+    def _get_msg(self, subject: str) -> MIMEMultipart:
         msg = MIMEMultipart()
-        msg["Subject"] = "RF4S: Notice of Program Termination"
+        msg["Subject"] = subject
         msg["From"] = self.cfg.BOT.NOTIFICATION.EMAIL
         recipients = [self.cfg.BOT.NOTIFICATION.EMAIL]
         msg["To"] = ", ".join(recipients)
+        return msg
 
-        text = ""
-        for k, v in self.result.items():
-            text += f"{k}: {v}\n"
-        msg.attach(MIMEText(text))
-
+    def _send_email(self, msg: MIMEMultipart) -> None:
         try:
             with smtplib.SMTP_SSL(self.cfg.BOT.NOTIFICATION.SMTP_SERVER, 465) as server:
                 # smtp_server.ehlo()
@@ -107,28 +140,50 @@ class EmailNotification:
                     self.cfg.BOT.NOTIFICATION.EMAIL, self.cfg.BOT.NOTIFICATION.PASSWORD
                 )
                 server.sendmail(
-                    self.cfg.BOT.NOTIFICATION.EMAIL, recipients, msg.as_string()
+                    self.cfg.BOT.NOTIFICATION.EMAIL,
+                    [self.cfg.BOT.NOTIFICATION.EMAIL],
+                    msg.as_string(),
                 )
-            logger.info("Email sent successfully")
+            logger.info("Message sent successfully")
         except Exception as e:
-            logger.error(f"Failed to send email: {e}")
+            logger.error(f"Failed to send the message: {e}")
+
+    def send_result(self, result: dict) -> None:
+        """Send a notification email to the user's email address."""
+        logger.info("Sending running result to email")
+        msg = self._get_msg("RF4S: Running Result")
+        text = ""
+        for k, v in result.items():
+            text += f"{k}: {v}\n"
+        msg.attach(MIMEText(text))
+        self._send_email(msg)
+
+    def send_screenshot(self, filepath: Path) -> None:
+        """Send a notification email to the user's email address."""
+        logger.info("Sending email notification")
+        msg = self._get_msg("RF4S: Catch Notification")
+
+        with open(filepath, "rb") as f:
+            img = MIMEImage(f.read(), name=filepath.name)
+        img.add_header("Content-Disposition", "attachment", filename=filepath.name)
+        msg.attach(img)
+        self._send_email(msg)
 
 
 class MiaotixingNotification:
-    def __init__(self, cfg, result):
+    def __init__(self, cfg):
         self.cfg = cfg
-        self.result = result
 
-    def send(self) -> None:
+    def send_result(self, result: dict) -> None:
         """Send a notification to the user's miaotixing service.
 
         :param result: running result
         :type result: dict
         """
-        logger.info("Sending miaotixing notification")
+        logger.info("Sending running result to Miaotixing")
 
         text = ""
-        for k, v in self.result.items():
+        for k, v in result.items():
             text += f"{k}: {v}\n"
 
         url = "http://miaotixing.com/trigger?" + parse.urlencode(
@@ -147,16 +202,25 @@ class MiaotixingNotification:
                     json_object["msg"],
                 )
 
+    def send_screenshot(self, _: Path) -> None:
+        logger.error("Miaotixing doesn't support image message")
+
 
 class TelegramNotification:
-    def __init__(self, cfg, result):
+    def __init__(self, cfg):
         self.cfg = cfg
-        self.result = result
 
-    def send(self):
+    def _check_response_status(self, response: requests.Response) -> None:
+        if response.status_code == 200:
+            logger.info("Message sent successfully")
+        else:
+            logger.error(f"Failed to send the message: {response.text}")
+
+    def send_result(self, result: dict) -> None:
+        logger.info("Sending running result to Telegram")
         # Send a simple message, no need for fancy python-telegram-bot
         text = "*Running Result*\n```\n"
-        for k, v in self.result.items():
+        for k, v in result.items():
             text += f"{k}: {v}\n"
         text += "```"
         payload = {
@@ -169,7 +233,20 @@ class TelegramNotification:
             f"bot{self.cfg.BOT.NOTIFICATION.TELEGRAM_BOT_TOKEN}/sendMessage",
             json=payload,
         )
-        if response.status_code == 200:
-            logger.info("Result successfully sent to Telegram")
-        else:
-            logger.error(f"Failed to send result to Telegram: {response.text}")
+        self._check_response_status(response)
+
+    def send_screenshot(self, filepath: Path) -> None:
+        logger.info("Sending catch notification to Telegram")
+        with open(filepath, "rb") as img:
+            files = {"photo": img}
+            payload = {
+                "chat_id": self.cfg.BOT.NOTIFICATION.TELEGRAM_CHAT_ID,
+                "parse_mode": "MarkdownV2",
+            }
+            response = requests.post(
+                "https://api.telegram.org/"
+                f"bot{self.cfg.BOT.NOTIFICATION.TELEGRAM_BOT_TOKEN}/sendPhoto",
+                data=payload,
+                files=files,
+            )
+        self._check_response_status(response)
