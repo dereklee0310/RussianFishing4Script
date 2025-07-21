@@ -32,6 +32,7 @@
 - remove support for zh-Tw and zh-CN
 - add venv compile script
 - add screenshot notification (includes trophy, card, gift)
+- add 0m or 5m
 
 ## 0.5.3 (2025-06-21)
 

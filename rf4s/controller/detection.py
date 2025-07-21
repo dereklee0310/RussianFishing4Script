@@ -258,18 +258,17 @@ class Detection:
 
     # ---------------------------- Retrieval detection --------------------------- #
     def is_retrieval_finished(self):
-        ready = self.is_tackle_ready()
-        if self.cfg.ARGS.RAINBOW:
-            return ready or self._is_rainbow_line_0or5m()
-        return ready or self._is_spool_full()
+        if self.is_tackle_ready():
+            return True
 
-    def _is_rainbow_line_0or5m(self):
-        return self._get_image_box(
-            "5m", self.cfg.BOT.SPOOL_CONFIDENCE
-        ) or self._get_image_box("0m", self.cfg.BOT.SPOOL_CONFIDENCE)
-
-    def _is_spool_full(self):
-        return self._get_image_box("wheel", self.cfg.BOT.SPOOL_CONFIDENCE)
+        if self.cfg.ARGS.RAINBOW is None:
+            return self._get_image_box("wheel", self.cfg.BOT.SPOOL_CONFIDENCE)
+        elif self.cfg.ARGS.RAINBOW == 0:
+            return self._get_image_box("0m", self.cfg.BOT.SPOOL_CONFIDENCE)
+        else: # self.cfg.ARGS.RAINBOW = 5, detect 0m or 5m
+            return self._get_image_box(
+                "5m", self.cfg.BOT.SPOOL_CONFIDENCE
+            ) or self._get_image_box("0m", self.cfg.BOT.SPOOL_CONFIDENCE)
 
     def is_line_snagged(self) -> bool:
         return pag.pixel(*self.snag_icon_coord) == CRITICAL_COLOR

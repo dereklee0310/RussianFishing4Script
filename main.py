@@ -52,7 +52,6 @@ FEATURES = (
 )
 
 BOT_BOOLEAN_ARGUMENTS = (
-    ("R", "rainbow", "use rainbow line meter for retrieval detection"),
     ("t", "tag", "keep only tagged fishes"),
     ("c", "coffee", "drink coffee if stamina is low during fish fight"),
     ("a", "alcohol", "drink alcohol before keeping the fish"),
@@ -226,10 +225,24 @@ def setup_parser(cfg: CN) -> argparse.ArgumentParser:
         type=str,
         choices=["forward", "left", "right"],
         help=(
-            "specify the direction for trolling mode\n"
+            "enable trolling mode and specify the direction\n"
             "(default: %(default)s, no argument: %(const)s)"
         ),
     )
+    bot_parser.add_argument(
+        "-R",
+        "--rainbow",
+        nargs="?",
+        const=5,
+        default=None,
+        type=int,
+        choices=[0, 5],
+        help=(
+            "enable rainbow line mode and specify the meter to lift the rod\n"
+            "(default: %(default)s, no argument: %(const)s)"
+        ),
+    )
+
     bot_parser.add_argument(
         "-BT",
         "--boat-ticket",
@@ -239,7 +252,7 @@ def setup_parser(cfg: CN) -> argparse.ArgumentParser:
         type=int,
         choices=[1, 2, 3, 5],
         help=(
-            "specify the duration for boat ticket renewal\n"
+            "enable boat ticket renewal and specify the duration\n"
             "(default: %(default)s, no argument: %(const)s)"
         ),
     )

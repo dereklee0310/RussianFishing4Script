@@ -28,6 +28,7 @@ LOOP_DELAY = 1
 ANIMATION_DELAY = 0.5
 
 RETRIEVAL_TIMEOUT = 32
+RETRIEVAL_FINISH_DELAY = 2
 PULL_TIMEOUT = 16
 RETRIEVAL_WITH_PAUSE_TIMEOUT = 128
 LIFT_DURATION = 3
@@ -190,8 +191,8 @@ class Tackle:
                     utils.hold_mouse_button(LIFT_DURATION, button="right")
 
             if self.detection.is_retrieval_finished():
-                # TODO: FIX THIS
-                sleep(0 if self.cfg.ARGS.RAINBOW else 2)
+                if self.cfg.ARGS.RAINBOW in (None, 5):
+                    sleep(RETRIEVAL_FINISH_DELAY)
                 return
 
             if self.detection.is_fish_captured():
