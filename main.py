@@ -92,7 +92,7 @@ Docs: https://github.com/dereklee0310/RussianFishing4Script/tree/main/docs/en
 if utils.is_compiled():
     ROOT = Path(sys.executable).parent
 else:
-    ROOT = Path(__file__).resolve().parents[2]
+    ROOT = Path(__file__).resolve().parents[0]
 
 
 class Formatter(
