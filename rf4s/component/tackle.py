@@ -70,6 +70,7 @@ class Tackle:
         self.detection = detection
         self.landing_net_out = False  # For telescopic pull
         self.available = True
+        self.gear_ratio_changed = False
 
     @staticmethod
     def _check_status(func):
@@ -351,8 +352,15 @@ class Tackle:
         self.is_disconnected_or_ticketed_expired()
         raise TimeoutError
 
-    def switch_gear_ratio(self) -> None:
+    def change_gear_ratio(self) -> None:
         """Switch the gear ratio of a conventional reel."""
+        logger.info("Switching gear ratio")
+        with pag.hold("ctrl"):
+            pag.press("space")
+        self.gear_ratio_changed = not self.gear_ratio_changed
+
+    def enable_electro_mode(self) -> None:
+        """Enable electro assist mode"""
         logger.info("Switching gear ratio")
         with pag.hold("ctrl"):
             pag.press("space")

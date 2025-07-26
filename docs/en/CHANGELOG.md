@@ -33,6 +33,7 @@
 - add venv compile script
 - add screenshot notification (includes trophy, card, gift)
 - add 0m or 5m
+- improve gear ratio
 
 ## 0.5.3 (2025-06-21)
 

@@ -479,6 +479,8 @@ class Player:
             self.reset_tackle()
 
         self.tackle.cast(lock)
+        if self.tackle.gear_ratio_changed:
+            self.tackle.change_gear_ratio() # Reset if necessary
         if update:
             self.timer.update_cast_time()
 
@@ -488,9 +490,8 @@ class Player:
             return
 
         first = True
-        gr_switched = False
         if self.cfg.ARGS.ELECTRO:
-            self.tackle.switch_gear_ratio()  # Use electro mode
+            self.tackle.enable_electro_mode()
 
         self.cur_coffee = 0
 
@@ -507,15 +508,13 @@ class Player:
                     if not self.clicklock_enabled:
                         self.enable_clicklock()
                     first = False
-                    if self.cfg.ARGS.GEAR_RATIO and not gr_switched:
-                        self.tackle.switch_gear_ratio()
-                        gr_switched = True
+                    # Enable when timed out, disable after pulling (in casting stage)
+                    if self.cfg.ARGS.GEAR_RATIO and not self.tackle.gear_ratio_changed:
+                        self.tackle.change_gear_ratio()
                     pag.keyUp("shift")
                     self._drink_coffee()
 
             pag.keyUp("shift")
-            if gr_switched:
-                self.tackle.switch_gear_ratio()
 
     def do_pirking(self) -> None:
         """Perform pirking until a fish is hooked."""
