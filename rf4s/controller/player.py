@@ -135,42 +135,55 @@ class Player:
         pag.mouseDown()
         if self.cfg.BOT.CLICK_LOCK:
             sleep(CLICK_LOCK_DURATION)
+        self.mouse_pressed = True
 
     def release_left_mouse_button(self):
         if self.cfg.BOT.CLICK_LOCK:
             pag.click()
         pag.mouseUp()
+        self.mouse_pressed = False
+
+    def hold_down_shift_key(self):
+        pag.keyDown("shift")
+        self.shift_pressed = True
+
+    def release_shift_key(self):
+        pag.keyUp("shift")
+        self.shift_pressed = False
 
     @contextmanager
-    def hold_keys(self, mouse, shift):
+    def hold_keys(self, mouse, shift, reset=True):
         mouse_pressed_before = self.mouse_pressed
         shift_pressed_before = self.shift_pressed
 
         if mouse and not self.mouse_pressed:
+            print("mouse 1")
             self.hold_down_left_mouse_button()
-            self.mouse_pressed = True
         if not mouse and self.mouse_pressed:
+            print("mouse 2")
             self.release_left_mouse_button()
-            self.mouse_pressed = False
 
         if shift and not self.shift_pressed:
-            pag.keyDown("shift")
-            self.shift_pressed = True
+            self.hold_down_shift_key()
         if not shift and self.shift_pressed:
-            pag.keyUp("shift")
-            self.shift_pressed = False
+            self.release_shift_key()
 
         yield
 
+        if not reset:
+            return
+
         if mouse and not mouse_pressed_before:
+            print("mouse 3")
             self.release_left_mouse_button()
         if not mouse and mouse_pressed_before:
+            print("mouse 4")
             self.hold_down_left_mouse_button()
 
         if shift and not shift_pressed_before:
-            pag.keyUp("shift")
+            self.release_shift_key()
         if not shift and shift_pressed_before:
-            pag.keyDown("shift")
+            self.hold_down_shift_key()
 
     # ---------------------------------------------------------------------------- #
     #                              main fishing loops                              #
@@ -180,9 +193,9 @@ class Player:
         skip_cast = self.cfg.ARGS.SKIP_CAST
         while True:
             if not skip_cast:
+                self.reset_tackle()
                 self._refill_stats()
                 self._harvest_baits(pickup=True)
-                self.reset_tackle()
                 self._change_tackle_lure()
                 self._cast_tackle()
             skip_cast = False
@@ -214,8 +227,6 @@ class Player:
         while True:
             if self.cfg.ARGS.SPOD_ROD and self.timer.is_spod_rod_castable():
                 self._cast_spod_rod()
-            self._refill_stats()
-            self._harvest_baits()
 
             logger.info("Checking rod %s", self.tackle_idx + 1)
             pag.press(str(self.cfg.KEY.BOTTOM_RODS[self.tackle_idx]))
@@ -230,6 +241,8 @@ class Player:
                     self.retrieve_and_recast()
                 else:
                     self._put_down_tackle(check_miss_counts)
+                    self._refill_stats()
+                    self._harvest_baits()
             self._update_tackle()
 
     def retrieve_and_recast(self) -> None:
@@ -258,8 +271,8 @@ class Player:
         skip_cast = self.cfg.ARGS.SKIP_CAST
         while True:
             if not skip_cast:
-                self._refill_stats()
                 self.reset_tackle()
+                self._refill_stats()
                 self._cast_tackle()
                 self.tackle.sink()
             skip_cast = False
@@ -285,9 +298,9 @@ class Player:
         monitor, hold_mouse_button = self._get_controllers(telescopic)
 
         while True:
+            self.reset_tackle()
             self._refill_stats()
             self._harvest_baits(pickup=True)
-            self.reset_tackle()
             self._cast_tackle()
 
             with self.error_handler():
@@ -514,17 +527,17 @@ class Player:
                     self.tackle.retrieve_with_no_fish()
                     break
 
-        if self.detection.is_retrieval_finished():
-            return
+            if self.detection.is_retrieval_finished():
+                return
 
-        if self.cfg.ARGS.ELECTRO:
-            self.tackle.enable_electro_mode()
+            if self.cfg.ARGS.ELECTRO:
+                self.tackle.enable_electro_mode()
 
-        with self.hold_keys(mouse=True, shift=self.cfg.PROFILE.POST_ACCELERATION):
-            while True:
-                with self.error_handler():
-                    self.tackle.retrieve_with_fish()
-                    break
+            with self.hold_keys(mouse=True, shift=self.cfg.PROFILE.POST_ACCELERATION):
+                while True:
+                    with self.error_handler():
+                        self.tackle.retrieve_with_fish()
+                        break
 
     def do_pirking(self) -> None:
         """Perform pirking until a fish is hooked."""
@@ -554,7 +567,7 @@ class Player:
         if not self.detection.is_fish_hooked():
             return
         self._drink_alcohol()
-        with self.hold_keys(mouse=True, shift=False):  # TODO: POST ACCELERATION?
+        with self.hold_keys(mouse=True, shift=self.cfg.PROFILE.POST_ACCELERATION, reset=False):
             while True:
                 with self.error_handler():
                     self.tackle.pull()
@@ -721,7 +734,8 @@ class Player:
     def _handle_broken_lure(self) -> None:
         """Handle the broken lure event according to the settings."""
         if self.cfg.ARGS.BROKEN_LURE:
-            self._replace_broken_lures()
+            with self.hold_keys(mouse=False, shift=False, reset=False):
+                self._replace_broken_lures()
         else:
             self.general_quit("Lure is broken")
 
@@ -757,7 +771,7 @@ class Player:
 
         keepnet_is_full = False
         logger.info("Handling fish")
-        with self.hold_keys(mouse=False, shift=False):
+        with self.hold_keys(mouse=False, shift=False, reset=False):
             if self.detection.is_keepnet_full():
                 pag.press("esc")
                 sleep(ANIMATION_DELAY)
@@ -907,28 +921,27 @@ class Player:
         """Replace multiple broken lures."""
         logger.info("Replacing broken lures")
 
-        with self.hold_keys(mouse=False, shift=False):
-            scrollbar_position = self.detection.get_scrollbar_position()
-            if scrollbar_position is None:
-                logger.info("Scroll bar not found, changing lures for normal rig")
-                while self._open_broken_lure_menu():
-                    self._replace_item()
-                pag.press("v")
-                return
+        scrollbar_position = self.detection.get_scrollbar_position()
+        if scrollbar_position is None:
+            logger.info("Scroll bar not found, changing lures for normal rig")
+            while self._open_broken_lure_menu():
+                self._replace_item()
+            pag.press("v")
+            return
 
-            logger.info("Scroll bar found, changing lures for dropshot rig")
-            pag.moveTo(scrollbar_position)
-            for _ in range(5):
-                sleep(ANIMATION_DELAY)
-                pag.drag(xOffset=0, yOffset=125, duration=0.5, button="left")
+        logger.info("Scroll bar found, changing lures for dropshot rig")
+        pag.moveTo(scrollbar_position)
+        for _ in range(5):
+            sleep(ANIMATION_DELAY)
+            pag.drag(xOffset=0, yOffset=125, duration=0.5, button="left")
 
-                replaced = False
-                while self._open_broken_lure_menu():
-                    self._replace_item()
-                    replaced = True
+            replaced = False
+            while self._open_broken_lure_menu():
+                self._replace_item()
+                replaced = True
 
-                if replaced:
-                    pag.moveTo(self.detection.get_scrollbar_position())
+            if replaced:
+                pag.moveTo(self.detection.get_scrollbar_position())
 
     def _open_broken_lure_menu(self) -> bool:
         """Open the broken lure menu.

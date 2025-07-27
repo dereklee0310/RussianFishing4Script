@@ -36,6 +36,7 @@
 - improve gear ratio
 - change post acceleration to true false
 - rework clicklock
+- change refill and harvest time, also for the bottom mode
 
 ## 0.5.3 (2025-06-21)
 
