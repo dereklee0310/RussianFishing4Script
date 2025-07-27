@@ -10,6 +10,7 @@ common tasks like clicklock and key releases.
 import random
 from time import sleep
 from typing import Literal
+from contextlib import contextmanager
 
 import pyautogui as pag
 import win32api
@@ -93,17 +94,10 @@ class Tackle:
 
     @_check_status
     def reset(self) -> None:
-        """Reset the tackle until ready and detect unexpected events.
-
-        :raises exceptions.FishHookedError: A fish is hooked.
-        :raises exceptions.FishCapturedError: A fish is captured.
-        :raises exceptions.LineAtEndError: The line is at its end.
-        :raises exceptions.LineSnaggedError: The line is snagged.
-        :raises TimeoutError: The loop timed out.
-        """
+        """Reset the tackle until ready and detect unexpected events."""
         logger.info("Resetting tackle")
         i = RESET_TIMEOUT
-        while i > 0:
+        while True:
             if self.detection.is_tackle_ready():
                 return
             if self.detection.is_fish_hooked():
@@ -119,9 +113,9 @@ class Tackle:
             if self.detection.is_tackle_broken():
                 raise exceptions.TackleBrokenError
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
-
-        self.is_disconnected_or_ticketed_expired()
-        raise TimeoutError
+            if i <= 0:
+                self.is_disconnected_or_ticketed_expired()
+                i = RESET_TIMEOUT
 
     @_check_status
     def cast(self, lock: bool) -> None:
@@ -166,31 +160,20 @@ class Tackle:
         utils.hold_mouse_button(self.cfg.PROFILE.TIGHTEN_DURATION)
 
     @_check_status
-    @utils.release_keys_after()
-    def retrieve(self, first: bool = True) -> None:
+    def retrieve_with_no_fish(self) -> None:
         """Retrieve the line until the end is reached and detect unexpected events.
-
-        :param first: Whether it's invoked for the first time, defaults to True.
-        :type first: bool, optional
 
         :raises exceptions.FishCapturedError: A fish is captured.
         :raises exceptions.LineAtEndError: The line is at its end.
         :raises exceptions.LineSnaggedError: The line is snagged.
         :raises TimeoutError: The loop timed out.
         """
-        logger.info("Retrieving fishing line")
+        logger.info("Retrieving fishing line [stage 1]")
 
         i = RETRIEVAL_TIMEOUT
-        while i > 0:
+        while True:
             if self.detection.is_fish_hooked():
-                if self.cfg.PROFILE.POST_ACCELERATION == "on":
-                    pag.keyDown("shift")
-                elif self.cfg.PROFILE.POST_ACCELERATION == "auto" and first:
-                    pag.keyDown("shift")
-
-                if self.cfg.ARGS.LIFT:
-                    utils.hold_mouse_button(LIFT_DURATION, button="right")
-
+                return
             if self.detection.is_retrieval_finished():
                 if self.cfg.ARGS.RAINBOW in (None, 5):
                     sleep(RETRIEVAL_FINISH_DELAY)
@@ -205,9 +188,43 @@ class Tackle:
             if self.detection.is_tackle_broken():
                 raise exceptions.TackleBrokenError
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
+            if i <= 0:
+                self.is_disconnected_or_ticketed_expired()
+                i = RETRIEVAL_TIMEOUT
+
+    @_check_status
+    def retrieve_with_fish(self) -> None:
+        """Retrieve the line until the end is reached and detect unexpected events.
+
+        :raises exceptions.FishCapturedError: A fish is captured.
+        :raises exceptions.LineAtEndError: The line is at its end.
+        :raises exceptions.LineSnaggedError: The line is snagged.
+        :raises TimeoutError: The loop timed out.
+        """
+        logger.info("Retrieving fishing line [stage 2]")
+
+        i = RETRIEVAL_TIMEOUT
+        while i > 0:
+            if self.detection.is_retrieval_finished():
+                if self.cfg.ARGS.RAINBOW in (None, 5):
+                    sleep(RETRIEVAL_FINISH_DELAY)
+                return
+
+            if self.cfg.ARGS.LIFT:
+                utils.hold_mouse_button(LIFT_DURATION, button="right")
+
+            if self.detection.is_fish_captured():
+                raise exceptions.FishCapturedError
+            if self.cfg.BOT.SPOOLING_DETECTION and self.detection.is_line_at_end():
+                raise exceptions.LineAtEndError
+            if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged():
+                raise exceptions.LineSnaggedError
+            if self.detection.is_tackle_broken():
+                raise exceptions.TackleBrokenError
+            i = utils.sleep_and_decrease(i, LOOP_DELAY)
 
         self.is_disconnected_or_ticketed_expired()
-        raise TimeoutError
+        raise exceptions.RetrieveTimeoutError
 
     @utils.release_keys_after()
     def _special_retrieve(self, button: str) -> None:
@@ -216,8 +233,6 @@ class Tackle:
         :param button: The mouse button to use for retrieval.
         :type button: str
         """
-        if self.cfg.PROFILE.PRE_ACCELERATION:
-            pag.keyDown("shift")
         i = RETRIEVAL_WITH_PAUSE_TIMEOUT
         while i > 0:
             utils.hold_mouse_button(self.cfg.PROFILE.RETRIEVAL_DURATION, button)
@@ -260,16 +275,12 @@ class Tackle:
         self.is_disconnected_or_ticketed_expired()
         raise TimeoutError
 
-    def elevate(self, dropped: bool) -> None:
-        """Perform elevator tactic (drop/rise) until a fish is hooked.
-
-        :param dropped: Whether the lure is dropped.
-        :type dropped: bool
-        :raises exceptions.TimeoutError: The loop timed out.
-        """
+    def elevate(self) -> None:
+        """Perform elevator tactic (drop/rise) until a fish is hooked."""
         locked = True  # Reel is locked after tackle.sink()
+        dropped = False
         i = self.cfg.PROFILE.ELEVATE_TIMEOUT
-        while i > 0:
+        while True:
             if self.detection.is_fish_hooked_twice():
                 pag.click()
                 return
@@ -289,8 +300,11 @@ class Tackle:
                     i -= self.cfg.PROFILE.ELEVATE_DURATION
             locked = not locked
 
-        self.is_disconnected_or_ticketed_expired()
-        raise TimeoutError
+            if i <= 0:
+                self.is_disconnected_or_ticketed_expired()
+                i = self.cfg.PROFILE.ELEVATE_TIMEOUT
+                dropped = not dropped
+
 
     @_check_status
     def pull(self) -> None:
@@ -325,7 +339,7 @@ class Tackle:
             raise exceptions.TackleBrokenError
 
         self.is_disconnected_or_ticketed_expired()
-        raise TimeoutError
+        raise exceptions.PullTimeoutError
 
     def _telescopic_pull(self) -> None:
         """Pull the fish until it's captured, designed for telescopic rod.
@@ -354,7 +368,7 @@ class Tackle:
 
     def change_gear_ratio(self) -> None:
         """Switch the gear ratio of a conventional reel."""
-        logger.info("Switching gear ratio")
+        logger.info("Changing gear ratio")
         with pag.hold("ctrl"):
             pag.press("space")
         self.gear_ratio_changed = not self.gear_ratio_changed
@@ -476,7 +490,6 @@ class Tackle:
                 return
 
         self.is_disconnected_or_ticketed_expired()
-        raise TimeoutError
 
     def _monitor_clip_state(self) -> None:
         """Monitor the state of the bolognese clip."""
@@ -488,4 +501,3 @@ class Tackle:
                 return
 
         self.is_disconnected_or_ticketed_expired()
-        raise TimeoutError

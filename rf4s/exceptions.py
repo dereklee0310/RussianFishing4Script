@@ -4,7 +4,7 @@ A module reserved for exception classes.
 
 
 class FishHookedError(Exception):
-    """A fish is hooked during a wrong routine."""
+    """A fish is hooked during resetting."""
 
 
 class FishCapturedError(Exception):
@@ -53,3 +53,14 @@ class SkipRemainingError(Exception):
 
 class QuitError(Exception):
     """User want to quit the app."""
+
+
+class RetrieveTimeoutError(Exception):
+    """Retrieve timed out."""
+
+
+class PirkTimeoutError(Exception):
+    """Pirking timed out."""
+
+class PullTimeoutError(Exception):
+    """Pulling timed out."""

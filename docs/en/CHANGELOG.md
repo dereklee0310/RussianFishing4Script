@@ -34,6 +34,8 @@
 - add screenshot notification (includes trophy, card, gift)
 - add 0m or 5m
 - improve gear ratio
+- change post acceleration to true false
+- rework clicklock
 
 ## 0.5.3 (2025-06-21)
 
