@@ -370,8 +370,7 @@ class Player:
 
         with self.hold_keys(mouse=False, shift=False):
             if self.cur_coffee > self.cfg.STAT.COFFEE_LIMIT:
-                pag.press("esc")  # Just back to control panel to reduce power usage
-                self._handle_termination("Coffee limit reached", shutdown=False)
+                self.general_quit("Coffee limit reached")
 
             logger.info("Drinking coffee")
             for _ in range(self.cfg.STAT.COFFEE_PER_DRINK):
