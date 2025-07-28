@@ -769,13 +769,8 @@ class Player:
         if not self.detection.is_fish_captured():
             return
 
-        keepnet_is_full = False
         logger.info("Handling fish")
         with self.hold_keys(mouse=False, shift=False, reset=False):
-            if self.detection.is_keepnet_full():
-                pag.press("esc")
-                sleep(ANIMATION_DELAY)
-                keepnet_is_full = True
             self._handle_fish()
             sleep(add_jitter(ANIMATION_DELAY))
             # Avoid wrong cast hour
@@ -795,17 +790,18 @@ class Player:
                 self.result.gift += 1
 
             limit = self.cfg.BOT.KEEPNET.CAPACITY - self.cfg.ARGS.FISHES_IN_KEEPNET
-            if keepnet_is_full or self.result.kept == limit:
+            if self.result.kept == limit:
                 self.general_quit("Keepnet is full")
 
     def _handle_fish(self) -> None:
         """Keep or release the fish and record the fish count."""
         self.result.total += 1
         bypass = keep = screenshot = card = False
+        tag_colors = []
         for tag in TagColor:
             if self.detection.is_tag_exist(tag):
                 tag_color = tag.name.lower()
-                setattr(self.result, tag_color, getattr(self.result, tag_color) + 1)
+                tag_colors.append(tag_color)
                 if tag_color in self.cfg.BOT.KEEPNET.BYPASS_TAGS:
                     bypass = True
                 if tag_color in self.cfg.BOT.KEEPNET.KEEP_TAGS:
@@ -838,6 +834,18 @@ class Player:
         else:
             pag.press("space")
             self.result.kept += 1
+
+        # Safe check
+        if self.detection.is_keepnet_full():
+            self.result.kept -= 1
+            pag.press("esc")
+            pag.press("backspace")
+            sleep(ANIMATION_DELAY)
+            self.general_quit("Keepnet is full")
+
+        for tag_color in tag_colors:
+            setattr(self.result, tag_color, getattr(self.result, tag_color) + 1)
+
 
     def _on_release(self, _: keyboard.KeyCode) -> None:
         """Handle key release events."""
