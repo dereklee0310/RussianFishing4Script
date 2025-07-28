@@ -166,7 +166,6 @@ class Tackle:
         :raises exceptions.FishCapturedError: A fish is captured.
         :raises exceptions.LineAtEndError: The line is at its end.
         :raises exceptions.LineSnaggedError: The line is snagged.
-        :raises TimeoutError: The loop timed out.
         """
         logger.info("Retrieving fishing line [stage 1]")
 
@@ -199,7 +198,6 @@ class Tackle:
         :raises exceptions.FishCapturedError: A fish is captured.
         :raises exceptions.LineAtEndError: The line is at its end.
         :raises exceptions.LineSnaggedError: The line is snagged.
-        :raises TimeoutError: The loop timed out.
         """
         logger.info("Retrieving fishing line [stage 2]")
 
@@ -246,10 +244,7 @@ class Tackle:
 
     @utils.release_keys_after()
     def pirk(self) -> None:
-        """Start pirking until a fish is hooked.
-
-        :raises exceptions.TimeoutError: The loop timed out.
-        """
+        """Start pirking until a fish is hooked."""
         logger.info("Pirking")
 
         i = self.cfg.PROFILE.PIRK_TIMEOUT
@@ -273,7 +268,7 @@ class Tackle:
                 i = utils.sleep_and_decrease(i, LOOP_DELAY)
 
         self.is_disconnected_or_ticketed_expired()
-        raise TimeoutError
+        raise exceptions.PirkTimeoutError
 
     def elevate(self) -> None:
         """Perform elevator tactic (drop/rise) until a fish is hooked."""
@@ -342,10 +337,7 @@ class Tackle:
         raise exceptions.PullTimeoutError
 
     def _telescopic_pull(self) -> None:
-        """Pull the fish until it's captured, designed for telescopic rod.
-
-        :raises exceptions.TimeoutError: The loop timed out.
-        """
+        """Pull the fish until it's captured, designed for telescopic rod."""
         # Check false postive first because it happens often
         if not self.detection.is_fish_hooked():
             return
@@ -364,7 +356,7 @@ class Tackle:
                 raise exceptions.TackleBrokenError
 
         self.is_disconnected_or_ticketed_expired()
-        raise TimeoutError
+        raise exceptions.PullTimeoutError
 
     def change_gear_ratio(self) -> None:
         """Switch the gear ratio of a conventional reel."""
