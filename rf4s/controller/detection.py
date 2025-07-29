@@ -393,6 +393,9 @@ class Detection:
     def is_pva_chosen(self):
         return self._get_image_box("pva_icon", 0.6) is None
 
+    def is_dry_mix_chosen(self):
+        return not self._get_image_box("groundbait_is_not_chosen", 0.8)
+
     def is_bait_chosen(self):
         if self.cfg.PROFILE.MODE in ("pirk", "elevator"):
             return True

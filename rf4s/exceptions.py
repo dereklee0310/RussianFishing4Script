@@ -64,3 +64,9 @@ class PirkTimeoutError(Exception):
 
 class PullTimeoutError(Exception):
     """Pulling timed out."""
+
+class BaitNotChosenError(Exception):
+    """Bait is not chosen."""
+
+class DryMixNotChosenError(Exception):
+    """Dry mix is not chosen."""

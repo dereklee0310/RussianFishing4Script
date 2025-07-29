@@ -208,18 +208,6 @@ class Timer:
             logger.warning("No cast record, skip plotting")
             return
 
-        with open(f"logs/{self.get_cur_timestamp()}_result.json", "w") as f:
-            json.dump(
-                {
-                    "start_time": self.start_datetime,
-                    "end_time": self.get_cur_datetime(),
-                    "cast_rhour_list": cast_rhour_list,
-                    "cast_ghour_list": cast_ghour_list,
-                },
-                f,
-                indent=4,
-            )
-
         logger.info("Plotting line chart")
 
         _, ax = plt.subplots(nrows=1, ncols=2)
@@ -231,7 +219,7 @@ class Timer:
         for hour in cast_rhour_list:
             fish_per_rhour[hour] += 1
         ax[0].plot(range(last_rhour + 1), fish_per_rhour, marker=".")
-        ax[0].set_title("Fish Caughted per Real Hour")
+        ax[0].set_title("Fish caught per Real Hour")
         ax[0].set_xticks(range(last_rhour + 2))
         ax[0].set_xlabel("Hour (real running time)")
         ax[0].yaxis.set_major_locator(MaxNLocator(integer=True))
@@ -240,7 +228,7 @@ class Timer:
         for hour in cast_ghour_list:
             fish_per_ghour[hour] += 1
         ax[1].bar(range(0, 24), fish_per_ghour)
-        ax[1].set_title("Fish Caughted per Game Hour")
+        ax[1].set_title("Fish caught per Game Hour")
         ax[1].set_xticks(range(0, 24, 2))
         ax[1].set_xlabel("Hour (game time)")
         ax[1].yaxis.set_major_locator(MaxNLocator(integer=True))

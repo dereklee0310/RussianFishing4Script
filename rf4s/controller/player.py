@@ -397,20 +397,6 @@ class Player:
         if self.detection.is_tackle_ready():
             return
 
-        if self.detection.is_lure_broken():
-            self._handle_broken_lure()
-            return
-
-        if self.cfg.ARGS.SPOD_ROD and not self.detection.is_groundbait_chosen():
-            self._refill_dry_mix()
-            return
-
-        if not self.detection.is_bait_chosen():
-            if len(self.tackles) == 1:
-                self.general_quit("Run out of bait")
-            self.tackle.available = False
-            return
-
         with self.hold_keys(mouse=True, shift=True):
             while True:
                 with self.error_handler():
@@ -462,6 +448,12 @@ class Player:
                 sleep(LOWER_TACKLE_DELAY)
                 if self.cfg.PROFILE.MODE != "telescopic":
                     self.retrieve_line()
+        except exceptions.BaitNotChosenError:
+            if len(self.tackles) == 1:
+                self.general_quit("Run out of bait")
+            self.tackle.available = False
+        except exceptions.DryMixNotChosenError:
+            self._refill_dry_mix()
 
     def _cast_spod_rod(self) -> None:
         """Cast the spod rod if dry mix is available."""
