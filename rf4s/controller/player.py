@@ -7,10 +7,10 @@ automating various fishing techniques.
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
 
+import msvcrt
 import os
 import random
 import sys
-import msvcrt
 from contextlib import contextmanager
 from multiprocessing import Lock
 from pathlib import Path

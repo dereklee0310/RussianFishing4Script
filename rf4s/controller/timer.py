@@ -7,7 +7,6 @@ for logging and automation purposes in Russian Fishing 4.
 """
 
 import datetime
-import json
 import random
 import sys
 import time

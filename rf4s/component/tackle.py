@@ -298,7 +298,6 @@ class Tackle:
                 i = self.cfg.PROFILE.ELEVATE_TIMEOUT
                 dropped = not dropped
 
-
     @_check_status
     def pull(self) -> None:
         """Pull the fish until it's captured."""

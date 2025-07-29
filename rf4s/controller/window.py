@@ -5,6 +5,7 @@ and terminal window in Russian Fishing 4.
 
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
+
 import sys
 from pathlib import Path
 from time import sleep

@@ -373,6 +373,7 @@ def get_fid(parser: argparse.ArgumentParser) -> int:
         utils.print_error("Invalid input, please try again.")
     return int(user_input)
 
+
 def get_language():
     utils.print_usage_box("What's your game language? [(1) en (2) ru]")
     while True:
@@ -381,6 +382,7 @@ def get_language():
             break
         utils.print_error("Invalid input, please try again.")
     return '"en"' if user_input == "1" else '"ru"'
+
 
 def get_click_lock():
     utils.print_usage_box("Is Windows Mouse ClickLock enabled? [(1) yes (2) no]")
@@ -391,6 +393,7 @@ def get_click_lock():
         utils.print_error("Invalid input, please try again.")
     return "true" if user_input == "1" else "false"
 
+
 def preprocess_config():
     config_path = ROOT / "config.yaml"
     if config_path.exists():
@@ -400,7 +403,7 @@ def preprocess_config():
     language = get_language()
     click_lock = get_click_lock()
 
-    with open(Path("rf4s/config/config.yaml"), 'r') as file:
+    with open(Path("rf4s/config/config.yaml"), "r") as file:
         lines = file.readlines()
         for i, line in enumerate(lines):
             if line.startswith("LANGUAGE:"):
@@ -408,9 +411,8 @@ def preprocess_config():
             if line.startswith("  CLICK_LOCK"):
                 lines[i] = f"  CLICK_LOCK: {click_lock}\n"
 
-    with open(config_path, 'w') as file:
+    with open(config_path, "w") as file:
         file.writelines(lines)
-
 
 
 def main() -> None:
@@ -459,6 +461,7 @@ def main() -> None:
         App(cfg, parser.parse_args(), parser).start()
     except Exception as e:
         logger.critical(e, exc_info=True)
+
 
 if __name__ == "__main__":
     main()

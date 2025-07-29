@@ -265,7 +265,7 @@ class Detection:
             return self._get_image_box("wheel", self.cfg.BOT.SPOOL_CONFIDENCE)
         elif self.cfg.ARGS.RAINBOW == 0:
             return self._get_image_box("0m", self.cfg.BOT.SPOOL_CONFIDENCE)
-        else: # self.cfg.ARGS.RAINBOW = 5, detect 0m or 5m
+        else:  # self.cfg.ARGS.RAINBOW = 5, detect 0m or 5m
             return self._get_image_box(
                 "5m", self.cfg.BOT.SPOOL_CONFIDENCE
             ) or self._get_image_box("0m", self.cfg.BOT.SPOOL_CONFIDENCE)
