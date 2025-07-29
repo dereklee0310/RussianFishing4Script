@@ -226,13 +226,13 @@ _C.PROFILE = CN()
 _C.PROFILE.SPIN = CN()
 # Profile description (optional)
 _C.PROFILE.SPIN.DESCRIPTION = "Default spin fishing profile."
+# Profile-level launch options that will be merged with the global BOT.LAUNCH_OPTIONS
+_C.PROFILE.SPIN.LAUNCH_OPTIONS = ""
 # Fishing mode
 _C.PROFILE.SPIN.MODE = "spin"
 # Type of special spin fishing technique to perform
 # (options: normal, pause, lift)
 _C.PROFILE.SPIN.TYPE = "normal"
-# Profile-level launch options that will be merged with the global BOT.LAUNCH_OPTIONS
-_C.PROFILE.SPIN.LAUNCH_OPTIONS = ""
 # Power level for casting (0.0-5.0).
 # 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+ (power cast), FYR.
 # For instance, 2.5 cast_power_level equals to 37.5% casting power.
@@ -257,8 +257,8 @@ _C.PROFILE.SPIN.POST_ACCELERATION = False
 
 _C.PROFILE.SPIN_WITH_PAUSE = CN()
 _C.PROFILE.SPIN_WITH_PAUSE.DESCRIPTION = "Spin fishing with short pauses."
-_C.PROFILE.SPIN_WITH_PAUSE.MODE = "spin"
 _C.PROFILE.SPIN_WITH_PAUSE.LAUNCH_OPTIONS = ""
+_C.PROFILE.SPIN_WITH_PAUSE.MODE = "spin"
 _C.PROFILE.SPIN_WITH_PAUSE.CAST_POWER_LEVEL = 5.0
 _C.PROFILE.SPIN_WITH_PAUSE.CAST_DELAY = 6.0
 _C.PROFILE.SPIN_WITH_PAUSE.TIGHTEN_DURATION = 1.0
@@ -272,8 +272,8 @@ _C.PROFILE.SPIN_WITH_PAUSE.TYPE = "pause"
 
 _C.PROFILE.SPIN_WITH_LIFT = CN()
 _C.PROFILE.SPIN_WITH_LIFT.DESCRIPTION = "Spin fishing with short lifts."
-_C.PROFILE.SPIN_WITH_LIFT.MODE = "spin"
 _C.PROFILE.SPIN_WITH_LIFT.LAUNCH_OPTIONS = ""
+_C.PROFILE.SPIN_WITH_LIFT.MODE = "spin"
 _C.PROFILE.SPIN_WITH_LIFT.CAST_POWER_LEVEL = 5.0
 _C.PROFILE.SPIN_WITH_LIFT.CAST_DELAY = 6.0
 _C.PROFILE.SPIN_WITH_LIFT.TIGHTEN_DURATION = 0.0
@@ -291,10 +291,10 @@ _C.PROFILE.SPIN_WITH_LIFT.TYPE = "lift"
 _C.PROFILE.BOTTOM = CN()
 # Profile description (optional)
 _C.PROFILE.BOTTOM.DESCRIPTION = "Default bottom fishing profile."
-# Fishing mode
-_C.PROFILE.BOTTOM.MODE = "bottom"
 # Profile-level launch options that will be merged with the global BOT.LAUNCH_OPTIONS
 _C.PROFILE.BOTTOM.LAUNCH_OPTIONS = ""
+# Fishing mode
+_C.PROFILE.BOTTOM.MODE = "bottom"
 # Power level for casting, (0.0-5.0).
 # 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+ (power cast), FYR.
 # For instance, 2.5 cast_power_level equals to 37.5% casting power.
@@ -305,11 +305,11 @@ _C.PROFILE.BOTTOM.CAST_DELAY = 4.0
 # (options: on, off, auto)
 _C.PROFILE.BOTTOM.POST_ACCELERATION = False
 # Time to wait before checking fish bite on the next rod
-_C.PROFILE.BOTTOM.CHECK_DELAY = 32.0
+_C.PROFILE.BOTTOM.CHECK_DELAY = 16.0
 # Maximum allowed misses before recasting the rod
 _C.PROFILE.BOTTOM.CHECK_MISS_LIMIT = 16
 # Time to wait before putting down the rod
-_C.PROFILE.BOTTOM.PUT_DOWN_DELAY = 0.0
+_C.PROFILE.BOTTOM.PUT_DOWN_DELAY = 2.0
 # Whether to check the rods randomly or sequentially
 _C.PROFILE.BOTTOM.RANDOM_ROD_SELECTION = True
 
@@ -320,10 +320,10 @@ _C.PROFILE.BOTTOM.RANDOM_ROD_SELECTION = True
 _C.PROFILE.PIRK = CN()
 # Profile description (optional)
 _C.PROFILE.PIRK.DESCRIPTION = "A marine fishing profile that perform pirking at the bottom layer for 34/41 holes in Norwegian Sea."
-# Fishing mode
-_C.PROFILE.PIRK.MODE = "pirk"
 # Profile-level launch options that will be merged with the global BOT.LAUNCH_OPTIONS
 _C.PROFILE.PIRK.LAUNCH_OPTIONS = ""
+# Fishing mode
+_C.PROFILE.PIRK.MODE = "pirk"
 # Power level for casting, (0.0-5.0).
 # 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+ (power cast), FYR.
 # For instance, 2.5 cast_power_level equals to 37.5% casting power.
@@ -355,14 +355,14 @@ _C.PROFILE.PIRK.PIRK_RETRIEVAL = False
 # continue pirking if not.
 _C.PROFILE.PIRK.HOOK_DELAY = 0.5
 # Hold down the Shift key during fish fight
-_C.PROFILE.PIRK.POST_ACCELERATION = False
+_C.PROFILE.PIRK.POST_ACCELERATION = True
 
 _C.PROFILE.PIRK_WITH_RETRIEVAL = CN()
 _C.PROFILE.PIRK_WITH_RETRIEVAL.DESCRIPTION = (
     "A marine fishing profile that retrieves the fishing line while parking."
 )
-_C.PROFILE.PIRK_WITH_RETRIEVAL.MODE = "pirk"
 _C.PROFILE.PIRK_WITH_RETRIEVAL.LAUNCH_OPTIONS = ""
+_C.PROFILE.PIRK_WITH_RETRIEVAL.MODE = "pirk"
 _C.PROFILE.PIRK_WITH_RETRIEVAL.CAST_POWER_LEVEL = 1.0
 _C.PROFILE.PIRK_WITH_RETRIEVAL.CAST_DELAY = 4.0
 _C.PROFILE.PIRK_WITH_RETRIEVAL.SINK_TIMEOUT = 60.0
@@ -376,12 +376,12 @@ _C.PROFILE.PIRK_WITH_RETRIEVAL.PIRK_DELAY = 2.0
 _C.PROFILE.PIRK_WITH_RETRIEVAL.PIRK_TIMEOUT = 32.0
 _C.PROFILE.PIRK_WITH_RETRIEVAL.PIRK_RETRIEVAL = True
 _C.PROFILE.PIRK_WITH_RETRIEVAL.HOOK_DELAY = 0.5
-_C.PROFILE.PIRK_WITH_RETRIEVAL.POST_ACCELERATION = False
+_C.PROFILE.PIRK_WITH_RETRIEVAL.POST_ACCELERATION = True
 
 _C.PROFILE.WACKY_RIG = CN()
 _C.PROFILE.WACKY_RIG.DESCRIPTION = "A variation of marine fishing profile for pirking at the bottom layer at Ladoga Archipelago using wacky rig."
-_C.PROFILE.WACKY_RIG.MODE = "pirk"
 _C.PROFILE.WACKY_RIG.LAUNCH_OPTIONS = ""
+_C.PROFILE.WACKY_RIG.MODE = "pirk"
 _C.PROFILE.WACKY_RIG.CAST_POWER_LEVEL = 1.0
 _C.PROFILE.WACKY_RIG.CAST_DELAY = 4.0
 _C.PROFILE.WACKY_RIG.SINK_TIMEOUT = 45.0
@@ -395,7 +395,7 @@ _C.PROFILE.WACKY_RIG.PIRK_DELAY = 4.0
 _C.PROFILE.WACKY_RIG.PIRK_TIMEOUT = 32.0
 _C.PROFILE.WACKY_RIG.PIRK_RETRIEVAL = False
 _C.PROFILE.WACKY_RIG.HOOK_DELAY = 0.5
-_C.PROFILE.WACKY_RIG.POST_ACCELERATION = False
+_C.PROFILE.WACKY_RIG.POST_ACCELERATION = True
 
 # ---------------------------------------------------------------------------- #
 #                            Marine Elevator Profile                           #
@@ -403,12 +403,12 @@ _C.PROFILE.WACKY_RIG.POST_ACCELERATION = False
 _C.PROFILE.ELEVATOR = CN()
 # Profile description (optional)
 _C.PROFILE.ELEVATOR.DESCRIPTION = (
-    "A marine fishing profile for elevator while fishing/trolling."
+    "A marine fishing profile for elevator while fishing/trolling that recast the rod after timed out."
 )
-# Fishing mode
-_C.PROFILE.ELEVATOR.MODE = "elevator"
 # Profile-level launch options that will be merged with the global BOT.LAUNCH_OPTIONS
 _C.PROFILE.ELEVATOR.LAUNCH_OPTIONS = ""
+# Fishing mode
+_C.PROFILE.ELEVATOR.MODE = "elevator"
 # Power level for casting, (0.0-5.0).
 # 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+ (power cast), FYR.
 # For instance, 2.5 cast_power_level equals to 37.5% casting power.
@@ -433,11 +433,14 @@ _C.PROFILE.ELEVATOR.DROP = False
 _C.PROFILE.ELEVATOR.HOOK_DELAY = 0.5
 # Hold down the Shift key during fish fight
 # (options: on, off, auto)
-_C.PROFILE.ELEVATOR.POST_ACCELERATION = False
+_C.PROFILE.ELEVATOR.POST_ACCELERATION = True
 
 _C.PROFILE.ELEVATOR_WITH_DROP = CN()
-_C.PROFILE.ELEVATOR_WITH_DROP.MODE = "elevator"
+_C.PROFILE.ELEVATOR_WITH_DROP.DESCRIPTION = (
+    "A marine fishing profile for elevator while fishing/trolling that lock/unlock the reel to drop the lure after timed out."
+)
 _C.PROFILE.ELEVATOR_WITH_DROP.LAUNCH_OPTIONS = ""
+_C.PROFILE.ELEVATOR_WITH_DROP.MODE = "elevator"
 _C.PROFILE.ELEVATOR_WITH_DROP.CAST_POWER_LEVEL = 1.0
 _C.PROFILE.ELEVATOR_WITH_DROP.CAST_DELAY = 4.0
 _C.PROFILE.ELEVATOR_WITH_DROP.SINK_TIMEOUT = 60.0
@@ -447,7 +450,7 @@ _C.PROFILE.ELEVATOR_WITH_DROP.ELEVATE_DELAY = 4.0
 _C.PROFILE.ELEVATOR_WITH_DROP.ELEVATE_TIMEOUT = 40.0
 _C.PROFILE.ELEVATOR_WITH_DROP.DROP = True
 _C.PROFILE.ELEVATOR_WITH_DROP.HOOK_DELAY = 0.5
-_C.PROFILE.ELEVATOR_WITH_DROP.POST_ACCELERATION = False
+_C.PROFILE.ELEVATOR_WITH_DROP.POST_ACCELERATION = True
 
 # ---------------------------------------------------------------------------- #
 #                             Float fishing profile                            #
@@ -455,10 +458,10 @@ _C.PROFILE.ELEVATOR_WITH_DROP.POST_ACCELERATION = False
 _C.PROFILE.TELESCOPIC = CN()
 # Profile description (optional)
 _C.PROFILE.TELESCOPIC.DESCRIPTION = "Default float fishing profile for telescopic rod."
-# Fishing mode
-_C.PROFILE.TELESCOPIC.MODE = "telescopic"
 # Profile-level launch options that will be merged with the global BOT.LAUNCH_OPTIONS
 _C.PROFILE.TELESCOPIC.LAUNCH_OPTIONS = ""
+# Fishing mode
+_C.PROFILE.TELESCOPIC.MODE = "telescopic"
 # Power level for casting, (0.0-5.0).
 # 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+ (power cast), FYR.
 # For instance, 2.5 cast_power_level equals to 37.5% casting power.
@@ -472,7 +475,7 @@ _C.PROFILE.TELESCOPIC.CHECK_DELAY = 1.0
 # Time to wait before pulling a fish after the float status changed
 _C.PROFILE.TELESCOPIC.PULL_DELAY = 0.5
 # Recast rod after timed out, designed for flowing water maps.
-_C.PROFILE.TELESCOPIC.DRIFT_TIMEOUT = 16.0
+_C.PROFILE.TELESCOPIC.DRIFT_TIMEOUT = 4096.0
 # Shape of the float camera, the script tracks the whole camrea window by default.
 # (options: square, wide, tall)
 _C.PROFILE.TELESCOPIC.CAMERA_SHAPE = "square"
@@ -481,10 +484,10 @@ _C.PROFILE.TELESCOPIC.CAMERA_SHAPE = "square"
 _C.PROFILE.BOLOGNESE = CN()
 # Profile description (optional)
 _C.PROFILE.BOLOGNESE.DESCRIPTION = "Default float fishing profile for bolognese rod."
-# Fishing mode
-_C.PROFILE.BOLOGNESE.MODE = "bolognese"
 # Profile-level launch options that will be merged with the global BOT.LAUNCH_OPTIONS
 _C.PROFILE.BOLOGNESE.LAUNCH_OPTIONS = ""
+# Fishing mode
+_C.PROFILE.BOLOGNESE.MODE = "bolognese"
 # Power level for casting, (0.0-5.0).
 # 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+ (power cast), FYR.
 # For instance, 2.5 cast_power_level equals to 37.5% casting power.
@@ -498,7 +501,7 @@ _C.PROFILE.BOLOGNESE.CHECK_DELAY = 1.0
 # Time to wait before pulling a fish after the float status changed
 _C.PROFILE.BOLOGNESE.PULL_DELAY = 0.5
 # Recast rod after timed out, designed for flowing water maps.
-_C.PROFILE.BOLOGNESE.DRIFT_TIMEOUT = 32.0
+_C.PROFILE.BOLOGNESE.DRIFT_TIMEOUT = 64.0
 # Shape of the float camera, the script tracks the whole camrea window by default.
 # (options: square, wide, tall)
 # (Fall back to float camera detection mode if the window size is not supported.)
@@ -511,10 +514,10 @@ _C.PROFILE.BOLOGNESE.POST_ACCELERATION = False
 _C.PROFILE.MATCH = CN()
 # Profile description (optional)
 _C.PROFILE.MATCH.DESCRIPTION = "Default float fishing profile for match rod."
-# Fishing mode
-_C.PROFILE.MATCH.MODE = "bolognese"
 # Profile-level launch options that will be merged with the global BOT.LAUNCH_OPTIONS
 _C.PROFILE.MATCH.LAUNCH_OPTIONS = ""
+# Fishing mode
+_C.PROFILE.MATCH.MODE = "bolognese"
 # Power level for casting, (0.0-5.0).
 # 1: 0%, 2: ~25%, 3: ~50%, 4: ~75% 5: 100%+ (power cast), FYR.
 # For instance, 2.5 cast_power_level equals to 37.5% casting power.

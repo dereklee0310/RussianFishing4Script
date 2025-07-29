@@ -38,11 +38,11 @@ BOT:
   CLICK_LOCK: false
   KEEPNET:
     CAPACITY: 100
-    SCREENSHOT_TAGS: [yellow, blue]
-    BYPASS_TAGS: [yellow, blue]
-    WHITELIST: [mackerel, saithe, herring, squid, scallop, mussel]
+    SCREENSHOT_TAGS: ["yellow", "blue"]
+    BYPASS_TAGS: ["yellow", "blue"]
     BLACKLIST: []
-    KEEP_TAGS: [green, yellow, blue, purple, pink]
+    WHITELIST: ["mackerel", "saithe", "herring", "squid", "scallop", "mussel"]
+    KEEP_TAGS: ["green", "yellow", "blue", "purple", "pink"]
   NOTIFICATION:
     EMAIL: "email@example.com"
     PASSWORD: "password"
@@ -77,9 +77,9 @@ FRICTION_BRAKE:
 PROFILE:
   SPIN:
     DESCRIPTION: "Default spin fishing profile."
+    LAUNCH_OPTIONS: ""
     MODE: "spin"
     TYPE: "normal"
-    LAUNCH_OPTIONS: ""
     CAST_POWER_LEVEL: 5.0
     CAST_DELAY: 6.0
     TIGHTEN_DURATION: 0.0
@@ -90,9 +90,8 @@ PROFILE:
     POST_ACCELERATION: false
   SPIN_WITH_PAUSE:
     DESCRIPTION: "Spin fishing with short pauses."
-    MODE: "spin"
-    TYPE: "pause"
     LAUNCH_OPTIONS: ""
+    MODE: "spin"
     CAST_POWER_LEVEL: 5.0
     CAST_DELAY: 6.0
     TIGHTEN_DURATION: 1.0
@@ -101,11 +100,11 @@ PROFILE:
     RETRIEVAL_TIMEOUT: 256.0
     PRE_ACCELERATION: false
     POST_ACCELERATION: false
+    TYPE: "pause"
   SPIN_WITH_LIFT:
     DESCRIPTION: "Spin fishing with short lifts."
-    MODE: "spin"
-    TYPE: "lift"
     LAUNCH_OPTIONS: ""
+    MODE: "spin"
     CAST_POWER_LEVEL: 5.0
     CAST_DELAY: 6.0
     TIGHTEN_DURATION: 0.0
@@ -114,22 +113,22 @@ PROFILE:
     RETRIEVAL_TIMEOUT: 256.0
     PRE_ACCELERATION: false
     POST_ACCELERATION: false
+    TYPE: "lift"
   BOTTOM:
     DESCRIPTION: "Default bottom fishing profile."
-    MODE: "bottom"
     LAUNCH_OPTIONS: ""
+    MODE: "bottom"
     CAST_POWER_LEVEL: 5.0
     CAST_DELAY: 4.0
     POST_ACCELERATION: false
-    CHECK_DELAY: 32.0
+    CHECK_DELAY: 16.0
     CHECK_MISS_LIMIT: 16
-    PUT_DOWN_DELAY: 0.0
+    PUT_DOWN_DELAY: 2.0
     RANDOM_ROD_SELECTION: true
   PIRK:
-    DESCRIPTION: "A marine fishing profile that perform pirking at the bottom layer
-      for 34/41 holes in Norwegian Sea."
-    MODE: "pirk"
+    DESCRIPTION: "A marine fishing profile that perform pirking at the bottom layer for 34/41m in Norwegian Sea."
     LAUNCH_OPTIONS: ""
+    MODE: "pirk"
     CAST_POWER_LEVEL: 1.0
     CAST_DELAY: 4.0
     SINK_TIMEOUT: 60.0
@@ -143,11 +142,11 @@ PROFILE:
     PIRK_TIMEOUT: 32.0
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
-    POST_ACCELERATION: false
+    POST_ACCELERATION: true
   PIRK_WITH_RETRIEVAL:
     DESCRIPTION: "A marine fishing profile that retrieves the fishing line while parking."
-    MODE: "pirk"
     LAUNCH_OPTIONS: ""
+    MODE: "pirk"
     CAST_POWER_LEVEL: 1.0
     CAST_DELAY: 4.0
     SINK_TIMEOUT: 60.0
@@ -161,12 +160,11 @@ PROFILE:
     PIRK_TIMEOUT: 32.0
     PIRK_RETRIEVAL: true
     HOOK_DELAY: 0.5
-    POST_ACCELERATION: false
+    POST_ACCELERATION: true
   WACKY_RIG:
-    DESCRIPTION: "A variation of marine fishing profile for pirking at the bottom layer
-      at Ladoga Archipelago using wacky rig."
-    MODE: "pirk"
+    DESCRIPTION: "A variation of marine fishing profile for pirking at the bottom layer at Ladoga Archipelago using wacky rig."
     LAUNCH_OPTIONS: ""
+    MODE: "pirk"
     CAST_POWER_LEVEL: 1.0
     CAST_DELAY: 4.0
     SINK_TIMEOUT: 45.0
@@ -180,11 +178,11 @@ PROFILE:
     PIRK_TIMEOUT: 32.0
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
-    POST_ACCELERATION: false
+    POST_ACCELERATION: true
   ELEVATOR:
-    DESCRIPTION: "A marine fishing profile for elevator while fishing/trolling."
-    MODE: "elevator"
+    DESCRIPTION: "A marine fishing profile for elevator while fishing/trolling that recast the rod after timed out."
     LAUNCH_OPTIONS: ""
+    MODE: "elevator"
     CAST_POWER_LEVEL: 1.0
     CAST_DELAY: 4.0
     SINK_TIMEOUT: 60.0
@@ -194,10 +192,11 @@ PROFILE:
     ELEVATE_TIMEOUT: 40.0
     DROP: false
     HOOK_DELAY: 0.5
-    POST_ACCELERATION: false
+    POST_ACCELERATION: true
   ELEVATOR_WITH_DROP:
-    MODE: "elevator"
+    DESCRIPTION: "A marine fishing profile for elevator while fishing/trolling that lock/unlock the reel to drop the lure after timed out."
     LAUNCH_OPTIONS: ""
+    MODE: "elevator"
     CAST_POWER_LEVEL: 1.0
     CAST_DELAY: 4.0
     SINK_TIMEOUT: 60.0
@@ -207,34 +206,34 @@ PROFILE:
     ELEVATE_TIMEOUT: 40.0
     DROP: true
     HOOK_DELAY: 0.5
-    POST_ACCELERATION: false
+    POST_ACCELERATION: true
   TELESCOPIC:
     DESCRIPTION: "Default float fishing profile for telescopic rod."
-    MODE: "telescopic"
     LAUNCH_OPTIONS: ""
+    MODE: "telescopic"
     CAST_POWER_LEVEL: 5.0
     CAST_DELAY: 4.0
     FLOAT_SENSITIVITY: 0.68
     CHECK_DELAY: 1.0
     PULL_DELAY: 0.5
-    DRIFT_TIMEOUT: 16.0
+    DRIFT_TIMEOUT: 4096.0
     CAMERA_SHAPE: "square"
   BOLOGNESE:
     DESCRIPTION: "Default float fishing profile for bolognese rod."
-    MODE: "bolognese"
     LAUNCH_OPTIONS: ""
+    MODE: "bolognese"
     CAST_POWER_LEVEL: 5.0
     CAST_DELAY: 4.0
     FLOAT_SENSITIVITY: 0.68
     CHECK_DELAY: 1.0
     PULL_DELAY: 0.5
-    DRIFT_TIMEOUT: 32.0
+    DRIFT_TIMEOUT: 64.0
     CAMERA_SHAPE: "square"
     POST_ACCELERATION: false
   MATCH:
     DESCRIPTION: "Default float fishing profile for match rod."
-    MODE: "bolognese"
     LAUNCH_OPTIONS: ""
+    MODE: "bolognese"
     CAST_POWER_LEVEL: 5.0
     CAST_DELAY: 4.0
     FLOAT_SENSITIVITY: 0.68
@@ -243,3 +242,194 @@ PROFILE:
     DRIFT_TIMEOUT: 64.0
     CAMERA_SHAPE: "square"
     POST_ACCELERATION: false
+
+  Copper Lake, 61:53, F1:
+    DESCRIPTION: "c12, ~90% cast power."
+    LAUNCH_OPTIONS: ""
+    MODE: "bottom"
+    CAST_POWER_LEVEL: 3.5
+    CAST_DELAY: 4.0
+    POST_ACCELERATION: false
+    CHECK_DELAY: 16.0
+    CHECK_MISS_LIMIT: 16
+    PUT_DOWN_DELAY: 2.0
+
+  Norwegian Sea, 175m, Strong pirking in bottom layer:
+    DESCRIPTION: "Strong pirking at bottom layer, 175m."
+    LAUNCH_OPTIONS: ""
+    MODE: "pirk"
+    CAST_POWER_LEVEL: 1.0
+    CAST_DELAY: 4.0
+    SINK_TIMEOUT: 140.0
+    TIGHTEN_DURATION: 2.0
+    DEPTH_ADJUST_DELAY: 4.0
+    DEPTH_ADJUST_DURATION: 2.0
+    CTRL: false
+    SHIFT: false
+    PIRK_DURATION: 0.8
+    PIRK_DELAY: 2.2
+    PIRK_TIMEOUT: 60.0
+    PIRK_RETRIEVAL: false
+    HOOK_DELAY: 0.5
+    POST_ACCELERATION: true
+
+  Norwegian Sea, 144m, Movement in bottom layer:
+    DESCRIPTION: "Movement at the bottom layer."
+    LAUNCH_OPTIONS: ""
+    MODE: "pirk"
+    CAST_POWER_LEVEL: 1.0
+    CAST_DELAY: 4.0
+    SINK_TIMEOUT: 80.0
+    TIGHTEN_DURATION: 2.0
+    DEPTH_ADJUST_DELAY: 4.0
+    DEPTH_ADJUST_DURATION: 2.0
+    CTRL: false
+    SHIFT: false
+    PIRK_DURATION: 0.0
+    PIRK_DELAY: 0.0
+    PIRK_TIMEOUT: 60.0
+    PIRK_RETRIEVAL: false
+    HOOK_DELAY: 0.5
+    POST_ACCELERATION: True
+
+  Old Burg Lake, 21:67, Black Carp:
+    DESCRIPTION: "c17, 50% cast power."
+    LAUNCH_OPTIONS: ""
+    MODE: "bottom"
+    CAST_POWER_LEVEL: 3.0
+    CAST_DELAY: 4.0
+    POST_ACCELERATION: false
+    CHECK_DELAY: 64.0
+    CHECK_MISS_LIMIT: 16
+    PUT_DOWN_DELAY: 2.0
+    RANDOM_ROD_SELECTION: true
+
+  Ladoga Lake, 73:55, Ludoga Whitefish:
+    DESCRIPTION: "c10, depth 150cm, full cast power."
+    LAUNCH_OPTIONS: ""
+    MODE: "bolognese"
+    CAST_POWER_LEVEL: 5.0
+    CAST_DELAY: 4.0
+    FLOAT_SENSITIVITY: 0.68
+    CHECK_DELAY: 1.0
+    PULL_DELAY: 2.0
+    DRIFT_TIMEOUT: 128.0
+    CAMERA_SHAPE: "square"
+    POST_ACCELERATION: true
+
+  Norwegian Sea, 34m, Strong pirking, Atlantic Saury:
+    DESCRIPTION: "Strong pirking at 34m, c15"
+    MODE: "pirk"
+    LAUNCH_OPTIONS: ""
+    CAST_POWER_LEVEL: 1.0
+    CAST_DELAY: 4.0
+    SINK_TIMEOUT: 12.0
+    TIGHTEN_DURATION: 1.0
+    DEPTH_ADJUST_DELAY: 2.0
+    DEPTH_ADJUST_DURATION: 1.0
+    CTRL: false
+    SHIFT: false
+    PIRK_DURATION: 0.5
+    PIRK_DELAY: 2.0
+    PIRK_TIMEOUT: 32.0
+    PIRK_RETRIEVAL: false
+    HOOK_DELAY: 0.5
+    POST_ACCELERATION: true
+
+  Elk Lake, Jig step:
+    DESCRIPTION: ""
+    LAUNCH_OPTIONS: ""
+    MODE: "spin"
+    CAST_POWER_LEVEL: 5.0
+    CAST_DELAY: 6.0
+    TIGHTEN_DURATION: 0.5
+    RETRIEVAL_DURATION: 0.5
+    RETRIEVAL_DELAY: 2.0
+    RETRIEVAL_TIMEOUT: 256.0
+    PRE_ACCELERATION: false
+    POST_ACCELERATION: true
+    TYPE: "pause"
+
+  Copper Lake, :
+    DESCRIPTION: ""
+    LAUNCH_OPTIONS: ""
+    MODE: "bottom"
+    CAST_POWER_LEVEL: 4.0
+    CAST_DELAY: 4.0
+    POST_ACCELERATION: false
+    CHECK_DELAY: 64.0
+    CHECK_MISS_LIMIT: 16
+    PUT_DOWN_DELAY: 2.0
+
+
+  Norwegian Sea, 120m, Movement in bottom layer:
+    DESCRIPTION: ""
+    LAUNCH_OPTIONS: "-rctDdR -GR -FB -BL"
+    MODE: "pirk"
+    CAST_POWER_LEVEL: 1.0
+    CAST_DELAY: 4.0
+    SINK_TIMEOUT: 140.0
+    TIGHTEN_DURATION: 3.0
+    DEPTH_ADJUST_DELAY: 4.0
+    DEPTH_ADJUST_DURATION: 2.0
+    CTRL: false
+    SHIFT: false
+    PIRK_DURATION: 0.0
+    PIRK_DELAY: 0.0
+    PIRK_TIMEOUT: 32.0
+    PIRK_RETRIEVAL: false
+    HOOK_DELAY: 0.5
+    POST_ACCELERATION: true
+
+  Norwegian Sea, 88m, Strong pirking in bottom layer:
+    DESCRIPTION: ""
+    LAUNCH_OPTIONS: "-rctDdR -GR -FB -BL"
+    MODE: "pirk"
+    CAST_POWER_LEVEL: 1.0
+    CAST_DELAY: 4.0
+    SINK_TIMEOUT: 60.0
+    TIGHTEN_DURATION: 3.0
+    DEPTH_ADJUST_DELAY: 4.0
+    DEPTH_ADJUST_DURATION: 2.0
+    CTRL: false
+    SHIFT: false
+    PIRK_DURATION: 0.5
+    PIRK_DELAY: 1.7
+    PIRK_TIMEOUT: 32.0
+    PIRK_RETRIEVAL: false
+    HOOK_DELAY: 0.5
+    POST_ACCELERATION: true
+
+  Kuori Lake, 92:100?, Twitching:
+    DESCRIPTION: ""
+    LAUNCH_OPTIONS: "-rctDdR"
+    MODE: "spin"
+    CAST_POWER_LEVEL: 5.0
+    CAST_DELAY: 6.0
+    TIGHTEN_DURATION: 0.2
+    RETRIEVAL_DURATION: 0.3
+    RETRIEVAL_DELAY: 1.0
+    RETRIEVAL_TIMEOUT: 256.0
+    PRE_ACCELERATION: false
+    POST_ACCELERATION: true
+    TYPE: "pause"
+
+
+  Norwegian Sea, 41m, Movement in bottom layer:
+    DESCRIPTION: ""
+    LAUNCH_OPTIONS: "-rctDdR -GR -BL"
+    MODE: "pirk"
+    CAST_POWER_LEVEL: 1.0
+    CAST_DELAY: 4.0
+    SINK_TIMEOUT: 40.0
+    TIGHTEN_DURATION: 2.0
+    DEPTH_ADJUST_DELAY: 2.0
+    DEPTH_ADJUST_DURATION: 2.0
+    CTRL: false
+    SHIFT: false
+    PIRK_DURATION: 0.0
+    PIRK_DELAY: 0.0
+    PIRK_TIMEOUT: 32.0
+    PIRK_RETRIEVAL: false
+    HOOK_DELAY: 0.5
+    POST_ACCELERATION: true
