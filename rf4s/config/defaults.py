@@ -33,6 +33,8 @@ _C.KEY.SPOD_ROD = 7
 # https://pynput.readthedocs.io/en/latest/keyboard.html#pynput.keyboard.Key
 # _C.KEY.QUIT = "CTRL-C"
 _C.KEY.QUIT = "CTRL-C"
+# Bot pause/restart shortcut
+_C.KEY.PAUSE = "g"
 # Friction brake (standalone) reset shortcut
 _C.KEY.FRICTION_BRAKE_RESET = "g"
 # Friction brake (standalone) quit shortcut, CTRL-C is not supported.

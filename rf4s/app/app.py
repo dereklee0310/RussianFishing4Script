@@ -119,7 +119,6 @@ class BotApp(App):
         self.validate_electro_mode()
         self.validate_favorite_icon()
         self.validate_screenshot_notification()
-
         self.cfg.freeze()  # cfg is done now
 
         settings = Table(
@@ -139,6 +138,8 @@ class BotApp(App):
         self.player = Player(
             self.cfg, Timer(self.cfg), Detection(cfg, self.window), self.result
         )
+
+        self.paused = False
 
     def validate_smtp_connection(self) -> None:
         """Verify SMTP server connection for email notifications.
@@ -392,6 +393,20 @@ class BotApp(App):
         if key == keyboard.KeyCode.from_char(self.cfg.KEY.QUIT):
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
             sys.exit()
+        if key == keyboard.KeyCode.from_char(self.cfg.KEY.PAUSE):
+            logger.info("Bot paused")
+            self.paused = True
+            os.kill(os.getpid(), signal.CTRL_C_EVENT)
+            sys.exit()
+
+    def _pause_wait(self, key: keyboard.KeyCode) -> None:
+        # Trigger CTRL_C_EVENT, which will be caught in start() to simulate pressing
+        # CTRL-C to terminate the script.
+        if key == keyboard.KeyCode.from_char(self.cfg.KEY.QUIT):
+            os.kill(os.getpid(), signal.CTRL_C_EVENT)
+            sys.exit()
+        if key == keyboard.KeyCode.from_char(self.cfg.KEY.PAUSE):
+            sys.exit()
 
     def start(self) -> None:
         """Start the fishing automation process.
@@ -404,11 +419,18 @@ class BotApp(App):
         if self.cfg.KEY.QUIT != "'CTRL-C'":
             listener = keyboard.Listener(on_release=self._on_release)
             listener.start()
-        self.window.activate_game_window()
-        try:
-            self.player.start_fishing()
-        except KeyboardInterrupt:
-            pass
+        while True:
+            self.window.activate_game_window()
+            try:
+                self.player.start_fishing()
+            except KeyboardInterrupt:
+                if not self.paused:
+                    break
+                utils.print_usage_box(f"Press {self.cfg.KEY.PAUSE} to restart.")
+                with keyboard.Listener(on_release=self._pause_wait) as listener:
+                    listener.join()
+                logger.info("Restarting bot")
+                self.paused = False
 
         self.display_result()
         if self.cfg.ARGS.DATA:

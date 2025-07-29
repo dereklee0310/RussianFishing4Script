@@ -197,7 +197,7 @@ def is_run_by_clicking():
 
 def safe_exit():
     if is_run_by_clicking():
-        print("Press any key to quit.")
+        print_usage_box("Press any key to quit.")
         # KeyboardInterrupt will mess with stdin, input will crash silently
         # Use msvcrt.getch() because it doesn't depends on stdin
         msvcrt.getch()

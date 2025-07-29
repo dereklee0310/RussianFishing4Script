@@ -10,7 +10,6 @@ common tasks like clicklock and key releases.
 import random
 from time import sleep
 from typing import Literal
-from contextlib import contextmanager
 
 import pyautogui as pag
 import win32api
