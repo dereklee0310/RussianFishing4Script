@@ -102,6 +102,7 @@ class Player:
         self.have_new_pva = True
         self.result = BotResult()
 
+        self.trolling_started = False
         self.mouse_pressed = False
         self.shift_pressed = False
 
@@ -116,7 +117,6 @@ class Player:
             pag.press("esc")
 
         logger.info("Starting fishing mode: '%s'", self.cfg.PROFILE.MODE)
-        self._start_trolling()
         getattr(self, f"start_{self.cfg.PROFILE.MODE}_mode")()
 
     def hold_down_left_mouse_button(self):
@@ -180,12 +180,13 @@ class Player:
         """Main spin fishing loop for 'spin' and 'spin_with_pause' modes."""
         skip_cast = self.cfg.ARGS.SKIP_CAST
         while True:
+            self.enable_trolling()
             if not skip_cast:
                 self.reset_tackle()
-                self._refill_stats()
-                self._harvest_baits(pickup=True)
-                self._change_tackle_lure()
-                self._cast_tackle()
+                self.refill_stats()
+                self.harvest_baits(pickup=True)
+                self.change_tackle_lure()
+                self.cast_tackle()
             skip_cast = False
 
             if self.cfg.PROFILE.TYPE != "normal":
@@ -211,6 +212,7 @@ class Player:
         check_miss_counts = [0] * self.num_tackle
 
         while True:
+            self.enable_trolling()
             if self.cfg.ARGS.SPOD_ROD and self.timer.is_spod_rod_castable():
                 self._cast_spod_rod()
 
@@ -227,8 +229,8 @@ class Player:
                     self.retrieve_and_recast()
                 else:
                     self._put_down_tackle(check_miss_counts)
-                    self._refill_stats()
-                    self._harvest_baits()
+                    self.refill_stats()
+                    self.harvest_baits()
             self._update_tackle()
 
     def retrieve_and_recast(self) -> None:
@@ -237,7 +239,7 @@ class Player:
         self.reset_tackle()
         self._refill_groundbait()
         self._refill_pva()
-        self._cast_tackle(lock=True)
+        self.cast_tackle(lock=True)
 
     def start_pirk_mode(self) -> None:
         """Main marine fishing loop for pirk mode."""
@@ -256,10 +258,11 @@ class Player:
         perform_technique = self.do_pirking if pirk else self.do_elevating
         skip_cast = self.cfg.ARGS.SKIP_CAST
         while True:
+            self.enable_trolling()
             if not skip_cast:
                 self.reset_tackle()
-                self._refill_stats()
-                self._cast_tackle()
+                self.refill_stats()
+                self.cast_tackle()
                 self.tackle.sink()
             skip_cast = False
 
@@ -284,10 +287,11 @@ class Player:
         monitor, hold_mouse_button = self._get_controllers(telescopic)
 
         while True:
+            self.enable_trolling()
             self.reset_tackle()
-            self._refill_stats()
-            self._harvest_baits(pickup=True)
-            self._cast_tackle()
+            self.refill_stats()
+            self.harvest_baits(pickup=True)
+            self.cast_tackle()
 
             with self.error_handler():
                 monitor()
@@ -300,7 +304,7 @@ class Player:
                     self.save_bite_screenshot()  # Should be called in _retrieve_fish()
                 self.pull_fish()
 
-    def _harvest_baits(self, pickup: bool = False) -> None:
+    def harvest_baits(self, pickup: bool = False) -> None:
         """Harvest baits if energy is high.
 
         :param pickup: Whether to pick up the main rod after harvesting.
@@ -326,7 +330,7 @@ class Player:
                 self._use_item("main_rod")
                 sleep(GET_DIGGING_TOOL_DELAY)
 
-    def _refill_stats(self) -> None:
+    def refill_stats(self) -> None:
         """Refill player stats using tea and carrot."""
         if not self.cfg.ARGS.REFILL:
             return
@@ -450,7 +454,7 @@ class Player:
                     utils.hold_mouse_button(self.cfg.PROFILE.DEPTH_ADJUST_DURATION)
                 else:
                     self.reset_tackle()
-                    self._cast_tackle()
+                    self.cast_tackle()
                     self.tackle.sink()
         except exceptions.PullTimeoutError:
             with self.hold_keys(mouse=False, shift=False):
@@ -467,11 +471,11 @@ class Player:
         if not self.tackle.available:
             self.tackle.available = True
             return
-        self._cast_tackle(lock=True, update=False)
+        self.cast_tackle(lock=True, update=False)
         pag.press("0")
         sleep(ANIMATION_DELAY)
 
-    def _cast_tackle(self, lock: bool = False, update: bool = True) -> None:
+    def cast_tackle(self, lock: bool = False, update: bool = True) -> None:
         """Cast the current tackle.
 
         :param lock: Whether to lock the tackle after casting.
@@ -583,20 +587,24 @@ class Player:
             self.reset_tackle()
             self._refill_groundbait()
             self._refill_pva()
-            self._cast_tackle(lock=True)
+            self.cast_tackle(lock=True)
 
         pag.press("0")
         sleep(add_jitter(self.cfg.PROFILE.CHECK_DELAY))
 
-    def _start_trolling(self) -> None:
+    def enable_trolling(self) -> None:
         """Start trolling and change moving direction based on the trolling setting."""
         if self.cfg.ARGS.TROLLING is None:
             return
-        logger.info("Starting trolling")
-        pag.press(TROLLING_KEY)
+        if not self.trolling_started:
+            logger.info("Start trolling")
+            pag.press(TROLLING_KEY)
         if self.cfg.ARGS.TROLLING not in ("left", "right"):  # Forward
             return
-        pag.keyDown(LEFT_KEY if self.cfg.ARGS.TROLLING == "left" else RIGHT_KEY)
+        key = LEFT_KEY if self.cfg.ARGS.TROLLING == "left" else RIGHT_KEY
+        pag.keyUp(key)
+        pag.keyDown(key)
+        self.trolling_started = True
 
     def _update_tackle(self) -> None:
         """Update the current tackle (rod) being used."""
@@ -630,7 +638,7 @@ class Player:
             candidates.remove(self.tackle_idx)
         return candidates
 
-    def _change_tackle_lure(self) -> None:
+    def change_tackle_lure(self) -> None:
         """Change the lure on the current tackle if possible."""
         if not self.cfg.ARGS.LURE or not self.have_new_lure:
             return

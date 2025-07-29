@@ -42,6 +42,8 @@
 - add startup prompt
 - update config yaml
 - fix --bite
+- fix trolling
+- fix bolognese retrieve
 
 ## 0.5.3 (2025-06-21)
 
