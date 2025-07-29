@@ -374,13 +374,50 @@ def get_fid(parser: argparse.ArgumentParser) -> int:
         utils.print_error("Invalid input, please try again.")
     return int(user_input)
 
+def get_language():
+    utils.print_usage_box("What's your game language? (1: en, 2: ru).")
+    while True:
+        user_input = input(">>> ")
+        if user_input.isdigit() and user_input in ("1", "2"):
+            break
+        utils.print_error("Invalid input, please try again.")
+    return '"en"' if user_input == "1" else '"ru"'
+
+def get_click_lock():
+    utils.print_usage_box("Is Windows Mouse ClickLock enabled? (1: yes, 2: no).")
+    while True:
+        user_input = input(">>> ")
+        if user_input.isdigit() and user_input in ("1", "2"):
+            break
+        utils.print_error("Invalid input, please try again.")
+    return "true" if user_input == "1" else "false"
+
+def preprocess_config():
+    config_path = ROOT / "config.yaml"
+    if config_path.exists():
+        return
+
+    # shutil.copy(Path("rf4s/config/config.yaml"), config_path)
+    language = get_language()
+    click_lock = get_click_lock()
+
+    with open(Path("rf4s/config/config.yaml"), 'r') as file:
+        lines = file.readlines()
+        for i, line in enumerate(lines):
+            if line.startswith("LANGUAGE:"):
+                lines[i] = f"LANGUAGE: {language}"
+            if line.startswith("  CLICK_LOCK"):
+                lines[i] = f"  CLICK_LOCK: {click_lock}"
+
+    with open(config_path, 'w') as file:
+        file.writelines(lines)
+
+
 
 def main() -> None:
     (ROOT / "screenshots").mkdir(parents=True, exist_ok=True)
     (ROOT / "logs").mkdir(parents=True, exist_ok=True)
-    config_path = ROOT / "config.yaml"
-    if not config_path.exists():
-        shutil.copy(Path("rf4s/config/config.yaml"), config_path)
+    preprocess_config()
 
     cfg = config.load_cfg()
     parser = setup_parser(cfg)

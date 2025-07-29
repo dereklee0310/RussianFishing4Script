@@ -114,19 +114,6 @@ class Player:
             logger.warning("Control panel detected, back to the game automatically")
             pag.press("esc")
 
-        if (
-            self.cfg.PROFILE.MODE not in ("telescopic", "bottom")
-            and not self.cfg.ARGS.SKIP_CAST
-            and not self.detection.is_retrieval_finished()
-        ):
-            logger.critical(
-                "The spool is not fully loaded, please refer to:\n"
-                "https://github.com/dereklee0310/RussianFishing4Script/tree/main?tab=readme-ov-file#spool-detection"
-            )
-            if self.friction_brake.monitor_process.is_alive():
-                self.friction_brake.monitor_process.terminate()
-            utils.safe_exit()
-
         logger.info("Starting fishing mode: '%s'", self.cfg.PROFILE.MODE)
         self._start_trolling()
         getattr(self, f"start_{self.cfg.PROFILE.MODE}_mode")()

@@ -131,6 +131,9 @@ class BotApp(App):
         print(settings)
         if self.cfg.PROFILE.DESCRIPTION:
             utils.print_description_box(self.cfg.PROFILE.DESCRIPTION)
+        utils.print_hint_box(
+            "The reel must be fully loaded, or consider using the -R option with rainbow line equipped."
+        )
         utils.print_usage_box(f"Press {self.cfg.KEY.QUIT} to quit.")
 
         self.result = BotResult()
@@ -316,6 +319,11 @@ class BotApp(App):
             logger.info("Supported window size. Don't change the game window size")
             return
 
+        window_resolution = self.window.get_resolution_str()
+        if window_resolution == "0x0":
+            logger.critical("'Fullscreen mode' is not supported")
+            utils.safe_exit()
+
         if self.cfg.PROFILE.MODE in ("telescopic", "bolognese"):
             logger.critical(
                 "Fishing mode '%s' doesn't support window size '%s'",
@@ -324,9 +332,9 @@ class BotApp(App):
             )
             utils.safe_exit()
 
-        logger.warning('Window mode must be "Borderless windowed" or "Window mode"')
         logger.warning(
-            "Unsupported window size '%s'. Use '2560x1440', '1920x1080' or '1600x900'",
+            "Unsupported window size '%s'\n"
+            "Supported window size: '2560x1440', '1920x1080' or '1600x900'",
             self.window.get_resolution_str(),
         )
         logger.error(

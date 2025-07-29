@@ -38,6 +38,8 @@
 - rework clicklock
 - change refill and harvest time, also for the bottom mode
 - add pause/restart
+- remove spool check
+- add startup prompt
 
 ## 0.5.3 (2025-06-21)
 
