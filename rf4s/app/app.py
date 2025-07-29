@@ -112,9 +112,9 @@ class BotApp(App):
         self.merge_args_to_cfg()
         self.window = Window()
         # args is done now, start validation
-        self.validate_smtp_connection()
-        self.validate_discord_webhook()
-        self.validate_telegram_bot()
+        self.validate_smtp()
+        self.validate_discord()
+        self.validate_telegram()
         self.validate_game_window()
         self.validate_electro_mode()
         self.validate_favorite_icon()
@@ -144,7 +144,7 @@ class BotApp(App):
 
         self.paused = False
 
-    def validate_smtp_connection(self) -> None:
+    def validate_smtp(self) -> None:
         """Verify SMTP server connection for email notifications.
 
         Tests the connection to the configured SMTP server using stored
@@ -174,7 +174,7 @@ class BotApp(App):
             )
             utils.safe_exit()
 
-    def validate_discord_webhook(self) -> None:
+    def validate_discord(self) -> None:
         if not self.cfg.ARGS.DISCORD or self.cfg.BOT.NOTIFICATION.DISCORD_WEBHOOK_URL:
             return
         logger.critical(
@@ -184,7 +184,13 @@ class BotApp(App):
         )
         utils.safe_exit()
 
-    def validate_telegram_bot(self):
+    def validate_miaotixing(self) -> None:
+        if not self.cfg.ARGS.MIAOTIXING or self.cfg.BOT.NOTIFICATION.MIAO_CODE:
+            return
+        logger.critical("BOT.NOTIFICATION.MIAO_CODE is not set.")
+        utils.safe_exit()
+
+    def validate_telegram(self):
         def _is_telegram_bot_valid():
             url = (
                 "https://api.telegram.org/"

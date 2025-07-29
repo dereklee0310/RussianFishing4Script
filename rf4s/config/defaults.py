@@ -104,7 +104,16 @@ _C.BOT.CLICK_LOCK = False
 _C.BOT.KEEPNET = CN()
 # Capacity of the keepnet
 _C.BOT.KEEPNET.CAPACITY = 100
-# These fish will always be kept, regardless of whether or not they have been tagged.
+# Take a screenshot when capturing a fish with any tags below.
+# Always take a screenshot if it's left empty.
+# (options: green, yellow, blue, purple, pink)
+_C.BOT.KEEPNET.SCREENSHOT_TAGS = ("yellow", "blue")
+# Fish with any of the following tags will be kept
+_C.BOT.KEEPNET.BYPASS_TAGS = ("yellow", "blue")
+# These fish will not be kept if they don't have any of the BYPASS_TAGS.
+# (options: mackerel, saithe, herring, squid, scallop, mussel, perch, shorthorn_sculpin)
+_C.BOT.KEEPNET.BLACKLIST = ()
+# These fish will be kept, regardless of whether or not they have any of the KEEP_TAGS.
 # (options: mackerel, saithe, herring, squid, scallop, mussel, perch, shorthorn_sculpin)
 _C.BOT.KEEPNET.WHITELIST = (
     "mackerel",
@@ -114,16 +123,7 @@ _C.BOT.KEEPNET.WHITELIST = (
     "scallop",
     "mussel",
 )
-# These fish will never be kept, regardless of whether or not they have been tagged.
-# (options: mackerel, saithe, herring, squid, scallop, mussel, perch, shorthorn_sculpin)
-_C.BOT.KEEPNET.BLACKLIST = ()
-# Take a screenshot when capturing a fish with any tags below.
-# Always take a screenshot if it's left empty.
-# (options: green, yellow, blue, purple, pink)
-_C.BOT.KEEPNET.SCREENSHOT_TAGS = ("yellow", "blue")
-# Fish with any of the following tags will be kept regardless of the blacklist setting
-_C.BOT.KEEPNET.BYPASS_TAGS = ("yellow", "blue")
-# Only keep the fish with any of the following tags
+# Only keep the fish with any of the following tags when -t is used.
 # (options: green, yellow, blue, purple, pink)
 _C.BOT.KEEPNET.KEEP_TAGS = ("green", "yellow", "blue", "purple", "pink")
 
@@ -138,7 +138,7 @@ _C.BOT.NOTIFICATION.PASSWORD = "password"
 _C.BOT.NOTIFICATION.SMTP_SERVER = "smtp.gmail.com"
 
 # Miaotixing
-_C.BOT.NOTIFICATION.MIAO_CODE = "example"
+_C.BOT.NOTIFICATION.MIAO_CODE = ""
 
 # Discord
 _C.BOT.NOTIFICATION.DISCORD_WEBHOOK_URL = ""

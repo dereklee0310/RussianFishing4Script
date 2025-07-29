@@ -375,7 +375,7 @@ def get_fid(parser: argparse.ArgumentParser) -> int:
     return int(user_input)
 
 def get_language():
-    utils.print_usage_box("What's your game language? (1: en, 2: ru).")
+    utils.print_usage_box("What's your game language? [(1) en (2) ru]")
     while True:
         user_input = input(">>> ")
         if user_input.isdigit() and user_input in ("1", "2"):
@@ -384,7 +384,7 @@ def get_language():
     return '"en"' if user_input == "1" else '"ru"'
 
 def get_click_lock():
-    utils.print_usage_box("Is Windows Mouse ClickLock enabled? (1: yes, 2: no).")
+    utils.print_usage_box("Is Windows Mouse ClickLock enabled? [(1) yes (2) no]")
     while True:
         user_input = input(">>> ")
         if user_input.isdigit() and user_input in ("1", "2"):
@@ -405,9 +405,9 @@ def preprocess_config():
         lines = file.readlines()
         for i, line in enumerate(lines):
             if line.startswith("LANGUAGE:"):
-                lines[i] = f"LANGUAGE: {language}"
+                lines[i] = f"LANGUAGE: {language}\n"
             if line.startswith("  CLICK_LOCK"):
-                lines[i] = f"  CLICK_LOCK: {click_lock}"
+                lines[i] = f"  CLICK_LOCK: {click_lock}\n"
 
     with open(config_path, 'w') as file:
         file.writelines(lines)

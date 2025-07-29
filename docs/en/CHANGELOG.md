@@ -40,6 +40,7 @@
 - add pause/restart
 - remove spool check
 - add startup prompt
+- update config yaml
 
 ## 0.5.3 (2025-06-21)
 
