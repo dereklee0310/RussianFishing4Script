@@ -41,6 +41,7 @@
 - remove spool check
 - add startup prompt
 - update config yaml
+- fix --bite
 
 ## 0.5.3 (2025-06-21)
 

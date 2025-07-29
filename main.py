@@ -66,7 +66,7 @@ BOT_BOOLEAN_ARGUMENTS = (
     ("e", "electro", "enable electric mode for Electro Raptor series reel"),
     ("FB", "friction-brake", "adjust friction brake automatically"),
     ("GR", "gear-ratio", "switch the gear ratio after the retrieval timed out"),
-    ("b", "bite", "save a screenshot in screenshots/ before rod cast (for bite spot)"),
+    ("b", "bite", "save a screenshot in screenshots/ when a fish bite"),
     ("s", "screenshot", "save a screenshot in screenshots/ after you caught a fish"),
     ("d", "data", "save fishing data in /logs"),
     ("E", "email", "send email noticication after the script stop"),

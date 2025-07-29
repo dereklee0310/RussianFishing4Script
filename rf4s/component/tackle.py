@@ -28,7 +28,6 @@ LOOP_DELAY = 1
 ANIMATION_DELAY = 0.5
 
 RETRIEVAL_TIMEOUT = 32
-RETRIEVAL_FINISH_DELAY = 2
 PULL_TIMEOUT = 16
 RETRIEVAL_WITH_PAUSE_TIMEOUT = 128
 LIFT_DURATION = 3
@@ -173,8 +172,6 @@ class Tackle:
             if self.detection.is_fish_hooked():
                 return
             if self.detection.is_retrieval_finished():
-                if self.cfg.ARGS.RAINBOW in (None, 5):
-                    sleep(RETRIEVAL_FINISH_DELAY)
                 return
 
             if self.detection.is_fish_captured():
@@ -203,8 +200,6 @@ class Tackle:
         i = RETRIEVAL_TIMEOUT
         while i > 0:
             if self.detection.is_retrieval_finished():
-                if self.cfg.ARGS.RAINBOW in (None, 5):
-                    sleep(RETRIEVAL_FINISH_DELAY)
                 return
 
             if self.cfg.ARGS.LIFT:

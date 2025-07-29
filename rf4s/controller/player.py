@@ -42,6 +42,7 @@ WEAR_TEXT_UPDATE_DELAY = 2
 LOWER_TACKLE_DELAY = 4
 BAD_CAST_DELAY = 1
 CLICK_LOCK_DURATION = 2.2
+RETRIEVAL_FINISH_DELAY = 2
 
 TROLLING_KEY = "j"
 LEFT_KEY = "a"
@@ -191,9 +192,7 @@ class Player:
                 utils.hold_mouse_button(self.cfg.PROFILE.TIGHTEN_DURATION)
                 getattr(self, f"retrieve_with_{self.cfg.PROFILE.TYPE}")()
             self.retrieve_line()
-
-            if self.detection.is_fish_hooked():
-                self.pull_fish()
+            self.pull_fish()
 
     def retrieve_with_pause(self) -> None:
         """Retrieve the line, pausing periodically."""
@@ -295,6 +294,10 @@ class Player:
             if self.detection.is_fish_hooked():
                 sleep(self.cfg.PROFILE.PULL_DELAY)
                 hold_mouse_button(PRE_RETRIEVAL_DURATION)
+                if not telescopic:
+                    self._retrieve_fish()
+                else:
+                    self.save_bite_screenshot()  # Should be called in _retrieve_fish()
                 self.pull_fish()
 
     def _harvest_baits(self, pickup: bool = False) -> None:
@@ -414,6 +417,7 @@ class Player:
         try:
             yield
         except exceptions.FishHookedError:
+            self._retrieve_fish()
             self.pull_fish()
         except exceptions.FishCapturedError:
             self.handle_fish()
@@ -454,7 +458,6 @@ class Player:
                 if self.cfg.PROFILE.MODE != "telescopic":
                     self.retrieve_line()
 
-
     def _cast_spod_rod(self) -> None:
         """Cast the spod rod if dry mix is available."""
         self._use_item("spod_rod")
@@ -479,11 +482,6 @@ class Player:
         if self.cfg.ARGS.PAUSE and self.timer.is_script_pausable():
             self._pause_script()
 
-        if self.cfg.ARGS.BITE:
-            self.detection.window.save_screenshot(
-                ROOT / "screenshots" / f"{self.timer.get_cur_timestamp()}.png"
-            )
-
         with self.hold_keys(mouse=False, shift=False):
             if (
                 self.cfg.ARGS.RANDOM_CAST
@@ -505,25 +503,36 @@ class Player:
         if self.detection.is_retrieval_finished():
             return
 
-        self.fish_hooked = False
         self.cur_coffee = 0
-        with self.hold_keys(mouse=True, shift=False):
-            while True:
-                with self.error_handler():
-                    self.tackle.retrieve_with_no_fish()
-                    break
-
-            if self.detection.is_retrieval_finished():
-                return
-
-            if self.cfg.ARGS.ELECTRO:
-                self.tackle.enable_electro_mode()
-
-            with self.hold_keys(mouse=True, shift=self.cfg.PROFILE.POST_ACCELERATION):
+        if self.detection.is_fish_hooked():
+            self._retrieve_fish()
+        else:
+            with self.hold_keys(mouse=True, shift=False):
                 while True:
                     with self.error_handler():
-                        self.tackle.retrieve_with_fish()
+                        self.tackle.retrieve_with_no_fish()
                         break
+                self._retrieve_fish()
+        if self.cfg.ARGS.RAINBOW in (None, 5):
+            sleep(RETRIEVAL_FINISH_DELAY)
+
+    def _retrieve_fish(self):
+        self.save_bite_screenshot()
+
+        if self.cfg.ARGS.ELECTRO:
+            self.tackle.enable_electro_mode()
+
+        with self.hold_keys(mouse=True, shift=self.cfg.PROFILE.POST_ACCELERATION):
+            while True:
+                with self.error_handler():
+                    self.tackle.retrieve_with_fish()
+                    break
+
+    def save_bite_screenshot(self):
+        if self.cfg.ARGS.BITE:
+            self.detection.window.save_screenshot(
+                ROOT / "screenshots" / f"{self.timer.get_cur_timestamp()}.png"
+            )
 
     def do_pirking(self) -> None:
         """Perform pirking until a fish is hooked."""
@@ -553,7 +562,9 @@ class Player:
         if not self.detection.is_fish_hooked():
             return
         self._drink_alcohol()
-        with self.hold_keys(mouse=True, shift=self.cfg.PROFILE.POST_ACCELERATION, reset=False):
+        with self.hold_keys(
+            mouse=True, shift=self.cfg.PROFILE.POST_ACCELERATION, reset=False
+        ):
             while True:
                 with self.error_handler():
                     self.tackle.pull()
@@ -663,7 +674,6 @@ class Player:
         """Refill the groundbait if it has been used up."""
         if not self.cfg.ARGS.GROUNDBAIT or not self.have_new_groundbait:
             return
-
 
         if self.detection.is_groundbait_chosen():
             logger.info("Groundbait is not used up yet")
@@ -831,7 +841,6 @@ class Player:
 
         for tag_color in tag_colors:
             setattr(self.result, tag_color, getattr(self.result, tag_color) + 1)
-
 
     def _on_release(self, _: keyboard.KeyCode) -> None:
         """Handle key release events."""
