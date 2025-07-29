@@ -167,12 +167,12 @@ class BotApp(App):
                 "For Gmail users, please refer to: "
                 "https://support.google.com/accounts/answer/185833\n"
             )
-            utils.safe_exit()
+            sys.exit()
         except (TimeoutError, gaierror):
             logger.critical(
                 "Invalid BOT.NOTIFICATION.SMTP_SERVER or connection timed out"
             )
-            utils.safe_exit()
+            sys.exit()
 
     def validate_discord(self) -> None:
         if not self.cfg.ARGS.DISCORD or self.cfg.BOT.NOTIFICATION.DISCORD_WEBHOOK_URL:
@@ -182,13 +182,13 @@ class BotApp(App):
             "To make a webhook, please refer to "
             "https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks"
         )
-        utils.safe_exit()
+        sys.exit()
 
     def validate_miaotixing(self) -> None:
         if not self.cfg.ARGS.MIAOTIXING or self.cfg.BOT.NOTIFICATION.MIAO_CODE:
             return
         logger.critical("BOT.NOTIFICATION.MIAO_CODE is not set.")
-        utils.safe_exit()
+        sys.exit()
 
     def validate_telegram(self):
         def _is_telegram_bot_valid():
@@ -213,7 +213,7 @@ class BotApp(App):
                 "Please refer to: "
                 "https://gist.github.com/nafiesl/4ad622f344cd1dc3bb1ecbe468ff9f8a",
             )
-            utils.safe_exit()
+            sys.exit()
 
     def validate_profile(self, profile_name: str) -> None:
         """Check if a profile configuration is valid and complete.
@@ -223,12 +223,12 @@ class BotApp(App):
         """
         if profile_name not in self.cfg.PROFILE:
             logger.critical("Invalid profile name: '%s'", profile_name)
-            utils.safe_exit()
+            sys.exit()
 
         mode = self.cfg.PROFILE[profile_name].MODE
         if mode.upper() not in self.cfg.PROFILE:
             logger.critical("Invalid mode: '%s'", mode)
-            utils.safe_exit()
+            sys.exit()
 
         expected_keys = set(self.cfg.PROFILE[mode.upper()])
         actual_keys = set(self.cfg.PROFILE[profile_name])
@@ -328,7 +328,7 @@ class BotApp(App):
         window_resolution = self.window.get_resolution_str()
         if window_resolution == "0x0":
             logger.critical("'Fullscreen mode' is not supported")
-            utils.safe_exit()
+            sys.exit()
 
         if self.cfg.PROFILE.MODE in ("telescopic", "bolognese"):
             logger.critical(
@@ -336,7 +336,7 @@ class BotApp(App):
                 self.cfg.PROFILE.MODE,
                 self.window.get_resolution_str(),
             )
-            utils.safe_exit()
+            sys.exit()
 
         logger.warning(
             "Unsupported window size '%s'\n"
@@ -441,7 +441,10 @@ class BotApp(App):
                 if not self.paused:
                     break
                 utils.print_usage_box(f"Press {self.cfg.KEY.PAUSE} to restart.")
-                with keyboard.Listener(on_release=self._pause_wait) as listener:
+                with (
+                    self.player.hold_keys(mouse=False, shift=False),
+                    keyboard.Listener(on_release=self._pause_wait) as listener,
+                ):
                     listener.join()
                 logger.info("Restarting bot")
                 self.paused = False
@@ -449,6 +452,7 @@ class BotApp(App):
         self.display_result()
         if self.cfg.ARGS.DATA:
             self.player.timer.save_data()
+        self.player.safe_exit()
 
     def display_result(self):
         # TODO: BUILT THIS FROM RESULT
@@ -499,7 +503,7 @@ class CraftApp(App):
                 "1x or move your mouse around"
             )
             self.window.activate_script_window()
-            utils.safe_exit()
+            sys.exit()
         pag.moveTo(make_button_position)
 
     def craft_item(self, accept_key: str) -> None:
@@ -788,7 +792,8 @@ class CalculateCommand(Enum):
 
 
 class CalculateApp:
-    def __init__(self):
+    def __init__(self, cfg, args, parser):
+        _ = cfg, args, parser
         self.result = None
         self.parts = [
             Part(name="Rod", prompt="Load capacity (kg)", color="orange1", base=0.3),
@@ -948,7 +953,7 @@ class FrictionBrakeApp(App):
 
         self.window = Window()
         if not self.is_game_window_valid():
-            utils.safe_exit()
+            sys.exit()
 
         self.detection = Detection(self.cfg, self.window)
         self.friction_brake = FrictionBrake(self.cfg, Lock(), self.detection)

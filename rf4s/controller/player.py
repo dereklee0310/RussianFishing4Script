@@ -10,6 +10,7 @@ automating various fishing techniques.
 import os
 import random
 import sys
+import msvcrt
 from contextlib import contextmanager
 from multiprocessing import Lock
 from pathlib import Path
@@ -761,7 +762,22 @@ class Player:
         print(result_table)
         if self.friction_brake.monitor_process.is_alive():
             self.friction_brake.monitor_process.terminate()
-        utils.safe_exit()
+        self.safe_exit()
+
+    def safe_exit(self):
+        if utils.is_run_by_clicking():
+            utils.print_usage_box("Press any key to quit.")
+            # KeyboardInterrupt will mess with stdin, input will crash silently
+            # Use msvcrt.getch() because it doesn't depends on stdin
+            msvcrt.getch()
+        # Skip this because it will trigger a right click to open context menu
+        # pag.mouseUp(button="right", _pause=False)
+        with self.hold_keys(mouse=False, shift=False, reset=False):
+            pass
+        pag.keyUp("w", _pause=False)
+        pag.keyUp("a", _pause=False)
+        pag.keyUp("d", _pause=False)
+        sys.exit()
 
     def _handle_snagged_line(self) -> None:
         """Handle a snagged line event."""

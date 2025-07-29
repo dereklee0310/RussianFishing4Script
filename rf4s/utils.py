@@ -8,7 +8,6 @@ key and mouse states during automation.
 """
 
 import ctypes
-import msvcrt
 import sys
 from time import sleep
 
@@ -193,23 +192,6 @@ def is_run_by_clicking():
     # If run from Python interpreter, num_processes would also be 2
     # We also need to check if it's an executable to make it work
     return is_compiled() and num_processes == 2
-
-
-def safe_exit():
-    if is_run_by_clicking():
-        print_usage_box("Press any key to quit.")
-        # KeyboardInterrupt will mess with stdin, input will crash silently
-        # Use msvcrt.getch() because it doesn't depends on stdin
-        msvcrt.getch()
-    # Skip this because it will trigger a right click to open context menu
-    # pag.mouseUp(button="right", _pause=False)
-    pag.mouseUp(button="left", _pause=False)
-    pag.keyUp("ctrl", _pause=False)
-    pag.keyUp("shift", _pause=False)
-    pag.keyUp("w", _pause=False)
-    pag.keyUp("a", _pause=False)
-    pag.keyUp("d", _pause=False)
-    sys.exit()
 
 
 def print_logo_box(logo: str) -> None:

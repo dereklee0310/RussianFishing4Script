@@ -11,7 +11,6 @@ import argparse
 import logging
 import logging.config
 import shlex
-import shutil
 import sys
 from pathlib import Path
 
@@ -47,8 +46,8 @@ FEATURES = (
     {"name": "Craft Items", "command": "craft"},
     {"name": "Move Forward", "command": "move"},
     {"name": "Harvest Baits", "command": "harvest"},
-    {"name": "Calculate Tackle's Stats", "command": "calculate"},
     {"name": "Auto Friction Brake", "command": "frictionbrake"},
+    {"name": "Calculate Tackle's Stats", "command": "calculate"},
 )
 
 BOT_BOOLEAN_ARGUMENTS = (
@@ -440,31 +439,26 @@ def main() -> None:
         match args.feature:
             case "bot":
                 sys.argv += shlex.split(cfg.BOT.LAUNCH_OPTIONS)
-                args = parser.parse_args()
-                BotApp(cfg, args, parser).start()
-            case "frictionbrake" | "fb":
-                sys.argv += shlex.split(cfg.FRICTION_BRAKE.LAUNCH_OPTIONS)
-                args = parser.parse_args()
-                FrictionBrakeApp(cfg, args, parser).start()
-            case "harvest":
-                sys.argv += shlex.split(cfg.HARVEST.LAUNCH_OPTIONS)
-                args = parser.parse_args()
-                HarvestApp(cfg, args, parser).start()
+                App = BotApp
+            case "craft":
+                sys.argv += shlex.split(cfg.MOVE.LAUNCH_OPTIONS)
+                App = CraftApp
             case "move":
                 sys.argv += shlex.split(cfg.MOVE.LAUNCH_OPTIONS)
-                args = parser.parse_args()
-                MoveApp(cfg, args, parser).start()
+                App = MoveApp
+            case "harvest":
+                sys.argv += shlex.split(cfg.HARVEST.LAUNCH_OPTIONS)
+                App = HarvestApp
+            case "frictionbrake" | "fb":
+                sys.argv += shlex.split(cfg.FRICTION_BRAKE.LAUNCH_OPTIONS)
+                App = FrictionBrakeApp
             case "calculate" | "cal":
-                CalculateApp().start()
-            case "craft":
-                CraftApp(cfg, args, parser).start()
+                App = CalculateApp
             case _:
                 raise NotImplementedError("You should not reach here.")
+        App(cfg, parser.parse_args(), parser).start()
     except Exception as e:
         logger.critical(e, exc_info=True)
-
-    utils.safe_exit()
-
 
 if __name__ == "__main__":
     main()

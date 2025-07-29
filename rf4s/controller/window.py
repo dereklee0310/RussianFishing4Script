@@ -5,7 +5,7 @@ and terminal window in Russian Fishing 4.
 
 .. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
 """
-
+import sys
 from pathlib import Path
 from time import sleep
 
@@ -14,7 +14,6 @@ import pyautogui as pag
 import win32con
 import win32gui
 
-from rf4s import utils
 from rf4s.controller import logger
 
 ANIMATION_DELAY = 0.5
@@ -57,7 +56,7 @@ class Window:
                 "Failed to locate the game window, please open the game and try again"
             )
 
-            utils.safe_exit()
+            sys.exit()
         return hwnd
 
     def is_title_bar_exist(self) -> bool:
