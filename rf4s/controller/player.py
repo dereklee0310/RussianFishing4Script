@@ -407,6 +407,9 @@ class Player:
             self._refill_dry_mix()
             return
 
+        if not self.detection.is_bait_chosen():
+            self.handle_bait_not_chosen()
+
         with self.hold_keys(mouse=True, shift=True):
             while True:
                 with self.error_handler():
@@ -459,11 +462,14 @@ class Player:
                 if self.cfg.PROFILE.MODE != "telescopic":
                     self.retrieve_line()
         except exceptions.BaitNotChosenError:
-            if len(self.tackles) == 1:
-                self.general_quit("Run out of bait")
-            self.tackle.available = False
+            self.handle_bait_not_chosen()
         except exceptions.DryMixNotChosenError:
             self._refill_dry_mix()
+
+    def handle_bait_not_chosen(self) -> None:
+        if len(self.tackles) == 1:
+            self.general_quit("Run out of bait")
+        self.tackle.available = False
 
     def _cast_spod_rod(self) -> None:
         """Cast the spod rod if dry mix is available."""
