@@ -44,16 +44,16 @@ WEAR_TEXT_UPDATE_DELAY = 2
 LOWER_TACKLE_DELAY = 4
 BAD_CAST_DELAY = 1
 CLICK_LOCK_DURATION = 2.2
-RETRIEVAL_FINISH_DELAY = 2
+RETRIEVAL_FINISH_DELAY = 4
 
 TROLLING_KEY = "j"
 LEFT_KEY = "a"
 RIGHT_KEY = "d"
 
 if utils.is_compiled():
-    ROOT = Path(sys.executable).parent  # Running as .exe (Nuitka/PyInstaller)
+    OUTER_ROOT = Path(sys.executable).parent  # Running as .exe (Nuitka/PyInstaller)
 else:
-    ROOT = Path(__file__).resolve().parents[2]
+    OUTER_ROOT = Path(__file__).resolve().parents[2]
 
 
 class Player:
@@ -520,7 +520,7 @@ class Player:
                         self.tackle.retrieve_with_no_fish()
                         break
                 self._retrieve_fish()
-        if self.cfg.ARGS.RAINBOW in (None, 5):
+        if self.cfg.ARGS.RAINBOW is None:
             sleep(RETRIEVAL_FINISH_DELAY)
 
     def _retrieve_fish(self):
@@ -538,7 +538,7 @@ class Player:
     def save_bite_screenshot(self):
         if self.cfg.ARGS.BITE:
             self.detection.window.save_screenshot(
-                ROOT / "screenshots" / f"{self.timer.get_cur_timestamp()}.png"
+                OUTER_ROOT / "screenshots" / f"{self.timer.get_cur_timestamp()}.png"
             )
 
     def do_pirking(self) -> None:
@@ -569,7 +569,9 @@ class Player:
         if not self.detection.is_fish_hooked():
             return
         self._drink_alcohol()
-        with self.hold_keys(mouse=True, shift=self.cfg.PROFILE.POST_ACCELERATION):
+        with self.hold_keys(
+            mouse=True, shift=self.cfg.PROFILE.POST_ACCELERATION, reset=False
+        ):
             while True:
                 with self.error_handler():
                     self.tackle.pull()
@@ -760,8 +762,9 @@ class Player:
         if send:
             send_result(self.cfg, result)
         if self.cfg.ARGS.DATA:
-            self.timer.save_data()
-            with open(f"logs/{self.timer.get_cur_timestamp()}_result.json", "w") as f:
+            timestamp = self.timer.get_cur_timestamp()
+            self.timer.save_data(timestamp)
+            with open(f"logs/{timestamp}_result.json", "w") as f:
                 json.dump(result, f, indent=4)
         if self.cfg.ARGS.SHUTDOWN and shutdown:
             os.system("shutdown /s /t 5")
@@ -807,7 +810,7 @@ class Player:
             while self.detection.is_gift_receieved():
                 if self.cfg.ARGS.SCREENSHOT:
                     filepath = (
-                        ROOT / "screenshots" / f"{self.timer.get_cur_timestamp()}.png"
+                        OUTER_ROOT / "screenshots" / f"{self.timer.get_cur_timestamp()}.png"
                     )
                     self.detection.window.save_screenshot(filepath)
                     send_screenshot(self.cfg, filepath)
@@ -842,7 +845,7 @@ class Player:
         if self.cfg.ARGS.SCREENSHOT and (
             (not self.cfg.BOT.KEEPNET.SCREENSHOT_TAGS or screenshot) or card
         ):
-            filepath = ROOT / "screenshots" / f"{self.timer.get_cur_timestamp()}.png"
+            filepath = OUTER_ROOT / "screenshots" / f"{self.timer.get_cur_timestamp()}.png"
             self.detection.window.save_screenshot(filepath)
             send_screenshot(self.cfg, filepath)
 

@@ -14,9 +14,9 @@ from rf4s import config, utils
 
 # Get the base path depending on runtime environment
 if utils.is_compiled():
-    ROOT = Path(sys.executable).parent  # Running as .exe (Nuitka/PyInstaller)
+    OUTER_ROOT = Path(sys.executable).parent  # Running as .exe (Nuitka/PyInstaller)
 else:
-    ROOT = Path(__file__).resolve().parents[2]
+    OUTER_ROOT = Path(__file__).resolve().parents[2]
 
 
 def setup_cfg() -> CN:
@@ -107,5 +107,5 @@ def to_list(profile: dict) -> list:
 
 def load_cfg() -> CN:
     cfg = setup_cfg()
-    cfg.merge_from_file(ROOT / "config.yaml")
+    cfg.merge_from_file(OUTER_ROOT / "config.yaml")
     return cfg

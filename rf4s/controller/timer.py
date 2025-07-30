@@ -22,9 +22,9 @@ from rf4s.controller import logger
 # This file is not included during compilation and could not be resolved automatically
 # by Nuitka.
 if utils.is_compiled():
-    ROOT = Path(sys.executable).parent  # Running as .exe (Nuitka/PyInstaller)
+    OUTER_ROOT = Path(sys.executable).parent  # Running as .exe (Nuitka/PyInstaller)
 else:
-    ROOT = Path(__file__).resolve().parents[2]
+    OUTER_ROOT = Path(__file__).resolve().parents[2]
 
 
 TIME_JITTER = 0.2
@@ -202,7 +202,7 @@ class Timer:
             return True
         return False
 
-    def save_data(self) -> None:
+    def save_data(self, timestamp: str) -> None:
         """Plot and save an image using rhour and ghour lists from the timer object."""
         cast_rhour_list, cast_ghour_list = self.get_cast_time_list()
         if not cast_rhour_list:
@@ -235,7 +235,7 @@ class Timer:
         ax[1].yaxis.set_major_locator(MaxNLocator(integer=True))
 
         # plt.tight_layout()
-        plt.savefig(str(ROOT / f"logs/{self.get_cur_timestamp()}.png"))
+        plt.savefig(str(OUTER_ROOT / f"logs/{timestamp}_chart.png"))
         logger.info("Chart has been saved under logs/")
 
     def set_sink_start_time(self):

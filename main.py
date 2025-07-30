@@ -88,10 +88,11 @@ Docs: https://github.com/dereklee0310/RussianFishing4Script/tree/main/docs/en
 # When running as an executable, use sys.executable to find the config.yaml.
 # This file is not included during compilation and could not be resolved automatically
 # by Nuitka.
-if utils.is_compiled():
-    ROOT = Path(sys.executable).parent
+INNER_ROOT = Path(__file__).resolve().parents[0]
+if utils.is_compiled:
+    OUTER_ROOT = Path(sys.executable).parent
 else:
-    ROOT = Path(__file__).resolve().parents[0]
+    OUTER_ROOT = INNER_ROOT
 
 
 class Formatter(
@@ -139,8 +140,8 @@ def setup_logging() -> logging.Logger:
     return logging.getLogger(__name__)
 
 
-(ROOT / "screenshots").mkdir(parents=True, exist_ok=True)
-(ROOT / "logs").mkdir(parents=True, exist_ok=True)
+(OUTER_ROOT / "screenshots").mkdir(parents=True, exist_ok=True)
+(OUTER_ROOT / "logs").mkdir(parents=True, exist_ok=True)
 logger = setup_logging()
 
 
@@ -420,7 +421,7 @@ def get_click_lock():
 
 
 def preprocess_config():
-    config_path = ROOT / "config.yaml"
+    config_path = OUTER_ROOT / "config.yaml"
     if config_path.exists():
         return
 
@@ -428,7 +429,7 @@ def preprocess_config():
     language = get_language()
     click_lock = get_click_lock()
 
-    with open(Path("rf4s/config/config.yaml"), "r") as file:
+    with open(Path(INNER_ROOT / "rf4s/config/config.yaml"), "r") as file:
         lines = file.readlines()
         for i, line in enumerate(lines):
             if line.startswith("LANGUAGE:"):
