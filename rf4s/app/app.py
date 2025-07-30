@@ -776,6 +776,7 @@ class Part:
     load_capacity: Optional[float] = None
     wear: Optional[float] = None
     real_load_capacity: Optional[float] = None
+    pre_real_load_capacity: Optional[float] = None
 
     def calculate_real_load_capacity(self) -> None:
         self.real_load_capacity = (
@@ -786,6 +787,8 @@ class Part:
 
 class CalculateCommand(Enum):
     RESTART = "r"
+    PREVIOUS = "p"
+    PREVIOUS_REMAINING = "P"
     SKIP = "s"
     SKIP_REMAINING = "S"
     QUIT = "q"
@@ -808,13 +811,27 @@ class CalculateApp:
         )
 
     def calculate_tackle_stats(self):
+        previous = False
         for part in self.parts:
             try:
+                if previous:
+                    if part.pre_real_load_capacity is not None:
+                        raise exceptions.PreviousError
+                    else:
+                        utils.print_error(f"{part.name}'s value not found.")
                 part.load_capacity = self.get_validated_input(part, part.prompt)
                 part.wear = self.get_validated_input(part, "Wear (%)")
             except exceptions.SkipError:
+                if part.real_load_capacity is not None:
+                    part.real_load_capacity = None
                 continue
-            part.calculate_real_load_capacity()
+            except exceptions.PreviousError:
+                part.real_load_capacity = part.pre_real_load_capacity
+            except exceptions.PreviousRemainingError:
+                part.real_load_capacity = part.pre_real_load_capacity
+                previous = True
+            else:
+                part.calculate_real_load_capacity()
             self.result.add_row(part.name, f"{part.real_load_capacity:.2f} kg")
 
     def get_validated_input(self, part: Part, prompt: str) -> float:
@@ -825,6 +842,16 @@ class CalculateApp:
             match user_input.strip():
                 case CalculateCommand.RESTART.value:
                     raise exceptions.RestartError
+                case CalculateCommand.PREVIOUS.value:
+                    if part.pre_real_load_capacity is None:
+                        utils.print_error(f"{part.name}'s value not found.")
+                        continue
+                    raise exceptions.PreviousError
+                case CalculateCommand.PREVIOUS_REMAINING.value:
+                    if part.pre_real_load_capacity is None:
+                        utils.print_error(f"{part.name}'s value not found.")
+                        continue
+                    raise exceptions.PreviousRemainingError
                 case CalculateCommand.SKIP.value:
                     raise exceptions.SkipError
                 case CalculateCommand.SKIP_REMAINING.value:
@@ -843,10 +870,11 @@ class CalculateApp:
                     continue
                 return number
             except ValueError:
-                utils.print_error("Invalid input. Please enter a number.")
+                utils.print_error("Invalid input. Please try again.")
 
     def reset_stats(self) -> None:
         for part in self.parts:
+            part.pre_real_load_capacity = part.real_load_capacity
             part.real_load_capacity = None
         self.result = Table(
             "Results",
@@ -888,7 +916,13 @@ class CalculateApp:
         Prompts the user for input, calculates the result, and displays them in a table.
         """
         utils.print_usage_box(
-            "Type r to restart, s to skip a part, S to skip the remaining parts, q to quit."
+            "Commands:\n"
+            "r: Restart\n"
+            "s: Skip a part\n"
+            "S: Skip the remaining parts\n"
+            "p: Use previous value for a part\n"
+            "P: Use previous value for the remaing parts\n"
+            "q: Quit"
         )
         utils.print_hint_box("Press V and click the gear icon to view the parts.")
 

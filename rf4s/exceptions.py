@@ -42,6 +42,12 @@ class TicketExpiredError(Exception):
 class RestartError(Exception):
     """User want to restart the app."""
 
+class PreviousError(Exception):
+    """User want to use the value in the previous run."""
+
+class PreviousRemainingError(Exception):
+    """User want to use the value in the previous run for remaining parts."""
+
 
 class SkipError(Exception):
     """User want to skip a component during tackle's stat calculation."""
