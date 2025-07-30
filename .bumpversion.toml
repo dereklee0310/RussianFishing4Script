@@ -31,7 +31,7 @@ search = "VERSION = \"{current_version}\""
 replace = "VERSION = \"{new_version}\""
 
 [[tool.bumpversion.files]]
-filename = "tools/main.py"
+filename = "main.py"
 search = "VERSION = \"{current_version}\""
 replace = "VERSION = \"{new_version}\""
 
