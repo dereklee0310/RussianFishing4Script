@@ -437,31 +437,33 @@ def main() -> None:
         utils.print_usage_box("Enter launch options (press Enter to skip).")
         sys.argv += shlex.split(input(">>> "))
         args = parser.parse_args()
-    try:
-        match args.feature:
-            case "bot":
-                sys.argv += shlex.split(cfg.BOT.LAUNCH_OPTIONS)
-                App = BotApp
-            case "craft":
-                sys.argv += shlex.split(cfg.MOVE.LAUNCH_OPTIONS)
-                App = CraftApp
-            case "move":
-                sys.argv += shlex.split(cfg.MOVE.LAUNCH_OPTIONS)
-                App = MoveApp
-            case "harvest":
-                sys.argv += shlex.split(cfg.HARVEST.LAUNCH_OPTIONS)
-                App = HarvestApp
-            case "frictionbrake" | "fb":
-                sys.argv += shlex.split(cfg.FRICTION_BRAKE.LAUNCH_OPTIONS)
-                App = FrictionBrakeApp
-            case "calculate" | "cal":
-                App = CalculateApp
-            case _:
-                raise NotImplementedError("You should not reach here.")
-        App(cfg, parser.parse_args(), parser).start()
-    except Exception as e:
-        logger.critical(e, exc_info=True)
+
+    match args.feature:
+        case "bot":
+            sys.argv += shlex.split(cfg.BOT.LAUNCH_OPTIONS)
+            App = BotApp
+        case "craft":
+            sys.argv += shlex.split(cfg.MOVE.LAUNCH_OPTIONS)
+            App = CraftApp
+        case "move":
+            sys.argv += shlex.split(cfg.MOVE.LAUNCH_OPTIONS)
+            App = MoveApp
+        case "harvest":
+            sys.argv += shlex.split(cfg.HARVEST.LAUNCH_OPTIONS)
+            App = HarvestApp
+        case "frictionbrake" | "fb":
+            sys.argv += shlex.split(cfg.FRICTION_BRAKE.LAUNCH_OPTIONS)
+            App = FrictionBrakeApp
+        case "calculate" | "cal":
+            App = CalculateApp
+        case _:
+            raise NotImplementedError("You should not reach here.")
+    App(cfg, parser.parse_args(), parser).start()
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        logger.critical(e, exc_info=True)
+

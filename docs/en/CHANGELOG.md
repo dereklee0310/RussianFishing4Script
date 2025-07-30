@@ -44,6 +44,7 @@
 - fix --bite
 - fix trolling
 - fix bolognese retrieve
+- fix spod rod bug
 
 ## 0.5.3 (2025-06-21)
 

@@ -1,7 +1,4 @@
 @echo off
-if not exist dist             mkdir dist
-if not exist dist\screenshots mkdir dist\screenshots
-if not exist dist\logs        mkdir dist\logs
 
 python -m nuitka ^
   main.py ^
