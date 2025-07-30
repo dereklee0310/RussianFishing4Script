@@ -78,6 +78,8 @@ class Timer:
         self.last_spod_rod_recast = self.start_time
         self.last_pause = self.start_time
 
+        self.sink_start_time = 0
+
     def get_running_time(self) -> float:
         """Calculate the execution time of the program.
 
@@ -235,3 +237,9 @@ class Timer:
         # plt.tight_layout()
         plt.savefig(str(ROOT / f"logs/{self.get_cur_timestamp()}.png"))
         logger.info("Chart has been saved under logs/")
+
+    def set_sink_start_time(self):
+        self.sink_start_time = time.time()
+
+    def print_sink_duration(self):
+        logger.info("Sinking takes %s seconds", int(time.time() - self.sink_start_time))

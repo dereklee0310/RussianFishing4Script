@@ -148,6 +148,7 @@ class Tackle:
         """Sink the lure until an event happens, designed for marine and wacky rig."""
         logger.info("Sinking lure")
         i = self.cfg.PROFILE.SINK_TIMEOUT
+        self.timer.set_sink_start_time()
         while i > 0:
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
             if self.detection.is_moving_in_bottom_layer():
@@ -158,7 +159,7 @@ class Tackle:
             if self.detection.is_fish_hooked_twice():
                 pag.click()  # Lock reel
                 return
-
+        self.timer.print_sink_duration()
         utils.hold_mouse_button(self.cfg.PROFILE.TIGHTEN_DURATION)
 
     @_check_status
