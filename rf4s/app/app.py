@@ -449,18 +449,7 @@ class BotApp(App):
                 logger.info("Restarting bot")
                 self.paused = False
 
-        self.display_result()
-        if self.cfg.ARGS.DATA:
-            self.player.timer.save_data()
-        self.player.safe_exit()
-
-    def display_result(self):
-        # TODO: BUILT THIS FROM RESULT
-        print(
-            self.player.get_result_table(
-                self.player.get_result_dict("Terminated by user")
-            )
-        )
+        self.player.handle_termination("Terminated by user", shutdown=False, send=False)
 
 
 class CraftApp(App):

@@ -11,6 +11,7 @@ import msvcrt
 import os
 import random
 import sys
+import json
 from contextlib import contextmanager
 from multiprocessing import Lock
 from pathlib import Path
@@ -744,20 +745,25 @@ class Player:
         else:
             self.general_quit("Lure is broken")
 
-    def _handle_termination(self, msg: str, shutdown: bool) -> None:
+    def handle_termination(self, msg: str, shutdown: bool, send: bool) -> None:
         """Handle script termination.
 
         :param msg: The reason for termination.
         :type msg: str
         :param shutdown: Whether to shutdown the computer after termination.
         :type shutdown: bool
+        :param shutdown: Whether to send notification.
+        :type shutdown: bool
         """
         result = self.get_result_dict(msg)
         result_table = self.get_result_table(result)
-        send_result(self.cfg, result)
+        if send:
+            send_result(self.cfg, result)
         if self.cfg.ARGS.DATA:
             self.timer.save_data()
-        if shutdown and self.cfg.ARGS.SHUTDOWN:
+            with open(f"logs/{self.timer.get_cur_timestamp()}_result.json", "w") as f:
+                json.dump(result, f, indent=4)
+        if self.cfg.ARGS.SHUTDOWN and shutdown:
             os.system("shutdown /s /t 5")
         print(result_table)
         if self.friction_brake.monitor_process.is_alive():
@@ -892,7 +898,7 @@ class Player:
             pag.moveTo(self.detection.get_yes_position())
             pag.click()
 
-            self._handle_termination(msg, shutdown=True)
+            self.handle_termination(msg, shutdown=True, send=True)
 
     def disconnected_quit(self) -> None:
         """Quit the game through the main menu."""
@@ -909,7 +915,7 @@ class Player:
                 pag.moveTo(self.detection.get_confirm_button_position())
                 pag.click()
 
-            self._handle_termination("Game disconnected", shutdown=True)
+            self.handle_termination("Game disconnected", shutdown=True, send=True)
 
     def get_result_dict(self, msg: str):
         return self.result.as_dict(msg, self.timer)

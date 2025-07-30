@@ -46,6 +46,8 @@
 - fix bolognese retrieve
 - fix spod rod bug
 - fix coffee limit behaviour
+- add sink time logging
+- add table save for -d
 
 ## 0.5.3 (2025-06-21)
 
