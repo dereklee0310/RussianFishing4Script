@@ -568,13 +568,12 @@ class Player:
         if not self.detection.is_fish_hooked():
             return
         self._drink_alcohol()
-        with self.hold_keys(
-            mouse=True, shift=self.cfg.PROFILE.POST_ACCELERATION, reset=False
-        ):
+        with self.hold_keys(mouse=True, shift=self.cfg.PROFILE.POST_ACCELERATION):
             while True:
                 with self.error_handler():
                     self.tackle.pull()
                     break
+        with self.hold_keys(mouse=False, shift=False, reset=False):
             self.handle_fish()
 
     def _put_down_tackle(self, check_miss_counts: list[int]) -> None:
