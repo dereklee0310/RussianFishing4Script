@@ -31,6 +31,7 @@ from rf4s.app import (
 )
 
 VERSION = "0.5.3"
+COMPATIBLE_CONFIG_VERSION = "0.5.3"
 LOGO = """
 ██████╗ ███████╗██╗  ██╗███████╗
 ██╔══██╗██╔════╝██║  ██║██╔════╝
@@ -89,7 +90,7 @@ Docs: https://github.com/dereklee0310/RussianFishing4Script/tree/main/docs/en
 # This file is not included during compilation and could not be resolved automatically
 # by Nuitka.
 INNER_ROOT = Path(__file__).resolve().parents[0]
-if utils.is_compiled:
+if utils.is_compiled():
     OUTER_ROOT = Path(sys.executable).parent
 else:
     OUTER_ROOT = INNER_ROOT
@@ -401,50 +402,57 @@ def get_launch_options(parser: argparse.ArgumentParser) -> str:
 
 
 def get_language():
-    utils.print_usage_box("What's your game language? [(1) en (2) ru]")
+    utils.print_usage_box("What's your game language? [(1) en (2) ru (3) q (quit)]")
     while True:
         user_input = input(">>> ")
         if user_input.isdigit() and user_input in ("1", "2"):
             break
+        if user_input == "q":
+            print("Bye.")
+            sys.exit()
         utils.print_error("Invalid input, please try again.")
     return '"en"' if user_input == "1" else '"ru"'
 
 
 def get_click_lock():
-    utils.print_usage_box("Is Windows Mouse ClickLock enabled? [(1) yes (2) no]")
+    utils.print_usage_box("Is Windows Mouse ClickLock enabled? [(1) yes (2) no (3) q (quit)]")
     while True:
         user_input = input(">>> ")
         if user_input.isdigit() and user_input in ("1", "2"):
             break
+        if user_input == "q":
+            print("Bye.")
+            sys.exit()
         utils.print_error("Invalid input, please try again.")
     return "true" if user_input == "1" else "false"
 
 
-def preprocess_config():
+def setup_cfg():
     config_path = OUTER_ROOT / "config.yaml"
-    if config_path.exists():
-        return
+    if not config_path.exists():
+        language = get_language()
+        click_lock = get_click_lock()
 
-    # shutil.copy(Path("rf4s/config/config.yaml"), config_path)
-    language = get_language()
-    click_lock = get_click_lock()
+        with open(Path(INNER_ROOT / "rf4s/config/config.yaml"), "r") as file:
+            lines = file.readlines()
+            for i, line in enumerate(lines):
+                if line.startswith("LANGUAGE:"):
+                    lines[i] = f"LANGUAGE: {language}\n"
+                if line.startswith("  CLICK_LOCK"):
+                    lines[i] = f"  CLICK_LOCK: {click_lock}\n"
 
-    with open(Path(INNER_ROOT / "rf4s/config/config.yaml"), "r") as file:
-        lines = file.readlines()
-        for i, line in enumerate(lines):
-            if line.startswith("LANGUAGE:"):
-                lines[i] = f"LANGUAGE: {language}\n"
-            if line.startswith("  CLICK_LOCK"):
-                lines[i] = f"  CLICK_LOCK: {click_lock}\n"
+        with open(config_path, "w") as file: # shutil.copy
+            file.writelines(lines)
 
-    with open(config_path, "w") as file:
-        file.writelines(lines)
+    cfg = config.load_cfg()
+    if cfg.VERSION < "0.5.3":
+        logger.critical("Incompatible config version, please delete it and try again")
+        sys.exit()
+    return cfg
 
 
 def main() -> None:
-    preprocess_config()
-
-    cfg = config.load_cfg()
+    cfg = setup_cfg()
     parser, subparsers = setup_parser(cfg)
     args = parser.parse_args()  # First parse to get {command} {flags}
     utils.print_logo_box(LOGO)  # Print logo here so the help message will not show it
