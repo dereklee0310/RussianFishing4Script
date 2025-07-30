@@ -115,7 +115,7 @@ PROFILE:
     POST_ACCELERATION: false
     TYPE: "lift"
   BOTTOM:
-    DESCRIPTION: "Default bottom fishing profile."
+    DESCRIPTION: "Default bottom fishing."
     LAUNCH_OPTIONS: ""
     MODE: "bottom"
     CAST_POWER_LEVEL: 5.0
@@ -126,7 +126,7 @@ PROFILE:
     PUT_DOWN_DELAY: 2.0
     RANDOM_ROD_SELECTION: true
   PIRK:
-    DESCRIPTION: "A marine fishing profile that perform pirking at the bottom layer for 34/41m in Norwegian Sea."
+    DESCRIPTION: "Default marine fishing, strong pirking at the bottom layer."
     LAUNCH_OPTIONS: ""
     MODE: "pirk"
     CAST_POWER_LEVEL: 1.0
@@ -137,14 +137,14 @@ PROFILE:
     DEPTH_ADJUST_DURATION: 1.0
     CTRL: false
     SHIFT: false
-    PIRK_DURATION: 0.5
+    PIRK_DURATION: 0.9
     PIRK_DELAY: 2.0
     PIRK_TIMEOUT: 32.0
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
   PIRK_WITH_RETRIEVAL:
-    DESCRIPTION: "A marine fishing profile that retrieves the fishing line while parking."
+    DESCRIPTION: "Marine fishing, pirking while retrieving the fishing line."
     LAUNCH_OPTIONS: ""
     MODE: "pirk"
     CAST_POWER_LEVEL: 1.0
@@ -162,7 +162,7 @@ PROFILE:
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
   WACKY_RIG:
-    DESCRIPTION: "A variation of marine fishing profile for pirking at the bottom layer at Ladoga Archipelago using wacky rig."
+    DESCRIPTION: "Pirking at the bottom layer at Ladoga Archipelago using wacky rig."
     LAUNCH_OPTIONS: ""
     MODE: "pirk"
     CAST_POWER_LEVEL: 1.0
@@ -324,12 +324,12 @@ PROFILE:
     CAST_POWER_LEVEL: 1.0
     CAST_DELAY: 4.0
     SINK_TIMEOUT: 12.0
-    TIGHTEN_DURATION: 1.0
+    TIGHTEN_DURATION: 0.1
     DEPTH_ADJUST_DELAY: 2.0
     DEPTH_ADJUST_DURATION: 1.0
     CTRL: false
     SHIFT: false
-    PIRK_DURATION: 0.5
+    PIRK_DURATION: 1.5
     PIRK_DELAY: 2.0
     PIRK_TIMEOUT: 32.0
     PIRK_RETRIEVAL: false
@@ -433,3 +433,87 @@ PROFILE:
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
+
+  YAMA_WALK_THE_DOG:
+    LAUNCH_OPTIONS: "-rcmR"
+    MODE: "spin"
+    CAST_POWER_LEVEL: 5.0
+    CAST_DELAY: 6.0
+    TIGHTEN_DURATION: 0.1
+    RETRIEVAL_TIMEOUT: 256.0
+    RETRIEVAL_DURATION: 0.55
+    RETRIEVAL_DELAY: 1.5
+    PRE_ACCELERATION: False
+    POST_ACCELERATION: false
+    TYPE: "pause"
+
+
+  BEAR_C17:
+    MODE: "bottom"
+    CAST_POWER_LEVEL: 2.5
+    CAST_DELAY: 4.0
+    POST_ACCELERATION: false
+    CHECK_DELAY: 32.0
+    CHECK_MISS_LIMIT: 10
+
+  COPPER_C18:
+    MODE: "bottom"
+    CAST_POWER_LEVEL: 4.0
+    CAST_DELAY: 4.0
+    POST_ACCELERATION: false
+    CHECK_DELAY: 64.0
+    CHECK_MISS_LIMIT: 10
+
+  COPPER_C31:
+    MODE: "bottom"
+    CAST_POWER_LEVEL: 4.0
+    CAST_DELAY: 4.0
+    POST_ACCELERATION: false
+    CHECK_DELAY: 32.0
+    CHECK_MISS_LIMIT: 10
+
+  COPPER_C6:
+    MODE: "bottom"
+    CAST_POWER_LEVEL: 3.0
+    CAST_DELAY: 4.0
+    POST_ACCELERATION: false
+    CHECK_DELAY: 16.0
+    CHECK_MISS_LIMIT: 10
+
+  AMBER_TROPHY:
+      MODE: "bottom"
+      CAST_POWER_LEVEL: 5.0
+      CAST_DELAY: 4.0
+      POST_ACCELERATION: false
+      CHECK_DELAY: 64.0
+      CHECK_MISS_LIMIT: 10
+
+  PIRK_80:
+    MODE: "pirk"
+    LAUNCH_OPTIONS: ""
+    CAST_POWER_LEVEL: 1.0
+    CAST_DELAY: 4.0
+    SINK_TIMEOUT: 60.0
+    TIGHTEN_DURATION: 2.0
+    DEPTH_ADJUST_DELAY: 4.0
+    DEPTH_ADJUST_DURATION: 1.0
+    CTRL: false
+    SHIFT: false
+    PIRK_DURATION: 0.5
+    PIRK_DELAY: 2.0
+    PIRK_TIMEOUT: 128.0
+    PIRK_RETRIEVAL: false
+    HOOK_DELAY: 0.5
+    POST_ACCELERATION: true
+
+  ELK:
+    MODE: "bolognese"
+    LAUNCH_OPTIONS: ""
+    CAST_POWER_LEVEL: 5.0
+    CAST_DELAY: 4.0
+    FLOAT_SENSITIVITY: 0.68
+    CHECK_DELAY: 1.0
+    PULL_DELAY: 0.0
+    DRIFT_TIMEOUT: 100.0
+    CAMERA_SHAPE: "square"
+    POST_ACCELERATION: false

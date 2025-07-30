@@ -45,6 +45,7 @@
 - fix trolling
 - fix bolognese retrieve
 - fix spod rod bug
+- fix coffee limit behaviour
 
 ## 0.5.3 (2025-06-21)
 
