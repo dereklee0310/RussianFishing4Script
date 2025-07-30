@@ -139,10 +139,12 @@ def setup_logging() -> logging.Logger:
     return logging.getLogger(__name__)
 
 
+(ROOT / "screenshots").mkdir(parents=True, exist_ok=True)
+(ROOT / "logs").mkdir(parents=True, exist_ok=True)
 logger = setup_logging()
 
 
-def setup_parser(cfg: CN) -> argparse.ArgumentParser:
+def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
     """Configure the argument parser with all supported command-line options.
 
     :return: Configured ArgumentParser instance with all options and flags.
@@ -309,17 +311,6 @@ def setup_parser(cfg: CN) -> argparse.ArgumentParser:
         help="refill hunger and comfort by consuming tea and carrot",
     )
 
-    calculate_paser = feature_parsers.add_parser(
-        "calculate",
-        help="calculate tackle's stats",
-        aliases=["cal"],
-        parents=[parent_parser],
-        formatter_class=Formatter,
-    )
-    calculate_paser.add_argument(
-        "-V", "--version", action="version", version=f"RF4S-calculate {VERSION}"
-    )
-
     friction_brake_parser = feature_parsers.add_parser(
         "frictionbrake",
         help="automate friction brake",
@@ -331,7 +322,25 @@ def setup_parser(cfg: CN) -> argparse.ArgumentParser:
         "-V", "--version", action="version", version=f"RF4S-frictionbrake {VERSION}"
     )
 
-    return main_parser
+    calculate_paser = feature_parsers.add_parser(
+        "calculate",
+        help="calculate tackle's stats",
+        aliases=["cal"],
+        parents=[parent_parser],
+        formatter_class=Formatter,
+    )
+    calculate_paser.add_argument(
+        "-V", "--version", action="version", version=f"RF4S-calculate {VERSION}"
+    )
+
+    return main_parser, (
+        bot_parser,
+        craft_parser,
+        move_parser,
+        harvest_parser,
+        friction_brake_parser,
+        calculate_paser,
+    )
 
 
 def display_features() -> None:
@@ -372,6 +381,22 @@ def get_fid(parser: argparse.ArgumentParser) -> int:
             continue
         utils.print_error("Invalid input, please try again.")
     return int(user_input)
+
+
+def get_launch_options(parser: argparse.ArgumentParser) -> str:
+    utils.print_usage_box(
+        "Enter launch options, Enter to skip, h to see help message, q to quit."
+    )
+    while True:
+        user_input = input(">>> ")
+        if user_input == "q":
+            print("Bye.")
+            sys.exit()
+        if user_input == "h":
+            parser.print_help()
+            continue
+        break
+    return user_input
 
 
 def get_language():
@@ -416,12 +441,10 @@ def preprocess_config():
 
 
 def main() -> None:
-    (ROOT / "screenshots").mkdir(parents=True, exist_ok=True)
-    (ROOT / "logs").mkdir(parents=True, exist_ok=True)
     preprocess_config()
 
     cfg = config.load_cfg()
-    parser = setup_parser(cfg)
+    parser, subparsers = setup_parser(cfg)
     args = parser.parse_args()  # First parse to get {command} {flags}
     utils.print_logo_box(LOGO)  # Print logo here so the help message will not show it
 
@@ -432,10 +455,10 @@ def main() -> None:
     # launch options and don't prompt them to type it.
     if args.feature is None:
         display_features()
+        fid = get_fid(parser)
         # Merge selected feature and launch options
-        sys.argv = [sys.argv[0]] + [FEATURES[get_fid(parser)]["command"]] + sys.argv[1:]
-        utils.print_usage_box("Enter launch options (press Enter to skip).")
-        sys.argv += shlex.split(input(">>> "))
+        sys.argv = [sys.argv[0]] + [FEATURES[fid]["command"]] + sys.argv[1:]
+        sys.argv += shlex.split(get_launch_options(subparsers[fid]))
         args = parser.parse_args()
 
     match args.feature:
@@ -466,4 +489,3 @@ if __name__ == "__main__":
         main()
     except Exception as e:
         logger.critical(e, exc_info=True)
-
