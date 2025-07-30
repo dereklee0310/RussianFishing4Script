@@ -116,6 +116,7 @@ class Player:
         if self.detection.get_quit_position():
             logger.warning("Control panel detected, back to the game automatically")
             pag.press("esc")
+            sleep(ANIMATION_DELAY)
 
         logger.info("Starting fishing mode: '%s'", self.cfg.PROFILE.MODE)
         getattr(self, f"start_{self.cfg.PROFILE.MODE}_mode")()
@@ -395,6 +396,14 @@ class Player:
     def reset_tackle(self) -> None:
         """Reset the tackle until it is ready."""
         if self.detection.is_tackle_ready():
+            return
+
+        if self.detection.is_lure_broken():
+            self._handle_broken_lure()
+            return
+
+        if not self.detection.is_dry_mix_chosen():
+            self._refill_dry_mix()
             return
 
         with self.hold_keys(mouse=True, shift=True):
