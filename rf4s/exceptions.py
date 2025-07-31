@@ -81,3 +81,6 @@ class BaitNotChosenError(Exception):
 
 class DryMixNotChosenError(Exception):
     """Dry mix is not chosen."""
+
+class StuckAtCastingError(Exception):
+    """Stuck at casting stage."""

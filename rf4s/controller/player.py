@@ -130,7 +130,8 @@ class Player:
     def release_left_mouse_button(self):
         if self.cfg.BOT.CLICK_LOCK:
             pag.click()
-        pag.mouseUp()
+        else:
+            pag.mouseUp()
         self.mouse_pressed = False
 
     def hold_down_shift_key(self):
@@ -142,10 +143,7 @@ class Player:
         self.shift_pressed = False
 
     @contextmanager
-    def hold_keys(self, mouse, shift, reset=True):
-        mouse_pressed_before = self.mouse_pressed
-        shift_pressed_before = self.shift_pressed
-
+    def hold_keys(self, mouse, shift):
         if mouse and not self.mouse_pressed:
             print("mouse 1")
             self.hold_down_left_mouse_button()
@@ -159,21 +157,6 @@ class Player:
             self.release_shift_key()
 
         yield
-
-        if not reset:
-            return
-
-        if mouse and not mouse_pressed_before:
-            print("mouse 3")
-            self.release_left_mouse_button()
-        if not mouse and mouse_pressed_before:
-            print("mouse 4")
-            self.hold_down_left_mouse_button()
-
-        if shift and not shift_pressed_before:
-            self.release_shift_key()
-        if not shift and shift_pressed_before:
-            self.hold_down_shift_key()
 
     # ---------------------------------------------------------------------------- #
     #                              main fishing loops                              #
@@ -467,6 +450,9 @@ class Player:
             self.handle_bait_not_chosen()
         except exceptions.DryMixNotChosenError:
             self._refill_dry_mix()
+        except exceptions.StuckAtCastingError:
+            with self.hold_keys(mouse=False, shift=False):
+                pass
 
     def handle_bait_not_chosen(self) -> None:
         if len(self.tackles) == 1:
@@ -528,10 +514,11 @@ class Player:
                         self.tackle.retrieve_with_no_fish()
                         break
                 self._retrieve_fish()
-        if self.cfg.ARGS.RAINBOW is None:
-            sleep(SPOOL_RETRIEVAL_DELAY)
-        elif self.cfg.ARGS.RAINBOW == 5:
-            sleep(RAINBOW_RETRIEVAL_DELAY)
+                if self.cfg.ARGS.RAINBOW is None:
+                    sleep(SPOOL_RETRIEVAL_DELAY)
+                elif self.cfg.ARGS.RAINBOW == 5:
+                    sleep(RAINBOW_RETRIEVAL_DELAY)
+
 
     def _retrieve_fish(self):
         self.save_bite_screenshot()
@@ -579,14 +566,12 @@ class Player:
         if not self.detection.is_fish_hooked():
             return
         self._drink_alcohol()
-        with self.hold_keys(
-            mouse=True, shift=self.cfg.PROFILE.POST_ACCELERATION, reset=False
-        ):
+        with self.hold_keys(mouse=True, shift=self.cfg.PROFILE.POST_ACCELERATION):
             while True:
                 with self.error_handler():
                     self.tackle.pull()
                     break
-        with self.hold_keys(mouse=False, shift=False, reset=False):
+        with self.hold_keys(mouse=False, shift=False):
             self.handle_fish()
 
     def _put_down_tackle(self, check_miss_counts: list[int]) -> None:
@@ -752,7 +737,7 @@ class Player:
     def _handle_broken_lure(self) -> None:
         """Handle the broken lure event according to the settings."""
         if self.cfg.ARGS.BROKEN_LURE:
-            with self.hold_keys(mouse=False, shift=False, reset=False):
+            with self.hold_keys(mouse=False, shift=False):
                 self._replace_broken_lures()
         else:
             self.general_quit("Lure is broken")
@@ -781,7 +766,7 @@ class Player:
         print(result_table)
         if self.friction_brake.monitor_process.is_alive():
             self.friction_brake.monitor_process.terminate()
-        with self.hold_keys(mouse=False, shift=False, reset=False):
+        with self.hold_keys(mouse=False, shift=False):
             utils.safe_exit()
 
     def _handle_snagged_line(self) -> None:
@@ -795,7 +780,7 @@ class Player:
             return
 
         logger.info("Handling fish")
-        with self.hold_keys(mouse=False, shift=False, reset=False):
+        with self.hold_keys(mouse=False, shift=False):
             self._handle_fish()
             sleep(add_jitter(ANIMATION_DELAY))
             # Avoid wrong cast hour

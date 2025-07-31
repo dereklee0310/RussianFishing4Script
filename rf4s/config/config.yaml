@@ -407,7 +407,7 @@ PROFILE:
     PIRK_DELAY: 2.0
     PIRK_TIMEOUT: 32.0
     PIRK_RETRIEVAL: false
-    HOOK_DELAY: 0.5
+    HOOK_DELAY: 0.0
     POST_ACCELERATION: true
   Marine 120/144m movement:
     DESCRIPTION: "Norwegian Sea, 120m, movement at the bottom layer"
@@ -425,7 +425,7 @@ PROFILE:
     PIRK_DELAY: 0.0
     PIRK_TIMEOUT: 32.0
     PIRK_RETRIEVAL: false
-    HOOK_DELAY: 0.5
+    HOOK_DELAY: 0.0
     POST_ACCELERATION: true
   Match still water c10:
     DESCRIPTION: "Ladoga Lake, 73:55, c10, depth 150cm."

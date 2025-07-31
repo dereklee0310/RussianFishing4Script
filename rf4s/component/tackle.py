@@ -27,7 +27,7 @@ LOOP_DELAY = 1
 
 ANIMATION_DELAY = 0.5
 
-RETRIEVAL_TIMEOUT = 32
+RETRIEVAL_TIMEOUT = 16
 PULL_TIMEOUT = 16
 RETRIEVAL_WITH_PAUSE_TIMEOUT = 128
 LIFT_DURATION = 3
@@ -83,12 +83,14 @@ class Tackle:
 
         return wrapper
 
-    def is_disconnected_or_ticketed_expired(self) -> None:
+    def is_rare_event_occur(self) -> None:
         """Check if the game disconnected or the boat ticket expired."""
         if self.detection.is_disconnected():
             raise exceptions.DisconnectedError
         if self.detection.is_ticket_expired():
             raise exceptions.TicketExpiredError
+        if self.detection.is_stuck_at_casting():
+            raise exceptions.StuckAtCastingError
 
     @_check_status
     def reset(self) -> None:
@@ -116,7 +118,7 @@ class Tackle:
                 raise exceptions.DryMixNotChosenError
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
             if i <= 0:
-                self.is_disconnected_or_ticketed_expired()
+                self.is_rare_event_occur()
                 i = RESET_TIMEOUT
 
     @_check_status
@@ -171,7 +173,6 @@ class Tackle:
         :raises exceptions.LineSnaggedError: The line is snagged.
         """
         logger.info("Retrieving fishing line [stage 1]")
-
         i = RETRIEVAL_TIMEOUT
         while True:
             if self.detection.is_fish_hooked():
@@ -189,8 +190,9 @@ class Tackle:
                 raise exceptions.TackleBrokenError
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
             if i <= 0:
-                self.is_disconnected_or_ticketed_expired()
+                self.is_rare_event_occur()
                 i = RETRIEVAL_TIMEOUT
+
 
     @_check_status
     def retrieve_with_fish(self) -> None:
@@ -220,7 +222,7 @@ class Tackle:
                 raise exceptions.TackleBrokenError
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
 
-        self.is_disconnected_or_ticketed_expired()
+        self.is_rare_event_occur()
         raise exceptions.RetrieveTimeoutError
 
     @utils.release_keys_after()
@@ -266,7 +268,7 @@ class Tackle:
             else:
                 i = utils.sleep_and_decrease(i, LOOP_DELAY)
 
-        self.is_disconnected_or_ticketed_expired()
+        self.is_rare_event_occur()
         raise exceptions.PirkTimeoutError
 
     def elevate(self) -> None:
@@ -295,7 +297,7 @@ class Tackle:
             locked = not locked
 
             if i <= 0:
-                self.is_disconnected_or_ticketed_expired()
+                self.is_rare_event_occur()
                 i = self.cfg.PROFILE.ELEVATE_TIMEOUT
                 dropped = not dropped
 
@@ -331,7 +333,7 @@ class Tackle:
         if self.detection.is_tackle_broken():
             raise exceptions.TackleBrokenError
 
-        self.is_disconnected_or_ticketed_expired()
+        self.is_rare_event_occur()
         raise exceptions.PullTimeoutError
 
     def _telescopic_pull(self) -> None:
@@ -353,7 +355,7 @@ class Tackle:
             if self.detection.is_tackle_broken():
                 raise exceptions.TackleBrokenError
 
-        self.is_disconnected_or_ticketed_expired()
+        self.is_rare_event_occur()
         raise exceptions.PullTimeoutError
 
     def change_gear_ratio(self) -> None:
@@ -479,7 +481,7 @@ class Tackle:
                 logger.info("Float status changed")
                 return
 
-        self.is_disconnected_or_ticketed_expired()
+        self.is_rare_event_occur()
 
     def _monitor_clip_state(self) -> None:
         """Monitor the state of the bolognese clip."""
@@ -490,4 +492,4 @@ class Tackle:
                 logger.info("Clip status changed")
                 return
 
-        self.is_disconnected_or_ticketed_expired()
+        self.is_rare_event_occur()

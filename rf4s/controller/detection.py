@@ -447,3 +447,6 @@ class Detection:
 
     def is_harvest_success(self):
         return self._get_image_box("harvest_confirm", 0.8)
+
+    def is_stuck_at_casting(self):
+        return self._get_image_box("cast", 0.7)

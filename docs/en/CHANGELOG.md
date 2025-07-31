@@ -50,6 +50,9 @@
 - add table save for -d
 - add new config
 - add random tea carrot
+- fix safe exit
+- decrease retrieval timeout
+
 
 ## 0.5.3 (2025-06-21)
 
