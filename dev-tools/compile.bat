@@ -11,5 +11,4 @@ python -m nuitka ^
 
 tar.exe -a -c -f dist/rf4s.zip ^
   LICENSE ^
-  -C dist main.exe ^
-  -C ../rf4s/config config.yaml
+  -C dist main.exe
