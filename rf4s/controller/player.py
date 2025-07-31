@@ -269,7 +269,8 @@ class Player:
                 self.tackle.sink()
             skip_cast = False
 
-            perform_technique()
+            if not self.detection.is_fish_hooked():
+                perform_technique()
             self.retrieve_line()
             self.pull_fish()
 
