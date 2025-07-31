@@ -42,7 +42,8 @@ WEAR_TEXT_UPDATE_DELAY = 2
 LOWER_TACKLE_DELAY = 4
 BAD_CAST_DELAY = 1
 CLICK_LOCK_DURATION = 2.2
-RETRIEVAL_FINISH_DELAY = 4
+SPOOL_RETRIEVAL_DELAY = 4
+RAINBOW_RETRIEVAL_DELAY = 1
 
 TROLLING_KEY = "j"
 LEFT_KEY = "a"
@@ -528,7 +529,9 @@ class Player:
                         break
                 self._retrieve_fish()
         if self.cfg.ARGS.RAINBOW is None:
-            sleep(RETRIEVAL_FINISH_DELAY)
+            sleep(SPOOL_RETRIEVAL_DELAY)
+        elif self.cfg.ARGS.RAINBOW == 5:
+            sleep(RAINBOW_RETRIEVAL_DELAY)
 
     def _retrieve_fish(self):
         self.save_bite_screenshot()
