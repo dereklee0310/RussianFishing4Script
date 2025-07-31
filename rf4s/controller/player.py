@@ -145,10 +145,8 @@ class Player:
     @contextmanager
     def hold_keys(self, mouse, shift):
         if mouse and not self.mouse_pressed:
-            print("mouse 1")
             self.hold_down_left_mouse_button()
         if not mouse and self.mouse_pressed:
-            print("mouse 2")
             self.release_left_mouse_button()
 
         if shift and not self.shift_pressed:
