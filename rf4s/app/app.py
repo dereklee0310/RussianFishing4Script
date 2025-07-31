@@ -134,7 +134,7 @@ class BotApp(App):
         utils.print_hint_box(
             "The reel must be fully loaded, or consider using the -R option with rainbow line equipped."
         )
-        utils.print_usage_box(f"Press {self.cfg.KEY.QUIT} to quit.")
+        utils.print_usage_box(f"Press {self.cfg.KEY.PAUSE} to pause, {self.cfg.KEY.QUIT} to quit.")
 
         self.result = BotResult()
         self.window = Window()
