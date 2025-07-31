@@ -319,7 +319,9 @@ _C.PROFILE.BOTTOM.RANDOM_ROD_SELECTION = True
 # ---------------------------------------------------------------------------- #
 _C.PROFILE.PIRK = CN()
 # Profile description (optional)
-_C.PROFILE.PIRK.DESCRIPTION = "Default marine fishing, strong pirking at the bottom layer."
+_C.PROFILE.PIRK.DESCRIPTION = (
+    "Default marine fishing, strong pirking at the bottom layer."
+)
 # Profile-level launch options that will be merged with the global BOT.LAUNCH_OPTIONS
 _C.PROFILE.PIRK.LAUNCH_OPTIONS = ""
 # Fishing mode
@@ -436,9 +438,7 @@ _C.PROFILE.ELEVATOR.HOOK_DELAY = 0.0
 _C.PROFILE.ELEVATOR.POST_ACCELERATION = True
 
 _C.PROFILE.ELEVATOR_WITH_DROP = CN()
-_C.PROFILE.ELEVATOR_WITH_DROP.DESCRIPTION = (
-    "Marine fishing, elevator pirking, lock/unlock the reel to drop the lure after timed out."
-)
+_C.PROFILE.ELEVATOR_WITH_DROP.DESCRIPTION = "Marine fishing, elevator pirking, lock/unlock the reel to drop the lure after timed out."
 _C.PROFILE.ELEVATOR_WITH_DROP.LAUNCH_OPTIONS = ""
 _C.PROFILE.ELEVATOR_WITH_DROP.MODE = "elevator"
 _C.PROFILE.ELEVATOR_WITH_DROP.CAST_POWER_LEVEL = 1.0
@@ -457,7 +457,9 @@ _C.PROFILE.ELEVATOR_WITH_DROP.POST_ACCELERATION = True
 # ---------------------------------------------------------------------------- #
 _C.PROFILE.TELESCOPIC = CN()
 # Profile description (optional)
-_C.PROFILE.TELESCOPIC.DESCRIPTION = "Default float fishing, still water, telescopic rod."
+_C.PROFILE.TELESCOPIC.DESCRIPTION = (
+    "Default float fishing, still water, telescopic rod."
+)
 # Profile-level launch options that will be merged with the global BOT.LAUNCH_OPTIONS
 _C.PROFILE.TELESCOPIC.LAUNCH_OPTIONS = ""
 # Fishing mode
@@ -483,7 +485,9 @@ _C.PROFILE.TELESCOPIC.CAMERA_SHAPE = "square"
 
 _C.PROFILE.BOLOGNESE = CN()
 # Profile description (optional)
-_C.PROFILE.BOLOGNESE.DESCRIPTION = "Default float fishing, flowing water, bolognese rod."
+_C.PROFILE.BOLOGNESE.DESCRIPTION = (
+    "Default float fishing, flowing water, bolognese rod."
+)
 # Profile-level launch options that will be merged with the global BOT.LAUNCH_OPTIONS
 _C.PROFILE.BOLOGNESE.LAUNCH_OPTIONS = ""
 # Fishing mode

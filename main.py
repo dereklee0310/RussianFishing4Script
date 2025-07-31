@@ -415,7 +415,9 @@ def get_language():
 
 
 def get_click_lock():
-    utils.print_usage_box("Is Windows Mouse ClickLock enabled? [(1) yes (2) no (3) q (quit)]")
+    utils.print_usage_box(
+        "Is Windows Mouse ClickLock enabled? [(1) yes (2) no (3) q (quit)]"
+    )
     while True:
         user_input = input(">>> ")
         if user_input.isdigit() and user_input in ("1", "2"):
@@ -441,13 +443,13 @@ def setup_cfg():
                 if line.startswith("  CLICK_LOCK"):
                     lines[i] = f"  CLICK_LOCK: {click_lock}\n"
 
-        with open(config_path, "w") as file: # shutil.copy
+        with open(config_path, "w") as file:  # shutil.copy
             file.writelines(lines)
 
     cfg = config.load_cfg()
     if cfg.VERSION < "0.5.3":
         logger.critical("Incompatible config version, please delete it and try again")
-        sys.exit()
+        utils.safe_exit()
     return cfg
 
 
@@ -498,3 +500,4 @@ if __name__ == "__main__":
         main()
     except Exception as e:
         logger.critical(e, exc_info=True)
+        utils.safe_exit()

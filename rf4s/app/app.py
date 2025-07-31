@@ -167,12 +167,12 @@ class BotApp(App):
                 "For Gmail users, please refer to: "
                 "https://support.google.com/accounts/answer/185833\n"
             )
-            sys.exit()
+            utils.safe_exit()
         except (TimeoutError, gaierror):
             logger.critical(
                 "Invalid BOT.NOTIFICATION.SMTP_SERVER or connection timed out"
             )
-            sys.exit()
+            utils.safe_exit()
 
     def validate_discord(self) -> None:
         if not self.cfg.ARGS.DISCORD or self.cfg.BOT.NOTIFICATION.DISCORD_WEBHOOK_URL:
@@ -182,13 +182,13 @@ class BotApp(App):
             "To make a webhook, please refer to "
             "https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks"
         )
-        sys.exit()
+        utils.safe_exit()
 
     def validate_miaotixing(self) -> None:
         if not self.cfg.ARGS.MIAOTIXING or self.cfg.BOT.NOTIFICATION.MIAO_CODE:
             return
         logger.critical("BOT.NOTIFICATION.MIAO_CODE is not set.")
-        sys.exit()
+        utils.safe_exit()
 
     def validate_telegram(self):
         def _is_telegram_bot_valid():
@@ -213,7 +213,7 @@ class BotApp(App):
                 "Please refer to: "
                 "https://gist.github.com/nafiesl/4ad622f344cd1dc3bb1ecbe468ff9f8a",
             )
-            sys.exit()
+            utils.safe_exit()
 
     def validate_profile(self, profile_name: str) -> None:
         """Check if a profile configuration is valid and complete.
@@ -223,12 +223,12 @@ class BotApp(App):
         """
         if profile_name not in self.cfg.PROFILE:
             logger.critical("Invalid profile name: '%s'", profile_name)
-            sys.exit()
+            utils.safe_exit()
 
         mode = self.cfg.PROFILE[profile_name].MODE
         if mode.upper() not in self.cfg.PROFILE:
             logger.critical("Invalid mode: '%s'", mode)
-            sys.exit()
+            utils.safe_exit()
 
         expected_keys = set(self.cfg.PROFILE[mode.upper()])
         actual_keys = set(self.cfg.PROFILE[profile_name])
@@ -328,7 +328,7 @@ class BotApp(App):
         window_resolution = self.window.get_resolution_str()
         if window_resolution == "0x0":
             logger.critical("'Fullscreen mode' is not supported")
-            sys.exit()
+            utils.safe_exit()
 
         if self.cfg.PROFILE.MODE in ("telescopic", "bolognese"):
             logger.critical(
@@ -336,7 +336,7 @@ class BotApp(App):
                 self.cfg.PROFILE.MODE,
                 self.window.get_resolution_str(),
             )
-            sys.exit()
+            utils.safe_exit()
 
         logger.warning(
             "Unsupported window size '%s'\n"
@@ -976,7 +976,7 @@ class FrictionBrakeApp(App):
 
         self.window = Window()
         if not self.is_game_window_valid():
-            sys.exit()
+            utils.safe_exit()
 
         self.detection = Detection(self.cfg, self.window)
         self.friction_brake = FrictionBrake(self.cfg, Lock(), self.detection)
