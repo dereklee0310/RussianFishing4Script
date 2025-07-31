@@ -48,6 +48,8 @@
 - fix coffee limit behaviour
 - add sink time logging
 - add table save for -d
+- add new config
+- add random tea carrot
 
 ## 0.5.3 (2025-06-21)
 

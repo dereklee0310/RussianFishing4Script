@@ -340,14 +340,16 @@ class Player:
             return
 
         logger.info("Refilling player stats")
+        item1, item2 = ("tea", "carrot") if random.random() < 0.5 else ("tea", "carrot")
+
         with self.hold_keys(mouse=False, shift=False):
             # Comfort is affected by weather, add a check to avoid over drink
             if self.detection.is_comfort_low() and self.timer.is_tea_drinkable():
-                self._use_item("tea")
+                self._use_item(item1)
                 self.result.tea += 1
 
             if self.detection.is_hunger_low():
-                self._use_item("carrot")
+                self._use_item(item2)
                 self.result.carrot += 1
 
     def _drink_alcohol(self) -> None:
@@ -817,7 +819,9 @@ class Player:
             while self.detection.is_gift_receieved():
                 if self.cfg.ARGS.SCREENSHOT:
                     filepath = (
-                        OUTER_ROOT / "screenshots" / f"{self.timer.get_cur_timestamp()}.png"
+                        OUTER_ROOT
+                        / "screenshots"
+                        / f"{self.timer.get_cur_timestamp()}.png"
                     )
                     self.detection.window.save_screenshot(filepath)
                     send_screenshot(self.cfg, filepath)
@@ -852,7 +856,9 @@ class Player:
         if self.cfg.ARGS.SCREENSHOT and (
             (not self.cfg.BOT.KEEPNET.SCREENSHOT_TAGS or screenshot) or card
         ):
-            filepath = OUTER_ROOT / "screenshots" / f"{self.timer.get_cur_timestamp()}.png"
+            filepath = (
+                OUTER_ROOT / "screenshots" / f"{self.timer.get_cur_timestamp()}.png"
+            )
             self.detection.window.save_screenshot(filepath)
             send_screenshot(self.cfg, filepath)
 
