@@ -569,8 +569,7 @@ class Player:
                 with self.error_handler():
                     self.tackle.pull()
                     break
-        with self.hold_keys(mouse=False, shift=False):
-            self.handle_fish()
+        self.handle_fish()
 
     def _put_down_tackle(self, check_miss_counts: list[int]) -> None:
         """Put down the tackle and wait for a while.

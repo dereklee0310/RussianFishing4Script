@@ -7,6 +7,7 @@ python -m nuitka ^
   --standalone ^
   --onefile ^
   --mingw64 ^
+  --enable-plugin=tk-inter ^
   --include-data-dir=static=static ^
   --include-data-files=rf4s/config/config.yaml=rf4s/config/config.yaml
 
