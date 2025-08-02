@@ -15,6 +15,14 @@
 <a target="_blank" href="http://makeapullrequest.com" style="background:none">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat" style="height: 22px;" />
 </a>
+</a>
+<a target="_blank" href="https://www.python.org/downloads/" style="background:none">
+    <img src="https://img.shields.io/badge/python-3.10_%7C_3.11_%7C_3.12-blue
+    " style="height: 22px;" />
+</a>
+<a target="_blank" href="https://github.com/astral-sh/ruff" style="background:none">
+    <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
+    " style="height: 22px;" />
 <!-- <a target="_blank" href="https://github.com/pylint-dev/pylint" style="background:none">
     <img src="https://img.shields.io/badge/linting-pylint-yellowgreen" style="height: 22px;" />
 </a> -->
@@ -25,93 +33,86 @@
     <img src="https://img.shields.io/badge/docs-%23BE1B55" style="height: 22px;" />
 </a> -->  
 
-![Python badge][python_badge]
-![Windows badge][windows_badge]
-
 </div>
 
 > [!TIP]
 > Join our [Discord server][discord] if you want to suggest new features, report bugs or get help on how to use the script.
 
 
-## Getting Started
-### Prerequisites
-**[Python 3.12.*][python]** is required if you want to run the Python code instead of the executable file.
+## Installation
 > [!WARNING] 
-> Python 3.13+ are not supported.
-
-### Installation
-#### Executable File
-Download `rf4s.zip` from [Releases][releases] and unzip it.  
-#### pip
+> The download path cannot contain non-English characters.
+### Executable File
+Download `rf4s.zip` from [Releases][releases].  
+### pip
 ```
 git clone https://github.com/dereklee0310/RussianFishing4Script.git
 cd RussianFishing4Script
-python -m pip install -r requirements.txt
+pip install -r requirements.txt
 ```
-#### uv
+> [!IMPORTANT] 
+> Python 3.13+ is not supported, required versions: >=3.10,<=3.12.
+
+### uv
 ```
 git clone https://github.com/dereklee0310/RussianFishing4Script.git
 cd RussianFishing4Script
 uv sync
 ```
 
-> [!WARNING] 
-> The download path cannot contain non-English characters.
+## Settings
+### Windows Mouse ClickLock
+If Windows Mouse ClickLock is enabled, set the time to long.  
 
-### Environment Setup
-#### Language
-- Confirm your game language matches the language setting in `config.yaml` ("en" by default).
-#### Display
-- Set both system and in-game interface scales to "1x".
-- Set game window mode to "window mode" or "borderless windowed".
-#### Spool Detection
-- By default, the bot monitors the spool (red box) to detect retrieval progress.  
-  Ensure the spool is fully loaded with fishing line for accurate detection of retrieval completion.
-- If using a rainbow line, enable the `-R` flag to switch detection to the meter (green box) for better precision.
-- Please refer to **[CONFIGURATION][configuration]** to see how to use it.
+![click_lock]
+### Display
+Set both system and in-game interface scales to "1x", and use "window mode" or "borderless windowed" for game window mode.
+### Spool Detection
+By default, the bot monitors the spool (red box) to detect retrieval progress.  
+Ensure the spool is fully loaded with fishing line for accurate detection of retrieval completion.  
+If using a rainbow line, enable the `-R` flag to switch detection to the meter (green box) for better precision.  
+Please refer to **[CONFIGURATION][configuration]** to see how to use it.  
 
 ![status]
 
 ## Usage
-### Before you start...
-#### Bottom Mode
+### Bottom fishing
 Add your rods to quick selection slots, cast and place them nearby so the bot can access them via shortcuts (1 ~ 3).
-#### Other Modes 
+### Spin, marine, telescopic, etc.
 Pick up the rod you want to use.
 > [!NOTE]
 > Currently, only bottom mode support multiple rods.
-
-### Let's Run it!
-#### Executable File
-Double-click the executable file to run it.
-#### Python Interpreter (for developer)
+### Executable File
+Double-click to run it, or:
 ```
-cd "path\to\the\project"
+.\main.exe
+```
+### Python
+```
 python main.py
 ```
-#### uv
+### uv
 ```
-cd "path\to\the\project"
-uv main.py
+uv run main.py
 ```
 > [!TIP]
 > See **[CONFIGURATION][configuration]** for advanced usage and configuration options.
 
 ## Features
-| Feature                  | Functionality                                            |
+| Feature                  | Description                                              |
 | ------------------------ | -------------------------------------------------------- |
-| Fishing Bot              | Main script                                              |
+| Fishing Bot              | Auto fishing bot                                         |
+| Craft Items              | Craft baits, groundbaits, lures, etc                     |
+| Moving Forward           | Toggle `W` (or `Shift + W` for sprinting)                |
 | Harvest Baits            | Stay idle and harvest baits automatically                |
-| Toggle Moving Forward    | Automatically presses `W` (or `Shift + W` for sprinting) |
-| Automate Friction Brake  | Adjust the friction brake automatically                  |
-<!-- | Calculate Tackle's Stats | Calculate the real drag or load capacity of the loadout  | -->
+| Auto Friction Brake      | Adjust the friction brake automatically                  |
+| Calculate Tackle's Stats | Calculate the tackle's stats and friction brake to use   |
 
 ## Troubleshooting
 <details>
-<summary>How to stop the script?</summary>
+<summary>Windows Defender detect it as a malware?</summary>
 
-- Type `Ctrl-C` in your terminal. 
+- It's a false postive, see [this][malware]. 
 </details>
 <!-- ------------------------------- divide -------------------------------- -->
 <details>
@@ -134,14 +135,14 @@ uv main.py
 
 - Make sure your reel is fully loaded, or equip a rainbow line and use `-R` flag. 
 - Resize the game window.
-- Reduce the value of `SPOOL_CONFIDENCE` in `config.yaml`.
+- Reduce the value of `BOT.SPOOL_CONFIDENCE` in `config.yaml`.
 - Avoid bright light sources (e.g., direct sunlight) or turn off the boat’s onboard lights.
 </details>
 <!-- ------------------------------- divide -------------------------------- -->
 <details>
-<summary>Script is running but nothing happen?</summary>
+<summary>Bot is running but nothing happen?</summary>
 
-- Run the script as administrator.
+- Run it as administrator.
 </details>
 <!-- ------------------------------- divide -------------------------------- -->
 
@@ -161,6 +162,8 @@ dereklee0310@gmail.com
 [rf4s_logo]: /static/readme/RF4S.png
 [python_badge]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
 [windows_badge]: https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white
+[click_lock]: /static/readme/clicklock.png
+[malware]: https://nuitka.net/user-documentation/common-issue-solutions.html#windows-virus-scanners
 
 [discord]: https://discord.gg/BZQWQnAMbY
 [python]: https://www.python.org/downloads/

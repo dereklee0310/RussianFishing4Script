@@ -1,10 +1,10 @@
 **[[English version]][readme]**
 <div align="center">
 
-![rf4s_logo]
-<h1 align="center">RF4S: 俄羅斯釣魚4腳本</h1>
+![RF4S][rf4s_logo]
+<h1 align="center">RF4S：Russian Fishing 4 Script</h1>
 
-**俄羅斯釣魚4自動釣魚機器人，支援紡車、底釣、海釣、維基釣組及手竿等模式。**
+**俄羅斯釣魚4自動釣魚機器人，支援路亞、水底、海釣、維基釣組及手竿等模式。**
 
 <a target="_blank" href="https://opensource.org/license/gpl-3-0" style="background:none">
     <img src="https://img.shields.io/badge/License-GPLv3-blue.svg" style="height: 22px;" />
@@ -15,41 +15,36 @@
 <a target="_blank" href="http://makeapullrequest.com" style="background:none">
     <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat" style="height: 22px;" />
 </a>
-<!-- <a target="_blank" href="https://github.com/pylint-dev/pylint" style="background:none">
-    <img src="https://img.shields.io/badge/代碼檢查-pylint-yellowgreen" style="height: 22px;" />
 </a>
-<a target="_blank" href="https://github.com/psf/black" style="background:none">
-    <img src="https://img.shields.io/badge/代碼風格-black-000000.svg" style="height: 22px;" />
-</a> -->
-<!-- <a target="_blank" href="link_to_docs, tbd" style="background:none">
-    <img src="https://img.shields.io/badge/文件-%23BE1B55" style="height: 22px;" />
-</a> -->  
+<a target="_blank" href="https://www.python.org/downloads/" style="background:none">
+    <img src="https://img.shields.io/badge/python-3.10_%7C_3.11_%7C_3.12-blue
+    " style="height: 22px;" />
+</a>
+<a target="_blank" href="https://github.com/astral-sh/ruff" style="background:none">
+    <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
+    " style="height: 22px;" />
 
-![Python 標章][python_badge]
-![Windows 標章][windows_badge]
 
 </div>
 
 > [!TIP]
-> 若需建議新功能、回報錯誤或取得使用幫助，請加入我們的 [Discord 伺服器][discord]。
+> 如果您想建議新功能、回報錯誤或尋求使用幫助，請加入我們的 [Discord 伺服器][discord]。
 
 
-## 快速開始
-### 環境需求
-**[Python 3.12.*][python]** (若需直接執行原始碼而非可執行檔)。
+## 安裝
 > [!WARNING] 
-> 不支援 Python 3.13 以上版本。
-
-### 安裝
-#### 可執行檔
-從 [Releases][releases] 下載 `rf4s.zip` 並解壓縮。
-#### pip
+> 下載路徑不能包含非英文字符。
+### 可執行檔
+從 [Releases][releases] 下載 `rf4s.zip`。  
+### pip
 ```
 git clone https://github.com/dereklee0310/RussianFishing4Script.git
 cd RussianFishing4Script
-python -m pip install -r requirements.txt
+pip install -r requirements.txt
 ```
-#### uv
+> [!IMPORTANT] 
+> 不支援 Python 3.13+，支援版本：>=3.10, <=3.12。
+### uv
 ```
 git clone https://github.com/dereklee0310/RussianFishing4Script.git
 cd RussianFishing4Script
@@ -58,112 +53,117 @@ uv sync
 > [!WARNING] 
 > 路徑不可包含非英文字符。
 
-### 環境設定
-#### 語言
-- 確認遊戲語言與 `config.yaml` 中的設定一致（預設為 "en"）。
-#### 顯示設定
-- 系統與遊戲介面縮放比例皆設為 "1x"。
-- 遊戲視窗模式設為「視窗化」或「無邊框視窗。
-#### 線杯偵測
-- 預設透過線杯（紅框區域）偵測收線進度，請確保線杯已裝滿線以獲得準確偵測結果。
-- 若使用彩虹線，請啟用 `-R` 參數切換至儀表板（綠框區域）偵測模式。
-- 啟動參數說明詳見 **[配置說明][configuration]**。
+
+## 設定
+### Windows 滑鼠按住鎖定
+若啟用了 Windows 滑鼠按住鎖定功能，請將時間設定為長。
+
+![click_lock]
+### 顯示設定
+請將系統與遊戲內的介面縮放比例都設定為「1x」，並使用「視窗模式」或「無邊框視窗模式」作為遊戲視窗模式。
+### 線軸偵測
+預設情況下，機器人會監控線軸（紅框）以偵測收線進度。  
+請確保線軸已完全纏繞釣線，以精確判斷收線完成。  
+若您使用彩虹線，請啟用 `-R` 參數，切換至儀表（綠框）進行偵測，以獲得更佳精度。  
+詳情請參閱 **[CONFIGURATION][configuration]** 了解如何使用。
 
 ![status]
 
 ## 使用方式
-### 開始前準備...
-#### 底釣模式
-將釣竿加入快速選擇欄位，並在拋竿後置於附近，確保腳本能透過快捷鍵 (1~3) 操作。
-#### 其他模式
-拿起要使用的釣竿即可。
+### 水底
+將您的釣竿加入快速選擇欄位，拋投並放置在附近，以便機器人能透過快捷鍵（1～3）存取。  
+### 路亞、海釣、手竿等
+拿起您想使用的釣竿。
 > [!NOTE]
-> 目前僅底釣模式支援多竿操作。
+> 目前僅水底模式支援多根釣竿。
 
-### 開始執行！
-#### 可執行檔
-雙擊執行檔即可運行
-#### Python 直譯器
+### 可執行檔
+雙擊執行，或使用：
 ```
-cd "專案路徑"
+.\main.exe
+```
+#### Python
+```
 python main.py
 ```
-#### uv
+### uv
 ```
 cd "專案路徑"
-python main.py
+uv run main.py
 ```
 
 > [!TIP]
-> 進階用法請參閱 **[配置說明][configuration]**
+> 請參閱 **[CONFIGURATION][configuration]** 以了解進階使用與設定選項。
 
-## 功能列表
-| 功能         | 說明                           |
-| ------------ | ------------------------------ |
-| 釣魚機器人   | 主腳本                         |
-| 自動挖餌     | 閒置並自動挖餌                 |
-| 自動前進     | 自動按 `W` (或 `Shift+W` 衝刺) |
-| 自動摩擦     | 自動調整摩擦                   |
-<!-- | 釣具參數計算 | 計算釣組實際拉力/負載          | -->
+## 功能
+| 功能                     | 說明                                              |
+| ------------------------ | ------------------------------------------------ |
+| 釣魚機器人               | 自動釣魚機器人                                     |
+| 製作物品                 | 自動製作餌料、誘餌、假餌等                         |
+| 向前移動                 | 切換按下 `W`（或 `Shift + W` 快速前進）            |
+| 自動挖餌                 | 掛機並自動採集餌料                                 |
+| 自動調整摩擦             | 自動調整捲線器的摩擦                               |
+| 計算釣具屬性             | 計算釣具的屬性與建議使用的摩擦                     |
 
-## 疑難排解
+## 常見問題排除
 <details>
-<summary>如何停止腳本？</summary>
+<summary>Windows Defender 將其偵測為惡意軟體？</summary>
 
-- 在終端機輸入 `Ctrl-C`。
+- 屬於誤判，請見 [此處][malware]。 
 </details>
-<!-- ------------------------------- 分隔線 -------------------------------- -->
+
 <details>
 <summary>無法停止腳本？</summary>
 
-- 可能因部分按鍵處於按下狀態 (如 `Ctrl`, `Shift`, 滑鼠按鍵等)，  
-  重新按下對應按鍵釋放後，再輸入 `Ctrl-C`。
+- 可能某些按鍵仍處於按下狀態（例如 `Ctrl`、`Shift`、滑鼠按鈕等）。  
+  請再次按下這些按鍵以釋放，然後正常輸入 `Ctrl-C` 即可。
 </details>
-<!-- ------------------------------- 分隔線 -------------------------------- -->
-<details>
-<summary>拋竿卡在 12x%？</summary>
 
-- 確認遊戲語言與腳本設定一致。
-- 確保線杯已裝滿線，或使用彩虹線並啟用 `-R` 參數。
+<details>
+<summary>卡在拋投 12x%？</summary>
+
+- 請確認遊戲語言與腳本語言設定相同。
+- 確保您的捲線器已完全纏繞釣線，或裝備彩虹線並使用 `-R` 參數。 
 </details>
-<!-- ------------------------------- 分隔線 -------------------------------- -->
-<details>
-<summary>收線完成後未提竿？</summary>
 
-- 確保線杯已裝滿線，或使用彩虹線並啟用 `-R` 參數。
+<details>
+<summary>收線完成後未舉竿？</summary>
+
+- 確保您的捲線器已完全纏繞釣線，或裝備彩虹線並使用 `-R` 參數。 
 - 調整遊戲視窗大小。
-- 降低 `config.yaml` 中的 `SPOOL_CONFIDENCE` 數值。
-- 避免強光源直射（如陽光直射）或關閉船燈。
+- 降低 `config.yaml` 中 `BOT.SPOOL_CONFIDENCE` 的數值。
+- 避免強光來源（如陽光直射）或關閉船上燈光。
 </details>
-<!-- ------------------------------- 分隔線 -------------------------------- -->
-<details>
-<summary>腳本運行但無反應？</summary>
 
-- 以系統管理員身分執行腳本。
+<details>
+<summary>機器人正在運行但無反應？</summary>
+
+- 請以系統管理員身分執行。
 </details>
-<!-- ------------------------------- 分隔線 -------------------------------- -->
 
 ## 更新日誌
-詳見 **[更新日誌][changelog]**。
+詳見 **[CHANGELOG][changelog]**。
 
 ## 授權條款
 **[GNU General Public License version 3][license]**
 
-## 貢獻指南
-歡迎提交任何功能建議、錯誤回報或新功能構想。
+## 貢獻
+歡迎任何形式的貢獻、錯誤回報或新功能建議。
 
-## 聯絡方式
+## 聯絡我
 dereklee0310@gmail.com 
 
-[readme]: /README.md
+[readme]: /docs/zh-TW/README.md
 [rf4s_logo]: /static/readme/RF4S.png
 [python_badge]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
 [windows_badge]: https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white
+[click_lock]: /static/readme/clicklock.png
+[malware]: https://nuitka.net/user-documentation/common-issue-solutions.html#windows-virus-scanners
 
-[discord]: https://discord.gg/BZQWQnAMbY
-[python]: https://www.python.org/downloads/
-[releases]: https://github.com/dereklee0310/RussianFishing4Script/releases
+[discord]: https://discord.gg/BZQWQnAMbY  
+[python]: https://www.python.org/downloads/  
+[releases]: https://github.com/dereklee0310/RussianFishing4Script/releases  
 [status]: /static/readme/status.png
-[configuration]: /docs/zh-TW/CONFIGURATION.md
-[changelog]: /docs/zh-TW/CHANGELOG.md
+[configuration]: /docs/en/CONFIGURATION.md
+[changelog]: /docs/en/CHANGELOG.md
 [license]: /LICENSE
