@@ -153,7 +153,7 @@ uv run main.py
 ## 聯絡我
 dereklee0310@gmail.com 
 
-[readme]: /docs/zh-TW/README.md
+[readme]: /README.md
 [rf4s_logo]: /static/readme/RF4S.png
 [python_badge]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
 [windows_badge]: https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white

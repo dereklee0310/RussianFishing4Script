@@ -1,344 +1,108 @@
 **[[English version]][configuration]**
-## 使用啟動參數  
-可通過啟動參數啟用一項或多項功能。  
+## 啟動選項
+你可以使用啟動選項在程式啟動時啟用一項或多項功能。
+### 執行檔
+```
+.\main.exe ...
+```
+### Python
+```
+python main.py ...
+```
+### uv
+```
+uv run main.py ...
+```
+> [!NOTE]
+> 如果未提供任何啟動選項，或透過雙擊執行，你可以在選擇要使用的功能後再輸入。
+>
+> ![啟動選項][launch_options]
 
-### 顯示幫助信息
-#### 可執行檔
+### 範例（執行檔）
+#### 使用「釣魚機器人」並設定護網中的魚數量為 32（需捕獲 68 條魚）：
 ```
-cd "專案路徑"
-.\main.exe -h
+.\main.exe bot -n 32
 ```
-#### Python 原始碼 (開發者適用)
+#### 使用「釣魚機器人」，選擇第 3 個設定檔，釣魚時飲用咖啡，並在停止時寄送電子郵件通知自己：
 ```
-cd "專案路徑"
-python tools\main.py -h
+.\main.exe bot -p 3 -c --email
 ```
+#### 使用「釣魚機器人」，消耗胡蘿蔔、茶與咖啡來補充角色狀態，並在拋竿前盡可能採集餌料：
+```
+.\main.exe bot -rcH
+```
+#### 使用「製作物品」功能來製作 10 個物品：
+```
+.\main.exe craft -n 10
+```
+#### 使用「計算釣具屬性」功能：
+```
+.\main.exe cal
+```
+
+
 > [!TIP]
-> `專案路徑`為解壓縮後的資料夾路徑.  
-> ![path]
+> 使用 `-h` 可查看幫助訊息。
 
-### 幫助信息說明  
+> [!IMPORTANT]
+> 若想使用 `-r` 或 `-c` 選項，請務必先將茶、胡蘿蔔／咖啡加入你的 **[最愛食物][favorite_food]**。  
+> 若要使用會自動替換物品的選項，也需將相關物品加入你的 **[最愛餌料][favorite_lure]**。
+
+## 設定配置
+### 設定修改
+請在 [`config.yaml`][config.yaml] 中編輯你的設定，重新啟動後變更才會生效。  
+設定參考請見 [`default.py`][default.py]。
+
+### 新增設定檔
+複製預設設定檔中的現有設定檔，進行編輯後，加入 `PROFILE` 區段中。
+
+以下範例新增一個名為 `MY_BOTTOM_FISHING` 的設定檔，重新啟動後將會出現在設定檔清單中：
+```yaml
+PROFILE:
+  BOTTOM:
+    DESCRIPTION: "預設底釣模式。"
+    LAUNCH_OPTIONS: ""
+    MODE: "bottom"
+    CAST_POWER_LEVEL: 5.0
+    CAST_DELAY: 4.0
+    POST_ACCELERATION: false
+    CHECK_DELAY: 16.0
+    CHECK_MISS_LIMIT: 16
+    PUT_DOWN_DELAY: 2.0
+    RANDOM_ROD_SELECTION: true
+            .
+            .
+            .
+  MY_BOTTOM_FISHING:
+    DESCRIPTION: "我的底釣模式。"
+    LAUNCH_OPTIONS: "-rctdDR"
+    MODE: "bottom"
+    CAST_POWER_LEVEL: 5.0
+    CAST_DELAY: 4.0
+    POST_ACCELERATION: false
+    CHECK_DELAY: 16.0
+    CHECK_MISS_LIMIT: 64
+    PUT_DOWN_DELAY: 4.0
+    RANDOM_ROD_SELECTION: false
 ```
-usage: main.py [-h] [-R] [-t] [-c] [-a] [-r] [-H] [-L] [-m] [-P] [-RC] [-SC] [-l] [-e] [-FB] [-GR] [-b] [-s] [-d] [-E]
-               [-M] [-D] [-S] [-SO] [-SR] [-DM] [-GB] [-PVA] [-p PID | -N PROFILE_NAME] [-n FISH_COUNT]
-               [-BT [DURATION]] [-T [DIRECTION]] [-BL [ACTION]]
-               [opts ...]
-
-啟動《俄羅斯釣魚4》自動腳本
-
-位置參數:
-  opts                  覆寫配置文件參數
-
-選項:
-  -h, --help            顯示幫助訊息
-  -R, --rainbow         使用彩虹線計量器偵測收線
-  -t, --tag             僅保留已標記的魚
-  -c, --coffee          體力不足時飲用咖啡恢復體力
-  -a, --alcohol         在保存魚之前飲酒
-  -r, --refill          當飢餓或舒適度過低時自動補充茶與胡蘿蔔
-  -H, --harvest         拋竿前自動收餌
-  -L, --lure            定期隨機更換擬餌（僅限路亞模式）
-  -m, --mouse           拋竿前隨機移動滑鼠
-  -P, --pause           偶爾暫停腳本運行
-  -RC, --random-cast    隨機添加額外拋竿動作
-  -SC, --skip-cast      跳過首次拋竿直接開始收線
-  -l, --lift            遛魚時持續提竿以節省時間
-  -e, --electro         為Electro Raptor系列捲線器啟用電動模式
-  -FB, --friction-brake 啟用自動摩擦調整
-  -GR, --gear-ratio     收線超時後切換齒輪比
-  -b, --bite            拋竿前截圖保存至 screenshots/（可用於分析咬鉤點）
-  -s, --screenshot      捕獲魚隻後自動截圖保存
-  -d, --data            在/logs目錄保存釣魚數據
-  -E, --email           腳本停止後發送郵件通知
-  -M, --miaotixing      腳本停止後發送喵提醒通知
-  -D, --discord         腳本停止後發送Discord通知
-  -S, --shutdown        腳本結束後關閉電腦
-  -SO, --signout        退出遊戲而非關機
-  -SR, --spod-rod       定期重拋餌料竿（底釣模式）
-  -DM, --dry-mix        補充乾混合餌（底釣模式）
-  -GB, --groundbait     補充底餌（底釣模式）
-  -PVA, --pva           補充PVA餌（底釣模式）
-  -p PID, --pid PID     指定配置檔ID
-  -N PROFILE_NAME, --pname PROFILE_NAME
-                        指定配置檔名稱
-  -n FISH_COUNT, --fishes-in-keepnet FISH_COUNT
-                        魚護當前魚量（預設為0）
-  -BT [DURATION], --boat-ticket [DURATION]
-                        自動續費船票，時長：1, 2, 3或5小時（預設5小時）
-  -T [DIRECTION], --trolling [DIRECTION]
-                        啟用拖釣模式，方向：'forward','left','right'（預設按'j'前進）
-  -BL [ACTION], --broken-lure [ACTION]
-                        斷餌自動處理，操作：'replace'或'alarm'（預設更換）
-``` 
 
 > [!IMPORTANT]
 > 若需使用 `-r` 或 `-c` 參數，請將茶和胡蘿蔔/咖啡加入 **[收藏物品][favorite_food]**。  
 > 需自動更換物品的功能，請將相關物品加入 **[收藏物品][favorite_lure]**。
 
-### 使用示例  
-**設置魚護當前魚量為32條（需捕獲68條）：**  
+### 覆寫設定  
+有時你可能只想暫時變更 [`config.yaml`][config.yaml] 中的某個設定而不修改設定檔，
+這時可透過啟動選項達成。以下為一個簡單範例，用來覆寫語言設定：
 ```  
-python tools\main.py -n 32  
-```  
-
-**使用3號配置檔，遛魚時飲用咖啡，停止後發送郵件：**  
-```  
-python tools\main.py -p 3 --c --email  
-```  
-
-**自動補充體力/飢餓/舒適度，拋竿前收餌：**  
-```  
-python tools\main.py -rcH  
-```  
-
-**定期重拋餌料竿並補充乾混合餌：**  
-```  
-python tools\main.py -o -dm  
-```  
-
-## 配置文件  
-### 修改設置  
-編輯`config.yaml`後重新運行腳本即可生效。  
-各項參數詳解參見[配置參數說明](#配置參數說明)。  
-
-### 添加新配置檔  
-1. 複製現有配置檔結構  
-2. 修改參數後添加至`PROFILE`段落  
-
-示例添加名為`YOUR_NEW_PROFILE`的路亞配置：  
-```yaml  
-PROFILE:  
-  SPIN:   
-    MODE: "spin"  
-    CAST_POWER_LEVEL: 5.0  
-    CAST_DELAY: 6.0  
-    ...  
-  
-  YOUR_NEW_PROFILE:  
-    MODE: "spin"  
-    CAST_POWER_LEVEL: 5.0  
-    CAST_DELAY: 4.0  # 縮短拋竿延遲  
-    PRE_ACCELERATION: True  # 啟用預加速  
-    ...  
-```  
-
-> [!IMPORTANT]  
-> - 配置檔名稱需唯一  
-> - 嚴格保持縮進格式  
-> - `MODE`需為`spin`/`bottom`/`pirk`/`elevator`/`telescopic`/`bolognese`  
-
-### 臨時覆寫配置  
-無需修改文件，直接通過命令覆寫參數：  
-```  
-python tools\main.py SCRIPT.LANGUAGE "ru"  # 臨時設置腳本語言為俄語  
+.\main.exe LANGUAGE "ru"
 ```  
 
 ### 雙竿拖釣模式  
-組合底釣配置與`-T`參數實現：  
+由於船上拖釣本質上就是按住拖釣鍵與方向鍵的底釣，
+因此你可以將底釣設定檔搭配 -T 參數使用。
+由於船上沒有第三支竿架，你應該像這樣覆寫底釣竿的按鍵設定：  
 ```  
-python tools\main.py -T KEY.BOTTOM_RODS "(1, 2)"  # 指定使用1、2號快捷鍵位  
-```  
-
-
-## 配置參數說明  
-```python  
-"""YACS默認配置節點"""  
-
-from yacs.config import CfgNode as CN  
-
-_C = CN()  
-_C.VERSION = "0.0.0"  
-
-# --------------------------------- 通用設置 -------------------------------- #  
-_C.SCRIPT = CN()  
-_C.SCRIPT.LANGUAGE = "en" # 腳本語言: en/ru/zh-TW/zh-CN  
-_C.SCRIPT.LAUNCH_OPTIONS = ""  # 默認啟動參數，如"-r -c -H"  
-_C.SCRIPT.SMTP_VERIFICATION = True  # SMTP驗證  
-_C.SCRIPT.IMAGE_VERIFICATION = True  # 圖像驗證  
-_C.SCRIPT.SNAG_DETECTION = True  # 掛底檢測  
-_C.SCRIPT.SPOOLING_DETECTION = True  # 線軸檢測  
-_C.SCRIPT.RANDOM_ROD_SELECTION = True  # 底釣隨機選竿  
-_C.SCRIPT.SPOOL_CONFIDENCE = 0.98  # 線軸檢測敏感度（值越低越敏感）  
-_C.SCRIPT.SPOD_ROD_RECAST_DELAY = 1800  # 餌料竿重拋間隔（秒）  
-_C.SCRIPT.LURE_CHANGE_DELAY = 1800  # 擬餌更換間隔（秒）  
-_C.SCRIPT.ALARM_SOUND = "./static/sound/guitar.wav"  # 提示音文件路徑
-_C.SCRIPT.RANDOM_CAST_PROBABILITY = 0.25 # 隨機拋竿失誤的機率
-_C.SCRIPT.SCREENSHOT_TAGS = ( # 魚獲截圖的標記種類，列表為空的話所有的魚都會截圖
-    "green",
-    "yellow",
-    "blue",
-    "purple",
-    "pink"
-)
-
-# --------------------------------- 快捷鍵設置 ------------------------------ #  
-_C.KEY = CN()  
-_C.KEY.TEA = -1  # 茶快捷鍵（-1使用快捷菜單）  
-_C.KEY.CARROT = -1  # 胡蘿蔔快捷鍵  
-_C.KEY.BOTTOM_RODS = (1, 2, 3)  # 底釣竿快捷鍵位  
-_C.KEY.COFFEE = 4  # 咖啡快捷鍵  
-_C.KEY.DIGGING_TOOL = 5  # 挖餌工具快捷鍵  
-_C.KEY.ALCOHOL = 6  # 酒精飲品快捷鍵  
-_C.KEY.MAIN_ROD = 1  # 主釣竿快捷鍵  
-_C.KEY.SPOD_ROD = 7  # 餌料竿快捷鍵  
-_C.KEY.QUIT = "CTRL-C"  # 退出快捷鍵  
-
-# --------------------------------- 角色狀態 -------------------------------- #  
-_C.STAT = CN()  
-_C.STAT.ENERGY_THRESHOLD = 0.74  # 喝咖啡/收餌體力閾值  
-_C.STAT.HUNGER_THRESHOLD = 0.5  # 食用胡蘿蔔飢餓閾值  
-_C.STAT.COMFORT_THRESHOLD = 0.51  # 飲茶舒適度閾值  
-_C.STAT.TEA_DELAY = 300  # 飲茶間隔（秒）  
-_C.STAT.COFFEE_LIMIT = 10  # 單次遛魚最大咖啡飲用量  
-_C.STAT.COFFEE_PER_DRINK = 1  # 單次飲用咖啡量  
-_C.STAT.ALCOHOL_DELAY = 900  # 飲酒間隔（秒）  
-_C.STAT.ALCOHOL_PER_DRINK = 1  # 單次飲酒量  
-
-# ----------------------------- 摩擦剎車設置（需-f參數）----------------------- #  
-_C.FRICTION_BRAKE = CN()  
-_C.FRICTION_BRAKE.INITIAL = 29  # 初始剎車值  
-_C.FRICTION_BRAKE.MAX = 30  # 最大剎車值  
-_C.FRICTION_BRAKE.START_DELAY = 2.0  # 中魚後開始調整延遲（秒）  
-_C.FRICTION_BRAKE.INCREASE_DELAY = 1.0  # 剎車增強間隔  
-_C.FRICTION_BRAKE.SENSITIVITY = "medium"  # 檢測敏感度（low/medium/high）  
-
-# --------------------------------- 魚護設置 -------------------------------- #  
-_C.KEEPNET = CN()  
-_C.KEEPNET.CAPACITY = 100  # 魚護容量  
-_C.KEEPNET.FISH_DELAY = 0.0  # 存魚前延遲（用於截圖）
-_C.KEEPNET.GIFT_DELAY = 4.0  # 接受禮物前延遲（用於截圖）
-_C.KEEPNET.FULL_ACTION = "quit"  # 滿護操作：quit（退出）/alarm（警報）
-# -m模式保留魚種
-# 選項: mackerel, saithe, herring, squid, scallop, mussel, perch, shorthorn_sculpin
-_C.KEEPNET.WHITELIST = (  # -t模式保留魚種  
-    "mackerel", "saithe", "herring",  
-    "squid", "scallop", "mussel"  
-)
-# 魚種黑名單
-# 選項: mackerel, saithe, herring, squid, scallop, mussel, perch, shorthorn_sculpin
-_C.KEEPNET.BLACKLIST = (
-)
-# -t模式保留魚的標記種類
-_C.KEEPNET.TAGS = (
-    "green",
-    "yellow",
-    "blue"
-    "purple",
-    "pink"
-)
-
-# ----------------------------- 通知設置 -------------------------------- #  
-_C.NOTIFICATION = CN()  
-_C.NOTIFICATION.EMAIL = "email@example.com"  # 郵箱地址  
-_C.NOTIFICATION.PASSWORD = "password"  # 郵箱密碼  
-_C.NOTIFICATION.SMTP_SERVER = "smtp.gmail.com"  # SMTP服務器  
-_C.NOTIFICATION.MIAO_CODE = "example"  # 喵提醒識別碼
-_C.NOTIFICATION.DISCORD_WEBHOOK_URL = "" # Discord Webhook 鍊結
-
-# ----------------------------- 暫停設置（需-X參數）------------------------ #  
-_C.PAUSE = CN()  
-_C.PAUSE.DELAY = 1800  # 暫停間隔（秒）  
-_C.PAUSE.DURATION = 600  # 暫停時長（秒）  
-
-# ----------------------------- 配置檔詳解 -------------------------------- #  
-_C.PROFILE = CN()  
-
-## 路亞配置 ##  
-_C.PROFILE.SPIN = CN()  
-_C.PROFILE.SPIN.MODE = "spin"  
-# 用於覆蓋 SCRIPT.LAUNCH_OPTIONS 的啟動參數
-# 若未設置，將使用 SCRIPT.LAUNCH_OPTIONS 作為預設值
-_C.PROFILE.SPIN.LAUNCH_OPTIONS = ""
-_C.PROFILE.SPIN.CAST_POWER_LEVEL = 5.0  # 拋投力度等級（1~5級，5為全力拋投）  
-_C.PROFILE.SPIN.CAST_DELAY = 6.0  # 拋竿後等待時間（秒）  
-_C.PROFILE.SPIN.TIGHTEN_DURATION = 0.0  # 收緊釣線時長（秒）  
-_C.PROFILE.SPIN.RETRIEVAL_DURATION = 0.0  # 收線/提竿持續時間（秒）  
-_C.PROFILE.SPIN.RETRIEVAL_DELAY = 0.0  # 收線後延遲（秒）  
-_C.PROFILE.SPIN.RETRIEVAL_TIMEOUT = 256.0 # 打狀態超時 （秒）
-_C.PROFILE.SPIN.PRE_ACCELERATION = False  # 拋竿前按住Shift（特殊技法）  
-_C.PROFILE.SPIN.POST_ACCELERATION = "off"  # 遛魚時加速模式（on/off/auto）  
-_C.PROFILE.SPIN.TYPE = "normal"  # 操作類型：normal（常規）/pause（停頓）/lift（提拉）  
-
-## 底釣配置 ##  
-_C.PROFILE.BOTTOM = CN()
-# 用於覆蓋 SCRIPT.LAUNCH_OPTIONS 的啟動參數
-# 若未設置，將使用 SCRIPT.LAUNCH_OPTIONS 作為預設值
-_C.PROFILE.BOTTOM.LAUNCH_OPTIONS = ""
-_C.PROFILE.BOTTOM.MODE = "bottom"  
-_C.PROFILE.BOTTOM.CAST_POWER_LEVEL = 5.0  # 拋投力度  
-_C.PROFILE.BOTTOM.CAST_DELAY = 4.0  # 拋竿後等待時間（秒）  
-_C.PROFILE.BOTTOM.POST_ACCELERATION = "off"  # 遛魚加速模式  
-_C.PROFILE.BOTTOM.CHECK_DELAY = 32.0  # 檢查咬口間隔（秒）  
-_C.PROFILE.BOTTOM.CHECK_MISS_LIMIT = 16  # 最大空竿次數後重拋  
-_C.PROFILE.BOTTOM.PUT_DOWN_DELAY = 0.0  # 放下竿子前再次檢查延遲
-
-## 海釣/維基配置（Pirk技法）##  
-_C.PROFILE.PIRK = CN()  
-_C.PROFILE.PIRK.MODE = "pirk"
-# 用於覆蓋 SCRIPT.LAUNCH_OPTIONS 的啟動參數
-# 若未設置，將使用 SCRIPT.LAUNCH_OPTIONS 作為預設值
-_C.PROFILE.PIRK.LAUNCH_OPTIONS = ""
-_C.PROFILE.PIRK.CAST_POWER_LEVEL = 1.0  # 拋投力度（淺拋）  
-_C.PROFILE.PIRK.CAST_DELAY = 4.0  # 拋竿後等待時間（秒）  
-_C.PROFILE.PIRK.SINK_TIMEOUT = 60.0  # 餌沉底超時（秒）  
-_C.PROFILE.PIRK.TIGHTEN_DURATION = 1.0  # 收線緊繃時長（秒）
-_C.PROFILE.PIRK.DEPTH_ADJUST_DELAY = 4.0  # 調整深度延遲（秒）  
-_C.PROFILE.PIRK.DEPTH_ADJUST_DURATION = 1.0 # 調整深度後的收線時長（秒）
-_C.PROFILE.PIRK.CTRL = False  # 抽竿時按住Ctrl
-_C.PROFILE.PIRK.SHIFT = False  # 抽竿時按住Shift
-_C.PROFILE.PIRK.PIRK_DURATION = 0.5  # 抽竿時長（秒）  
-_C.PROFILE.PIRK.PIRK_DELAY = 2.0  # 抽竿後延遲（秒）  
-_C.PROFILE.PIRK.PIRK_TIMEOUT = 32.0  # 抽竿超時（秒）  
-_C.PROFILE.PIRK.PIRK_RETRIEVAL = False  # 抽竿時收線  
-_C.PROFILE.PIRK.HOOK_DELAY = 0.5  # 中魚後檢查延遲（秒）  
-_C.PROFILE.PIRK.POST_ACCELERATION = "auto"  # 遛魚加速模式 
-
-## 升降釣法配置（深海升降釣組）##  
-_C.PROFILE.ELEVATOR = CN()
-_C.PROFILE.ELEVATOR.MODE = "elevator"
-# 用於覆蓋 SCRIPT.LAUNCH_OPTIONS 的啟動參數
-# 若未設置，將使用 SCRIPT.LAUNCH_OPTIONS 作為預設值
-_C.PROFILE.ELEVATOR.LAUNCH_OPTIONS = ""
-_C.PROFILE.ELEVATOR.CAST_POWER_LEVEL = 1.0  # 拋投力度等級（1~5級，1為輕拋）  
-_C.PROFILE.ELEVATOR.CAST_DELAY = 4.0  # 拋竿後等待時間（秒）  
-_C.PROFILE.ELEVATOR.SINK_TIMEOUT = 60.0  # 餌沉底超時（秒）  
-_C.PROFILE.ELEVATOR.TIGHTEN_DURATION = 1.0  # 收緊釣線時長（秒）  
-_C.PROFILE.ELEVATOR.ELEVATE_DURATION = 4.0  # 提升釣線持續時間（秒）  
-_C.PROFILE.ELEVATOR.ELEVATE_DELAY = 4.0  # 提升後延遲（秒）  
-_C.PROFILE.ELEVATOR.ELEVATE_TIMEOUT = 40.0  # 單次升降超時（秒）  
-_C.PROFILE.ELEVATOR.DROP = False  # 超時後自動下沉釣組（逐層下降）  
-_C.PROFILE.ELEVATOR.HOOK_DELAY = 0.5  # 中魚後檢查延遲（秒）  
-_C.PROFILE.ELEVATOR.POST_ACCELERATION = "auto"  # 遛魚加速模式（on/off/auto）
-
-## 浮標釣配置 ##  
-_C.PROFILE.TELESCOPIC = CN()  
-_C.PROFILE.TELESCOPIC.MODE = "telescopic"
-# 用於覆蓋 SCRIPT.LAUNCH_OPTIONS 的啟動參數
-# 若未設置，將使用 SCRIPT.LAUNCH_OPTIONS 作為預設值
-_C.PROFILE.TELESCOPIC.LAUNCH_OPTIONS = ""
-_C.PROFILE.TELESCOPIC.CAST_POWER_LEVEL = 5.0  # 拋投力度  
-_C.PROFILE.TELESCOPIC.CAST_DELAY = 4.0  # 拋竿後等待時間（秒）  
-_C.PROFILE.TELESCOPIC.FLOAT_SENSITIVITY = 0.68  # 浮標檢測敏感度（0~1）  
-_C.PROFILE.TELESCOPIC.CHECK_DELAY = 1.0  # 檢查咬口間隔（秒）  
-_C.PROFILE.TELESCOPIC.PULL_DELAY = 0.5  # 中魚後提竿延遲（秒）  
-_C.PROFILE.TELESCOPIC.DRIFT_TIMEOUT = 16.0  # 漂流超時重拋（秒）  
-_C.PROFILE.TELESCOPIC.CAMERA_SHAPE = "square"  # 浮標視窗形狀（square/wide/tall）  
-
-## 博洛尼亞釣法配置 ##  
-_C.PROFILE.BOLOGNESE = CN()  
-_C.PROFILE.BOLOGNESE.MODE = "bolognese"
-# 用於覆蓋 SCRIPT.LAUNCH_OPTIONS 的啟動參數
-# 若未設置，將使用 SCRIPT.LAUNCH_OPTIONS 作為預設值
-_C.PROFILE.BOLOGNESE.LAUNCH_OPTIONS = ""
-_C.PROFILE.BOLOGNESE.CAST_POWER_LEVEL = 5.0  # 拋投力度  
-_C.PROFILE.BOLOGNESE.CAST_DELAY = 4.0  # 拋竿後等待時間（秒）  
-_C.PROFILE.BOLOGNESE.FLOAT_SENSITIVITY = 0.68  # 浮標檢測敏感度  
-_C.PROFILE.BOLOGNESE.DRIFT_TIMEOUT = 32.0  # 漂流超時重拋（秒）
-_C.PROFILE.BOLOGNESE.POST_ACCELERATION = "off"  # 遛魚加速模式（on/off/auto）
-
-def get_cfg_defaults():  
-    """獲取默認配置節點"""  
-    return _C.clone()  
+.\main.exe bot -T KEY.BOTTOM_RODS "(1, 2)"
 ```  
 
 
@@ -351,6 +115,10 @@ def get_cfg_defaults():
 3. 效果展示  
 ![meow_3]
 
+[launch_options]: /static/readme/launch_options.png
+[path]: /static/readme/path.png
+[config.yaml]: /rf4s/config/config.yaml
+[default.py]: /rf4s/config/defaults.py
 [configuration]: /docs/en/CONFIGURATION.md
 [favorite_food]: /static/readme/favorite_food.png
 [favorite_lure]: /static/readme/favorite_lure.png
