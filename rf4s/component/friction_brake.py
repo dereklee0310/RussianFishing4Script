@@ -19,8 +19,6 @@ MIN_FRICTION_BRAKE = 0
 UP = 1
 DOWN = -1
 FRICTION_BRAKE_MONITOR_DELAY = 2
-LOOP_DELAY = 0.04
-
 
 class FrictionBrake:
     """Friction brake controller.
@@ -86,7 +84,6 @@ class FrictionBrake:
             if self.cur.value > 0:
                 pag.scroll(DOWN, _pause=False)
                 self.cur.value = max(self.cur.value - 1, MIN_FRICTION_BRAKE)
-        sleep(LOOP_DELAY)
 
 
 def monitor_friction_brake(friction_brake: FrictionBrake) -> None:

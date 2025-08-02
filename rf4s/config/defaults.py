@@ -158,9 +158,9 @@ _C.BOT.FRICTION_BRAKE.INITIAL = 29
 _C.BOT.FRICTION_BRAKE.MAX = 30
 # Delay before starting to adjust the friction brake after a fish is hooked
 _C.BOT.FRICTION_BRAKE.START_DELAY = 2.0
-# Delay between each friction brake increment
+# Delay between each friction brake increment, minimum: 0.04
 _C.BOT.FRICTION_BRAKE.INCREASE_DELAY = 1.0
-# Delay after decreasing the friction brake
+# Delay after decreasing the friction brake, , minimum: 0.04
 _C.BOT.FRICTION_BRAKE.DECREASE_DELAY = 1.0
 # Sensitivity of friction brake detection
 # (options: low, medium, high, very_high)
