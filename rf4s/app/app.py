@@ -442,7 +442,7 @@ class BotApp(App):
                     break
                 utils.print_usage_box(f"Press {self.cfg.KEY.PAUSE} to restart.")
                 with (
-                    self.player.hold_keys(mouse=False, shift=False),
+                    self.player.hold_keys(mouse=False, shift=False, reset=True),
                     keyboard.Listener(on_release=self._pause_wait) as listener,
                 ):
                     listener.join()

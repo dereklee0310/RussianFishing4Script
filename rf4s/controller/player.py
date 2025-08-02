@@ -143,7 +143,9 @@ class Player:
         self.shift_pressed = False
 
     @contextmanager
-    def hold_keys(self, mouse, shift):
+    def hold_keys(self, mouse, shift, reset=False):
+        mouse_pressed_before = self.mouse_pressed
+        shift_pressed_before = self.shift_pressed
         if mouse and not self.mouse_pressed:
             self.hold_down_left_mouse_button()
         if not mouse and self.mouse_pressed:
@@ -155,6 +157,19 @@ class Player:
             self.release_shift_key()
 
         yield
+
+        if not reset:
+            return
+
+        if self.mouse_pressed and not mouse_pressed_before:
+            self.release_left_mouse_button()
+        if not self.mouse_pressed and mouse_pressed_before:
+            self.hold_down_left_mouse_button()
+
+        if self.shift_pressed and not shift_pressed_before:
+            self.release_shift_key()
+        if not self.shift_pressed and shift_pressed_before:
+            self.hold_down_shift_key()
 
     # ---------------------------------------------------------------------------- #
     #                              main fishing loops                              #
@@ -348,7 +363,7 @@ class Player:
         if not self.cfg.ARGS.COFFEE or self.detection.is_energy_high():
             return
 
-        with self.hold_keys(mouse=False, shift=False):
+        with self.hold_keys(mouse=False, shift=False, reset=True):
             if self.cur_coffee > self.cfg.STAT.COFFEE_LIMIT:
                 self.general_quit("Coffee limit reached")
 
@@ -416,18 +431,21 @@ class Player:
         except exceptions.LineSnaggedError:
             self._handle_snagged_line()
         except exceptions.LureBrokenError:
-            self._handle_broken_lure()
+            with self.hold_keys(mouse=False, shift=False, reset=True):
+                self._handle_broken_lure()
         except exceptions.TackleBrokenError:
             self.general_quit("Tackle is broken")
         except exceptions.DisconnectedError:
             self.disconnected_quit()
         except exceptions.TicketExpiredError:
-            self._handle_expired_ticket()
+            with self.hold_keys(mouse=False, shift=False, reset=True):
+                self._handle_expired_ticket()
         except exceptions.RetrieveTimeoutError:
             # Enable when timed out, disable after pulling (in casting stage)
             if self.cfg.ARGS.GEAR_RATIO and not self.tackle.gear_ratio_changed:
                 self.tackle.change_gear_ratio()
-            self._drink_coffee()
+            with self.hold_keys(mouse=False, shift=False, reset=True):
+                self._drink_coffee()
         except exceptions.PirkTimeoutError:
             with self.hold_keys(mouse=False, shift=False):
                 if self.cfg.PROFILE.DEPTH_ADJUST_DELAY > 0:
@@ -449,7 +467,7 @@ class Player:
         except exceptions.DryMixNotChosenError:
             self._refill_dry_mix()
         except exceptions.StuckAtCastingError:
-            with self.hold_keys(mouse=False, shift=False):
+            with self.hold_keys(mouse=False, shift=False, reset=True):
                 pass
 
     def handle_bait_not_chosen(self) -> None:
