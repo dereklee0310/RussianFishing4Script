@@ -31,6 +31,7 @@
 - The bot now closes the game when `BOT.STAT.COFFEE_LIMIT` is reached to prevent overuse.
 - The `-d/--data` flag now saves the result table as a JSON file in the `/logs` directory for easy export and analysis.
 - When both hunger and comfort are low, the bot will now randomly consume either tea or carrots.
+- Increased check frequency on the friction brake bar.
 
 ### 🐛 Bug Fixes
 - Fixed an issue where the terminal would close immediately after the user stops the bot.
