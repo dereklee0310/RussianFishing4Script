@@ -1,58 +1,51 @@
 **[[中文版]][CHANGELOG]**
 
-## TBD
+## 0.6.0 (2025-08-02)
 
-- KEY.BOTTOM_RODS "1, 2" -> KEY.BOTTOM_RODS "(1, 2)"
-- Add calculate and craft
-- Rework parser
-- Fix quit result disappear bug?
-- Improve settings display at startup
-- Remove sound files and alarm_sound and alarm feature
-- move screenshot_tags
-- move random_rod_selection
-- add keybinds for move and friction brake
-- remove friction_brake.max
-- TODO: remove tea_delay? add it back?
-- KEEPNET.TAGS -> BOT.KEEPNET.KEEP_TAGS
-- SCRIPT.SCREENSHOT_TAGS -> BOT.KEEPNET.SCREENSHOT_TAGS
-- TEA_DELAY -> TEA_DRINK_DELAY
-- Add uv
-- Add rich-argparse
-- Add telegram
-- Add file log
-- Fix wakey rig typo
-- Add control pannel detection
-- Add profile description
-- Add delay time jitter
-- add calculate app
-- add clicklock setting
-- add bypass tags
-- add keepnet full protection
-- add card and gift record
-- remove support for zh-Tw and zh-CN
-- add venv compile script
-- add screenshot notification (includes trophy, card, gift)
-- add 0m or 5m
-- improve gear ratio
-- change post acceleration to true false
-- rework clicklock
-- change refill and harvest time, also for the bottom mode
-- add pause/restart
-- remove spool check
-- add startup prompt
-- update config yaml
-- fix --bite
-- fix trolling
-- fix bolognese retrieve
-- fix spod rod bug
-- fix coffee limit behaviour
-- add sink time logging
-- add table save for -d
-- add new config
-- add random tea carrot
-- fix safe exit
-- decrease retrieval timeout
+### 🆕 New Features
+- Added "Craft Items" feature to automate crafting of in-game items.
+- Added "Calculate Tackle's Stats" feature to compute tackle's stats and recommend the appropriate friction brake based on wear levels.
+- Added support for Telegram notifications to alert users of key events such as rare catches and received gifts.
+- Added compatibility with `uv` as a faster alternative to `pip` for dependency management.
+- Added a dedicated log file at `/logs/.log` to record runtime activity and errors for easier troubleshooting.
+- Profiles now support a `DESCRIPTION` field, allowing users to document their purpose or strategy directly in the config.
+- Introduced `BOT.CLICK_LOCK` to support users who have Windows Mouse ClickLock enabled.
+- Added `BOT.KEEPNET.BYPASS_TAGS` to always keep fish that match specific tags (e.g., trophy, rare trophy).
+- Added tracking and recording of collected cards and gifts.
+- Added optional screenshot notifications for fish catches, card discoveries, and gift pickups.
+- Added delay time jitter to introduce small random variations in actions, improving human-like behavior.
+- Implemented full keepnet protection: the bot now exits safely even if the fish count is misconfigured.
+- Added the `-R [{0,5}]` option, allowing users to choose between 0m or 5m detection for fishing line retrieval end.
+- Added a compile script to simplify setup for both `venv` and `uv` users.
+- Added a keyboard shortcut to pause and restart the bot for easier runtime control.
+- Added logging of sink time during `pirk` and `elevator` fishing modes for better performance analysis.
 
+### 🔧 Improvements
+- Improved UI design for a more intuitive and user-friendly experience.
+- Reworked the configuration file structure for better clarity, consistency, and ease of use.
+- Enhanced fishing line retrieval control flow for smoother and more reliable operation.
+- The control panel now closes automatically at startup to reduce distractions.
+- Gear ratio is now reset immediately after casting, instead of during the pulling phase.
+- Bottom fishing mode now harvests baits after checking the rod to improving efficiency.
+- Increased frequency of energy checks during retrieval to ensure timely coffee consumption.
+- The bot now closes the game when `BOT.STAT.COFFEE_LIMIT` is reached to prevent overuse.
+- The `-d/--data` flag now saves the result table as a JSON file in the `/logs` directory for easy export and analysis.
+- When both hunger and comfort are low, the bot will now randomly consume either tea or carrots.
+
+### 🐛 Bug Fixes
+- Fixed an issue where the terminal would close immediately after the user stops the bot.
+- Fixed `-b/--bite`: it now takes a screenshot when a fish bites, not when the rod is cast.
+- Fixed arrow key input not working correctly in trolling mode.
+- Fixed bolognese fishing mode attempting to pull the fish before fully retrieving the line.
+- Fixed `-DM/--dry-mix` not functioning on spod rods.
+- Fixed a bug where `-d/--data` not functioning on executable file.
+
+### 🗃️ Deprecations
+- Deprecated earlier versions of configuration files.
+- Removed `auto/on/off` options for `POST_ACCELERATION`; now accepts only `true` or `false`.
+- Discontinued support for zh-TW and zh-CN game languages.
+- Removed the "alarm" feature.
+- Removed spool and file integrity checks at startup.
 
 ## 0.5.3 (2025-06-21)
 
