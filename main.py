@@ -30,8 +30,8 @@ from rf4s.app import (
     MoveApp,
 )
 
-VERSION = "0.6.1"
-COMPATIBLE_CONFIG_VERSION = "0.6.1"
+VERSION = "0.6.2"
+COMPATIBLE_CONFIG_VERSION = "0.6.2"
 LOGO = """
 ██████╗ ███████╗██╗  ██╗███████╗
 ██╔══██╗██╔════╝██║  ██║██╔════╝
