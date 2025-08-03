@@ -141,7 +141,7 @@ PROFILE:
     PIRK_DELAY: 2.0
     PIRK_TIMEOUT: 32.0
     PIRK_RETRIEVAL: false
-    HOOK_DELAY: 0.0
+    HOOK_DELAY: 0.5
     POST_ACCELERATION: true
   PIRK_WITH_RETRIEVAL:
     DESCRIPTION: "Marine fishing, pirking while retrieving the fishing line."
@@ -159,7 +159,7 @@ PROFILE:
     PIRK_DELAY: 2.0
     PIRK_TIMEOUT: 32.0
     PIRK_RETRIEVAL: true
-    HOOK_DELAY: 0.0
+    HOOK_DELAY: 0.5
     POST_ACCELERATION: true
   WACKY_RIG:
     DESCRIPTION: "Wacky rig fishing, pirking at the bottom layer."
@@ -177,7 +177,7 @@ PROFILE:
     PIRK_DELAY: 4.0
     PIRK_TIMEOUT: 32.0
     PIRK_RETRIEVAL: false
-    HOOK_DELAY: 0.0
+    HOOK_DELAY: 0.5
     POST_ACCELERATION: true
   ELEVATOR:
     DESCRIPTION: "Marine fishing, elevator pirking, recast the rod after timed out."
@@ -191,7 +191,7 @@ PROFILE:
     ELEVATE_DELAY: 4.0
     ELEVATE_TIMEOUT: 40.0
     DROP: false
-    HOOK_DELAY: 0.0
+    HOOK_DELAY: 0.5
     POST_ACCELERATION: true
   ELEVATOR_WITH_DROP:
     DESCRIPTION: "Marine fishing, elevator pirking, lock/unlock the reel to drop the lure after timed out."
@@ -205,7 +205,7 @@ PROFILE:
     ELEVATE_DELAY: 4.0
     ELEVATE_TIMEOUT: 40.0
     DROP: true
-    HOOK_DELAY: 0.0
+    HOOK_DELAY: 0.5
     POST_ACCELERATION: true
   TELESCOPIC:
     DESCRIPTION: "Default float fishing, still water, telescopic rod."
@@ -371,7 +371,7 @@ PROFILE:
     PIRK_DELAY: 2.0
     PIRK_TIMEOUT: 32.0
     PIRK_RETRIEVAL: false
-    HOOK_DELAY: 0.0
+    HOOK_DELAY: 0.5
     POST_ACCELERATION: true
   Marine 34/41/55m strong pirking:
     DESCRIPTION: "Norwegian Sea, 34/41/55m, strong pirking at the bottom layer."
@@ -389,7 +389,7 @@ PROFILE:
     PIRK_DELAY: 2.0
     PIRK_TIMEOUT: 32.0
     PIRK_RETRIEVAL: false
-    HOOK_DELAY: 0.0
+    HOOK_DELAY: 0.5
     POST_ACCELERATION: true
   Marine 80/88m strong pirking:
     DESCRIPTION: "Norwegian Sea, 80/88m, strong pirking at the bottom layer."
@@ -407,7 +407,7 @@ PROFILE:
     PIRK_DELAY: 2.0
     PIRK_TIMEOUT: 32.0
     PIRK_RETRIEVAL: false
-    HOOK_DELAY: 0.0
+    HOOK_DELAY: 0.5
     POST_ACCELERATION: true
   Marine 120/144m movement:
     DESCRIPTION: "Norwegian Sea, 120m, movement at the bottom layer"
@@ -425,7 +425,7 @@ PROFILE:
     PIRK_DELAY: 0.0
     PIRK_TIMEOUT: 32.0
     PIRK_RETRIEVAL: false
-    HOOK_DELAY: 0.0
+    HOOK_DELAY: 0.5
     POST_ACCELERATION: true
   Match still water c10:
     DESCRIPTION: "Ladoga Lake, 73:55, c10, depth 150cm."
