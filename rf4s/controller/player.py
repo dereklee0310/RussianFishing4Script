@@ -447,7 +447,7 @@ class Player:
             with self.hold_keys(mouse=False, shift=False, reset=True):
                 self._drink_coffee()
         except exceptions.PirkTimeoutError:
-            with self.hold_keys(mouse=False, shift=False):
+            with self.hold_keys(mouse=False, shift=False, reset=True):
                 if self.cfg.PROFILE.DEPTH_ADJUST_DELAY > 0:
                     logger.info("Adjusting lure depth")
                     pag.press("enter")  # Open reel
@@ -458,7 +458,7 @@ class Player:
                     self.cast_tackle()
                     self.tackle.sink()
         except exceptions.PullTimeoutError:
-            with self.hold_keys(mouse=False, shift=False):
+            with self.hold_keys(mouse=False, shift=False, reset=True):
                 sleep(LOWER_TACKLE_DELAY)
                 if self.cfg.PROFILE.MODE != "telescopic":
                     self.retrieve_line()
