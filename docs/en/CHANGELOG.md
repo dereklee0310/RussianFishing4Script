@@ -1,5 +1,18 @@
 **[[中文版]][CHANGELOG]**
 
+## 0.6.2 (2025-08-02)
+
+### 🐛 Bug Fixes
+- Fixed an issue where the bot would get stuck if the pull phase timed out.
+
+### 🔧 Improvements
+- Increased the default value of `HOOK_DELAY` to help prevent fish from escaping.
+
+## 0.6.1 (2025-08-02)
+### 🔧 Improvements
+- Increased the check frequency for the friction brake bar to improve responsiveness.
+
+
 ## 0.6.0 (2025-08-02)
 
 ### 🆕 New Features
