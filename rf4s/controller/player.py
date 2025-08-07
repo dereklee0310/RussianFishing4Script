@@ -171,13 +171,22 @@ class Player:
         if not self.shift_pressed and shift_pressed_before:
             self.hold_down_shift_key()
 
+    @contextmanager
+    def safe_loop(self):
+        while True:
+            try:
+                yield
+            except exceptions.FishCapturedError:
+                logger.error("Got an unexpected fish!")
+                self.handle_fish()
+
     # ---------------------------------------------------------------------------- #
     #                              main fishing loops                              #
     # ---------------------------------------------------------------------------- #
     def start_spin_mode(self) -> None:
         """Main spin fishing loop for 'spin' and 'spin_with_pause' modes."""
         skip_cast = self.cfg.ARGS.SKIP_CAST
-        while True:
+        with self.safe_loop():
             self.enable_trolling()
             if not skip_cast:
                 self.reset_tackle()
@@ -209,7 +218,7 @@ class Player:
         """Main bottom fishing loop."""
         check_miss_counts = [0] * self.num_tackle
 
-        while True:
+        with self.safe_loop():
             self.enable_trolling()
             if self.cfg.ARGS.SPOD_ROD and self.timer.is_spod_rod_castable():
                 self._cast_spod_rod()
@@ -255,7 +264,7 @@ class Player:
         """
         perform_technique = self.do_pirking if pirk else self.do_elevating
         skip_cast = self.cfg.ARGS.SKIP_CAST
-        while True:
+        with self.safe_loop():
             self.enable_trolling()
             if not skip_cast:
                 self.reset_tackle()
@@ -285,7 +294,7 @@ class Player:
         """
         monitor, hold_mouse_button = self._get_controllers(telescopic)
 
-        while True:
+        with self.safe_loop():
             self.enable_trolling()
             self.reset_tackle()
             self.refill_stats()
@@ -421,8 +430,6 @@ class Player:
         except exceptions.FishHookedError:
             self._retrieve_fish()
             self.pull_fish()
-        except exceptions.FishCapturedError:
-            self.handle_fish()
         except exceptions.LineAtEndError:
             if self.cfg.ARGS.FRICTION_BRAKE:
                 with self.friction_brake.lock:
