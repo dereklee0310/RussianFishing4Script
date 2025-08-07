@@ -461,7 +461,7 @@ class Player:
             with self.hold_keys(mouse=False, shift=False, reset=True):
                 sleep(LOWER_TACKLE_DELAY)
                 if self.cfg.PROFILE.MODE != "telescopic":
-                    self.retrieve_line()
+                    self._retrieve_fish(save=False)
         except exceptions.BaitNotChosenError:
             self.handle_bait_not_chosen()
         except exceptions.DryMixNotChosenError:
@@ -536,8 +536,9 @@ class Player:
                     sleep(RAINBOW_RETRIEVAL_DELAY)
 
 
-    def _retrieve_fish(self):
-        self.save_bite_screenshot()
+    def _retrieve_fish(self, save=True):
+        if save:
+            self.save_bite_screenshot()
 
         if self.cfg.ARGS.ELECTRO:
             self.tackle.enable_electro_mode()
