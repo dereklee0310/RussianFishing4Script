@@ -39,3 +39,12 @@ replace = "VERSION = \"{new_version}\""
 filename = "pyproject.toml"
 search = "version = \"{current_version}\""
 replace = "version = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "uv.lock"
+search = """name = \"russianfishing4script\"
+version = \"{current_version}\"
+"""
+replace = """name = \"russianfishing4script\"
+version = \"{new_version}\"
+"""
