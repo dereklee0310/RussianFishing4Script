@@ -106,6 +106,7 @@ class Player:
         self.trolling_started = False
         self.mouse_pressed = False
         self.shift_pressed = False
+        self.using_spod_rod = False
 
     def start_fishing(self) -> None:
         """Start the main fishing loop with the specified fishing strategy."""
@@ -179,6 +180,27 @@ class Player:
             except exceptions.FishCapturedError:
                 logger.error("Got an unexpected fish!")
                 self.handle_fish()
+            except exceptions.FishHookedError:
+                self._retrieve_fish()
+                self.pull_fish()
+            except exceptions.StuckAtCastingError:
+                with self.hold_keys(mouse=False, shift=False):
+                    pass # defer to reset_tackle()
+            except exceptions.LineAtEndError:
+                if self.cfg.ARGS.FRICTION_BRAKE:
+                    with self.friction_brake.lock:
+                        self.friction_brake.change(increase=False)
+                self.general_quit("Fishing line is at its end")
+            except exceptions.LineSnaggedError:
+                self._handle_snagged_line()
+            except exceptions.DisconnectedError:
+                self.disconnected_quit()
+            except exceptions.TackleBrokenError:
+                self.general_quit("Tackle is broken")
+            except exceptions.BaitNotChosenError:
+                self.handle_bait_not_chosen()
+            except exceptions.DryMixNotFoundError:
+                pass
 
     # ---------------------------------------------------------------------------- #
     #                              main fishing loops                              #
@@ -427,23 +449,9 @@ class Player:
     def error_handler(self):
         try:
             yield
-        except exceptions.FishHookedError:
-            self._retrieve_fish()
-            self.pull_fish()
-        except exceptions.LineAtEndError:
-            if self.cfg.ARGS.FRICTION_BRAKE:
-                with self.friction_brake.lock:
-                    self.friction_brake.change(increase=False)
-            self.general_quit("Fishing line is at its end")
-        except exceptions.LineSnaggedError:
-            self._handle_snagged_line()
         except exceptions.LureBrokenError:
             with self.hold_keys(mouse=False, shift=False, reset=True):
                 self._handle_broken_lure()
-        except exceptions.TackleBrokenError:
-            self.general_quit("Tackle is broken")
-        except exceptions.DisconnectedError:
-            self.disconnected_quit()
         except exceptions.TicketExpiredError:
             with self.hold_keys(mouse=False, shift=False, reset=True):
                 self._handle_expired_ticket()
@@ -469,13 +477,8 @@ class Player:
                 sleep(LOWER_TACKLE_DELAY)
                 if self.cfg.PROFILE.MODE != "telescopic":
                     self._retrieve_fish(save=False)
-        except exceptions.BaitNotChosenError:
-            self.handle_bait_not_chosen()
         except exceptions.DryMixNotChosenError:
             self._refill_dry_mix()
-        except exceptions.StuckAtCastingError:
-            with self.hold_keys(mouse=False, shift=False, reset=True):
-                pass
 
     def handle_bait_not_chosen(self) -> None:
         if len(self.tackles) == 1:
@@ -484,16 +487,13 @@ class Player:
 
     def _cast_spod_rod(self) -> None:
         """Cast the spod rod if dry mix is available."""
+        self.using_spod_rod = True
         self._use_item("spod_rod")
         self.reset_tackle()
-
-        # If no dry mix is available, skip casting
-        if not self.tackle.available:
-            self.tackle.available = True
-            return
         self.cast_tackle(lock=True, update=False)
         pag.press("0")
         sleep(ANIMATION_DELAY)
+        self.using_spod_rod = False
 
     def cast_tackle(self, lock: bool = False, update: bool = True) -> None:
         """Cast the current tackle.
@@ -697,8 +697,8 @@ class Player:
                 self.tackle.equip_item("dry_mix")
             except exceptions.ItemNotFoundError:
                 logger.error("New dry mix not found")
-                self.tackle.available = False  # Skip following stages
                 self.have_new_dry_mix = False
+                raise exceptions.DryMixNotFoundError
 
     def _refill_groundbait(self) -> None:
         """Refill the groundbait if it has been used up."""

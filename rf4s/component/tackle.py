@@ -71,18 +71,6 @@ class Tackle:
         self.available = True
         self.gear_ratio_changed = False
 
-    @staticmethod
-    def _check_status(func):
-        def wrapper(self, *args, **kwargs):
-            if not self.available:
-                return
-            try:
-                func(self, *args)
-            except Exception as e:
-                raise e
-
-        return wrapper
-
     def is_rare_event_occur(self) -> None:
         """Check if the game disconnected or the boat ticket expired."""
         if self.detection.is_disconnected():
@@ -92,7 +80,6 @@ class Tackle:
         if self.detection.is_stuck_at_casting():
             raise exceptions.StuckAtCastingError
 
-    @_check_status
     def reset(self) -> None:
         """Reset the tackle until ready and detect unexpected events."""
         logger.info("Resetting tackle")
@@ -121,7 +108,6 @@ class Tackle:
                 self.is_rare_event_occur()
                 i = RESET_TIMEOUT
 
-    @_check_status
     def cast(self, lock: bool) -> None:
         """Cast the rod, then wait for the lure/bait to fly and sink.
 
@@ -164,7 +150,6 @@ class Tackle:
         self.timer.print_sink_duration()
         utils.hold_mouse_button(self.cfg.PROFILE.TIGHTEN_DURATION)
 
-    @_check_status
     def retrieve_with_no_fish(self) -> None:
         """Retrieve the line until the end is reached and detect unexpected events.
 
@@ -194,7 +179,6 @@ class Tackle:
                 i = RETRIEVAL_TIMEOUT
 
 
-    @_check_status
     def retrieve_with_fish(self) -> None:
         """Retrieve the line until the end is reached and detect unexpected events.
 
@@ -301,7 +285,6 @@ class Tackle:
                 i = self.cfg.PROFILE.ELEVATE_TIMEOUT
                 dropped = not dropped
 
-    @_check_status
     def pull(self) -> None:
         """Pull the fish until it's captured."""
         logger.info("Pulling fish")

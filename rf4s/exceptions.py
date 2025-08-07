@@ -84,3 +84,6 @@ class DryMixNotChosenError(Exception):
 
 class StuckAtCastingError(Exception):
     """Stuck at casting stage."""
+
+class DryMixNotFoundError(Exception):
+    """Dry mix cannot be found."""
