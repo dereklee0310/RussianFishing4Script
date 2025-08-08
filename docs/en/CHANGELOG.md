@@ -1,5 +1,11 @@
 **[[中文版]][CHANGELOG]**
 
+## TBD
+- Increase minimum gray scale level
+- Fix pull time out bug
+- Fix bump version and uv.lock bug
+- Fix telescopic/bolognese skip cast bug
+
 ## 0.6.2 (2025-08-02)
 
 ### 🐛 Bug Fixes
