@@ -173,34 +173,33 @@ class Player:
             self.hold_down_shift_key()
 
     @contextmanager
-    def safe_loop(self):
-        while True:
-            try:
-                yield
-            except exceptions.FishCapturedError:
-                logger.error("Got an unexpected fish!")
-                self.handle_fish()
-            except exceptions.FishHookedError:
-                self._retrieve_fish()
-                self.pull_fish()
-            except exceptions.StuckAtCastingError:
-                with self.hold_keys(mouse=False, shift=False):
-                    pass # defer to reset_tackle()
-            except exceptions.LineAtEndError:
-                if self.cfg.ARGS.FRICTION_BRAKE:
-                    with self.friction_brake.lock:
-                        self.friction_brake.change(increase=False)
-                self.general_quit("Fishing line is at its end")
-            except exceptions.LineSnaggedError:
-                self._handle_snagged_line()
-            except exceptions.DisconnectedError:
-                self.disconnected_quit()
-            except exceptions.TackleBrokenError:
-                self.general_quit("Tackle is broken")
-            except exceptions.BaitNotChosenError:
-                self.handle_bait_not_chosen()
-            except exceptions.DryMixNotFoundError:
-                pass
+    def loop_restart_handler(self):
+        try:
+            yield
+        except exceptions.FishCapturedError:
+            logger.error("Got an unexpected fish!")
+            self.handle_fish()
+        except exceptions.FishHookedError:
+            self._retrieve_fish()
+            self.pull_fish()
+        except exceptions.StuckAtCastingError:
+            with self.hold_keys(mouse=False, shift=False):
+                pass # defer to reset_tackle()
+        except exceptions.LineAtEndError:
+            if self.cfg.ARGS.FRICTION_BRAKE:
+                with self.friction_brake.lock:
+                    self.friction_brake.change(increase=False)
+            self.general_quit("Fishing line is at its end")
+        except exceptions.LineSnaggedError:
+            self._handle_snagged_line()
+        except exceptions.DisconnectedError:
+            self.disconnected_quit()
+        except exceptions.TackleBrokenError:
+            self.general_quit("Tackle is broken")
+        except exceptions.BaitNotChosenError:
+            self.handle_bait_not_chosen()
+        except exceptions.DryMixNotFoundError:
+            pass
 
     # ---------------------------------------------------------------------------- #
     #                              main fishing loops                              #
@@ -208,21 +207,22 @@ class Player:
     def start_spin_mode(self) -> None:
         """Main spin fishing loop for 'spin' and 'spin_with_pause' modes."""
         skip_cast = self.cfg.ARGS.SKIP_CAST
-        with self.safe_loop():
-            self.enable_trolling()
-            if not skip_cast:
-                self.reset_tackle()
-                self.refill_stats()
-                self.harvest_baits(pickup=True)
-                self.change_tackle_lure()
-                self.cast_tackle()
-            skip_cast = False
+        while True:
+            with self.loop_restart_handler():
+                self.enable_trolling()
+                if not skip_cast:
+                    self.reset_tackle()
+                    self.refill_stats()
+                    self.harvest_baits(pickup=True)
+                    self.change_tackle_lure()
+                    self.cast_tackle()
+                skip_cast = False
 
-            if self.cfg.PROFILE.TYPE != "normal":
-                utils.hold_mouse_button(self.cfg.PROFILE.TIGHTEN_DURATION)
-                getattr(self, f"retrieve_with_{self.cfg.PROFILE.TYPE}")()
-            self.retrieve_line()
-            self.pull_fish()
+                if self.cfg.PROFILE.TYPE != "normal":
+                    utils.hold_mouse_button(self.cfg.PROFILE.TIGHTEN_DURATION)
+                    getattr(self, f"retrieve_with_{self.cfg.PROFILE.TYPE}")()
+                self.retrieve_line()
+                self.pull_fish()
 
     def retrieve_with_pause(self) -> None:
         """Retrieve the line, pausing periodically."""
@@ -240,27 +240,28 @@ class Player:
         """Main bottom fishing loop."""
         check_miss_counts = [0] * self.num_tackle
 
-        with self.safe_loop():
-            self.enable_trolling()
-            if self.cfg.ARGS.SPOD_ROD and self.timer.is_spod_rod_castable():
-                self._cast_spod_rod()
+        while True:
+            with self.loop_restart_handler():
+                self.enable_trolling()
+                if self.cfg.ARGS.SPOD_ROD and self.timer.is_spod_rod_castable():
+                    self._cast_spod_rod()
 
-            logger.info("Checking rod %s", self.tackle_idx + 1)
-            pag.press(str(self.cfg.KEY.BOTTOM_RODS[self.tackle_idx]))
-            sleep(ANIMATION_DELAY)
-            if self.detection.is_fish_hooked():
-                check_miss_counts[self.tackle_idx] = 0
-                self.retrieve_and_recast()
-            else:
-                sleep(self.cfg.PROFILE.PUT_DOWN_DELAY)
+                logger.info("Checking rod %s", self.tackle_idx + 1)
+                pag.press(str(self.cfg.KEY.BOTTOM_RODS[self.tackle_idx]))
+                sleep(ANIMATION_DELAY)
                 if self.detection.is_fish_hooked():
                     check_miss_counts[self.tackle_idx] = 0
                     self.retrieve_and_recast()
                 else:
-                    self._put_down_tackle(check_miss_counts)
-                    self.refill_stats()
-                    self.harvest_baits()
-            self._update_tackle()
+                    sleep(self.cfg.PROFILE.PUT_DOWN_DELAY)
+                    if self.detection.is_fish_hooked():
+                        check_miss_counts[self.tackle_idx] = 0
+                        self.retrieve_and_recast()
+                    else:
+                        self._put_down_tackle(check_miss_counts)
+                        self.refill_stats()
+                        self.harvest_baits()
+                self._update_tackle()
 
     def retrieve_and_recast(self) -> None:
         self.retrieve_line()
@@ -286,19 +287,20 @@ class Player:
         """
         perform_technique = self.do_pirking if pirk else self.do_elevating
         skip_cast = self.cfg.ARGS.SKIP_CAST
-        with self.safe_loop():
-            self.enable_trolling()
-            if not skip_cast:
-                self.reset_tackle()
-                self.refill_stats()
-                self.cast_tackle()
-                self.tackle.sink()
-            skip_cast = False
+        while True:
+            with self.loop_restart_handler():
+                self.enable_trolling()
+                if not skip_cast:
+                    self.reset_tackle()
+                    self.refill_stats()
+                    self.cast_tackle()
+                    self.tackle.sink()
+                skip_cast = False
 
-            if not self.detection.is_fish_hooked():
-                perform_technique()
-            self.retrieve_line()
-            self.pull_fish()
+                if not self.detection.is_fish_hooked():
+                    perform_technique()
+                self.retrieve_line()
+                self.pull_fish()
 
     def start_telescopic_mode(self) -> None:
         """Main telescopic fishing loop."""
@@ -316,23 +318,24 @@ class Player:
         """
         monitor, hold_mouse_button = self._get_controllers(telescopic)
 
-        with self.safe_loop():
-            self.enable_trolling()
-            self.reset_tackle()
-            self.refill_stats()
-            self.harvest_baits(pickup=True)
-            self.cast_tackle()
+        while True:
+            with self.loop_restart_handler():
+                self.enable_trolling()
+                self.reset_tackle()
+                self.refill_stats()
+                self.harvest_baits(pickup=True)
+                self.cast_tackle()
 
-            with self.error_handler():
-                monitor()
-            if self.detection.is_fish_hooked():
-                sleep(self.cfg.PROFILE.PULL_DELAY)
-                hold_mouse_button(PRE_RETRIEVAL_DURATION)
-                if not telescopic:
-                    self._retrieve_fish()
-                else:
-                    self.save_bite_screenshot()  # Should be called in _retrieve_fish()
-                self.pull_fish()
+                with self.error_handler():
+                    monitor()
+                if self.detection.is_fish_hooked():
+                    sleep(self.cfg.PROFILE.PULL_DELAY)
+                    hold_mouse_button(PRE_RETRIEVAL_DURATION)
+                    if not telescopic:
+                        self._retrieve_fish()
+                    else:
+                        self.save_bite_screenshot()  # Should be called in _retrieve_fish()
+                    self.pull_fish()
 
     def harvest_baits(self, pickup: bool = False) -> None:
         """Harvest baits if energy is high.
@@ -697,6 +700,8 @@ class Player:
                 self.tackle.equip_item("dry_mix")
             except exceptions.ItemNotFoundError:
                 logger.error("New dry mix not found")
+                if not self.using_spod_rod:
+                    self.tackle.available = False
                 self.have_new_dry_mix = False
                 raise exceptions.DryMixNotFoundError
 
