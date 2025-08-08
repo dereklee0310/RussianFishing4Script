@@ -317,14 +317,16 @@ class Player:
         :type telescopic: bool
         """
         monitor, hold_mouse_button = self._get_controllers(telescopic)
-
+        skip_cast = self.cfg.ARGS.SKIP_CAST
         while True:
             with self.loop_restart_handler():
                 self.enable_trolling()
-                self.reset_tackle()
-                self.refill_stats()
-                self.harvest_baits(pickup=True)
-                self.cast_tackle()
+                if not skip_cast:
+                    self.reset_tackle()
+                    self.refill_stats()
+                    self.harvest_baits(pickup=True)
+                    self.cast_tackle()
+                skip_cast = False
 
                 with self.error_handler():
                     monitor()
