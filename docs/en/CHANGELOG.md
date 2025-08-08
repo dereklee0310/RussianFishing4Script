@@ -5,6 +5,7 @@
 - Fix pull time out bug
 - Fix bump version and uv.lock bug
 - Fix telescopic/bolognese skip cast bug
+- Fix bottom harvest bug
 
 ## 0.6.2 (2025-08-02)
 
