@@ -246,6 +246,7 @@ class Player:
                 if self.cfg.ARGS.SPOD_ROD and self.timer.is_spod_rod_castable():
                     self._cast_spod_rod()
 
+                self.refill_stats()
                 logger.info("Checking rod %s", self.tackle_idx + 1)
                 pag.press(str(self.cfg.KEY.BOTTOM_RODS[self.tackle_idx]))
                 sleep(ANIMATION_DELAY)
@@ -259,8 +260,6 @@ class Player:
                         self.retrieve_and_recast()
                     else:
                         self._put_down_tackle(check_miss_counts)
-                        self.refill_stats()
-                        self.harvest_baits()
                 self._update_tackle()
 
     def retrieve_and_recast(self) -> None:
@@ -617,6 +616,7 @@ class Player:
             self.cast_tackle(lock=True)
 
         pag.press("0")
+        self.harvest_baits()
         sleep(add_jitter(self.cfg.PROFILE.CHECK_DELAY))
 
     def enable_trolling(self) -> None:
