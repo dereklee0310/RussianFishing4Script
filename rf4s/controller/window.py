@@ -14,8 +14,8 @@ import pyautogui as pag
 import win32con
 import win32gui
 
-from rf4s.controller import logger
 from rf4s import utils
+from rf4s.controller import logger
 
 ANIMATION_DELAY = 0.5
 

@@ -500,4 +500,4 @@ if __name__ == "__main__":
         main()
     except Exception as e:
         logger.critical(e, exc_info=True)
-        utils.safe_exit() #TODO
+        utils.safe_exit()  # TODO

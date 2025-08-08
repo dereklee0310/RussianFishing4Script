@@ -178,7 +178,6 @@ class Tackle:
                 self.is_rare_event_occur()
                 i = RETRIEVAL_TIMEOUT
 
-
     def retrieve_with_fish(self) -> None:
         """Retrieve the line until the end is reached and detect unexpected events.
 

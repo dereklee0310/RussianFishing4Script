@@ -20,6 +20,7 @@ UP = 1
 DOWN = -1
 FRICTION_BRAKE_MONITOR_DELAY = 2
 
+
 class FrictionBrake:
     """Friction brake controller.
 

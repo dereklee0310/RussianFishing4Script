@@ -186,7 +186,7 @@ class Player:
             self.pull_fish()
         except exceptions.StuckAtCastingError:
             with self.hold_keys(mouse=False, shift=False):
-                pass # defer to reset_tackle()
+                pass  # defer to reset_tackle()
         except exceptions.LineAtEndError:
             if self.cfg.ARGS.FRICTION_BRAKE:
                 with self.friction_brake.lock:
@@ -544,7 +544,6 @@ class Player:
                     sleep(SPOOL_RETRIEVAL_DELAY)
                 elif self.cfg.ARGS.RAINBOW == 5:
                     sleep(RAINBOW_RETRIEVAL_DELAY)
-
 
     def _retrieve_fish(self, save=True):
         if save:
