@@ -179,6 +179,8 @@ class Player:
         except exceptions.FishCapturedError:
             logger.error("Got an unexpected fish!")
             self.handle_fish()
+        except exceptions.LureBrokenError:
+            self._handle_broken_lure()
         except exceptions.FishHookedError:
             self._retrieve_fish()
             self.pull_fish()
@@ -398,7 +400,9 @@ class Player:
         if not self.cfg.ARGS.COFFEE or self.detection.is_energy_high():
             return
 
-        with self.hold_keys(mouse=False, shift=False, reset=True):
+        # Hold mouse button if we can use coffee by pressing a hotkey
+        mouse = True if self.cfg.KEY["COFFEE"] != -1 else False
+        with self.hold_keys(mouse=mouse, shift=False, reset=True):
             if self.cur_coffee > self.cfg.STAT.COFFEE_LIMIT:
                 self.general_quit("Coffee limit reached")
 
@@ -453,18 +457,13 @@ class Player:
     def error_handler(self):
         try:
             yield
-        except exceptions.LureBrokenError:
-            with self.hold_keys(mouse=False, shift=False, reset=True):
-                self._handle_broken_lure()
         except exceptions.TicketExpiredError:
-            with self.hold_keys(mouse=False, shift=False, reset=True):
-                self._handle_expired_ticket()
+            self._handle_expired_ticket()
         except exceptions.RetrieveTimeoutError:
             # Enable when timed out, disable after pulling (in casting stage)
             if self.cfg.ARGS.GEAR_RATIO and not self.tackle.gear_ratio_changed:
                 self.tackle.change_gear_ratio()
-            with self.hold_keys(mouse=False, shift=False, reset=True):
-                self._drink_coffee()
+            self._drink_coffee()
         except exceptions.PirkTimeoutError:
             with self.hold_keys(mouse=False, shift=False, reset=True):
                 if self.cfg.PROFILE.DEPTH_ADJUST_DELAY > 0:
@@ -948,7 +947,7 @@ class Player:
 
     def _handle_expired_ticket(self) -> None:
         """Handle an expired boat ticket event."""
-        with self.hold_keys(mouse=False, shift=False):
+        with self.hold_keys(mouse=False, shift=False, reset=True):
             if self.cfg.ARGS.BOAT_TICKET is None:
                 pag.press("esc")
                 sleep(TICKET_EXPIRE_DELAY)
