@@ -400,8 +400,10 @@ class Player:
         if not self.cfg.ARGS.COFFEE or self.detection.is_energy_high():
             return
 
-        # Hold mouse button if we can use coffee by pressing a hotkey
-        mouse = True if self.cfg.KEY["COFFEE"] != -1 else False
+        # Hold left mouse button if we can use coffee by pressing a hotkey.
+        # If left mouse button is not pressed, it means it's called while handling
+        # PullTimeoutError and we don't need to keep it pressed.
+        mouse = True if self.mouse_pressed and self.cfg.KEY["COFFEE"] != -1 else False
         with self.hold_keys(mouse=mouse, shift=False, reset=True):
             if self.cur_coffee > self.cfg.STAT.COFFEE_LIMIT:
                 self.general_quit("Coffee limit reached")
@@ -478,6 +480,7 @@ class Player:
         except exceptions.PullTimeoutError:
             with self.hold_keys(mouse=False, shift=False, reset=True):
                 sleep(LOWER_TACKLE_DELAY)
+                self._drink_coffee()
                 if self.cfg.PROFILE.MODE != "telescopic":
                     self._retrieve_fish(save=False)
         except exceptions.DryMixNotChosenError:
