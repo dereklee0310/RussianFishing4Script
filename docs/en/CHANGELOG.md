@@ -8,6 +8,7 @@
 - Fix bottom harvest bug
 - Fix drink coffee while retrieving bug
 - Fix drink coffee during pulling bug
+- Add and finetune profiles in config.yaml
 
 ## 0.6.2 (2025-08-02)
 

@@ -355,6 +355,24 @@ PROFILE:
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
+  Marine 34/41/55m movement:
+    DESCRIPTION: "Norwegian Sea, 34/41/55m, movement at the bottom layer."
+    LAUNCH_OPTIONS: ""
+    MODE: "pirk"
+    CAST_POWER_LEVEL: 1.0
+    CAST_DELAY: 4.0
+    SINK_TIMEOUT: 60.0
+    TIGHTEN_DURATION: 1.0
+    DEPTH_ADJUST_DELAY: 4.0
+    DEPTH_ADJUST_DURATION: 1.0
+    CTRL: false
+    SHIFT: false
+    PIRK_DURATION: 0.0
+    PIRK_DELAY: 0.0
+    PIRK_TIMEOUT: 64.0
+    PIRK_RETRIEVAL: false
+    HOOK_DELAY: 0.5
+    POST_ACCELERATION: true
   Marine 34/41/55m pirking:
     DESCRIPTION: "Norwegian Sea, 34/41/55m, pirking at the bottom layer."
     LAUNCH_OPTIONS: ""
@@ -369,7 +387,7 @@ PROFILE:
     SHIFT: false
     PIRK_DURATION: 0.4
     PIRK_DELAY: 2.0
-    PIRK_TIMEOUT: 32.0
+    PIRK_TIMEOUT: 64.0
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
@@ -387,7 +405,25 @@ PROFILE:
     SHIFT: false
     PIRK_DURATION: 0.9
     PIRK_DELAY: 2.0
-    PIRK_TIMEOUT: 32.0
+    PIRK_TIMEOUT: 64.0
+    PIRK_RETRIEVAL: false
+    HOOK_DELAY: 0.5
+    POST_ACCELERATION: true
+  Marine 80/88m movement:
+    DESCRIPTION: "Norwegian Sea, 80/88m, movement at the bottom layer."
+    LAUNCH_OPTIONS: ""
+    MODE: "pirk"
+    CAST_POWER_LEVEL: 1.0
+    CAST_DELAY: 4.0
+    SINK_TIMEOUT: 60.0
+    TIGHTEN_DURATION: 3.0
+    DEPTH_ADJUST_DELAY: 4.0
+    DEPTH_ADJUST_DURATION: 2.0
+    CTRL: false
+    SHIFT: false
+    PIRK_DURATION: 0.0
+    PIRK_DELAY: 0.0
+    PIRK_TIMEOUT: 64.0
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
@@ -405,7 +441,7 @@ PROFILE:
     SHIFT: false
     PIRK_DURATION: 0.9
     PIRK_DELAY: 2.0
-    PIRK_TIMEOUT: 32.0
+    PIRK_TIMEOUT: 64.0
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
@@ -418,12 +454,30 @@ PROFILE:
     SINK_TIMEOUT: 100.0
     TIGHTEN_DURATION: 3.0
     DEPTH_ADJUST_DELAY: 4.0
-    DEPTH_ADJUST_DURATION: 2.0
+    DEPTH_ADJUST_DURATION: 3.0
     CTRL: false
     SHIFT: false
     PIRK_DURATION: 0.0
     PIRK_DELAY: 0.0
-    PIRK_TIMEOUT: 32.0
+    PIRK_TIMEOUT: 64.0
+    PIRK_RETRIEVAL: false
+    HOOK_DELAY: 0.5
+    POST_ACCELERATION: true
+  Marine 120/144m strong pirking:
+    DESCRIPTION: "Norwegian Sea, 120m, strong pirking at the bottom layer"
+    LAUNCH_OPTIONS: ""
+    MODE: "pirk"
+    CAST_POWER_LEVEL: 1.0
+    CAST_DELAY: 4.0
+    SINK_TIMEOUT: 100.0
+    TIGHTEN_DURATION: 3.0
+    DEPTH_ADJUST_DELAY: 4.0
+    DEPTH_ADJUST_DURATION: 3.0
+    CTRL: false
+    SHIFT: false
+    PIRK_DURATION: 0.0
+    PIRK_DELAY: 0.0
+    PIRK_TIMEOUT: 64.0
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
