@@ -193,7 +193,6 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
     )
 
     def pname(_pname: str) -> str:
-        _pname = _pname.upper()
         if _pname not in cfg.PROFILE:
             raise ValueError  # ValueError will be handled
         return _pname

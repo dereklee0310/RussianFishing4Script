@@ -40,6 +40,7 @@ from rf4s.controller.player import Player
 from rf4s.controller.timer import Timer, add_jitter
 from rf4s.controller.window import Window
 from rf4s.result import BotResult, CraftResult, HarvestResult, Result
+from rf4s.config import load_cfg
 
 ANIMATION_DELAY = 0.5
 CRAFT_DELAY = 4.0
@@ -112,6 +113,19 @@ class BotApp(App):
         self.merge_args_to_cfg()
         self.window = Window()
         # args is done now, start validation
+        self.validate_cfg()
+        self.cfg.freeze()  # cfg is done now
+        self.display_info()
+
+        self.result = BotResult()
+        self.window = Window()
+        self.player = Player(
+            self.cfg, Timer(self.cfg), Detection(cfg, self.window), self.result
+        )
+
+        self.paused = False
+
+    def validate_cfg(self):
         self.validate_smtp()
         self.validate_discord()
         self.validate_telegram()
@@ -119,8 +133,8 @@ class BotApp(App):
         self.validate_electro_mode()
         self.validate_favorite_icon()
         self.validate_screenshot_notification()
-        self.cfg.freeze()  # cfg is done now
 
+    def display_info(self):
         settings = Table(
             title="Settings", show_header=False, box=box.HEAVY, min_width=36
         )
@@ -137,14 +151,6 @@ class BotApp(App):
         utils.print_usage_box(
             f"Press {self.cfg.KEY.PAUSE} to pause, {self.cfg.KEY.QUIT} to quit."
         )
-
-        self.result = BotResult()
-        self.window = Window()
-        self.player = Player(
-            self.cfg, Timer(self.cfg), Detection(cfg, self.window), self.result
-        )
-
-        self.paused = False
 
     def validate_smtp(self) -> None:
         """Verify SMTP server connection for email notifications.
@@ -265,9 +271,7 @@ class BotApp(App):
         Continuously prompts until a valid profile ID is entered or the
         user chooses to quit.
         """
-        utils.print_usage_box(
-            "Enter profile id to use, q to quit."
-        )
+        utils.print_usage_box("Enter profile id to use, q to quit.")
 
         while True:
             user_input = input(">>> ")
@@ -421,6 +425,17 @@ class BotApp(App):
         if key == keyboard.KeyCode.from_char(self.cfg.KEY.PAUSE):
             sys.exit()
 
+    def reload_cfg(self) -> None:
+        self.cfg.defrost()
+        profile_name = self.cfg.PROFILE.NAME
+        new_cfg = load_cfg()
+        new_profile = new_cfg.PROFILE[profile_name]
+        self.cfg.merge_from_other_cfg(new_cfg)
+        self.cfg.PROFILE = new_profile
+        self.validate_cfg()
+        self.cfg.freeze()
+        self.display_info()
+
     def start(self) -> None:
         """Start the fishing automation process.
 
@@ -439,13 +454,19 @@ class BotApp(App):
             except KeyboardInterrupt:
                 if not self.paused:
                     break
-                utils.print_usage_box(f"Press {self.cfg.KEY.PAUSE} to restart.")
+                utils.print_usage_box(
+                    f"Press {self.cfg.KEY.PAUSE} to reload config and restart."
+                )
+                utils.print_hint_box(
+                    "Any modifications made to LAUNCH_OPTIONS will be ignored."
+                )
                 with (
                     self.player.hold_keys(mouse=False, shift=False, reset=True),
                     keyboard.Listener(on_release=self._pause_wait) as listener,
                 ):
                     listener.join()
-                logger.info("Restarting bot")
+                logger.info("Restarting bot without resetting records")
+                self.reload_cfg()
                 self.paused = False
 
         self.player.handle_termination("Terminated by user", shutdown=False, send=False)

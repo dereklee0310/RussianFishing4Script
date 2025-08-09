@@ -9,6 +9,8 @@
 - Fix drink coffee while retrieving bug
 - Fix drink coffee during pulling bug
 - Add and finetune profiles in config.yaml
+- Fix config reload bug
+- Fix --pname bug
 
 ## 0.6.2 (2025-08-02)
 
