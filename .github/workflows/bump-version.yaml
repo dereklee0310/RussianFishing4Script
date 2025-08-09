@@ -23,10 +23,10 @@ jobs:
       - name: Bump version
         id: bump
         uses: callowayproject/bump-my-version@master
-        env:
+        # env:
           # GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BUMPVERSION_TAG: "true"
-          BUMPVERSION_COMMIT: "true"  #TODO: This is a temporary fix
+          # BUMPVERSION_TAG: "true"
+          # BUMPVERSION_COMMIT: "true"  #TODO: This is a temporary fix
         with:
           args: ${{ inputs.bump-type }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
