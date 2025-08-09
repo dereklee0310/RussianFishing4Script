@@ -266,7 +266,7 @@ class BotApp(App):
         user chooses to quit.
         """
         utils.print_usage_box(
-            "Enter profile id to use, h to see help message, q to quit."
+            "Enter profile id to use, q to quit."
         )
 
         while True:
@@ -276,9 +276,6 @@ class BotApp(App):
             if user_input == "q":
                 print("Bye.")
                 sys.exit()
-            if user_input == "h":
-                self.parser.print_help()
-                continue
             utils.print_error("Invalid profile id, please try again.")
 
         self.args.pid = int(user_input)
