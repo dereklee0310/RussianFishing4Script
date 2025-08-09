@@ -22,3 +22,54 @@ dependencies = [
     "rich-argparse>=1.7.1",
     "yacs==0.1.8",
 ]
+
+[tool.bumpversion]
+current_version = "0.6.2"
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)"
+serialize = ["{major}.{minor}.{patch}"]
+search = "{current_version}"
+replace = "{new_version}"
+regex = true
+ignore_missing_version = false
+ignore_missing_files = false
+tag = true
+sign_tags = false
+tag_name = "v{new_version}"
+tag_message = "Bump version: {current_version} → {new_version}"
+allow_dirty = false
+commit = true
+message = "Bump version: {current_version} → {new_version}"
+moveable_tags = []
+commit_args = ""
+setup_hooks = []
+pre_commit_hooks = []
+post_commit_hooks = []
+
+[[tool.bumpversion.files]]
+filename = "rf4s/config/config.yaml"
+search = "VERSION: \"{current_version}\""
+replace = "VERSION: \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "rf4s/config/defaults.py"
+search = "VERSION = \"{current_version}\""
+replace = "VERSION = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "main.py"
+search = "^VERSION = \"{current_version}\""
+replace = "VERSION = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = "version = \"{current_version}\""
+replace = "version = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "uv.lock"
+search = """name = \"russianfishing4script\"
+version = \"{current_version}\"
+"""
+replace = """name = \"russianfishing4script\"
+version = \"{new_version}\"
+"""
