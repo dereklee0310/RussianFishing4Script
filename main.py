@@ -31,7 +31,7 @@ from rf4s.app import (
 )
 
 VERSION = "0.6.2"
-COMPATIBLE_CONFIG_VERSION = "0.6.2"
+MINIMUM_COMPATIBLE_CONFIG_VERSION = "0.6.2"
 LOGO = """
 ██████╗ ███████╗██╗  ██╗███████╗
 ██╔══██╗██╔════╝██║  ██║██╔════╝
@@ -446,7 +446,7 @@ def setup_cfg():
             file.writelines(lines)
 
     cfg = config.load_cfg()
-    if cfg.VERSION < "0.5.3":
+    if cfg.VERSION < MINIMUM_COMPATIBLE_CONFIG_VERSION:
         logger.critical("Incompatible config version, please delete it and try again")
         utils.safe_exit()
     return cfg

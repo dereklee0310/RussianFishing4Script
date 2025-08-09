@@ -11,6 +11,7 @@
 - Add and finetune profiles in config.yaml
 - Fix config reload bug
 - Fix --pname bug
+- Fix minimum compatible version bug
 
 ## 0.6.2 (2025-08-02)
 
