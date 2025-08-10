@@ -101,7 +101,7 @@ class Tackle:
                 raise exceptions.TackleBrokenError
             if not self.detection.is_bait_chosen():
                 raise exceptions.BaitNotChosenError
-            if self.cfg.ARGS.SPOD_ROD and not self.detection.is_dry_mix_chosen():
+            if not self.detection.is_dry_mix_chosen():
                 raise exceptions.DryMixNotChosenError
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
             if i <= 0:

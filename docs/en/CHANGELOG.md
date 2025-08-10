@@ -12,6 +12,7 @@
 - Fix config reload bug
 - Fix --pname bug
 - Fix minimum compatible version bug
+- Fix spod rod refill bug
 
 ## 0.6.2 (2025-08-02)
 

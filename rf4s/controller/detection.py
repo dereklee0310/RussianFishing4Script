@@ -394,6 +394,7 @@ class Detection:
         return self._get_image_box("pva_icon", 0.6) is None
 
     def is_dry_mix_chosen(self):
+        print(self._get_image_box("groundbait_is_not_chosen", 0.8))
         return not self._get_image_box("groundbait_is_not_chosen", 0.8)
 
     def is_bait_chosen(self):

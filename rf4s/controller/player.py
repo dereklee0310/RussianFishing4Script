@@ -245,8 +245,9 @@ class Player:
         while True:
             with self.loop_restart_handler():
                 self.enable_trolling()
+                print(self.timer.is_spod_rod_castable())
                 if self.cfg.ARGS.SPOD_ROD and self.timer.is_spod_rod_castable():
-                    self._cast_spod_rod()
+                    self.cast_spod_rod()
 
                 self.refill_stats()
                 logger.info("Checking rod %s", self.tackle_idx + 1)
@@ -491,7 +492,7 @@ class Player:
             self.general_quit("Run out of bait")
         self.tackle.available = False
 
-    def _cast_spod_rod(self) -> None:
+    def cast_spod_rod(self) -> None:
         """Cast the spod rod if dry mix is available."""
         self.using_spod_rod = True
         self._use_item("spod_rod")
