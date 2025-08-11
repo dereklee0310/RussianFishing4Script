@@ -1,4 +1,4 @@
-**[[中文版]][readme]**
+**[[中文版]][readme_zh-TW]** **[[Русская версия]][readme_ru]**
 <div align="center">
 
 ![RF4S][rf4s_logo]
@@ -42,7 +42,7 @@
 ## Installation
 > [!WARNING] 
 > The download path cannot contain non-English characters.
-### Executable File
+### Executable File (.exe)
 Download `rf4s.zip` from [Releases][releases].  
 ### pip
 ```
@@ -82,7 +82,7 @@ Add your rods to quick selection slots, cast and place them nearby so the bot ca
 Pick up the rod you want to use.
 > [!NOTE]
 > Currently, only bottom mode support multiple rods.
-### Executable File
+### Executable File (.exe)
 Double-click to run it, or:
 ```
 .\main.exe
@@ -158,7 +158,8 @@ Any contribution, bug report, or idea about new features is welcome.
 ## Contact me
 dereklee0310@gmail.com 
 
-[readme]: /docs/zh-TW/README.md
+[readme_zh-TW]: /docs/zh-TW/README.md
+[readme_ru]: /docs/ru/README.md
 [rf4s_logo]: /static/readme/RF4S.png
 [python_badge]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
 [windows_badge]: https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white

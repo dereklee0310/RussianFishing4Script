@@ -1,4 +1,3 @@
-**[[English version]][configuration]**
 ## 啟動選項
 你可以使用啟動選項在程式啟動時啟用一項或多項功能。
 ### 執行檔
@@ -119,7 +118,6 @@ PROFILE:
 [path]: /static/readme/path.png
 [config.yaml]: /rf4s/config/config.yaml
 [default.py]: /rf4s/config/defaults.py
-[configuration]: /docs/en/CONFIGURATION.md
 [favorite_food]: /static/readme/favorite_food.png
 [favorite_lure]: /static/readme/favorite_lure.png
 [meow]: https://miaotixing.com/how

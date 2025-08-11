@@ -1,4 +1,3 @@
-**[[中文版]][configuration]**
 ## Launch Options
 You can use launch options to enable one or more functionalities at startup.
 ### Executable file
@@ -109,6 +108,5 @@ There's no 3rd rod pod on the boat, so you should overwrite the bottom rod keys 
 [path]: /static/readme/path.png
 [config.yaml]: /rf4s/config/config.yaml
 [default.py]: /rf4s/config/defaults.py
-[configuration]: /docs/zh-TW/CONFIGURATION.md
 [favorite_food]: /static/readme/favorite_food.png
 [favorite_lure]: /static/readme/favorite_lure.png

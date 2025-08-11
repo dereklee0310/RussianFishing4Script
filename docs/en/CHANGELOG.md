@@ -1,20 +1,20 @@
-**[[中文版]][CHANGELOG]**
+## 0.6.3 (2025-08-11)
 
-## TBD
-- Increase minimum gray scale level
-- Fix pull time out bug
-- Fix bump version and uv.lock bug
-- Fix telescopic/bolognese skip cast bug
-- Fix bottom harvest bug
-- Fix drink coffee while retrieving bug
-- Fix drink coffee during pulling bug
-- Add and finetune profiles in config.yaml
-- Fix config reload bug
-- Fix --pname bug
-- Fix minimum compatible version bug
-- Fix spod rod refill bug
+### 🐛 Bug Fixes
+- Fixed an issue where the script attempted to reset the tackle after catching a fish.
+- Fixed incorrect version updates in `uv.lock`.
+- Fixed an issue where the `-SC` flag was not respected in telescopic and bolognese fishing modes.
+- Fixed incorrect bait harvesting timing in bottom fishing mode.
+- Fixed a brief pause before drinking coffee while reeling in a fish.
+- Fixed a bug where `-N` / `-pname` did not work correctly for certain profiles.
+- Fixed an issue where the bot failed to refill dry mix for the spod rod.
 
-## 0.6.2 (2025-08-02)
+### 🔧 Improvements
+- The bot now also drinks coffee while pulling a fish.
+- Added new configuration options and enhanced the quality of pre-defined profiles.
+- The bot now reloads the configuration file after resuming from a pause.
+
+## 0.6.2 (2025-08-03)
 
 ### 🐛 Bug Fixes
 - Fixed an issue where the bot would get stuck if the pull phase timed out.
@@ -22,12 +22,12 @@
 ### 🔧 Improvements
 - Increased the default value of `HOOK_DELAY` to help prevent fish from escaping.
 
-## 0.6.1 (2025-08-02)
+## 0.6.1 (2025-08-03)
 ### 🔧 Improvements
 - Increased the check frequency for the friction brake bar to improve responsiveness.
 
 
-## 0.6.0 (2025-08-02)
+## 0.6.0 (2025-08-03)
 
 ### 🆕 New Features
 - Added "Craft Items" feature to automate crafting of in-game items.
@@ -176,5 +176,3 @@
 
 ## 0.1.0 (2025-03-06)
 - New config system, bolognese mode, trolling mode, window mode support, and more.
-
-[CHANGELOG]: /docs/zh-TW/CHANGELOG.md

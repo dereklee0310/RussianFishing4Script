@@ -1,4 +1,4 @@
-**[[English version]][readme]**
+**[[English version]][readme_en]** **[[Русская версия]][readme_ru]**
 <div align="center">
 
 ![RF4S][rf4s_logo]
@@ -34,7 +34,7 @@
 ## 安裝
 > [!WARNING] 
 > 下載路徑不能包含非英文字符。
-### 可執行檔
+### 可執行檔 (.exe)
 從 [Releases][releases] 下載 `rf4s.zip`。  
 ### pip
 ```
@@ -77,7 +77,7 @@ uv sync
 > [!NOTE]
 > 目前僅水底模式支援多根釣竿。
 
-### 可執行檔
+### 可執行檔 (.exe)
 雙擊執行，或使用：
 ```
 .\main.exe
@@ -153,7 +153,8 @@ uv run main.py
 ## 聯絡我
 dereklee0310@gmail.com 
 
-[readme]: /README.md
+[readme_en]: /README.md
+[readme_ru]: /docs/ru/README.md
 [rf4s_logo]: /static/readme/RF4S.png
 [python_badge]: https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white
 [windows_badge]: https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white
@@ -164,6 +165,5 @@ dereklee0310@gmail.com
 [python]: https://www.python.org/downloads/  
 [releases]: https://github.com/dereklee0310/RussianFishing4Script/releases  
 [status]: /static/readme/status.png
-[configuration]: /docs/en/CONFIGURATION.md
 [changelog]: /docs/en/CHANGELOG.md
 [license]: /LICENSE
