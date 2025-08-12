@@ -56,7 +56,7 @@ def dict_to_cfg(args: dict) -> CN:
     return cfg
 
 
-def print_cfg(cfg: CN, level: int = 0) -> None:
+def dump_cfg(cfg: CN, level: int = 0, result: list | None = None) -> None:
     """
     Print the configuration node in a readable format.
 
@@ -69,22 +69,26 @@ def print_cfg(cfg: CN, level: int = 0) -> None:
     :type level: int
     """
     # Two-space indentation style
-    # indent = "  " * level if level > 0 else ""
-    # for k, v in dict(cfg).items():
-    #     if isinstance(v, CN):
-    #         print(f"{indent}{k}:")
-    #         print_cfg(v, level + 1)
-    #     else:
-    #         print(f"{indent}{k}: {v}")
+    if result is None:
+        result = []
+    indent = "  " * level if level > 0 else ""
+    for k, v in dict(cfg).items():
+        if isinstance(v, CN):
+            result.append(f"{indent}{k}:\n")
+            dump_cfg(v, level + 1, result)
+        else:
+            result.append(f"{indent}{k}: {v}\n")
+    if level == 0:
+        return "".join(result)[:-1]
 
     # Two-Space separated style
     # Need to add a newline manually
-    for k, v in dict(cfg).items():
-        if isinstance(v, CN):
-            print(f"{k}:", end=" ")
-            print_cfg(v, level + 1)
-        else:
-            print(f"{k}: {v}", end=" ")
+    # for k, v in dict(cfg).items():
+    #     if isinstance(v, CN):
+    #         print(f"{k}:", end=" ")
+    #         print_cfg(v, level + 1)
+    #     else:
+    #         print(f"{k}: {v}", end=" ")
 
 
 def to_list(profile: dict) -> list:

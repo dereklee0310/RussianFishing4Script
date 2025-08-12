@@ -202,7 +202,7 @@ class Timer:
             return True
         return False
 
-    def save_data(self, timestamp: str) -> None:
+    def save_data(self, output_dir: Path) -> None:
         """Plot and save an image using rhour and ghour lists from the timer object."""
         cast_rhour_list, cast_ghour_list = self.get_cast_time_list()
         if not cast_rhour_list:
@@ -235,7 +235,7 @@ class Timer:
         ax[1].yaxis.set_major_locator(MaxNLocator(integer=True))
 
         # plt.tight_layout()
-        plt.savefig(str(OUTER_ROOT / f"logs/{timestamp}_chart.png"))
+        plt.savefig(str(output_dir / "chart.png"))
         logger.info("Chart has been saved under logs/")
 
     def set_sink_start_time(self):

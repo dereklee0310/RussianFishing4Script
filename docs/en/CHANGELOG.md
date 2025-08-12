@@ -1,5 +1,6 @@
 ## 0.6.3 (2025-08-11)
 - Add locate game window
+- Rework -d/--data feature
 
 ## 0.6.3 (2025-08-11)
 

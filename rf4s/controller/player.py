@@ -23,7 +23,7 @@ import pyautogui as pag
 from rich import box, print
 from rich.table import Table
 
-from rf4s import exceptions, utils
+from rf4s import exceptions, utils, config
 from rf4s.component.friction_brake import FrictionBrake
 from rf4s.component.tackle import Tackle
 from rf4s.controller import logger
@@ -789,10 +789,13 @@ class Player:
         if send:
             send_result(self.cfg, result)
         if self.cfg.ARGS.DATA:
-            timestamp = self.timer.get_cur_timestamp()
-            self.timer.save_data(timestamp)
-            with open(f"logs/{timestamp}_result.json", "w") as f:
+            output_dir = OUTER_ROOT / "logs" / self.timer.get_cur_timestamp()
+            output_dir.mkdir()
+            self.timer.save_data(output_dir)
+            with open(output_dir / "result.json", "w") as f:
                 json.dump(result, f, indent=4)
+            with open(output_dir / "config.yaml", "w") as f:
+                f.write(config.dump_cfg(self.cfg))
         if self.cfg.ARGS.SHUTDOWN and shutdown:
             os.system("shutdown /s /t 5")
         print(result_table)
