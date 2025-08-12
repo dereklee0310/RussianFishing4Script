@@ -126,14 +126,29 @@ class Detection:
         if window.is_size_supported():
             self._set_absolute_coords()
             self.is_fish_hooked = self.is_fish_hooked_pixel
+            self.locateAll = self.locateAllRegion
+            self.locate = self.locateRegion
         else:
             self.is_fish_hooked = partial(
                 self._get_image_box,
                 image="fish_icon",
                 confidence="0.9",
             )
+            self.locateAll = pag.locateAllOnScreen
+            self.locate = pag.locateOnScreen
 
         self.bait_icon_reference_img = Image.open(self.image_dir / "bait_icon.png")
+
+    def locateAllRegion(self, image, **kwargs):
+        screenshotIm = pag.screenshot(region=self.window.get_box())
+        return pag.locateAll(image, screenshotIm, **kwargs)
+
+    def locateRegion(self, image, **kwargs):
+        try:
+            screenshotIm = pag.screenshot(region=self.window.get_box())
+            return pag.locate(image, screenshotIm, **kwargs)
+        except pag.ImageNotFoundException:
+            return None
 
     def _get_image_box(
         self, image: str, confidence: float, multiple: bool = False
@@ -151,8 +166,8 @@ class Detection:
         """
         image_path = str(self.image_dir / f"{image}.png")
         if multiple:
-            return pag.locateAllOnScreen(image_path, confidence=confidence)
-        return pag.locateOnScreen(image_path, confidence=confidence)
+            return self.locateAll(image_path, confidence=confidence)
+        return self.locate(image_path, confidence=confidence)
 
     def _set_absolute_coords(self) -> None:
         """Add offsets to the base coordinates to get absolute ones."""

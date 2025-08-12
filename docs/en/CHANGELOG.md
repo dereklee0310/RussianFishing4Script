@@ -1,4 +1,7 @@
 ## 0.6.3 (2025-08-11)
+- Add locate game window
+
+## 0.6.3 (2025-08-11)
 
 ### 🐛 Bug Fixes
 - Fixed an issue where the script attempted to reset the tackle after catching a fish.
