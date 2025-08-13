@@ -1,6 +1,7 @@
 ## 0.6.3 (2025-08-11)
 - Add locate game window
 - Rework -d/--data feature
+- Add card and gift to result table
 
 ## 0.6.3 (2025-08-11)
 

@@ -51,6 +51,8 @@ class BotResult:
             "Blue tag fish": self.blue,
             "Purple tag fish": self.purple,
             "Pink tag fish": self.pink,
+            "Card": self.card,
+            "Gift": self.gift,
             "Tea consumed": self.tea,
             "Carrot consumed": self.carrot,
             "Alcohol consumed": self.alcohol,
