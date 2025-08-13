@@ -23,7 +23,7 @@ import pyautogui as pag
 from rich import box, print
 from rich.table import Table
 
-from rf4s import exceptions, utils, config
+from rf4s import config, exceptions, utils
 from rf4s.component.friction_brake import FrictionBrake
 from rf4s.component.tackle import Tackle
 from rf4s.controller import logger

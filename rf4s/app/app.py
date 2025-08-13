@@ -35,12 +35,12 @@ from yacs.config import CfgNode as CN
 from rf4s import config, exceptions, utils
 from rf4s.app.core import logger
 from rf4s.component.friction_brake import FrictionBrake
+from rf4s.config import load_cfg
 from rf4s.controller.detection import Detection
 from rf4s.controller.player import Player
 from rf4s.controller.timer import Timer, add_jitter
 from rf4s.controller.window import Window
 from rf4s.result import BotResult, CraftResult, HarvestResult, Result
-from rf4s.config import load_cfg
 
 ANIMATION_DELAY = 0.5
 CRAFT_DELAY = 4.0
@@ -418,7 +418,7 @@ class BotApp(App):
             logger.info("Pausing the bot")
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
             self.paused = True
-            logger.info("Bot paused") # Don't remove this! It messes with signal?
+            logger.info("Bot paused")  # Don't remove this! It messes with signal?
             sys.exit()
 
     def _pause_wait(self, key: keyboard.KeyCode) -> None:

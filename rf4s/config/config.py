@@ -56,7 +56,7 @@ def dict_to_cfg(args: dict) -> CN:
     return cfg
 
 
-def dump_cfg(cfg: CN, level: int = 0, result: list | None = None) -> None:
+def dump_cfg(cfg: CN, level: int = 0, result: list | None = None) -> str | None:
     """
     Print the configuration node in a readable format.
 
@@ -80,6 +80,7 @@ def dump_cfg(cfg: CN, level: int = 0, result: list | None = None) -> None:
             result.append(f"{indent}{k}: {v}\n")
     if level == 0:
         return "".join(result)[:-1]
+    return None
 
     # Two-Space separated style
     # Need to add a newline manually
