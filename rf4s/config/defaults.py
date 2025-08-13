@@ -34,11 +34,11 @@ _C.KEY.SPOD_ROD = 7
 # _C.KEY.QUIT = "CTRL-C"
 _C.KEY.QUIT = "CTRL-C"
 # Bot pause/restart shortcut
-_C.KEY.PAUSE = "g"
+_C.KEY.PAUSE = "["
 # Friction brake (standalone) reset shortcut
-_C.KEY.FRICTION_BRAKE_RESET = "g"
+_C.KEY.FRICTION_BRAKE_RESET = "["
 # Friction brake (standalone) quit shortcut, CTRL-C is not supported.
-_C.KEY.FRICTION_BRAKE_QUIT = "h"
+_C.KEY.FRICTION_BRAKE_QUIT = "]"
 # Move (standalone) pause shortcut
 _C.KEY.MOVE_PAUSE = "w"
 # Move (standalone) quit shortcut, CTRL-C is not supported.
