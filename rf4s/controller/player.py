@@ -96,6 +96,7 @@ class Player:
         self.have_new_groundbait = True
         self.have_new_dry_mix = True
         self.have_new_pva = True
+        self.friction_brake = None
         self.result = BotResult()
 
         self.trolling_started = False
@@ -798,8 +799,6 @@ class Player:
         if self.cfg.ARGS.SHUTDOWN and shutdown:
             os.system("shutdown /s /t 5")
         print(result_table)
-        if self.friction_brake.monitor_process.is_alive():
-            self.friction_brake.monitor_process.terminate()
         with self.hold_keys(mouse=False, shift=False):
             utils.safe_exit()
 
@@ -901,12 +900,12 @@ class Player:
         :type msg: str
         """
         logger.critical(msg)
-
+        if self.friction_brake is not None:
+            self.friction_brake.reset(self.cfg.BOT.FRICTION_BRAKE.INITIAL)
         with self.hold_keys(mouse=False, shift=False):
             sleep(ANIMATION_DELAY)
             pag.press("esc")
             sleep(ANIMATION_DELAY)
-
             if self.cfg.ARGS.SIGNOUT:
                 pag.keyDown("shift")
             pag.moveTo(self.detection.get_quit_position())
@@ -920,6 +919,7 @@ class Player:
 
     def disconnected_quit(self) -> None:
         """Quit the game through the main menu."""
+        logger.critical("Game disconnected")
         with self.hold_keys(mouse=False, shift=False):
             pag.press("space")
             # Sleep to bypass the black screen (experimental)

@@ -109,8 +109,8 @@ def monitor_friction_brake(friction_brake: FrictionBrake) -> None:
     logger.info("Monitoring friction brake")
     pre_time = time()
     fish_hooked = False
-
     try:
+        friction_brake.reset(friction_brake.fb_cfg.INITIAL, to_max=True)
         while True:
             if not friction_brake.detection.is_fish_hooked_pixel():
                 sleep(FRICTION_BRAKE_MONITOR_DELAY)
