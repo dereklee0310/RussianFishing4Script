@@ -822,7 +822,10 @@ class Player:
             self.timer.add_cast_time()
 
             while self.detection.is_gift_receieved():
-                if self.cfg.ARGS.SCREENSHOT:
+                if (
+                    self.cfg.ARGS.SCREENSHOT
+                    and "gift" in self.cfg.KEEPNET.SCREENSHOT_EVENT
+                ):
                     filepath = (
                         OUTER_ROOT
                         / "screenshots"
@@ -858,9 +861,18 @@ class Player:
             card = True
             self.result.card += 1
 
-        if self.cfg.ARGS.SCREENSHOT and (
-            (not self.cfg.BOT.KEEPNET.SCREENSHOT_TAGS or screenshot) or card
-        ):
+        fish_screenshot = (
+            self.cfg.ARGS.SCREENSHOT
+            and (not self.cfg.BOT.KEEPNET.SCREENSHOT_TAGS or screenshot)
+            and "fish" in self.cfg.KEEPNET.SCREENSHOT_EVENT
+        )
+        card_screenshot = (
+            self.cfg.ARGS.SCREENSHOT
+            and card
+            and "card" in self.cfg.KEEPNET.SCREENSHOT_EVENT
+        )
+
+        if fish_screenshot or card_screenshot:
             filepath = (
                 OUTER_ROOT / "screenshots" / f"{self.timer.get_cur_timestamp()}.png"
             )

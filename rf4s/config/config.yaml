@@ -38,6 +38,7 @@ BOT:
   CLICK_LOCK: false
   KEEPNET:
     CAPACITY: 100
+    SCREENSHOT_EVENT: ["fish", "card", "gift"]
     SCREENSHOT_TAGS: ["yellow", "blue"]
     BYPASS_TAGS: ["yellow", "blue"]
     BLACKLIST: []

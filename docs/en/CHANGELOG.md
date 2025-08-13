@@ -11,6 +11,7 @@
 - Change default pause fb reset and quit key
 - Add new marine profiles
 - Rename old profiles
+- Add SCREENSHOT_EVENT
 
 
 ## 0.6.3 (2025-08-11)
