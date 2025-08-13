@@ -91,11 +91,6 @@ class Player:
         ]
         self.tackle = self.tackles[self.tackle_idx]
 
-        self.friction_brake_lock = Lock()
-        self.friction_brake = FrictionBrake(
-            cfg, self.friction_brake_lock, self.detection
-        )
-
         self.cur_coffee = 0
         self.have_new_lure = True
         self.have_new_groundbait = True
@@ -111,6 +106,11 @@ class Player:
     def start_fishing(self) -> None:
         """Start the main fishing loop with the specified fishing strategy."""
         if self.cfg.ARGS.FRICTION_BRAKE:
+            # Define here because we cannot start a process twice (same instance)
+            self.friction_brake_lock = Lock()
+            self.friction_brake = FrictionBrake(
+                self.cfg, self.friction_brake_lock, self.detection
+            )
             logger.info("Spawing new process, do not quit the script")
             self.friction_brake.monitor_process.start()
 
@@ -177,7 +177,6 @@ class Player:
         try:
             yield
         except exceptions.FishCapturedError:
-            logger.error("Got an unexpected fish!")
             self.handle_fish()
         except exceptions.LureBrokenError:
             self._handle_broken_lure()

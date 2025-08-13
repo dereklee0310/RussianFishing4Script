@@ -297,7 +297,9 @@ class BotApp(App):
                 self.display_profiles()
                 self.get_pid()
             profile_name = list(self.cfg.PROFILE)[self.args.pid]
+        self.merge_default_to_profile(profile_name)
 
+    def merge_default_to_profile(self, profile_name) -> None:
         self.validate_profile(profile_name)
         mode = self.cfg.PROFILE[profile_name].MODE.upper()
         user_profile = CN({"NAME": profile_name}, new_allowed=True)
@@ -408,31 +410,27 @@ class BotApp(App):
         """
         # Trigger CTRL_C_EVENT, which will be caught in start() to simulate pressing
         # CTRL-C to terminate the script.
-        if key == keyboard.KeyCode.from_char(self.cfg.KEY.QUIT):
+        key = str(key).lower()
+        if key == str(keyboard.KeyCode.from_char(self.cfg.KEY.QUIT)):
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
             sys.exit()
-        if key == keyboard.KeyCode.from_char(self.cfg.KEY.PAUSE):
-            logger.info("Bot paused")
-            self.paused = True
+        if key == str(keyboard.KeyCode.from_char(self.cfg.KEY.PAUSE)):
+            logger.info("Pausing the bot")
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
+            self.paused = True
+            logger.info("Bot paused") # Don't remove this! It messes with signal?
             sys.exit()
 
     def _pause_wait(self, key: keyboard.KeyCode) -> None:
-        # Trigger CTRL_C_EVENT, which will be caught in start() to simulate pressing
-        # CTRL-C to terminate the script.
-        if key == keyboard.KeyCode.from_char(self.cfg.KEY.QUIT):
-            os.kill(os.getpid(), signal.CTRL_C_EVENT)
-            sys.exit()
-        if key == keyboard.KeyCode.from_char(self.cfg.KEY.PAUSE):
+        key = str(key).lower()
+        if key == str(keyboard.KeyCode.from_char(self.cfg.KEY.PAUSE)):
             sys.exit()
 
     def reload_cfg(self) -> None:
-        self.cfg.defrost()
         profile_name = self.cfg.PROFILE.NAME
-        new_cfg = load_cfg()
-        new_profile = new_cfg.PROFILE[profile_name]
-        self.cfg.merge_from_other_cfg(new_cfg)
-        self.cfg.PROFILE = new_profile
+        self.cfg = load_cfg()
+        self.merge_default_to_profile(profile_name)
+        self.merge_args_to_cfg()
         self.validate_cfg()
         self.cfg.freeze()
         self.display_info()
@@ -444,11 +442,9 @@ class BotApp(App):
         registers key listeners, and begins the fishing automation.
         Handles termination and displays result.
         """
-
-        if self.cfg.KEY.QUIT != "'CTRL-C'":
-            listener = keyboard.Listener(on_release=self._on_release)
-            listener.start()
         while True:
+            general_listener = keyboard.Listener(on_release=self._on_release)
+            general_listener.start()
             self.window.activate_game_window()
             try:
                 self.player.start_fishing()
@@ -461,6 +457,7 @@ class BotApp(App):
                 utils.print_hint_box(
                     "Any modifications made to LAUNCH_OPTIONS will be ignored."
                 )
+                general_listener.join()
                 with (
                     self.player.hold_keys(mouse=False, shift=False, reset=True),
                     keyboard.Listener(on_release=self._pause_wait) as listener,
@@ -550,7 +547,7 @@ class CraftApp(App):
         :param key: Key released by the user.
         :type key: keyboard.KeyCode
         """
-        if key == keyboard.KeyCode.from_char(self.cfg.KEY.QUIT):
+        if str(key).lower() == str(keyboard.KeyCode.from_char(self.cfg.KEY.QUIT)):
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
             sys.exit()
 
@@ -560,9 +557,8 @@ class CraftApp(App):
         Executes the primary loop for crafting items until materials are exhausted or
         the crafting limit is reached. Supports fast crafting mode and discarding items.
         """
-        if self.cfg.KEY.QUIT != "'CTRL-C'":
-            listener = keyboard.Listener(on_release=self._on_release)
-            listener.start()
+        listener = keyboard.Listener(on_release=self._on_release)
+        listener.start()
 
         try:
             utils.print_usage_box(f"Press {self.cfg.KEY.QUIT} to quit.")
@@ -625,9 +621,10 @@ class MoveApp(App):
         :param key: Key released by the user.
         :type key: keyboard.KeyCode
         """
-        if key == keyboard.KeyCode.from_char(self.cfg.KEY.MOVE_QUIT):
+        key = str(key).lower()
+        if key == str(keyboard.KeyCode.from_char(self.cfg.KEY.MOVE_QUIT)):
             sys.exit()
-        elif key == keyboard.KeyCode.from_char(self.cfg.KEY.MOVE_PAUSE):
+        if key == str(keyboard.KeyCode.from_char(self.cfg.KEY.MOVE_PAUSE)):
             if self.w_key_pressed:
                 self.w_key_pressed = False
                 return
@@ -725,7 +722,7 @@ class HarvestApp(App):
         """
         # Trigger CTRL_C_EVENT, which will be caught in start() to simulate pressing
         # CTRL-C to terminate the script.
-        if key == keyboard.KeyCode.from_char(self.cfg.KEY.QUIT):
+        if str(key).lower() == str(keyboard.KeyCode.from_char(self.cfg.KEY.QUIT)):
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
             sys.exit()
 
@@ -749,9 +746,8 @@ class HarvestApp(App):
 
     def start(self) -> None:
         """Wrapper method that handle window activation and result display."""
-        if self.cfg.KEY.QUIT != "'CTRL-C'":
-            listener = keyboard.Listener(on_release=self._on_release)
-            listener.start()
+        listener = keyboard.Listener(on_release=self._on_release)
+        listener.start()
 
         self.window.activate_game_window()
         try:
@@ -1026,10 +1022,11 @@ class FrictionBrakeApp(App):
         :param key: The key that was released.
         :type key: keyboard.KeyCode
         """
-        if key == keyboard.KeyCode.from_char(self.cfg.KEY.FRICTION_BRAKE_QUIT):
+        key = str(key).lower()
+        if key == str(keyboard.KeyCode.from_char(self.cfg.KEY.FRICTION_BRAKE_QUIT)):
             self.friction_brake.monitor_process.terminate()
             sys.exit()
-        if key == keyboard.KeyCode.from_char(self.cfg.KEY.FRICTION_BRAKE_RESET):
+        if key == str(keyboard.KeyCode.from_char(self.cfg.KEY.FRICTION_BRAKE_RESET)):
             self.friction_brake.reset(self.cfg.FRICTION_BRAKE.INITIAL)
 
     def start(self):

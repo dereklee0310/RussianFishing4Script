@@ -6,6 +6,8 @@
 - Faster FB Reset
 - Now FB app use FRICTION_BRAKE.SENSITIVITY correctly
 - Now Bot app use BOT.FRICTION_BRAKE.INITIAL correctly
+- Fix pause bug
+- Optimize time required to pause
 
 ## 0.6.3 (2025-08-11)
 

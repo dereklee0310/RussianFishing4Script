@@ -76,7 +76,6 @@ class FrictionBrake:
             else:
                 cur = self.cur.value
             diff = cur - target
-            print(cur, target, diff)
             for _ in range(abs(diff)):
                 pag.scroll(DOWN, _pause=False)
                 sleep(FRICTION_BRAKE_CHANGE_DELAY)
