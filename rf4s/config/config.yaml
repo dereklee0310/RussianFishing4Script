@@ -243,8 +243,8 @@ PROFILE:
     CAMERA_SHAPE: "square"
     POST_ACCELERATION: true
 
-  Walk the dog:
-    DESCRIPTION: "Yama River, Beluga Venga 10000, speed 50, walk the dog."
+  Walk the dog | Beluga Venga 10000:
+    DESCRIPTION: "Yama River, speed 50, walk the dog."
     LAUNCH_OPTIONS: ""
     MODE: "spin"
     TYPE: "pause"
@@ -256,8 +256,8 @@ PROFILE:
     RETRIEVAL_TIMEOUT: 256.0
     PRE_ACCELERATION: false
     POST_ACCELERATION: true
-  Twitching:
-    DESCRIPTION: "Kuori Lake, 92:100, Beluga Venga 10000, speed 50, walk the dog."
+  Twitching | Beluga Venga 10000:
+    DESCRIPTION: "Kuori Lake, 92:100, speed 50, twitching."
     LAUNCH_OPTIONS: ""
     MODE: "spin"
     TYPE: "pause"
@@ -269,8 +269,8 @@ PROFILE:
     RETRIEVAL_TIMEOUT: 256.0
     PRE_ACCELERATION: false
     POST_ACCELERATION: true
-  Jig step:
-    DESCRIPTION: "Lower Tunguska River, 88:96, Beluga Venga 10000, speed 50, jig step."
+  Jig step | Beluga Venga 10000:
+    DESCRIPTION: "Lower Tunguska River, 88:96, speed 50, jig step."
     LAUNCH_OPTIONS: ""
     MODE: "spin"
     TYPE: "pause"
@@ -282,8 +282,8 @@ PROFILE:
     RETRIEVAL_TIMEOUT: 256.0
     PRE_ACCELERATION: false
     POST_ACCELERATION: true
-  Bottom c6:
-    DESCRIPTION: "Copper Lake, 67:57, c6."
+  Bottom | c6 | Royal Picker PM98H:
+    DESCRIPTION: "Copper Lake, 67:57."
     LAUNCH_OPTIONS: ""
     MODE: "bottom"
     CAST_POWER_LEVEL: 2.0
@@ -293,8 +293,8 @@ PROFILE:
     CHECK_MISS_LIMIT: 10
     PUT_DOWN_DELAY: 2.0
     RANDOM_ROD_SELECTION: true
-  Bottom c12:
-    DESCRIPTION: "Copper Lake, 61:53, clip 12."
+  Bottom | c12 | Royal Picker PM98H:
+    DESCRIPTION: "Copper Lake, 61:53."
     LAUNCH_OPTIONS: ""
     MODE: "bottom"
     CAST_POWER_LEVEL: 3.5
@@ -304,8 +304,8 @@ PROFILE:
     CHECK_MISS_LIMIT: 16
     PUT_DOWN_DELAY: 2.0
     RANDOM_ROD_SELECTION: true
-  Bottom c17:
-    DESCRIPTION: "Old burg Lake, 21:67, clip 17."
+  Bottom | c17 | Fortuna Carp 360XH:
+    DESCRIPTION: "Old burg Lake, 21:67."
     LAUNCH_OPTIONS: ""
     MODE: "bottom"
     CAST_POWER_LEVEL: 3.0
@@ -315,8 +315,8 @@ PROFILE:
     CHECK_MISS_LIMIT: 16
     PUT_DOWN_DELAY: 2.0
     RANDOM_ROD_SELECTION: true
-  Bottom c30:
-    DESCRIPTION: "Copper Lake, 37:32, clip 30."
+  Bottom | c30 | Royal Picker PM98H:
+    DESCRIPTION: "Copper Lake, 37:32."
     LAUNCH_OPTIONS: ""
     MODE: "bottom"
     CAST_POWER_LEVEL: 4.0
@@ -326,8 +326,8 @@ PROFILE:
     CHECK_MISS_LIMIT: 10
     PUT_DOWN_DELAY: 2.0
     RANDOM_ROD_SELECTION: true
-  Bottom c35:
-    DESCRIPTION: "Amber Lake, 83:145, clip 35."
+  Bottom | c35 | Fortuna Carp 360XH:
+    DESCRIPTION: "Amber Lake, 83:145."
     LAUNCH_OPTIONS: ""
     MODE: "bottom"
     CAST_POWER_LEVEL: 3.0
@@ -337,8 +337,8 @@ PROFILE:
     CHECK_MISS_LIMIT: 16
     PUT_DOWN_DELAY: 2.0
     RANDOM_ROD_SELECTION: true
-  Marine c20 strong pirking:
-    DESCRIPTION: "Norwegian Sea, clip 20, strong pirking."
+  Marine | c20 | strong pirking | SAT Rigal 20 2S:
+    DESCRIPTION: "Norwegian Sea, 30/34m, Atlantic Saury."
     LAUNCH_OPTIONS: ""
     MODE: "pirk"
     CAST_POWER_LEVEL: 1.0
@@ -355,8 +355,8 @@ PROFILE:
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
-  Marine 34/41/55m movement:
-    DESCRIPTION: "Norwegian Sea, 34/41/55m, movement at the bottom layer."
+  Marine | 34/41/55m | movement | SAT Rigal 20 2S:
+    DESCRIPTION: "Norwegian Sea, 34/41/55m."
     LAUNCH_OPTIONS: ""
     MODE: "pirk"
     CAST_POWER_LEVEL: 1.0
@@ -373,8 +373,8 @@ PROFILE:
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
-  Marine 34/41/55m pirking:
-    DESCRIPTION: "Norwegian Sea, 34/41/55m, pirking at the bottom layer."
+  Marine | 34/41/55m | pirking | SAT Rigal 20 2S:
+    DESCRIPTION: "Norwegian Sea, 34/41/55m."
     LAUNCH_OPTIONS: ""
     MODE: "pirk"
     CAST_POWER_LEVEL: 1.0
@@ -391,8 +391,8 @@ PROFILE:
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
-  Marine 34/41/55m strong pirking:
-    DESCRIPTION: "Norwegian Sea, 34/41/55m, strong pirking at the bottom layer."
+  Marine | 34/41/55m | strong pirking | SAT Rigal 20 2S:
+    DESCRIPTION: "Norwegian Sea, 34/41/55m."
     LAUNCH_OPTIONS: ""
     MODE: "pirk"
     CAST_POWER_LEVEL: 1.0
@@ -409,8 +409,26 @@ PROFILE:
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
-  Marine 80/88m movement:
-    DESCRIPTION: "Norwegian Sea, 80/88m, movement at the bottom layer."
+  Marine | 34/41/55m | strong pirking | Reef Albacore 40 DS:
+    DESCRIPTION: "Norwegian Sea, 34/41/55m."
+    LAUNCH_OPTIONS: ""
+    MODE: "pirk"
+    CAST_POWER_LEVEL: 1.0
+    CAST_DELAY: 4.0
+    SINK_TIMEOUT: 60.0
+    TIGHTEN_DURATION: 2.0
+    DEPTH_ADJUST_DELAY: 4.0
+    DEPTH_ADJUST_DURATION: 2.0
+    CTRL: false
+    SHIFT: false
+    PIRK_DURATION: 0.9
+    PIRK_DELAY: 2.0
+    PIRK_TIMEOUT: 32.0
+    PIRK_RETRIEVAL: false
+    HOOK_DELAY: 0.5
+    POST_ACCELERATION: true
+  Marine | 80/88m | movement | Reef Albacore 40 DS:
+    DESCRIPTION: "Norwegian Sea, 80/88m."
     LAUNCH_OPTIONS: ""
     MODE: "pirk"
     CAST_POWER_LEVEL: 1.0
@@ -427,8 +445,8 @@ PROFILE:
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
-  Marine 80/88m strong pirking:
-    DESCRIPTION: "Norwegian Sea, 80/88m, strong pirking at the bottom layer."
+  Marine | 80/88m | strong pirking | Reef Albacore 40 DS:
+    DESCRIPTION: "Norwegian Sea, 80/88m."
     LAUNCH_OPTIONS: ""
     MODE: "pirk"
     CAST_POWER_LEVEL: 1.0
@@ -445,8 +463,8 @@ PROFILE:
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
-  Marine 120/144m movement:
-    DESCRIPTION: "Norwegian Sea, 120m, movement at the bottom layer"
+  Marine | 120/144m | movement | Reef Albacore 40 DS:
+    DESCRIPTION: "Norwegian Sea, 120/144m."
     LAUNCH_OPTIONS: ""
     MODE: "pirk"
     CAST_POWER_LEVEL: 1.0
@@ -463,8 +481,8 @@ PROFILE:
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
-  Marine 120/144m strong pirking:
-    DESCRIPTION: "Norwegian Sea, 120m, strong pirking at the bottom layer"
+  Marine | 120/144m | strong pirking | Reef Albacore 40 DS:
+    DESCRIPTION: "Norwegian Sea, 120/144m."
     LAUNCH_OPTIONS: ""
     MODE: "pirk"
     CAST_POWER_LEVEL: 1.0
@@ -475,14 +493,32 @@ PROFILE:
     DEPTH_ADJUST_DURATION: 3.0
     CTRL: false
     SHIFT: false
-    PIRK_DURATION: 0.0
-    PIRK_DELAY: 0.0
+    PIRK_DURATION: 0.9
+    PIRK_DELAY: 2.0
     PIRK_TIMEOUT: 64.0
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
-  Match still water c10:
-    DESCRIPTION: "Ladoga Lake, 73:55, c10, depth 150cm."
+  Marine | 215m | strong pirking | Reef Albacore 40 DS:
+    DESCRIPTION: "Norwegian Sea, 215m."
+    LAUNCH_OPTIONS: ""
+    MODE: "pirk"
+    CAST_POWER_LEVEL: 1.0
+    CAST_DELAY: 4.0
+    SINK_TIMEOUT: 140.0
+    TIGHTEN_DURATION: 4.0
+    DEPTH_ADJUST_DELAY: 5.0
+    DEPTH_ADJUST_DURATION: 4.0
+    CTRL: false
+    SHIFT: false
+    PIRK_DURATION: 0.9
+    PIRK_DELAY: 2.0
+    PIRK_TIMEOUT: 64.0
+    PIRK_RETRIEVAL: false
+    HOOK_DELAY: 0.5
+    POST_ACCELERATION: true
+  Match | still water | c10:
+    DESCRIPTION: "Ladoga Lake, 73:55, depth 150cm."
     LAUNCH_OPTIONS: ""
     MODE: "bolognese"
     CAST_POWER_LEVEL: 5.0

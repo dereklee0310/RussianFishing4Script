@@ -9,6 +9,8 @@
 - Optimize time required to pause
 - Now reset fb on quitting
 - Change default pause fb reset and quit key
+- Add new marine profiles
+- Rename old profiles
 
 
 ## 0.6.3 (2025-08-11)
