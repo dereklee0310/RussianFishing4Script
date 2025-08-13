@@ -343,7 +343,7 @@ class BotApp(App):
 
         logger.warning(
             "Unsupported window size '%s'\n"
-            "Supported window size: '2560x1440', '1920x1080' or '1600x900'\n",
+            "Supported window size: '2560x1440', '1920x1080' or '1600x900'\n"
             "Will search the image on the screen instead of the game window",
             self.window.get_resolution_str(),
         )
