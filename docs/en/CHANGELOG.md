@@ -2,6 +2,10 @@
 - Add locate game window
 - Rework -d/--data feature
 - Add card and gift to result table
+- FB app now reset friction brake at startup
+- Faster FB Reset
+- Now FB app use FRICTION_BRAKE.SENSITIVITY correctly
+- Now Bot app use BOT.FRICTION_BRAKE.INITIAL correctly
 
 ## 0.6.3 (2025-08-11)
 

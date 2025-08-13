@@ -171,8 +171,7 @@ def reset_friction_brake_after(func):
         if not self.cfg.ARGS.FRICTION_BRAKE:
             return
 
-        with self.friction_brake_lock:
-            self.friction_brake.reset(self.cfg.FRICTION_BRAKE.INITIAL)
+        self.friction_brake.reset(self.cfg.BOT.FRICTION_BRAKE.INITIAL)
 
     return wrapper
 

@@ -1038,4 +1038,5 @@ class FrictionBrakeApp(App):
         listener.start()
         self.window.activate_game_window()
         self.friction_brake.monitor_process.start()
+        self.friction_brake.reset(self.cfg.FRICTION_BRAKE.INITIAL, to_max=True)
         listener.join()

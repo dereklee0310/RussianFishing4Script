@@ -177,7 +177,11 @@ class Detection:
             setattr(self, f"{key}_coord", self._get_absolute_coord(key))
 
         self.bait_icon_coord = self._get_absolute_coord("bait_icon") + [44, 52]
-        friction_brake_key = f"friction_brake_{self.cfg.BOT.FRICTION_BRAKE.SENSITIVITY}"
+        if self.cfg.ARGS.FEATURE == "bot":
+            sensitivity = self.cfg.BOT.FRICTION_BRAKE.SENSITIVITY
+        else: # friction_brake
+            sensitivity = self.cfg.FRICTION_BRAKE.SENSITIVITY
+        friction_brake_key = f"friction_brake_{sensitivity}"
         self.friction_brake_coord = self._get_absolute_coord(friction_brake_key)
 
         bases = self._get_absolute_coord("float_camera")
