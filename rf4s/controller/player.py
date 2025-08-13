@@ -824,7 +824,7 @@ class Player:
             while self.detection.is_gift_receieved():
                 if (
                     self.cfg.ARGS.SCREENSHOT
-                    and "gift" in self.cfg.KEEPNET.SCREENSHOT_EVENT
+                    and "gift" in self.cfg.BOT.KEEPNET.SCREENSHOT_EVENTS
                 ):
                     filepath = (
                         OUTER_ROOT
@@ -864,12 +864,12 @@ class Player:
         fish_screenshot = (
             self.cfg.ARGS.SCREENSHOT
             and (not self.cfg.BOT.KEEPNET.SCREENSHOT_TAGS or screenshot)
-            and "fish" in self.cfg.KEEPNET.SCREENSHOT_EVENT
+            and "fish" in self.cfg.BOT.KEEPNET.SCREENSHOT_EVENTS
         )
         card_screenshot = (
             self.cfg.ARGS.SCREENSHOT
             and card
-            and "card" in self.cfg.KEEPNET.SCREENSHOT_EVENT
+            and "card" in self.cfg.BOT.KEEPNET.SCREENSHOT_EVENTS
         )
 
         if fish_screenshot or card_screenshot:

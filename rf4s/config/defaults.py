@@ -106,7 +106,7 @@ _C.BOT.KEEPNET = CN()
 _C.BOT.KEEPNET.CAPACITY = 100
 # Events that triggers a screenshot.
 # (options: fish, card, gift)
-_C.BOT.KEEPNET.SCREENSHOT_EVENT = ("fish", "card", "gift")
+_C.BOT.KEEPNET.SCREENSHOT_EVENTS = ("fish", "card", "gift")
 # Take a screenshot when capturing a fish with any tags below.
 # Always take a screenshot if it's left empty.
 # (options: green, yellow, blue, purple, pink)
