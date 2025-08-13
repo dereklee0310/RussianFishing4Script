@@ -208,7 +208,6 @@ class Tackle:
         self.is_rare_event_occur()
         raise exceptions.RetrieveTimeoutError
 
-    @utils.release_keys_after()
     def _special_retrieve(self, button: str) -> None:
         """Retrieve the line with special conditions (pause or lift).
 
@@ -226,7 +225,7 @@ class Tackle:
             ):
                 return
 
-    @utils.release_keys_after()
+    @utils.release_keys_after() #TODO: FIX THIS
     def pirk(self) -> None:
         """Start pirking until a fish is hooked."""
         logger.info("Pirking")

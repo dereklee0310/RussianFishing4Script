@@ -12,6 +12,7 @@
 - Add new marine profiles
 - Rename old profiles
 - Add SCREENSHOT_EVENTS
+- Fix pre_acceleration bug
 
 
 ## 0.6.3 (2025-08-11)
