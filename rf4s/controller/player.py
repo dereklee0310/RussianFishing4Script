@@ -245,7 +245,6 @@ class Player:
         while True:
             with self.loop_restart_handler():
                 self.enable_trolling()
-                print(self.timer.is_spod_rod_castable())
                 if self.cfg.ARGS.SPOD_ROD and self.timer.is_spod_rod_castable():
                     self.cast_spod_rod()
 

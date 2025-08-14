@@ -13,7 +13,7 @@
 - Rename old profiles
 - Add SCREENSHOT_EVENTS
 - Fix pre_acceleration bug
-
+- Increase STAT.COFFEE_LIMIT default value
 
 ## 0.6.3 (2025-08-11)
 
