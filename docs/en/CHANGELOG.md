@@ -1,19 +1,25 @@
-## 0.6.3 (2025-08-11)
-- Rework -d/--data feature
-- Add card and gift to result table
-- FB and app now reset friction brake at startup
-- Faster FB Reset
-- Now FB app use FRICTION_BRAKE.SENSITIVITY correctly
-- Now Bot app use BOT.FRICTION_BRAKE.INITIAL correctly
-- Fix pause bug
-- Optimize time required to pause
-- Now reset fb on quitting
-- Change default pause fb reset and quit key
-- Add new marine profiles
-- Rename old profiles
-- Add SCREENSHOT_EVENTS
-- Fix pre_acceleration bug
-- Increase STAT.COFFEE_LIMIT default value
+## 0.7.0 (2025-08-15)
+
+### 🆕 New Features
+- Added new marine fishing profiles.
+- Introduced `BOT.KEEPNET.SCREENSHOT_EVENTS`, allowing users to specify which types of events should trigger a screenshot.
+
+### 🐛 Bug Fixes
+- Fixed a bug where `friction_brake` used an incorrect friction brake sensitivity setting.
+- Resolved an issue where `bot` applied an incorrect initial value for friction brake.
+- Fixed several bugs that caused the `pause` function to behave incorrectly.
+- Addressed a conflict between `pre_acceleration` and `post_acceleration` that could lead to unintended behavior.
+
+### 🔧 Improvements
+- The `-d`/`--data` flag now saves chart, result, and config files into a timestamped directory at `/logs/{timestamp}`.
+- The result table now additionally displays the number of cards and gifts received.
+- The `friction_brake` feature now sets the brake to its initial value upon startup.
+- Optimized the time required to pause the bot for a more responsive experience.
+- `friction_brake` will now automatically reset when the bot is stopped through non-manual means.
+- Renamed existing profiles for improved readability and ease of use.
+- Changed the default pause key for `bot` from `g` to `[` to avoid conflicts with the "Stop engine" hotkey.
+- Updated the default keys for `friction_brake`: reset is now `[` and quit is `]`.
+- Increased the default value of `STAT.COFFEE_LIMIT` to better handle stronger fish.
 
 ## 0.6.3 (2025-08-11)
 
