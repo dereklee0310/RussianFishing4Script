@@ -97,7 +97,6 @@ class Player:
         self.have_new_dry_mix = True
         self.have_new_pva = True
         self.friction_brake = None
-        self.result = BotResult()
 
         self.trolling_started = False
         self.mouse_pressed = False

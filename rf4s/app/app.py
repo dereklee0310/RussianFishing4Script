@@ -120,7 +120,7 @@ class BotApp(App):
         self.result = BotResult()
         self.window = Window()
         self.player = Player(
-            self.cfg, Timer(self.cfg), Detection(cfg, self.window), self.result
+            self.cfg, Timer(self.cfg), Detection(self.cfg, self.window), self.result
         )
 
         self.paused = False
@@ -465,6 +465,12 @@ class BotApp(App):
                     listener.join()
                 logger.info("Restarting bot without resetting records")
                 self.reload_cfg()
+                self.player = Player(
+                    self.cfg,
+                    self.player.timer,
+                    self.player.detection,
+                    self.player.result,
+                )
                 self.paused = False
 
         self.player.handle_termination("Terminated by user", shutdown=False, send=False)

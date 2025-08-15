@@ -1,6 +1,7 @@
 ## 0.7.0 (2025-08-15)
 - Fix friction brake reset bug
 - Fix PIRK.PIRK_RETRIEVAL bug
+- Fix config reload bug
 
 ## 0.7.0 (2025-08-15)
 
@@ -21,7 +22,7 @@
 - Optimized the time required to pause the bot for a more responsive experience.
 - `friction_brake` will now automatically reset when the bot is stopped through non-manual means.
 - Renamed existing profiles for improved readability and ease of use.
-- Changed the default pause key for `bot` from `g` to `[` to avoid conflicts with the "Stop engine" hotkey.
+- Changed the default pause key for q`bot` from `g` to `[` to avoid conflicts with the "Stop engine" hotkey.
 - Updated the default keys for `friction_brake`: reset is now `[` and quit is `]`.
 - Increased the default value of `STAT.COFFEE_LIMIT` to better handle stronger fish.
 
