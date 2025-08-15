@@ -2,6 +2,7 @@
 - Fix friction brake reset bug
 - Fix PIRK.PIRK_RETRIEVAL bug
 - Fix config reload bug
+- Add ticket record
 
 ## 0.7.0 (2025-08-15)
 

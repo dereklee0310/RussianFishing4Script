@@ -27,6 +27,7 @@ class BotResult:
     pink: int = 0
     card: int = 0
     gift: int = 0
+    ticket: int = 0
 
     def as_dict(self, msg: str, timer: Timer) -> dict:
         # Will be 0 if total_fish_count = 0
@@ -58,6 +59,7 @@ class BotResult:
             "Alcohol consumed": self.alcohol,
             "Coffee consumed": self.coffee,
             "Bait harvested": self.bait,
+            "Ticket used": self.ticket
         }
 
 

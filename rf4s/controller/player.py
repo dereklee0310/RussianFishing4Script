@@ -975,6 +975,7 @@ class Player:
                 self.general_quit("New boat ticket not found")
             pag.moveTo(ticket_loc)
             pag.click(clicks=2, interval=0.1)  # pag.doubleClick() not implemented
+            self.result.ticket += 1
             sleep(ANIMATION_DELAY)
 
     @utils.press_before_and_after("v")
