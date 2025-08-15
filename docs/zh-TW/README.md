@@ -6,24 +6,11 @@
 
 **俄羅斯釣魚4自動釣魚機器人，支援路亞、水底、海釣、維基釣組及手竿等模式。**
 
-<a target="_blank" href="https://opensource.org/license/gpl-3-0" style="background:none">
-    <img src="https://img.shields.io/badge/License-GPLv3-blue.svg" style="height: 22px;" />
-</a>
-<a target="_blank" href="https://discord.gg/BZQWQnAMbY" style="background:none">
-    <img src="https://img.shields.io/badge/discord-join-rf44.svg?labelColor=191937&color=6F6FF7&logo=discord" style="height: 22px;" />
-</a>
-<a target="_blank" href="http://makeapullrequest.com" style="background:none">
-    <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat" style="height: 22px;" />
-</a>
-</a>
-<a target="_blank" href="https://www.python.org/downloads/" style="background:none">
-    <img src="https://img.shields.io/badge/python-3.10_%7C_3.11_%7C_3.12-blue
-    " style="height: 22px;" />
-</a>
-<a target="_blank" href="https://github.com/astral-sh/ruff" style="background:none">
-    <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
-    " style="height: 22px;" />
-
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://opensource.org/license/gpl-3-0)
+[![Discord](https://img.shields.io/badge/discord-join-rf44.svg?labelColor=191937&color=6F6FF7&logo=discord)](https://discord.gg/BZQWQnAMbY)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat)](http://makeapullrequest.com)
+[![Python: 3.10 | 3.11 | 3.12](https://img.shields.io/badge/python-3.10_%7C_3.11_%7C_3.12-blue)](https://www.python.org/downloads/)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 </div>
 
