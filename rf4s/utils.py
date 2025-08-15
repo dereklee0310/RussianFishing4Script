@@ -134,33 +134,6 @@ def press_before_and_after(key):
     return func_wrapper
 
 
-def release_keys_after(arrow_keys: bool = False):
-    """Release keys that might have been holding down
-
-    :param arrow_keys: whether to toggle arrow keys, defaults to False
-    :type arrow_keys: bool, optional
-    """
-
-    def release_keys(arrow_keys):
-        pag.keyUp("ctrl")
-        pag.keyUp("shift")
-        if arrow_keys:
-            pag.keyUp("w")
-            pag.keyUp("a")
-            pag.keyUp("d")
-
-    def func_wrapper(func):  # Capture arrow_keys as default arg
-        def args_wrapper(*args, **kwargs):
-            try:
-                return func(*args, **kwargs)
-            finally:
-                release_keys(arrow_keys)  # Uses the captured value
-
-        return args_wrapper
-
-    return func_wrapper
-
-
 # There's lots of early return in player._resetting_stage(),
 # so use a decorator here to simplify the code
 def reset_friction_brake_after(func):

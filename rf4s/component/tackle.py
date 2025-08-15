@@ -225,7 +225,6 @@ class Tackle:
             ):
                 return
 
-    @utils.release_keys_after() #TODO: FIX THIS
     def pirk(self) -> None:
         """Start pirking until a fish is hooked."""
         logger.info("Pirking")
@@ -245,6 +244,10 @@ class Tackle:
                 if self.cfg.PROFILE.SHIFT:
                     pag.keyDown("shift")
                 utils.hold_mouse_button(self.cfg.PROFILE.PIRK_DURATION, button="right")
+                if self.cfg.PROFILE.CTRL:
+                    pag.keyUp("ctrl")
+                if self.cfg.PROFILE.SHIFT:
+                    pag.keyUp("shift")
                 i -= self.cfg.PROFILE.PIRK_DURATION
                 i = utils.sleep_and_decrease(i, self.cfg.PROFILE.PIRK_DELAY)
             else:

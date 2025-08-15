@@ -570,7 +570,7 @@ class Player:
     def do_pirking(self) -> None:
         """Perform pirking until a fish is hooked."""
         if self.cfg.PROFILE.PIRK_RETRIEVAL:
-            with self.hold_keys(mouse=False, shift=False):
+            with self.hold_keys(mouse=True, shift=False):
                 self._do_pirking()
         else:
             self._do_pirking()
