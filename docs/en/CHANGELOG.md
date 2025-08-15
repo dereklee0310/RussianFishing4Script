@@ -1,4 +1,8 @@
 ## 0.7.0 (2025-08-15)
+- Fix friction brake reset bug
+
+
+## 0.7.0 (2025-08-15)
 
 ### 🆕 New Features
 - Added new marine fishing profiles.
