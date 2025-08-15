@@ -59,7 +59,7 @@ _C.STAT.COMFORT_THRESHOLD = 0.51
 _C.STAT.TEA_DRINK_DELAY = 300
 # Maximum coffee drinks per fish fight.
 # The script will stop and let the game stay idle after the limit is reached.
-_C.STAT.COFFEE_LIMIT = 10
+_C.STAT.COFFEE_LIMIT = 32
 # Amount of coffee to consume per drink
 _C.STAT.COFFEE_PER_DRINK = 1
 # Delay between alcohol drinks
