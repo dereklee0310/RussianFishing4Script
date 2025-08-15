@@ -1,8 +1,12 @@
-## 0.7.0 (2025-08-15)
-- Fix friction brake reset bug
-- Fix PIRK.PIRK_RETRIEVAL bug
-- Fix config reload bug
-- Add ticket record
+## 0.7.1 (2025-08-16)
+
+### 🐛 Bug Fixes
+- Fixed a bug where the bot did not reset the friction brake correctly.
+- Fixed an issue where `PIRK.PIRK_RETRIEVAL` was not taking effect.
+- Fixed a bug where changes to certain settings were not applied after resuming from pause.
+
+### 🔧 Improvements
+- Added the number of boat tickets used to the result table.
 
 ## 0.7.0 (2025-08-15)
 
