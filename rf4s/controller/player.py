@@ -800,6 +800,8 @@ class Player:
         if self.cfg.ARGS.SHUTDOWN and shutdown:
             os.system("shutdown /s /t 5")
         print(result_table)
+        if self.cfg.ARGS.FRICTION_BRAKE:
+            self.friction_brake.monitor_process.terminate()
         with self.hold_keys(mouse=False, shift=False):
             utils.safe_exit()
 
