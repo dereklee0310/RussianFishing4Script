@@ -73,6 +73,8 @@ class Tackle:
 
     def is_rare_event_occur(self) -> None:
         """Check if the game disconnected or the boat ticket expired."""
+        if self.detection.is_tackle_broken():
+            raise exceptions.TackleBrokenError
         if self.detection.is_disconnected():
             raise exceptions.DisconnectedError
         if self.detection.is_ticket_expired():
@@ -171,8 +173,6 @@ class Tackle:
                 raise exceptions.LineAtEndError
             if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged():
                 raise exceptions.LineSnaggedError
-            if self.detection.is_tackle_broken():
-                raise exceptions.TackleBrokenError
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
             if i <= 0:
                 self.is_rare_event_occur()
@@ -201,8 +201,6 @@ class Tackle:
                 raise exceptions.LineAtEndError
             if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged():
                 raise exceptions.LineSnaggedError
-            if self.detection.is_tackle_broken():
-                raise exceptions.TackleBrokenError
             i = utils.sleep_and_decrease(i, LOOP_DELAY)
 
         self.is_rare_event_occur()
@@ -314,8 +312,6 @@ class Tackle:
                 return
             pag.press("space")
             sleep(ANIMATION_DELAY)
-        if self.detection.is_tackle_broken():
-            raise exceptions.TackleBrokenError
 
         self.is_rare_event_occur()
         raise exceptions.PullTimeoutError
@@ -336,8 +332,8 @@ class Tackle:
             if self.detection.is_fish_captured():
                 self.landing_net_out = False
                 return
-            if self.detection.is_tackle_broken():
-                raise exceptions.TackleBrokenError
+            if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged():
+                raise exceptions.LineSnaggedError
 
         self.is_rare_event_occur()
         raise exceptions.PullTimeoutError

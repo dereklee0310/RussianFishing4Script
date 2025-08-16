@@ -102,6 +102,7 @@ class Player:
         self.mouse_pressed = False
         self.shift_pressed = False
         self.using_spod_rod = False
+        self.skip_cast = self.cfg.ARGS.SKIP_CAST
 
     def start_fishing(self) -> None:
         """Start the main fishing loop with the specified fishing strategy."""
@@ -181,8 +182,9 @@ class Player:
         except exceptions.LureBrokenError:
             self._handle_broken_lure()
         except exceptions.FishHookedError:
-            self._retrieve_fish()
-            self.pull_fish()
+            # Don't call retrieve_fish() but skip casting stage, otherwise another
+            # Exception might be raised, which requires another wrapper to catch it.
+            self.skip_cast = True
         except exceptions.StuckAtCastingError:
             with self.hold_keys(mouse=False, shift=False):
                 pass  # defer to reset_tackle()
@@ -207,17 +209,16 @@ class Player:
     # ---------------------------------------------------------------------------- #
     def start_spin_mode(self) -> None:
         """Main spin fishing loop for 'spin' and 'spin_with_pause' modes."""
-        skip_cast = self.cfg.ARGS.SKIP_CAST
         while True:
             with self.loop_restart_handler():
                 self.enable_trolling()
-                if not skip_cast:
+                if not self.skip_cast:
                     self.reset_tackle()
                     self.refill_stats()
                     self.harvest_baits(pickup=True)
                     self.change_tackle_lure()
                     self.cast_tackle()
-                skip_cast = False
+                self.skip_cast = False
 
                 if self.cfg.PROFILE.TYPE != "normal":
                     utils.hold_mouse_button(self.cfg.PROFILE.TIGHTEN_DURATION)
@@ -243,14 +244,18 @@ class Player:
 
         while True:
             with self.loop_restart_handler():
-                self.enable_trolling()
-                if self.cfg.ARGS.SPOD_ROD and self.timer.is_spod_rod_castable():
-                    self.cast_spod_rod()
+                # If FishHookedError is raised in the resetting stage, let the bot check
+                # if a fish is hooked without changing the rod it's using.
+                if not self.skip_cast:
+                    self.enable_trolling()
+                    if self.cfg.ARGS.SPOD_ROD and self.timer.is_spod_rod_castable():
+                        self.cast_spod_rod()
 
-                self.refill_stats()
-                logger.info("Checking rod %s", self.tackle_idx + 1)
-                pag.press(str(self.cfg.KEY.BOTTOM_RODS[self.tackle_idx]))
-                sleep(ANIMATION_DELAY)
+                    self.refill_stats()
+                    logger.info("Checking rod %s", self.tackle_idx + 1)
+                    pag.press(str(self.cfg.KEY.BOTTOM_RODS[self.tackle_idx]))
+                    sleep(ANIMATION_DELAY)
+                    self.skip_cast = False
                 if self.detection.is_fish_hooked():
                     check_miss_counts[self.tackle_idx] = 0
                     self.retrieve_and_recast()
@@ -286,16 +291,15 @@ class Player:
         :type pirk: bool
         """
         perform_technique = self.do_pirking if pirk else self.do_elevating
-        skip_cast = self.cfg.ARGS.SKIP_CAST
         while True:
             with self.loop_restart_handler():
                 self.enable_trolling()
-                if not skip_cast:
+                if not self.skip_cast:
                     self.reset_tackle()
                     self.refill_stats()
                     self.cast_tackle()
                     self.tackle.sink()
-                skip_cast = False
+                self.skip_cast = False
 
                 if not self.detection.is_fish_hooked():
                     perform_technique()
@@ -317,16 +321,15 @@ class Player:
         :type telescopic: bool
         """
         monitor, hold_mouse_button = self._get_controllers(telescopic)
-        skip_cast = self.cfg.ARGS.SKIP_CAST
         while True:
             with self.loop_restart_handler():
                 self.enable_trolling()
-                if not skip_cast:
+                if not self.skip_cast:
                     self.reset_tackle()
                     self.refill_stats()
                     self.harvest_baits(pickup=True)
                     self.cast_tackle()
-                skip_cast = False
+                self.skip_cast = False
 
                 with self.error_handler():
                     monitor()
