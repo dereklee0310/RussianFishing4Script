@@ -1,6 +1,7 @@
 ## 0.7.1 (2025-08-16)
 
 - Fixed FishHookedError freezing bug
+- Fixed friction brake process bug
 
 
 ## 0.7.1 (2025-08-16)
