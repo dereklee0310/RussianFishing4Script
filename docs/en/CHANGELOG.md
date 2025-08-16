@@ -1,5 +1,10 @@
 ## 0.7.1 (2025-08-16)
 
+- Fixed FishHookedError freezing bug
+
+
+## 0.7.1 (2025-08-16)
+
 ### 🐛 Bug Fixes
 - Fixed a bug where the bot did not reset the friction brake correctly.
 - Fixed an issue where `PIRK.PIRK_RETRIEVAL` was not taking effect.
