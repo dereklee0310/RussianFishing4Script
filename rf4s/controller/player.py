@@ -535,7 +535,6 @@ class Player:
         if self.detection.is_retrieval_finished():
             return
 
-        self.cur_coffee = 0
         if self.detection.is_fish_hooked():
             self._retrieve_fish()
         else:
@@ -544,16 +543,20 @@ class Player:
                     with self.error_handler():
                         self.tackle.retrieve_with_no_fish()
                         break
-                self._retrieve_fish()
+                if self.detection.is_fish_hooked():
+                    self._retrieve_fish()
                 if self.cfg.ARGS.RAINBOW is None:
                     sleep(SPOOL_RETRIEVAL_DELAY)
                 elif self.cfg.ARGS.RAINBOW == 5:
                     sleep(RAINBOW_RETRIEVAL_DELAY)
 
-    def _retrieve_fish(self, save=True):
+    def _retrieve_fish(self, save: bool=True) -> None:
+        if self.detection.is_retrieval_finished():
+            return
+
+        self.cur_coffee = 0
         if save:
             self.save_bite_screenshot()
-
         if self.cfg.ARGS.ELECTRO:
             self.tackle.enable_electro_mode()
 
