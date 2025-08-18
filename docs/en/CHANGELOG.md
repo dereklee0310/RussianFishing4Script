@@ -2,7 +2,7 @@
 
 - Fixed FishHookedError freezing bug
 - Fixed friction brake process bug
-
+- Fixed bottom fishing recast bug
 
 ## 0.7.1 (2025-08-16)
 

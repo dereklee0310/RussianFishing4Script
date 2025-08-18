@@ -179,15 +179,21 @@ class Player:
             yield
         except exceptions.FishCapturedError:
             self.handle_fish()
+            if self.cfg.PROFILE.MODE == "bottom":
+                with self.loop_restart_handler():
+                    self.recast_tackle()
         except exceptions.LureBrokenError:
             self._handle_broken_lure()
         except exceptions.FishHookedError:
-            # Don't call retrieve_fish() but skip casting stage, otherwise another
-            # Exception might be raised, which requires another wrapper to catch it.
-            self.skip_cast = True
+            with self.loop_restart_handler():
+                self._retrieve_fish()
+                self.pull_fish()
         except exceptions.StuckAtCastingError:
             with self.hold_keys(mouse=False, shift=False):
                 pass  # defer to reset_tackle()
+            if self.cfg.PROFILE.MODE == "bottom":
+                with self.loop_restart_handler():
+                    self.recast_tackle()
         except exceptions.LineAtEndError:
             if self.cfg.ARGS.FRICTION_BRAKE:
                 with self.friction_brake.lock:
@@ -244,18 +250,14 @@ class Player:
 
         while True:
             with self.loop_restart_handler():
-                # If FishHookedError is raised in the resetting stage, let the bot check
-                # if a fish is hooked without changing the rod it's using.
-                if not self.skip_cast:
-                    self.enable_trolling()
-                    if self.cfg.ARGS.SPOD_ROD and self.timer.is_spod_rod_castable():
-                        self.cast_spod_rod()
+                self.enable_trolling()
+                if self.cfg.ARGS.SPOD_ROD and self.timer.is_spod_rod_castable():
+                    self.cast_spod_rod()
 
-                    self.refill_stats()
-                    logger.info("Checking rod %s", self.tackle_idx + 1)
-                    pag.press(str(self.cfg.KEY.BOTTOM_RODS[self.tackle_idx]))
-                    sleep(ANIMATION_DELAY)
-                    self.skip_cast = False
+                self.refill_stats()
+                logger.info("Checking rod %s", self.tackle_idx + 1)
+                pag.press(str(self.cfg.KEY.BOTTOM_RODS[self.tackle_idx]))
+                sleep(ANIMATION_DELAY)
                 if self.detection.is_fish_hooked():
                     check_miss_counts[self.tackle_idx] = 0
                     self.retrieve_and_recast()
@@ -271,6 +273,9 @@ class Player:
     def retrieve_and_recast(self) -> None:
         self.retrieve_line()
         self.pull_fish()
+        self.recast_tackle()
+
+    def recast_tackle(self) -> None:
         self.reset_tackle()
         self._refill_groundbait()
         self._refill_pva()
