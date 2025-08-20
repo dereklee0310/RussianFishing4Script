@@ -338,14 +338,13 @@ class Player:
 
                 with self.error_handler():
                     monitor()
-                if self.detection.is_fish_hooked():
-                    sleep(self.cfg.PROFILE.PULL_DELAY)
-                    hold_mouse_button(PRE_RETRIEVAL_DURATION)
-                    if not telescopic:
-                        self._retrieve_fish()
-                    else:
-                        self.save_bite_screenshot()  # Should be called in _retrieve_fish()
-                    self.pull_fish()
+                sleep(self.cfg.PROFILE.PULL_DELAY)
+                hold_mouse_button(PRE_RETRIEVAL_DURATION)
+                if not telescopic:
+                    self._retrieve_fish()
+                else:
+                    self.save_bite_screenshot()  # Should be called in _retrieve_fish()
+                self.pull_fish()
 
     def harvest_baits(self, pickup: bool = False) -> None:
         """Harvest baits if energy is high.
