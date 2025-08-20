@@ -4,6 +4,7 @@
 - Fixed friction brake process bug
 - Fixed bottom fishing recast bug
 - Fixed hookset bug
+- Fixed friction brake reset bug
 
 ## 0.7.1 (2025-08-16)
 

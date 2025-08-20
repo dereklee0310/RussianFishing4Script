@@ -57,26 +57,20 @@ class FrictionBrake:
         self.cur = Value("i", self.fb_cfg.INITIAL)
         self.monitor_process = Process(target=monitor_friction_brake, args=(self,))
 
-    def reset(self, target: int, to_max: bool = False) -> None:
+    def reset(self, target: int) -> None:
         """Reset the friction brake to the target value.
 
         :param target: Target friction brake value.
         :type target: int
-        :param to_max: Increase to 30 before setting it to target, defaults to False.
-        :type to_max: bool, optional
         """
         logger.info("Resetting friction brake")
         with self.lock:
             sleep(FRICTION_BRAKE_CHANGE_DELAY)  # might be called after change()
-            if to_max:
-                for _ in range(MAX_FRICTION_BRAKE):
-                    pag.scroll(UP, _pause=False)
-                    sleep(FRICTION_BRAKE_CHANGE_DELAY)
-                cur = MAX_FRICTION_BRAKE
-            else:
-                cur = self.cur.value
-            diff = cur - target
-            for _ in range(abs(diff)):
+            for _ in range(MAX_FRICTION_BRAKE):
+                pag.scroll(UP, _pause=False)
+                sleep(FRICTION_BRAKE_CHANGE_DELAY)
+            print(MAX_FRICTION_BRAKE - target)
+            for _ in range(abs(MAX_FRICTION_BRAKE - target)):
                 pag.scroll(DOWN, _pause=False)
                 sleep(FRICTION_BRAKE_CHANGE_DELAY)
             self.cur.value = target
@@ -110,7 +104,6 @@ def monitor_friction_brake(friction_brake: FrictionBrake) -> None:
     pre_time = time()
     fish_hooked = False
     try:
-        friction_brake.reset(friction_brake.fb_cfg.INITIAL, to_max=True)
         while True:
             if not friction_brake.detection.is_fish_hooked_pixel():
                 sleep(FRICTION_BRAKE_MONITOR_DELAY)
