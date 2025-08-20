@@ -1,10 +1,11 @@
-## 0.7.1 (2025-08-16)
+## 0.7.2 (2025-08-21)
 
-- Fixed FishHookedError freezing bug
-- Fixed friction brake process bug
-- Fixed bottom fishing recast bug
-- Fixed hookset bug
-- Fixed friction brake reset bug
+### 🐛 Bug Fixes
+- Fixed a critical bug that caused the script to panic when a fish was caught during the resetting phase.
+- Resolved an issue preventing the subprocess from shutting down gracefully.
+- Corrected a behavior where the bot failed to recast the rod after catching a fish in bottom fishing mode.
+- Fixed improper hook-setting logic in telescopic and bolognese fishing modes.
+- Addressed a bug that incorrectly reset the friction brake to a wrong value.
 
 ## 0.7.1 (2025-08-16)
 
