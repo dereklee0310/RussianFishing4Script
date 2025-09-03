@@ -52,11 +52,12 @@ def hold_mouse_buttons(duration: float = 1) -> None:
     :param duration: Hold time, defaults to 1.
     :type duration: float, optional
     """
-    pag.mouseDown()
-    pag.mouseDown(button="right")
-    sleep(duration)
-    pag.mouseUp()
-    pag.mouseUp(button="right")
+    with pag.hold("ctrl"):
+        pag.mouseDown()
+        pag.mouseDown(button="right")
+        sleep(duration)
+        pag.mouseUp()
+        pag.mouseUp(button="right")
     if duration >= 2.1:  # + 0.1 due to pag.mouseDown() delay
         pag.click()
 

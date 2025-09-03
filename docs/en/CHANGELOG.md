@@ -1,6 +1,7 @@
 ## 0.7.2 (2025-08-21)
 
 - Fix harvest bug
+- Add hookset
 
 ### 🐛 Bug Fixes
 - Fixed a critical bug that caused the script to panic when a fish was caught during the resetting phase.
