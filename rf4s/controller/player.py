@@ -362,6 +362,7 @@ class Player:
             pag.click()
 
             while not self.detection.is_harvest_success():
+                pag.click()
                 sleep(add_jitter(LOOP_DELAY))
             pag.press("space")
             pag.press("backspace")
