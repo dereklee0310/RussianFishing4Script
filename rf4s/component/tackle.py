@@ -462,6 +462,7 @@ class Tackle:
                 return
 
         self.is_rare_event_occur()
+        raise exceptions.DriftTimeoutError
 
     def _monitor_clip_state(self) -> None:
         """Monitor the state of the bolognese clip."""
@@ -473,3 +474,4 @@ class Tackle:
                 return
 
         self.is_rare_event_occur()
+        raise exceptions.DriftTimeoutError

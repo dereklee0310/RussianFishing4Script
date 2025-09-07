@@ -89,3 +89,6 @@ class StuckAtCastingError(Exception):
 
 class DryMixNotFoundError(Exception):
     """Dry mix cannot be found."""
+
+class DriftTimeoutError(Exception):
+    """Bait drifting timed out during float fishing"""

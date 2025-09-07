@@ -183,6 +183,10 @@ class Detection:
                     width, height = SIDE_LENGTH, SIDE_LENGTH_HALF
                 case "square":
                     width, height = SIDE_LENGTH, SIDE_LENGTH
+                case "mini_square":
+                    bases[0] += CAMERA_OFFSET
+                    bases[1] += CAMERA_OFFSET
+                    width, height = SIDE_LENGTH_HALF, SIDE_LENGTH_HALF
                 case _:
                     raise ValueError(self.cfg.PROFILE.CAMERA_SHAPE)
             self.float_camera_rect = (*bases, width, height)  # (left, top, w, h)

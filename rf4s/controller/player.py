@@ -209,6 +209,8 @@ class Player:
             self.handle_bait_not_chosen()
         except exceptions.DryMixNotFoundError:
             pass
+        except exceptions.DriftTimeoutError:
+            pass
 
     # ---------------------------------------------------------------------------- #
     #                              main fishing loops                              #
@@ -565,7 +567,12 @@ class Player:
         if self.cfg.ARGS.ELECTRO:
             self.tackle.enable_electro_mode()
 
-        with self.hold_keys(mouse=True, shift=self.cfg.PROFILE.POST_ACCELERATION):
+        shift = (
+            self.cfg.PROFILE.POST_ACCELERATION
+            if self.cfg.PROFILE.MODE != "telescopic"
+            else False
+        )
+        with self.hold_keys(mouse=True, shift=shift):
             while True:
                 with self.error_handler():
                     self.tackle.retrieve_with_fish()
@@ -605,7 +612,12 @@ class Player:
         if not self.detection.is_fish_hooked():
             return
         self._drink_alcohol()
-        with self.hold_keys(mouse=True, shift=self.cfg.PROFILE.POST_ACCELERATION):
+        shift = (
+            self.cfg.PROFILE.POST_ACCELERATION
+            if self.cfg.PROFILE.MODE != "telescopic"
+            else False
+        )
+        with self.hold_keys(mouse=True, shift=shift):
             while True:
                 with self.error_handler():
                     self.tackle.pull()
