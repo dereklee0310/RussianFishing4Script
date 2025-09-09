@@ -212,24 +212,24 @@ PROFILE:
     DESCRIPTION: "Default float fishing, still water, telescopic rod."
     LAUNCH_OPTIONS: ""
     MODE: "telescopic"
-    CAST_POWER_LEVEL: 5.0
+    CAST_POWER_LEVEL: 4.9
     CAST_DELAY: 4.0
-    FLOAT_SENSITIVITY: 0.68
-    CHECK_DELAY: 0.5
-    PULL_DELAY: 1.0
+    FLOAT_SENSITIVITY: 0.75
+    CHECK_DELAY: 0.25
+    PULL_DELAY: 1.5
     DRIFT_TIMEOUT: 256.0
-    CAMERA_SHAPE: "square"
+    CAMERA_SHAPE: "tall"
   BOLOGNESE:
     DESCRIPTION: "Default float fishing, flowing water, bolognese rod."
     LAUNCH_OPTIONS: ""
     MODE: "bolognese"
     CAST_POWER_LEVEL: 5.0
     CAST_DELAY: 4.0
-    FLOAT_SENSITIVITY: 0.68
+    FLOAT_SENSITIVITY: 0.75
     CHECK_DELAY: 0.5
     PULL_DELAY: 2.5
-    DRIFT_TIMEOUT: 64.0
-    CAMERA_SHAPE: "square"
+    DRIFT_TIMEOUT: 256.0
+    CAMERA_SHAPE: "tall"
     POST_ACCELERATION: true
   MATCH:
     DESCRIPTION: "Default float fishing, flowing water, match rod."
@@ -237,11 +237,11 @@ PROFILE:
     MODE: "bolognese"
     CAST_POWER_LEVEL: 5.0
     CAST_DELAY: 4.0
-    FLOAT_SENSITIVITY: 0.68
+    FLOAT_SENSITIVITY: 0.75
     CHECK_DELAY: 0.5
     PULL_DELAY: 2.5
     DRIFT_TIMEOUT: 64.0
-    CAMERA_SHAPE: "square"
+    CAMERA_SHAPE: "tall"
     POST_ACCELERATION: true
 
   Walk the dog | Beluga Venga 10000:
@@ -528,5 +528,17 @@ PROFILE:
     CHECK_DELAY: 0.5
     PULL_DELAY: 2.5
     DRIFT_TIMEOUT: 256.0
-    CAMERA_SHAPE: "square"
+    CAMERA_SHAPE: "tall"
     POST_ACCELERATION: true
+
+  Telescopic | flow water:
+    DESCRIPTION: "Winding Rivulet, 72:85, depth 18cm"
+    LAUNCH_OPTIONS: ""
+    MODE: "telescopic"
+    CAST_POWER_LEVEL: 4.9
+    CAST_DELAY: 4.0
+    FLOAT_SENSITIVITY: 0.75
+    CHECK_DELAY: 0.25
+    PULL_DELAY: 1.5
+    DRIFT_TIMEOUT: 16.0
+    CAMERA_SHAPE: "tall"

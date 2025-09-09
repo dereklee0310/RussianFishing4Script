@@ -10,6 +10,7 @@ common tasks like clicklock and key releases.
 import random
 from time import sleep
 from typing import Literal
+from PIL import ImageFilter
 
 import pyautogui as pag
 import win32api
@@ -454,10 +455,11 @@ class Tackle:
         """Monitor the state of the float."""
         logger.info("Monitoring float state")
         reference_img = pag.screenshot(region=self.detection.float_camera_rect)
+        blurred = reference_img.filter(ImageFilter.GaussianBlur(radius=3))
         i = self.cfg.PROFILE.DRIFT_TIMEOUT
         while i > 0:
             i = utils.sleep_and_decrease(i, self.cfg.PROFILE.CHECK_DELAY)
-            if self.detection.is_float_state_changed(reference_img):
+            if self.detection.is_float_state_changed(blurred):
                 logger.info("Float status changed")
                 return
 

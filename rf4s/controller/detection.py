@@ -15,7 +15,7 @@ from typing import Generator
 import cv2
 import numpy as np
 import pyautogui as pag
-from PIL import Image
+from PIL import Image, ImageFilter
 from pyscreeze import Box
 
 from rf4s.controller.window import Window
@@ -183,10 +183,6 @@ class Detection:
                     width, height = SIDE_LENGTH, SIDE_LENGTH_HALF
                 case "square":
                     width, height = SIDE_LENGTH, SIDE_LENGTH
-                case "mini_square":
-                    bases[0] += CAMERA_OFFSET
-                    bases[1] += CAMERA_OFFSET
-                    width, height = SIDE_LENGTH_HALF, SIDE_LENGTH_HALF
                 case _:
                     raise ValueError(self.cfg.PROFILE.CAMERA_SHAPE)
             self.float_camera_rect = (*bases, width, height)  # (left, top, w, h)
@@ -444,7 +440,7 @@ class Detection:
     def is_float_state_changed(self, reference_img):
         current_img = pag.screenshot(region=self.float_camera_rect)
         return not pag.locate(
-            current_img,
+            current_img.filter(ImageFilter.GaussianBlur(radius=3)),
             reference_img,
             grayscale=True,
             confidence=self.cfg.PROFILE.FLOAT_SENSITIVITY,
