@@ -1,11 +1,17 @@
-## 0.7.2 (2025-08-21)
+## 0.7.3 (2025-09-10)
 
-- Fix harvest bug
-- Add hookset
-- Improve default config
-- Improve float detection and float configs
-- Fix telescopic mode reset bug
-- Fix spin mode bait check bug
+### 🐛 Bug Fixes
+- Fixed an issue causing the bot to get stuck during bait harvesting in bottom fishing mode.
+- Fixed a bug where telescopic mode was not functioning.
+- Fixed a bug where the bot incorrectly checked whether a bait was equipped in spin fishing mode.
+
+### 🔧 Improvements
+- In bolognese and match modes, the bot will now automatically set the hook when a fish bites.
+- Improved the quality of default float fishing profiles.
+- Enhanced detection accuracy in float fishing mode.
+- Added a new telescopic profile: `Telescopic | Flowing Water` for fishing at Winding Rivulet.
+
+## 0.7.2 (2025-08-21)
 
 ### 🐛 Bug Fixes
 - Fixed a critical bug that caused the script to panic when a fish was caught during the resetting phase.
