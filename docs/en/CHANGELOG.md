@@ -4,6 +4,7 @@
 - Add hookset
 - Improve default config
 - Improve float detection and float configs
+- Fix telescopic mode reset bug
 
 ### 🐛 Bug Fixes
 - Fixed a critical bug that caused the script to panic when a fish was caught during the resetting phase.

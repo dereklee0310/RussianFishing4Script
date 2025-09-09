@@ -186,7 +186,10 @@ class Player:
             self._handle_broken_lure()
         except exceptions.FishHookedError:
             with self.loop_restart_handler():
-                self._retrieve_fish()
+                if self.cfg.PROFILE.MODE != "telescopic":
+                    self._retrieve_fish()
+                else:
+                    self.save_bite_screenshot()  # Should be called in _retrieve_fish()
                 self.pull_fish()
         except exceptions.StuckAtCastingError:
             with self.hold_keys(mouse=False, shift=False):
