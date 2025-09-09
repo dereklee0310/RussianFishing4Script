@@ -10,11 +10,11 @@ common tasks like clicklock and key releases.
 import random
 from time import sleep
 from typing import Literal
-from PIL import ImageFilter
 
 import pyautogui as pag
 import win32api
 import win32con
+from PIL import ImageFilter
 from pyscreeze import Box
 
 from rf4s import exceptions, utils

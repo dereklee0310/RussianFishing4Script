@@ -59,7 +59,7 @@ class BotResult:
             "Alcohol consumed": self.alcohol,
             "Coffee consumed": self.coffee,
             "Bait harvested": self.bait,
-            "Ticket used": self.ticket
+            "Ticket used": self.ticket,
         }
 
 

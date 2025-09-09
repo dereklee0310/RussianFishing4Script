@@ -560,7 +560,7 @@ class Player:
                 elif self.cfg.ARGS.RAINBOW == 5:
                     sleep(RAINBOW_RETRIEVAL_DELAY)
 
-    def _retrieve_fish(self, save: bool=True) -> None:
+    def _retrieve_fish(self, save: bool = True) -> None:
         if self.detection.is_retrieval_finished():
             return
 

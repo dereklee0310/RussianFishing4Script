@@ -69,7 +69,6 @@ class FrictionBrake:
             for _ in range(MAX_FRICTION_BRAKE):
                 pag.scroll(UP, _pause=False)
                 sleep(FRICTION_BRAKE_CHANGE_DELAY)
-            print(MAX_FRICTION_BRAKE - target)
             for _ in range(abs(MAX_FRICTION_BRAKE - target)):
                 pag.scroll(DOWN, _pause=False)
                 sleep(FRICTION_BRAKE_CHANGE_DELAY)
