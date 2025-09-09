@@ -401,7 +401,7 @@ class Detection:
         return not self._get_image_box("groundbait_is_not_chosen", 0.8)
 
     def is_bait_chosen(self):
-        if self.cfg.PROFILE.MODE in ("pirk", "elevator"):
+        if self.cfg.PROFILE.MODE in ("spin", "pirk", "elevator"):
             return True
 
         # Two bait slots, check only the first one
