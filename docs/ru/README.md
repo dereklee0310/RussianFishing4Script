@@ -31,7 +31,10 @@
 > [!WARNING] 
 > Путь к загрузке не должен содержать неанглийские символы.
 ### Исполняемый файл (.exe)
-Скачайте `rf4s.zip` из раздела [Releases][releases].  
+Скачайте `rf4s.zip` из раздела [Releases][releases].
+> [!WARNING] 
+> Исполняемый файл с большей вероятностью будет обнаружен. Рекомендуем запускать скрипт через Python.
+> Если вы не знаете, как запустить его через Python, см. раздел **[УСТАНОВКА][installation]**.
 ### pip
 ```
 git clone https://github.com/dereklee0310/RussianFishing4Script.git
@@ -161,3 +164,4 @@ dereklee0310@gmail.com
 [configuration]: /docs/ru/CONFIGURATION.md
 [changelog]: /docs/ru/CHANGELOG.md
 [license]: /LICENSE
+[installation]: /docs/ru/INSTALLATION.md

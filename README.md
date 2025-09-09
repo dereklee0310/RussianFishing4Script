@@ -32,7 +32,10 @@
 > [!WARNING] 
 > The download path cannot contain non-English characters.
 ### Executable File (.exe)
-Download `rf4s.zip` from [Releases][releases].  
+Download `rf4s.zip` from [Releases][releases]. 
+> [!WARNING] 
+> The executable file is more likely to be detected. Consider using Python to run it instead.  
+> If you're not sure how to run it using Python, see **[INSTALLATION][installation]**.
 ### pip
 ```
 git clone https://github.com/dereklee0310/RussianFishing4Script.git
@@ -162,3 +165,4 @@ dereklee0310@gmail.com
 [configuration]: /docs/en/CONFIGURATION.md
 [changelog]: /docs/en/CHANGELOG.md
 [license]: /LICENSE
+[installation]: /docs/en/INSTALLATION.md

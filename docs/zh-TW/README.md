@@ -22,7 +22,10 @@
 > [!WARNING] 
 > 下載路徑不能包含非英文字符。
 ### 可執行檔 (.exe)
-從 [Releases][releases] 下載 `rf4s.zip`。  
+從 [Releases][releases] 下載 `rf4s.zip`。
+> [!WARNING] 
+> 執行檔較容易被偵測到，建議改用 Python 執行。
+> 若不確定如何使用 Python 執行，請參閱 **[安裝說明][installation]**。
 ### pip
 ```
 git clone https://github.com/dereklee0310/RussianFishing4Script.git
@@ -154,3 +157,4 @@ dereklee0310@gmail.com
 [status]: /static/readme/status.png
 [changelog]: /docs/en/CHANGELOG.md
 [license]: /LICENSE
+[installation]: /docs/zh-TW/INSTALLATION.md
