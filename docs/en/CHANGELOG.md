@@ -1,3 +1,6 @@
+- Fix lure changing bug
+
+
 ## 0.7.3 (2025-09-10)
 
 ### 🐛 Bug Fixes

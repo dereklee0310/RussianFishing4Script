@@ -372,7 +372,8 @@ class Tackle:
         """
         if item == "lure":
             self._equip_item_from_menu(item)
-        self._equip_item_from_inventory(item)  # groundbait, dry_mix, pva
+        else:
+            self._equip_item_from_inventory(item)  # groundbait, dry_mix, pva
 
     def _equip_item_from_menu(self, item: str) -> None:
         """Equip an item from the menu.
