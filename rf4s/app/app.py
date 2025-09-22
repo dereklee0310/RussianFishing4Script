@@ -488,8 +488,6 @@ class CraftApp(App):
 
     def __init__(self, cfg, args, parser):
         super().__init__(cfg, args, parser)
-        sys.argv += shlex.split(self.cfg.CRAFT.LAUNCH_OPTIONS)
-        self.args = parser.parse_args()
         args_cfg = CN({"ARGS": config.dict_to_cfg(vars(self.args))})
         self.cfg.merge_from_other_cfg(args_cfg)
         self.cfg.merge_from_list(self.args.opts)
@@ -606,9 +604,6 @@ class MoveApp(App):
         2. Create w key flag.
         """
         super().__init__(cfg, args, parser)
-
-        sys.argv += shlex.split(self.cfg.MOVE.LAUNCH_OPTIONS)
-        self.args = parser.parse_args()
         args_cfg = CN({"ARGS": config.dict_to_cfg(vars(self.args))})
         self.cfg.merge_from_other_cfg(args_cfg)
         self.cfg.merge_from_list(self.args.opts)
@@ -668,9 +663,6 @@ class HarvestApp(App):
         detection, and timer instances.
         """
         super().__init__(cfg, args, parser)
-
-        sys.argv += shlex.split(self.cfg.HARVEST.LAUNCH_OPTIONS)
-        self.args = parser.parse_args()
         args_cfg = CN({"ARGS": config.dict_to_cfg(vars(self.args))})
         self.cfg.merge_from_other_cfg(args_cfg)
         self.cfg.merge_from_list(self.args.opts)
@@ -976,8 +968,6 @@ class FrictionBrakeApp(App):
         4. Initialize a friction brake instance.
         """
         super().__init__(cfg, args, parser)
-        sys.argv += shlex.split(self.cfg.FRICTION_BRAKE.LAUNCH_OPTIONS)
-        self.args = parser.parse_args()
         args_cfg = CN({"ARGS": config.dict_to_cfg(vars(self.args))})
         self.cfg.merge_from_other_cfg(args_cfg)
         self.cfg.merge_from_list(self.args.opts)
