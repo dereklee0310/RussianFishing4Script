@@ -1,11 +1,16 @@
-- Fix lure changing bug
-- Fix safe check bug
-- Fix telescopic mode landing net bug
-- Add -BT 0 option
-- Fix launch options precedence bug
-- Fix craft & move apps launch options bug
-- Add ignore flag
-- Fix broken lure replace bug
+## 0.7.4 (2025-09-22)
+
+### 🐛 Bug Fixes
+- Resolved an issue causing `-L/--lure` to behave incorrectly.
+- Addressed a rare case where telescopic mode failed to deploy the landing net when reeling in fish.
+- Corrected option precedence: user-provided launch arguments now correctly override app- and profile-level defaults.
+- Fixed `Craft` and `Move` features erroneously applying outdated or incorrect launch options.
+- Patched `-BL/--broken-lure` to work reliably with drop shot rigs.
+
+### 🔧 Improvements
+- Introduced a short delay before keepnet safety validation for more consistent behavior.
+- Added `-BT/--boat-ticket 0` as a quick way to overwrite existing `-BT/--boat-ticket` flag.
+- Implemented `-i/--ignore` flag in `Craft` to let users bypass slots with missing materials.
 
 ## 0.7.3 (2025-09-10)
 
