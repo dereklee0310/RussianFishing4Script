@@ -444,7 +444,6 @@ class Player:
                 pag.click()
         sleep(add_jitter(ANIMATION_DELAY))  # Could be followed by another _use_item()
 
-    @utils.reset_friction_brake_after
     def reset_tackle(self) -> None:
         """Reset the tackle until it is ready."""
         if self.detection.is_tackle_ready():
@@ -523,6 +522,10 @@ class Player:
         """
         if self.cfg.ARGS.PAUSE and self.timer.is_script_pausable():
             self._pause_script()
+
+        # Reset changed states right before casting
+        self.friction_brake.reset(self.cfg.BOT.FRICTION_BRAKE.INITIAL)
+        self.landing_net_out = False
 
         with self.hold_keys(mouse=False, shift=False):
             if (

@@ -135,21 +135,6 @@ def press_before_and_after(key):
     return func_wrapper
 
 
-# There's lots of early return in player._resetting_stage(),
-# so use a decorator here to simplify the code
-def reset_friction_brake_after(func):
-    """Reset friction brake after calling the function."""
-
-    def wrapper(self, *args, **kwargs):
-        func(self, *args, **kwargs)
-        if not self.cfg.ARGS.FRICTION_BRAKE:
-            return
-
-        self.friction_brake.reset(self.cfg.BOT.FRICTION_BRAKE.INITIAL)
-
-    return wrapper
-
-
 def is_compiled():
     return "__compiled__" in globals()  # Nuitka style
 
