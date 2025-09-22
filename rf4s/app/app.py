@@ -313,7 +313,8 @@ class BotApp(App):
         # Merge profile-level launch options
         if self.cfg.PROFILE.LAUNCH_OPTIONS:
             new_launch_options = shlex.split(self.cfg.PROFILE.LAUNCH_OPTIONS)
-            sys.argv = sys.argv[:2] + new_launch_options + sys.argv[2:]
+            base_len = len(shlex.split(self.cfg.BOT.LAUNCH_OPTIONS) + 2)
+            sys.argv = sys.argv[:base_len] + new_launch_options + sys.argv[base_len:]
             self.args = self.parser.parse_args()
         # We need to convert items in args to uppercase to make them consistent with
         # those in CN(), so it must be done manually instead of using CN(dict).
