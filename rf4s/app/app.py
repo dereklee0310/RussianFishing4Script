@@ -313,7 +313,7 @@ class BotApp(App):
         # Merge profile-level launch options
         if self.cfg.PROFILE.LAUNCH_OPTIONS:
             new_launch_options = shlex.split(self.cfg.PROFILE.LAUNCH_OPTIONS)
-            base_len = len(shlex.split(self.cfg.BOT.LAUNCH_OPTIONS) + 2)
+            base_len = len(shlex.split(self.cfg.BOT.LAUNCH_OPTIONS)) + 2
             sys.argv = sys.argv[:base_len] + new_launch_options + sys.argv[base_len:]
             self.args = self.parser.parse_args()
         # We need to convert items in args to uppercase to make them consistent with
