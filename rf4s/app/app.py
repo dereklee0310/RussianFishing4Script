@@ -575,7 +575,10 @@ class CraftApp(App):
             self.window.activate_game_window()
             self.move_cursor_to_make_button()
             while True:
-                if not self.detection.is_material_complete():
+                if (
+                    not self.cfg.ARGS.IGNORE
+                    and not self.detection.is_material_complete()
+                ):
                     logger.critical("Running out of materials")
                     break
                 if self.result.succes == self.cfg.ARGS.CRAFT_LIMIT:

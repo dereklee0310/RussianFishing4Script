@@ -272,6 +272,12 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         help="discard all the crafted items (for groundbaits)",
     )
     craft_parser.add_argument(
+        "-i",
+        "--ignore",
+        action="store_true",
+        help="ignore unselected material slots",
+    )
+    craft_parser.add_argument(
         "-n",
         "--craft-limit",
         type=int,
