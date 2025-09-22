@@ -5,6 +5,7 @@
 - Fix launch options precedence bug
 - Fix craft & move apps launch options bug
 - Add ignore flag
+- Fix broken lure replace bug
 
 ## 0.7.3 (2025-09-10)
 

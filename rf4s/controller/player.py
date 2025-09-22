@@ -1070,9 +1070,9 @@ class Player:
 
             # Check if the lure for replacement is already broken
             x, y = utils.get_box_center(favorite_item_position)
-            if pag.pixel(x - 60, y + 190) != (178, 59, 30):  # Magic value #TODO
+            if pag.pixel(x - 70, y + 190) != (178, 59, 30):  # Magic value ;)
                 logger.info("Lure replaced successfully")
-                pag.moveTo(x - 60, y + 190)
+                pag.moveTo(x - 70, y + 190)
                 pag.click(clicks=2, interval=0.1)
                 sleep(WEAR_TEXT_UPDATE_DELAY)
                 break
