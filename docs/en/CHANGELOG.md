@@ -3,7 +3,7 @@
 - Fix telescopic mode landing net bug
 - Add -BT 0 option
 - Fix launch options precedence bug
-
+- Fix craft app launch options bug
 
 ## 0.7.3 (2025-09-10)
 

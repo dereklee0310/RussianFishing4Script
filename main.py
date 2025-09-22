@@ -480,7 +480,7 @@ def main() -> None:
             sys.argv = start + shlex.split(cfg.MOVE.LAUNCH_OPTIONS) + end
             App = CraftApp
         case "move":
-            sys.argv = start + shlex.split(cfg.MOVE.LAUNCH_OPTIONS) + end
+            sys.argv = start + shlex.split(cfg.CRAFT.LAUNCH_OPTIONS) + end
             App = MoveApp
         case "harvest":
             sys.argv = start + shlex.split(cfg.HARVEST.LAUNCH_OPTIONS) + end
