@@ -2,6 +2,7 @@
 - Fix safe check bug
 - Fix telescopic mode landing net bug
 - Add -BT 0 option
+- Fix launch options precedence bug
 
 
 ## 0.7.3 (2025-09-10)

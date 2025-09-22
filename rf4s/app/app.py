@@ -138,7 +138,7 @@ class BotApp(App):
         settings = Table(
             title="Settings", show_header=False, box=box.HEAVY, min_width=36
         )
-        settings.add_row("Launch options", " ".join(sys.argv[1:]))
+        settings.add_row("LAUNCH OPTIONS (FINAL)", " ".join(sys.argv[1:]))
         for k, v in self.cfg.PROFILE.items():
             if k != "DESCRIPTION":
                 settings.add_row(k, str(v))
@@ -312,7 +312,8 @@ class BotApp(App):
         self.cfg.merge_from_list(self.args.opts)
         # Merge profile-level launch options
         if self.cfg.PROFILE.LAUNCH_OPTIONS:
-            sys.argv += shlex.split(self.cfg.PROFILE.LAUNCH_OPTIONS)
+            new_launch_options = shlex.split(self.cfg.PROFILE.LAUNCH_OPTIONS)
+            sys.argv = sys.argv[:2] + new_launch_options + sys.argv[2:]
             self.args = self.parser.parse_args()
         # We need to convert items in args to uppercase to make them consistent with
         # those in CN(), so it must be done manually instead of using CN(dict).
@@ -496,7 +497,7 @@ class CraftApp(App):
         settings = Table(
             title="Settings", show_header=False, box=box.HEAVY, min_width=36
         )
-        settings.add_row("Launch options", " ".join(sys.argv[1:]))
+        settings.add_row("LAUNCH OPTIONS (FINAL)", " ".join(sys.argv[1:]))
         print(settings)
 
         self.result = CraftResult()
@@ -677,7 +678,7 @@ class HarvestApp(App):
         settings = Table(
             title="Settings", show_header=False, box=box.HEAVY, min_width=36
         )
-        settings.add_row("Launch options", " ".join(sys.argv[1:]))
+        settings.add_row("LAUNCH OPTIONS (FINAL)", " ".join(sys.argv[1:]))
         settings.add_row("Power saving", str(self.cfg.HARVEST.POWER_SAVING))
         settings.add_row("Check delay", str(self.cfg.HARVEST.CHECK_DELAY))
         settings.add_row("Energy threshold", str(self.cfg.STAT.ENERGY_THRESHOLD))
@@ -984,7 +985,7 @@ class FrictionBrakeApp(App):
         settings = Table(
             title="Settings", show_header=False, box=box.HEAVY, min_width=36
         )
-        settings.add_row("Launch options", " ".join(sys.argv[1:]))
+        settings.add_row("LAUNCH OPTIONS (FINAL)", " ".join(sys.argv[1:]))
         settings.add_row("Initial friction brake", str(self.cfg.FRICTION_BRAKE.INITIAL))
         settings.add_row("Max friction brake", str(self.cfg.FRICTION_BRAKE.MAX))
         settings.add_row("Start delay", str(self.cfg.FRICTION_BRAKE.START_DELAY))

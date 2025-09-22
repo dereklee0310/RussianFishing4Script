@@ -471,21 +471,22 @@ def main() -> None:
         sys.argv += shlex.split(get_launch_options(subparsers[fid]))
         args = parser.parse_args()
 
+    start, end = sys.argv[:2], sys.argv[2:]
     match args.feature:
         case "bot":
-            sys.argv += shlex.split(cfg.BOT.LAUNCH_OPTIONS)
+            sys.argv = start + shlex.split(cfg.BOT.LAUNCH_OPTIONS) + end
             App = BotApp
         case "craft":
-            sys.argv += shlex.split(cfg.MOVE.LAUNCH_OPTIONS)
+            sys.argv = start + shlex.split(cfg.MOVE.LAUNCH_OPTIONS) + end
             App = CraftApp
         case "move":
-            sys.argv += shlex.split(cfg.MOVE.LAUNCH_OPTIONS)
+            sys.argv = start + shlex.split(cfg.MOVE.LAUNCH_OPTIONS) + end
             App = MoveApp
         case "harvest":
-            sys.argv += shlex.split(cfg.HARVEST.LAUNCH_OPTIONS)
+            sys.argv = start + shlex.split(cfg.HARVEST.LAUNCH_OPTIONS) + end
             App = HarvestApp
         case "frictionbrake" | "fb":
-            sys.argv += shlex.split(cfg.FRICTION_BRAKE.LAUNCH_OPTIONS)
+            sys.argv = start + shlex.split(cfg.FRICTION_BRAKE.LAUNCH_OPTIONS) + end
             App = FrictionBrakeApp
         case "calculate" | "cal":
             App = CalculateApp
