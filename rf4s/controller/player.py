@@ -1025,17 +1025,15 @@ class Player:
 
         logger.info("Scroll bar found, changing lures for dropshot rig")
         pag.moveTo(scrollbar_position)
+        x, y = scrollbar_position.x, scrollbar_position.y
         for _ in range(5):
             sleep(ANIMATION_DELAY)
             pag.drag(xOffset=0, yOffset=125, duration=0.5, button="left")
+            y += 125
 
-            replaced = False
             while self._open_broken_lure_menu():
                 self._replace_item()
-                replaced = True
-
-            if replaced:
-                pag.moveTo(self.detection.get_scrollbar_position())
+            pag.moveTo((x, y))
 
     def _open_broken_lure_menu(self) -> bool:
         """Open the broken lure menu.
