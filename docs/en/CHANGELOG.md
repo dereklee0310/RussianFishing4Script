@@ -1,6 +1,7 @@
 - Fix lure changing bug
 - Fix safe check bug
 - Fix telescopic mode landing net bug
+- Add -BT 0 option
 
 
 ## 0.7.3 (2025-09-10)

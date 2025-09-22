@@ -250,9 +250,9 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         "--boat-ticket",
         nargs="?",
         const=5,
-        default=None,
+        default=0,
         type=int,
-        choices=[1, 2, 3, 5],
+        choices=[0, 1, 2, 3, 5],
         help=(
             "enable boat ticket renewal and specify the duration\n"
             "(default: %(default)s, no argument: %(const)s)"

@@ -995,7 +995,7 @@ class Player:
     def _handle_expired_ticket(self) -> None:
         """Handle an expired boat ticket event."""
         with self.hold_keys(mouse=False, shift=False, reset=True):
-            if self.cfg.ARGS.BOAT_TICKET is None:
+            if self.cfg.ARGS.BOAT_TICKET == 0:
                 pag.press("esc")
                 sleep(TICKET_EXPIRE_DELAY)
                 self.general_quit("Boat ticket expired")
