@@ -921,6 +921,7 @@ class Player:
             self.result.kept += 1
 
         # Safe check
+        sleep(ANIMATION_DELAY)
         if self.detection.is_keepnet_full():
             self.result.kept -= 1
             pag.press("esc")

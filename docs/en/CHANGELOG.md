@@ -1,4 +1,5 @@
 - Fix lure changing bug
+- Fix safe check bug
 
 
 ## 0.7.3 (2025-09-10)
