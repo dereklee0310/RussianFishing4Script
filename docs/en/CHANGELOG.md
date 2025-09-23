@@ -1,5 +1,6 @@
-- Fix groundbait discard bug
-
+## 0.7.5 (2025-09-23)
+### 🐛 Bug Fixes
+- Fixed a bug where `-d/--discard` flag didn't work on the `Craft` feature. 
 
 ## 0.7.4 (2025-09-22)
 
