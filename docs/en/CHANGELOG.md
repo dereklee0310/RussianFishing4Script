@@ -1,3 +1,6 @@
+- Fix groundbait discard bug
+
+
 ## 0.7.4 (2025-09-22)
 
 ### 🐛 Bug Fixes

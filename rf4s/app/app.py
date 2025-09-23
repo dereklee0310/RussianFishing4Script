@@ -545,6 +545,10 @@ class CraftApp(App):
                 break
             sleep(add_jitter(LOOP_DELAY))
         pag.press(accept_key)
+        sleep(add_jitter(ANIMATION_DELAY))
+        discard_yes_position = self.detection.get_discard_yes_position()
+        if discard_yes_position:
+            pag.click(discard_yes_position)
         sleep(add_jitter(LOOP_DELAY))
 
     def _on_release(self, key: keyboard.KeyCode) -> None:
@@ -585,6 +589,7 @@ class CraftApp(App):
                     logger.info("Crafting limit reached")
                     break
                 self.craft_item(accept_key)
+                self.move_cursor_to_make_button()
         except KeyboardInterrupt:
             pass
         self.display_result()

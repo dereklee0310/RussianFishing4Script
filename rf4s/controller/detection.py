@@ -326,15 +326,18 @@ class Detection:
     def is_material_complete(self):
         return not self._get_image_box("material_slot", 0.7)
 
+    def get_make_button_position(self):
+        return self._get_image_box("make", 0.9)
+
+    def get_discard_yes_position(self):
+        return self._get_image_box("discard_yes", 0.9)
+
     # ---------------------- Quiting game from control panel --------------------- #
     def get_quit_position(self):
         return self._get_image_box("quit", 0.8)
 
     def get_yes_position(self):
         return self._get_image_box("yes", 0.8)
-
-    def get_make_button_position(self):
-        return self._get_image_box("make", 0.9)
 
     # ------------------------ Quiting game from main menu ----------------------- #
     def get_exit_icon_position(self):
