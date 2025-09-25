@@ -1,9 +1,11 @@
+## 0.7.6 (2025-09-26)
+
 ### 🐛 Bug Fixes
 - Fixed a bug that caused the `Craft` feature to malfunction in certain scenarios.
 - Fixed a bug that the bot used the number of items crafted instead of the number of materials used the for `-n/--craft-limit` option.
 
-
 ## 0.7.5 (2025-09-23)
+
 ### 🐛 Bug Fixes
 - Fixed a bug where `-d/--discard` flag didn't work on the `Craft` feature. 
 
