@@ -65,13 +65,13 @@ class BotResult:
 
 @dataclass
 class CraftResult:
-    succes: int = 0
+    success: int = 0
     fail: int = 0
     material: int = 0
 
     def as_dict(self) -> dict:
         return {
-            "Successful crafts": self.succes,
+            "Successful crafts": self.success,
             "Failed crafts": self.fail,
             "Materials used": self.material,
         }

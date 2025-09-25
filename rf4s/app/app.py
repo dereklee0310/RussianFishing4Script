@@ -503,22 +503,6 @@ class CraftApp(App):
         self.window = Window()
         self.detection = Detection(self.cfg, self.window)
 
-    def move_cursor_to_make_button(self) -> None:
-        """Move the cursor to the make button position.
-
-        This method uses the Detection class to find the position of the make button
-        and moves the cursor to that position.
-        """
-        make_button_position = self.detection.get_make_button_position()
-        if make_button_position is None:
-            logger.critical(
-                "Make button not found, please set the interface scale to "
-                "1x or move your mouse around"
-            )
-            self.window.activate_script_window()
-            sys.exit()
-        pag.moveTo(make_button_position)
-
     def craft_item(self, accept_key: str) -> None:
         """Craft an item.
 
@@ -536,7 +520,7 @@ class CraftApp(App):
         while True:
             if self.detection.is_operation_success():
                 logger.info("Crafting successed")
-                self.result.succes += 1
+                self.result.success += 1
                 pag.press(accept_key)
                 break
 
@@ -578,7 +562,15 @@ class CraftApp(App):
             random.seed(datetime.now().timestamp())
             accept_key = "backspace" if self.cfg.ARGS.DISCARD else "space"
             self.window.activate_game_window()
-            self.move_cursor_to_make_button()
+            make_button_position = self.detection.get_make_button_position()
+            if make_button_position is None:
+                logger.critical(
+                    "Make button not found, please set the interface scale to "
+                    "1x or move your mouse around"
+                )
+                self.window.activate_script_window()
+                sys.exit()
+            pag.moveTo(make_button_position)
             while True:
                 if (
                     not self.cfg.ARGS.IGNORE
@@ -586,11 +578,11 @@ class CraftApp(App):
                 ):
                     logger.critical("Running out of materials")
                     break
-                if self.result.succes == self.cfg.ARGS.CRAFT_LIMIT:
+                if self.result.material == self.cfg.ARGS.CRAFT_LIMIT:
                     logger.info("Crafting limit reached")
                     break
                 self.craft_item(accept_key)
-                self.move_cursor_to_make_button()
+                pag.moveTo(make_button_position)
         except KeyboardInterrupt:
             pass
         self.display_result()
