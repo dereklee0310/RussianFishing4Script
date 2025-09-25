@@ -537,14 +537,15 @@ class CraftApp(App):
             if self.detection.is_operation_success():
                 logger.info("Crafting successed")
                 self.result.succes += 1
+                pag.press(accept_key)
                 break
 
             if self.detection.is_operation_failed():
                 logger.warning("Crafting failed")
                 self.result.fail += 1
+                pag.press("space")
                 break
             sleep(add_jitter(LOOP_DELAY))
-        pag.press(accept_key)
         sleep(add_jitter(ANIMATION_DELAY))
         discard_yes_position = self.detection.get_discard_yes_position()
         if discard_yes_position:
