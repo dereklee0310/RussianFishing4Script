@@ -42,8 +42,6 @@ WEAR_TEXT_UPDATE_DELAY = 2
 LOWER_TACKLE_DELAY = 4
 BAD_CAST_DELAY = 1
 CLICK_LOCK_DURATION = 2.2
-SPOOL_RETRIEVAL_DELAY = 4
-RAINBOW_RETRIEVAL_DELAY = 1
 
 TROLLING_KEY = "j"
 LEFT_KEY = "a"
@@ -560,9 +558,9 @@ class Player:
                 if self.detection.is_fish_hooked():
                     self._retrieve_fish()
                 if self.cfg.ARGS.RAINBOW is None:
-                    sleep(SPOOL_RETRIEVAL_DELAY)
+                    sleep(self.cfg.BOT.SPOOL_RETRIEVAL_DELAY)
                 elif self.cfg.ARGS.RAINBOW == 5:
-                    sleep(RAINBOW_RETRIEVAL_DELAY)
+                    sleep(self.cfg.BOT.RAINBOW_RETRIEVAL_DELAY)
 
     def _retrieve_fish(self, save: bool = True) -> None:
         if self.detection.is_retrieval_finished():
@@ -1005,6 +1003,7 @@ class Player:
             ticket_loc = self.detection.get_ticket_position(self.cfg.ARGS.BOAT_TICKET)
             if ticket_loc is None:
                 pag.press("esc")  # Close ticket menu
+                sleep(TICKET_EXPIRE_DELAY)
                 self.general_quit("New boat ticket not found")
             pag.moveTo(ticket_loc)
             pag.click(clicks=2, interval=0.1)  # pag.doubleClick() not implemented

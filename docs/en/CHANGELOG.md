@@ -1,5 +1,6 @@
 ### 🐛 Bug Fixes
 - Fix item replace bug
+- Add retrieval delays
 
 
 ## 0.7.6 (2025-09-26)

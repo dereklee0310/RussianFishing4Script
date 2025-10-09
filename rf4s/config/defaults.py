@@ -83,6 +83,10 @@ _C.BOT.SNAG_DETECTION = True
 _C.BOT.SPOOLING_DETECTION = True
 # Fishing line's retrieval sensitivity (lower = more sensitive) (0.0-1.0)
 _C.BOT.SPOOL_CONFIDENCE = 0.98
+# Time to wait after the line retrieval is finished when normal mode is used
+_C.BOT.SPOOL_RETRIEVAL_DELAY = 4.0
+# Time to wait after the line retrieval is finished when rainbow line mode is used
+_C.BOT.RAINBOW_RETRIEVAL_DELAY = 1.0
 # Random rod cast probability (0.0-1.0).
 _C.BOT.RANDOM_CAST_PROBABILITY = 0.25
 # Time to wait before recasting the spod rod
