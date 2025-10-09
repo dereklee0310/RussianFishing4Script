@@ -2,6 +2,7 @@
 - Fix item replace bug
 - Add retrieval delays
 - Fix electro mode -gr bug
+- Fix electro mode bottom layer bug
 
 ## 0.7.6 (2025-09-26)
 

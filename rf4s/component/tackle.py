@@ -125,11 +125,11 @@ class Tackle:
                 pag.click()
             case 5:  # power cast
                 with pag.hold("shift"):
-                    utils.hold_mouse_button(1)
+                    self.hold_mouse_button(1)
             case _:
                 # -1 for backward compatibility
                 duration = CAST_SCALE * (self.cfg.PROFILE.CAST_POWER_LEVEL - 1)
-                utils.hold_mouse_button(duration)
+                self.hold_mouse_button(duration)
 
         sleep(self.cfg.PROFILE.CAST_DELAY)
         if lock:
@@ -151,7 +151,7 @@ class Tackle:
                 pag.click()  # Lock reel
                 return
         self.timer.print_sink_duration()
-        utils.hold_mouse_button(self.cfg.PROFILE.TIGHTEN_DURATION)
+        self.hold_mouse_button(self.cfg.PROFILE.TIGHTEN_DURATION)
 
     def retrieve_with_no_fish(self) -> None:
         """Retrieve the line until the end is reached and detect unexpected events.
@@ -194,7 +194,7 @@ class Tackle:
                 return
 
             if self.cfg.ARGS.LIFT:
-                utils.hold_mouse_button(LIFT_DURATION, button="right")
+                self.hold_mouse_button(LIFT_DURATION, button="right")
 
             if self.detection.is_fish_captured():
                 raise exceptions.FishCapturedError
@@ -215,7 +215,7 @@ class Tackle:
         """
         i = RETRIEVAL_WITH_PAUSE_TIMEOUT
         while i > 0:
-            utils.hold_mouse_button(self.cfg.PROFILE.RETRIEVAL_DURATION, button)
+            self.hold_mouse_button(self.cfg.PROFILE.RETRIEVAL_DURATION, button)
             i -= self.cfg.PROFILE.RETRIEVAL_DURATION
             i = utils.sleep_and_decrease(i, self.cfg.PROFILE.RETRIEVAL_DELAY)
             if (
@@ -242,7 +242,7 @@ class Tackle:
                     pag.keyDown("ctrl")
                 if self.cfg.PROFILE.SHIFT:
                     pag.keyDown("shift")
-                utils.hold_mouse_button(self.cfg.PROFILE.PIRK_DURATION, button="right")
+                self.hold_mouse_button(self.cfg.PROFILE.PIRK_DURATION, button="right")
                 if self.cfg.PROFILE.CTRL:
                     pag.keyUp("ctrl")
                 if self.cfg.PROFILE.SHIFT:
@@ -276,7 +276,7 @@ class Tackle:
                 if locked:
                     i = utils.sleep_and_decrease(i, self.cfg.PROFILE.ELEVATE_DELAY)
                 else:
-                    utils.hold_mouse_button(self.cfg.PROFILE.ELEVATE_DURATION)
+                    self.hold_mouse_button(self.cfg.PROFILE.ELEVATE_DURATION)
                     i -= self.cfg.PROFILE.ELEVATE_DURATION
             locked = not locked
 
@@ -471,3 +471,37 @@ class Tackle:
 
         self.is_rare_event_occur()
         raise exceptions.DriftTimeoutError
+
+    def hold_mouse_button(self, duration: float = 1, button: str = "left") -> None:
+        """Hold left or right mouse button.
+
+        :param duration: Hold time, defaults to 1.
+        :type duration: float, optional
+        :param button: Button to click, defaults to "left".
+        :type button: str, optional
+        """
+        if duration == 0:
+            return
+
+        pag.mouseDown(button=button)
+        sleep(duration)
+        pag.mouseUp(button=button)
+        # + 0.1 due to pag.mouseDown() delay
+        if self.cfg.BOT.CLICK_LOCK and button == "left" and duration >= 2.1:
+            pag.click()
+
+    def hold_mouse_buttons(self, duration: float = 1) -> None:
+        """Hold left and right mouse buttons simultaneously.
+
+        :param duration: Hold time, defaults to 1.
+        :type duration: float, optional
+        """
+        with pag.hold("ctrl"):
+            pag.mouseDown()
+            pag.mouseDown(button="right")
+            sleep(duration)
+            pag.mouseUp()
+            pag.mouseUp(button="right")
+        # + 0.1 due to pag.mouseDown() delay
+        if self.cfg.BOT.CLICK_LOCK and duration >= 2.1:
+            pag.click()

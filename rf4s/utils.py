@@ -26,42 +26,6 @@ ANIMATION_DELAY = 0.5
 # ---------------------------------------------------------------------------- #
 #                            common functionalities                            #
 # ---------------------------------------------------------------------------- #
-
-
-def hold_mouse_button(duration: float = 1, button: str = "left") -> None:
-    """Hold left or right mouse button.
-
-    :param duration: Hold time, defaults to 1.
-    :type duration: float, optional
-    :param button: Button to click, defaults to "left".
-    :type button: str, optional
-    """
-    if duration == 0:
-        return
-
-    pag.mouseDown(button=button)
-    sleep(duration)
-    pag.mouseUp(button=button)
-    if button == "left" and duration >= 2.1:  # + 0.1 due to pag.mouseDown() delay
-        pag.click()
-
-
-def hold_mouse_buttons(duration: float = 1) -> None:
-    """Hold left and right mouse buttons simultaneously.
-
-    :param duration: Hold time, defaults to 1.
-    :type duration: float, optional
-    """
-    with pag.hold("ctrl"):
-        pag.mouseDown()
-        pag.mouseDown(button="right")
-        sleep(duration)
-        pag.mouseUp()
-        pag.mouseUp(button="right")
-    if duration >= 2.1:  # + 0.1 due to pag.mouseDown() delay
-        pag.click()
-
-
 def sleep_and_decrease(num: int, delay: int) -> int:
     """Self-decrement with a delay.
 

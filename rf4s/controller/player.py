@@ -230,7 +230,7 @@ class Player:
                 self.skip_cast = False
 
                 if self.cfg.PROFILE.TYPE != "normal":
-                    utils.hold_mouse_button(self.cfg.PROFILE.TIGHTEN_DURATION)
+                    self.tackle.hold_mouse_button(self.cfg.PROFILE.TIGHTEN_DURATION)
                     getattr(self, f"retrieve_with_{self.cfg.PROFILE.TYPE}")()
                 self.retrieve_line()
                 self.pull_fish()
@@ -481,7 +481,7 @@ class Player:
                     logger.info("Adjusting lure depth")
                     pag.press("enter")  # Open reel
                     sleep(self.cfg.PROFILE.DEPTH_ADJUST_DELAY)
-                    utils.hold_mouse_button(self.cfg.PROFILE.DEPTH_ADJUST_DURATION)
+                    self.tackle.hold_mouse_button(self.cfg.PROFILE.DEPTH_ADJUST_DURATION)
                 else:
                     self.reset_tackle()
                     self.cast_tackle()
@@ -761,7 +761,7 @@ class Player:
         :rtype: tuple[Callable, Callable]
         """
         if telescopic:
-            hold_mouse_button = utils.hold_mouse_button
+            hold_mouse_button = self.tackle.hold_mouse_button
             monitor = self.tackle._monitor_float_state
         else:
             if self.detection.is_clip_open():
@@ -769,7 +769,7 @@ class Player:
                 monitor = self.tackle._monitor_float_state
             else:
                 monitor = self.tackle._monitor_clip_state
-            hold_mouse_button = utils.hold_mouse_buttons
+            hold_mouse_button = self.tackle.hold_mouse_buttons
 
         return monitor, hold_mouse_button
 
