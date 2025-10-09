@@ -65,7 +65,7 @@ BOT_BOOLEAN_ARGUMENTS = (
     ("l", "lift", "lift the tackle constantly during a fish fight"),
     ("e", "electro", "enable electric mode for Electro Raptor series reel"),
     ("FB", "friction-brake", "adjust friction brake automatically"),
-    ("GR", "gear-ratio", "switch the gear ratio after the retrieval timed out"),
+    ("GR", "gear-ratio", "switch the gear ratio or mode after the retrieval timed out"),
     ("b", "bite", "save a screenshot in screenshots/ when a fish bite"),
     ("s", "screenshot", "save a screenshot in screenshots/ after you caught a fish"),
     ("d", "data", "save fishing data in /logs"),

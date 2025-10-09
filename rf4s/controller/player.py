@@ -473,7 +473,7 @@ class Player:
         except exceptions.RetrieveTimeoutError:
             # Enable when timed out, disable after pulling (in casting stage)
             if self.cfg.ARGS.GEAR_RATIO and not self.tackle.gear_ratio_changed:
-                self.tackle.change_gear_ratio()
+                self.tackle.change_gear_ratio_or_electro_mode()
             self._drink_coffee()
         except exceptions.PirkTimeoutError:
             with self.hold_keys(mouse=False, shift=False, reset=True):
@@ -537,8 +537,9 @@ class Player:
                 self.reset_tackle()
 
             self.tackle.cast(lock)
-            if self.tackle.gear_ratio_changed:
-                self.tackle.change_gear_ratio()  # Reset if necessary
+            # Electro Raptor will reset to the manual mode automatically
+            if not self.cfg.ARGS.ELECTRO and self.tackle.gear_ratio_changed:
+                self.tackle.change_gear_ratio_or_electro_mode()
             if update:
                 self.timer.update_cast_time()
 
@@ -570,7 +571,7 @@ class Player:
         if save:
             self.save_bite_screenshot()
         if self.cfg.ARGS.ELECTRO:
-            self.tackle.enable_electro_mode()
+            self.tackle.change_gear_ratio_or_electro_mode()
 
         shift = (
             self.cfg.PROFILE.POST_ACCELERATION

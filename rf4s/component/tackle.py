@@ -338,18 +338,12 @@ class Tackle:
         self.is_rare_event_occur()
         raise exceptions.PullTimeoutError
 
-    def change_gear_ratio(self) -> None:
-        """Switch the gear ratio of a conventional reel."""
-        logger.info("Changing gear ratio")
+    def change_gear_ratio_or_electro_mode(self) -> None:
+        """Switch the gear ratio or electro assist mode."""
+        logger.info("Changing gear ratio / electro assist mode")
         with pag.hold("ctrl"):
             pag.press("space")
         self.gear_ratio_changed = not self.gear_ratio_changed
-
-    def enable_electro_mode(self) -> None:
-        """Enable electro assist mode"""
-        logger.info("Switching gear ratio")
-        with pag.hold("ctrl"):
-            pag.press("space")
 
     def move_mouse_randomly(self) -> None:
         """Randomly move the mouse for four times."""
