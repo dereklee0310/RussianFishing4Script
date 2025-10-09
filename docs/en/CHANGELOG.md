@@ -1,3 +1,7 @@
+### 🐛 Bug Fixes
+- Fix item replace bug
+
+
 ## 0.7.6 (2025-09-26)
 
 ### 🐛 Bug Fixes

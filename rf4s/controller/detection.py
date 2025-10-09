@@ -389,7 +389,8 @@ class Detection:
 
     # ----------------------------- Item replacement ----------------------------- #
     def get_scrollbar_position(self):
-        return pag.center(self._get_image_box("scrollbar", 0.97))
+        box = self._get_image_box("scrollbar", 0.97)
+        return box if box is None else pag.center(box)
 
     def get_100wear_position(self):
         return self._get_image_box("100wear", 0.98)
