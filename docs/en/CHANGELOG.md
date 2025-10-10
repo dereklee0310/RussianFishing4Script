@@ -3,6 +3,7 @@
 - Add retrieval delays
 - Fix electro mode -gr bug
 - Fix electro mode bottom layer bug
+- Add SPIN.RESET_ACCELERATION
 
 ## 0.7.6 (2025-09-26)
 

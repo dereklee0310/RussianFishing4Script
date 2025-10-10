@@ -458,7 +458,11 @@ class Player:
         if not self.detection.is_bait_chosen():
             self.handle_bait_not_chosen()
 
-        with self.hold_keys(mouse=True, shift=True):
+        if self.cfg.PROFILE.MODE == "spin":
+            shift = self.cfg.PROFILE.RESET_ACCELERATION
+        else:
+            shift = True
+        with self.hold_keys(mouse=True, shift=shift):
             while True:
                 with self.error_handler():
                     self.tackle.reset()
