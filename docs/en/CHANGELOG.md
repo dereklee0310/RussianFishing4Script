@@ -4,6 +4,7 @@
 - Fix electro mode -gr bug
 - Fix electro mode bottom layer bug
 - Add SPIN.RESET_ACCELERATION
+- Fix telesopic landing net bug
 
 ## 0.7.6 (2025-09-26)
 
