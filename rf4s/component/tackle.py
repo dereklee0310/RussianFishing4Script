@@ -39,11 +39,11 @@ NUM_OF_MOVEMENT = 4
 
 class StageId(Enum):
     RESET = auto()
-    RETRIEVE_LINE = auto()
-    RETRIEVE_FISH = auto()
+    RETRIEVE = auto()
+    PULL = auto()
     PIRK = auto()
     ELEVATE = auto()
-    PULL = auto()
+    LIFT = auto()
 
 
 class Tackle:
@@ -147,7 +147,7 @@ class Tackle:
         """Sink the lure until an event happens, designed for marine and wacky rig."""
         logger.info("Sinking lure")
         self.timer.set_timeout_start_time()
-        while not self.timer.is_sinking_finished():
+        while not self.timer.is_sink_stage_timeout():
             if self.detection.is_moving_in_bottom_layer():
                 logger.info("Lure has reached bottom layer")
                 sleep(SINK_DELAY) # Drop to the bottom to make the depth consistent
@@ -160,7 +160,7 @@ class Tackle:
                 break
             sleep(LOOP_DELAY)
 
-    def retrieve_with_no_fish(self) -> None:
+    def retrieve(self) -> None:
         """Retrieve the line until the end is reached and detect unexpected events.
 
         :raises exceptions.FishCapturedError: A fish is captured.
@@ -168,8 +168,8 @@ class Tackle:
         :raises exceptions.LineSnaggedError: The line is snagged.
         """
         logger.info("Retrieving fishing line [stage 1]")
-        if self.stage != StageId.RETRIEVE_LINE:
-            self.stage = StageId.RETRIEVE_LINE
+        if self.stage != StageId.RETRIEVE:
+            self.stage = StageId.RETRIEVE
             self.timer.set_timeout_start_time()
         while True:
             if self.detection.is_fish_hooked():
@@ -187,7 +187,7 @@ class Tackle:
                 self.check_rare_events()
             sleep(LOOP_DELAY)
 
-    def retrieve_with_fish(self) -> None:
+    def pull(self) -> None:
         """Retrieve the line until the end is reached and detect unexpected events.
 
         :raises exceptions.FishCapturedError: A fish is captured.
@@ -196,8 +196,8 @@ class Tackle:
         """
         logger.info("Retrieving fishing line [stage 2]")
 
-        if self.stage != StageId.RETRIEVE_FISH:
-            self.stage = StageId.RETRIEVE_FISH
+        if self.stage != StageId.PULL:
+            self.stage = StageId.PULL
             self.timer.set_timeout_start_time()
         while True:
             if self.detection.is_retrieval_finished():
@@ -220,14 +220,14 @@ class Tackle:
             if self.timer.is_gear_ratio_changeable():
                 raise exceptions.GearRatioTimeoutError
 
-    def _special_retrieve(self, button: str) -> None:
+    def special_retrieve(self, button: str) -> None:
         """Retrieve the line with special conditions (pause or lift).
 
         :param button: The mouse button to use for retrieval.
         :type button: str
         """
         self.timer.set_timeout_start_time()
-        while not self.timer.is_special_retrieval_finished():
+        while not self.timer.is_special_retrieve_timeout():
             self.hold_mouse_button(self.cfg.PROFILE.RETRIEVAL_DURATION, button)
             sleep(self.cfg.PROFILE.RETRIEVAL_DELAY)
             if (
@@ -243,7 +243,7 @@ class Tackle:
         if self.stage != StageId.PIRK:
             self.stage = StageId.PIRK
             self.timer.set_timeout_start_time()
-        while not self.timer.is_pirking_finished():
+        while not self.timer.is_pirk_stage_timeout():
             if self.detection.is_tackle_ready():
                 return
 
@@ -275,7 +275,7 @@ class Tackle:
         if self.stage != StageId.ELEVATE:
             self.stage = StageId.ELEVATE
             self.timer.set_timeout_start_time()
-        while not self.timer.is_elevating_finished():
+        while not self.timer.is_elevate_stage_timeout():
             if self.detection.is_fish_hooked_twice():
                 pag.click()
                 return
@@ -298,21 +298,21 @@ class Tackle:
                 self.check_rare_events()
                 dropped = not dropped
 
-    def pull(self) -> None:
+    def lift(self) -> None:
         """Pull the fish until it's captured."""
-        logger.info("Pulling fish")
-        if self.stage != StageId.PULL:
-            self.stage = StageId.PULL
+        logger.info("Lifting rod to pull the fish")
+        if self.stage != StageId.LIFT:
+            self.stage = StageId.LIFT
             self.timer.set_timeout_start_time()
         if self.cfg.PROFILE.MODE == "telescopic":
-            self._telescopic_pull()
+            self._telescopic_lift()
         else:
-            self._pull()
+            self._lift()
 
     @utils.toggle_right_mouse_button #TODO: FIX THIS
-    def _pull(self) -> None:
+    def _lift(self) -> None:
         """Pull the fish until it's captured."""
-        while not self.timer.is_pulling_finished():
+        while not self.timer.is_lift_stage_timeout():
             sleep(LOOP_DELAY)
             if self.detection.is_fish_captured():
                 return
@@ -332,19 +332,19 @@ class Tackle:
                 return
             pag.press("space")
             sleep(ANIMATION_DELAY)
-        raise exceptions.PullTimeoutError
+        raise exceptions.LiftTimeoutError
 
-    def _telescopic_pull(self) -> None:
+    def _telescopic_lift(self) -> None:
         """Pull the fish until it's captured, designed for telescopic rod."""
         # Check false postive first because it happens often
         if not self.detection.is_fish_hooked():
             return
 
-        # Toggle landing net when pull() is called for the first time
+        # Toggle landing net when lift() is called for the first time
         if not self.landing_net_out:
             pag.press("space")
             self.landing_net_out = True
-        while not self.timer.is_pulling_finished():
+        while not self.timer.is_lift_stage_timeout():
             sleep(LOOP_DELAY)
             if self.detection.is_fish_captured():
                 return
@@ -354,7 +354,7 @@ class Tackle:
                 self.check_rare_events()
             if self.timer.is_coffee_drinkable():
                 raise exceptions.CoffeeTimeoutError
-        raise exceptions.PullTimeoutError
+        raise exceptions.LiftTimeoutError
 
     def change_gear_ratio_or_electro_mode(self) -> None:
         """Switch the gear ratio or electro assist mode."""
@@ -469,7 +469,7 @@ class Tackle:
         reference_img = pag.screenshot(region=self.detection.float_camera_rect)
         blurred = reference_img.filter(ImageFilter.GaussianBlur(radius=3))
         self.timer.set_timeout_start_time()
-        while not self.timer.is_drifting_finished():
+        while not self.timer.is_drift_stage_timeout():
             sleep(self.cfg.PROFILE.CHECK_DELAY)
             if self.detection.is_float_state_changed(blurred):
                 logger.info("Float status changed")
@@ -482,7 +482,7 @@ class Tackle:
         """Monitor the state of the bolognese clip."""
         logger.info("Monitoring clip state")
         self.timer.set_timeout_start_time()
-        while not self.timer.is_drifting_finished():
+        while not self.timer.is_drift_stage_timeout():
             sleep(self.cfg.PROFILE.CHECK_DELAY)
             if self.detection.is_clip_open():
                 logger.info("Clip status changed")

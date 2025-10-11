@@ -75,8 +75,8 @@ class PirkTimeoutError(Exception):
     """Pirking times out."""
 
 
-class PullTimeoutError(Exception):
-    """Pulling times out."""
+class LiftTimeoutError(Exception):
+    """Lifting times out."""
 
 
 class BaitNotChosenError(Exception):

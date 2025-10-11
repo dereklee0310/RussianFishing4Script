@@ -7,6 +7,7 @@
 - Fix telesopic landing net bug
 - Add COFFEE_DRINK_DELAY
 - Add GEAR_RATIO_DELAY
+- Rename PULL_DELAY as LIFT_DELAY
 
 ## 0.7.6 (2025-09-26)
 

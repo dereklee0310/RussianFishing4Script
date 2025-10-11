@@ -77,9 +77,9 @@ class Timer:
         self.last_alcohol_drink = 0
         self.last_coffee_drink = 0
         self.last_rare_event_check = 0
-        self.last_pirking_finished = 0
-        self.last_elevating_finished = 0
-        self.last_pulling_finished = 0
+        self.last_pirk_timeout = 0
+        self.last_elevate_timeout = 0
+        self.last_lift_timeout = 0
         self.last_drifting_finished = 0
         self.last_lure_change = self.start_time
         self.last_spod_rod_recast = self.start_time
@@ -252,8 +252,9 @@ class Timer:
         self.timeout_start_time = time.time()
         self.last_coffee_drink = self.timeout_start_time
         self.last_rare_event_check = self.timeout_start_time
-        self.last_pirking_finished = self.timeout_start_time
-        self.last_elevating_finished = self.timeout_start_time
+        self.last_pirk_timeout = self.timeout_start_time
+        self.last_elevate_timeout = self.timeout_start_time
+        self.last_lift_timeout = self.timeout_start_time
 
     def is_rare_event_checkable(self):
         cur_time = time.time()
@@ -262,7 +263,7 @@ class Timer:
             return True
         return False
 
-    def is_sinking_finished(self):
+    def is_sink_stage_timeout(self):
         return time.time() - self.timeout_start_time > self.cfg.PROFILE.SINK_TIMEOUT
 
     def is_coffee_drinkable(self):
@@ -275,33 +276,29 @@ class Timer:
     def is_gear_ratio_changeable(self):
         return time.time() - self.timeout_start_time > self.cfg.BOT.GEAR_RATIO_DELAY
 
-    def is_special_retrieval_finished(self):
+    def is_special_retrieve_timeout(self):
         return time.time() - self.timeout_start_time > self.cfg.PROFILE.RETRIEVAL_TIMEOUT
 
-    def is_pirking_finished(self):
+    def is_pirk_stage_timeout(self):
         cur_time = time.time()
-        if cur_time - self.last_pirking_finished > self.cfg.PROFILE.PIRK_TIMEOUT:
-            self.last_pirking_finished = cur_time
+        if cur_time - self.last_pirk_timeout > self.cfg.PROFILE.PIRK_TIMEOUT:
+            self.last_pirk_timeout = cur_time
             return True
         return False
 
-    def is_elevating_finished(self):
+    def is_elevate_stage_timeout(self):
         cur_time = time.time()
-        if cur_time - self.last_elevating_finished > self.cfg.PROFILE.ELEVATE_TIMEOUT:
-            self.last_elevating_finished = cur_time
+        if cur_time - self.last_elevate_timeout > self.cfg.PROFILE.ELEVATE_TIMEOUT:
+            self.last_elevate_timeout = cur_time
             return True
         return False
 
-    def is_pulling_finished(self):
+    def is_lift_stage_timeout(self):
         cur_time = time.time()
-        if cur_time - self.last_pulling_finished > self.cfg.PROFILE.PULL_TIMEOUT:
-            self.last_pulling_finished = cur_time
+        if cur_time - self.last_lift_timeout > self.cfg.PROFILE.LIFT_TIMEOUT:
+            self.last_lift_timeout = cur_time
             return True
         return False
 
-    def is_drifting_finished(self):
-        cur_time = time.time()
-        if cur_time - self.last_drifting_finished > self.cfg.PROFILE.DRIFT_TIMEOUT:
-            self.last_drifting_finished = cur_time
-            return True
-        return False
+    def is_drift_stage_timeout(self):
+        return time.time() - self.timeout_start_time > self.cfg.PROFILE.DRIFT_TIMEOUT

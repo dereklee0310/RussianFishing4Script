@@ -185,10 +185,10 @@ class Player:
         except exceptions.FishHookedError:
             with self.loop_restart_handler():
                 if self.cfg.PROFILE.MODE != "telescopic":
-                    self._retrieve_fish()
+                    self.pull_fish()
                 else:
                     self.save_bite_screenshot()  # Should be called in _retrieve_fish()
-                self.pull_fish()
+                self.lift_fish()
         except exceptions.StuckAtCastingError:
             with self.hold_keys(mouse=False, shift=False):
                 pass  # defer to reset_tackle()
@@ -233,19 +233,19 @@ class Player:
                     self.tackle.hold_mouse_button(self.cfg.PROFILE.TIGHTEN_DURATION)
                     getattr(self, f"retrieve_with_{self.cfg.PROFILE.TYPE}")()
                 self.retrieve_line()
-                self.pull_fish()
+                self.lift_fish()
 
     def retrieve_with_pause(self) -> None:
         """Retrieve the line, pausing periodically."""
         logger.info("Retrieving fishing line with pause")
         with self.hold_keys(mouse=False, shift=self.cfg.PROFILE.PRE_ACCELERATION):
-            self.tackle._special_retrieve(button="left")
+            self.tackle.special_retrieve(button="left")
 
     def retrieve_with_lift(self) -> None:
         """Retrieve the line, lifting periodically."""
         logger.info("Retrieving fishing line with lift")
         with self.hold_keys(mouse=True, shift=self.cfg.PROFILE.PRE_ACCELERATION):
-            self.tackle._special_retrieve(button="right")
+            self.tackle.special_retrieve(button="right")
 
     def start_bottom_mode(self) -> None:
         """Main bottom fishing loop."""
@@ -275,7 +275,7 @@ class Player:
 
     def retrieve_and_recast(self) -> None:
         self.retrieve_line()
-        self.pull_fish()
+        self.lift_fish()
         self.recast_tackle()
 
     def recast_tackle(self) -> None:
@@ -312,7 +312,7 @@ class Player:
                 if not self.detection.is_fish_hooked():
                     perform_technique()
                 self.retrieve_line()
-                self.pull_fish()
+                self.lift_fish()
 
     def start_telescopic_mode(self) -> None:
         """Main telescopic fishing loop."""
@@ -341,13 +341,13 @@ class Player:
 
                 with self.error_handler():
                     monitor()
-                sleep(self.cfg.PROFILE.PULL_DELAY)
+                sleep(self.cfg.PROFILE.LIFT_DELAY)
                 hold_mouse_button(PRE_RETRIEVAL_DURATION)
                 if not telescopic:
-                    self._retrieve_fish()
+                    self.pull_fish()
                 else:
                     self.save_bite_screenshot()  # Should be called in _retrieve_fish()
-                self.pull_fish()
+                self.lift_fish()
 
     def harvest_baits(self, pickup: bool = False) -> None:
         """Harvest baits if energy is high.
@@ -412,7 +412,7 @@ class Player:
 
         # Hold left mouse button if we can use coffee by pressing a hotkey.
         # If left mouse button is not pressed, it means it's called while handling
-        # PullTimeoutError and we don't need to keep it pressed.
+        # LiftTimeoutError and we don't need to keep it pressed.
         mouse = True if self.mouse_pressed and self.cfg.KEY["COFFEE"] != -1 else False
         with self.hold_keys(mouse=mouse, shift=False, reset=True):
             if self.cur_coffee > self.cfg.STAT.COFFEE_LIMIT:
@@ -475,7 +475,7 @@ class Player:
         except exceptions.CoffeeTimeoutError:
             self._drink_coffee()
         except exceptions.GearRatioTimeoutError:
-            # Enable when timed out, disable after pulling (in casting stage)
+            # Enable when timed out, disable after lifting (in casting stage)
             if self.cfg.ARGS.GEAR_RATIO and not self.tackle.gear_ratio_changed:
                 self.tackle.change_gear_ratio_or_electro_mode()
         except exceptions.PirkTimeoutError:
@@ -489,11 +489,11 @@ class Player:
                     self.reset_tackle()
                     self.cast_tackle()
                     self.tackle.sink()
-        except exceptions.PullTimeoutError:
+        except exceptions.LiftTimeoutError:
             with self.hold_keys(mouse=False, shift=False, reset=True):
                 sleep(LOWER_TACKLE_DELAY)
                 if self.cfg.PROFILE.MODE != "telescopic":
-                    self._retrieve_fish(save=False)
+                    self.pull_fish(save=False)
         except exceptions.DryMixNotChosenError:
             self._refill_dry_mix()
 
@@ -551,21 +551,21 @@ class Player:
             return
 
         if self.detection.is_fish_hooked():
-            self._retrieve_fish()
+            self.pull_fish()
         else:
             with self.hold_keys(mouse=True, shift=False):
                 while True:
                     with self.error_handler():
-                        self.tackle.retrieve_with_no_fish()
+                        self.tackle.retrieve()
                         break
                 if self.detection.is_fish_hooked():
-                    self._retrieve_fish()
+                    self.pull_fish()
                 if self.cfg.ARGS.RAINBOW is None:
                     sleep(self.cfg.BOT.SPOOL_RETRIEVAL_DELAY)
                 elif self.cfg.ARGS.RAINBOW == 5:
                     sleep(self.cfg.BOT.RAINBOW_RETRIEVAL_DELAY)
 
-    def _retrieve_fish(self, save: bool = True) -> None:
+    def pull_fish(self, save: bool = True) -> None:
         if self.detection.is_retrieval_finished():
             return
 
@@ -583,7 +583,7 @@ class Player:
         with self.hold_keys(mouse=True, shift=shift):
             while True:
                 with self.error_handler():
-                    self.tackle.retrieve_with_fish()
+                    self.tackle.pull()
                     break
 
     def save_bite_screenshot(self):
@@ -615,8 +615,8 @@ class Player:
                 self.tackle.elevate()
             break
 
-    def pull_fish(self) -> None:
-        """Pull the fish up and handle it."""
+    def lift_fish(self) -> None:
+        """Lift the fish up and handle it."""
         if not self.detection.is_fish_hooked():
             return
         self._drink_alcohol()
@@ -628,7 +628,7 @@ class Player:
         with self.hold_keys(mouse=True, shift=shift):
             while True:
                 with self.error_handler():
-                    self.tackle.pull()
+                    self.tackle.lift()
                     break
         self.handle_fish()
 
