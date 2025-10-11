@@ -94,6 +94,7 @@ PROFILE:
     RESET_ACCELERATION: false
     PRE_ACCELERATION: false
     POST_ACCELERATION: false
+    PULL_TIMEOUT: 16.0
   SPIN_WITH_PAUSE:
     DESCRIPTION: "Spin fishing, short pauses."
     LAUNCH_OPTIONS: ""
@@ -108,6 +109,7 @@ PROFILE:
     RESET_ACCELERATION: false
     PRE_ACCELERATION: false
     POST_ACCELERATION: false
+    PULL_TIMEOUT: 16.0
   SPIN_WITH_LIFT:
     DESCRIPTION: "Spin fishing, short lifts."
     LAUNCH_OPTIONS: ""
@@ -122,6 +124,7 @@ PROFILE:
     RESET_ACCELERATION: false
     PRE_ACCELERATION: false
     POST_ACCELERATION: false
+    PULL_TIMEOUT: 16.0
   BOTTOM:
     DESCRIPTION: "Default bottom fishing."
     LAUNCH_OPTIONS: ""
@@ -133,6 +136,7 @@ PROFILE:
     CHECK_MISS_LIMIT: 16
     PUT_DOWN_DELAY: 2.0
     RANDOM_ROD_SELECTION: true
+    PULL_TIMEOUT: 16.0
   PIRK:
     DESCRIPTION: "Default marine fishing, strong pirking at the bottom layer."
     LAUNCH_OPTIONS: ""
@@ -151,6 +155,7 @@ PROFILE:
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
+    PULL_TIMEOUT: 16.0
   PIRK_WITH_RETRIEVAL:
     DESCRIPTION: "Marine fishing, pirking while retrieving the fishing line."
     LAUNCH_OPTIONS: ""
@@ -169,6 +174,7 @@ PROFILE:
     PIRK_RETRIEVAL: true
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
+    PULL_TIMEOUT: 16.0
   WACKY_RIG:
     DESCRIPTION: "Wacky rig fishing, pirking at the bottom layer."
     LAUNCH_OPTIONS: ""
@@ -187,6 +193,7 @@ PROFILE:
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
+    PULL_TIMEOUT: 16.0
   ELEVATOR:
     DESCRIPTION: "Marine fishing, elevator pirking, recast the rod after timed out."
     LAUNCH_OPTIONS: ""
@@ -201,6 +208,7 @@ PROFILE:
     DROP: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
+    PULL_TIMEOUT: 16.0
   ELEVATOR_WITH_DROP:
     DESCRIPTION: "Marine fishing, elevator pirking, lock/unlock the reel to drop the lure after timed out."
     LAUNCH_OPTIONS: ""
@@ -215,6 +223,7 @@ PROFILE:
     DROP: true
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
+    PULL_TIMEOUT: 16.0
   TELESCOPIC:
     DESCRIPTION: "Default float fishing, still water, telescopic rod."
     LAUNCH_OPTIONS: ""
@@ -226,6 +235,7 @@ PROFILE:
     PULL_DELAY: 1.5
     DRIFT_TIMEOUT: 256.0
     CAMERA_SHAPE: "tall"
+    PULL_TIMEOUT: 16.0
   BOLOGNESE:
     DESCRIPTION: "Default float fishing, flowing water, bolognese rod."
     LAUNCH_OPTIONS: ""
@@ -238,6 +248,7 @@ PROFILE:
     DRIFT_TIMEOUT: 256.0
     CAMERA_SHAPE: "tall"
     POST_ACCELERATION: true
+    PULL_TIMEOUT: 16.0
   MATCH:
     DESCRIPTION: "Default float fishing, flowing water, match rod."
     LAUNCH_OPTIONS: ""
@@ -250,6 +261,7 @@ PROFILE:
     DRIFT_TIMEOUT: 64.0
     CAMERA_SHAPE: "tall"
     POST_ACCELERATION: true
+    PULL_TIMEOUT: 16.0
 
   Walk the dog | Beluga Venga 10000:
     DESCRIPTION: "Yama River, speed 50, walk the dog."
@@ -265,6 +277,7 @@ PROFILE:
     RESET_ACCELERATION: false
     PRE_ACCELERATION: false
     POST_ACCELERATION: true
+    PULL_TIMEOUT: 16.0
   Twitching | Beluga Venga 10000:
     DESCRIPTION: "Kuori Lake, 92:100, speed 50, twitching."
     LAUNCH_OPTIONS: ""
@@ -279,6 +292,7 @@ PROFILE:
     RESET_ACCELERATION: false
     PRE_ACCELERATION: false
     POST_ACCELERATION: true
+    PULL_TIMEOUT: 16.0
   Jig step | Beluga Venga 10000:
     DESCRIPTION: "Lower Tunguska River, 88:96, speed 50, jig step."
     LAUNCH_OPTIONS: ""
@@ -293,6 +307,7 @@ PROFILE:
     RESET_ACCELERATION: false
     PRE_ACCELERATION: false
     POST_ACCELERATION: true
+    PULL_TIMEOUT: 16.0
   Bottom | c6 | Royal Picker PM98H:
     DESCRIPTION: "Copper Lake, 67:57."
     LAUNCH_OPTIONS: ""
@@ -304,6 +319,7 @@ PROFILE:
     CHECK_MISS_LIMIT: 10
     PUT_DOWN_DELAY: 2.0
     RANDOM_ROD_SELECTION: true
+    PULL_TIMEOUT: 16.0
   Bottom | c12 | Royal Picker PM98H:
     DESCRIPTION: "Copper Lake, 61:53."
     LAUNCH_OPTIONS: ""
@@ -315,6 +331,7 @@ PROFILE:
     CHECK_MISS_LIMIT: 16
     PUT_DOWN_DELAY: 2.0
     RANDOM_ROD_SELECTION: true
+    PULL_TIMEOUT: 16.0
   Bottom | c17 | Fortuna Carp 360XH:
     DESCRIPTION: "Old burg Lake, 21:67."
     LAUNCH_OPTIONS: ""
@@ -326,6 +343,7 @@ PROFILE:
     CHECK_MISS_LIMIT: 16
     PUT_DOWN_DELAY: 2.0
     RANDOM_ROD_SELECTION: true
+    PULL_TIMEOUT: 16.0
   Bottom | c30 | Royal Picker PM98H:
     DESCRIPTION: "Copper Lake, 37:32."
     LAUNCH_OPTIONS: ""
@@ -337,6 +355,7 @@ PROFILE:
     CHECK_MISS_LIMIT: 10
     PUT_DOWN_DELAY: 2.0
     RANDOM_ROD_SELECTION: true
+    PULL_TIMEOUT: 16.0
   Bottom | c35 | Fortuna Carp 360XH:
     DESCRIPTION: "Amber Lake, 83:145."
     LAUNCH_OPTIONS: ""
@@ -348,6 +367,7 @@ PROFILE:
     CHECK_MISS_LIMIT: 16
     PUT_DOWN_DELAY: 2.0
     RANDOM_ROD_SELECTION: true
+    PULL_TIMEOUT: 16.0
   Marine | c20 | strong pirking | SAT Rigal 20 2S:
     DESCRIPTION: "Norwegian Sea, 30/34m, Atlantic Saury."
     LAUNCH_OPTIONS: ""
@@ -366,6 +386,7 @@ PROFILE:
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
+    PULL_TIMEOUT: 16.0
   Marine | 34/41/55m | movement | SAT Rigal 20 2S:
     DESCRIPTION: "Norwegian Sea, 34/41/55m."
     LAUNCH_OPTIONS: ""
@@ -384,6 +405,7 @@ PROFILE:
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
+    PULL_TIMEOUT: 16.0
   Marine | 34/41/55m | pirking | SAT Rigal 20 2S:
     DESCRIPTION: "Norwegian Sea, 34/41/55m."
     LAUNCH_OPTIONS: ""
@@ -402,6 +424,7 @@ PROFILE:
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
+    PULL_TIMEOUT: 16.0
   Marine | 34/41/55m | strong pirking | SAT Rigal 20 2S:
     DESCRIPTION: "Norwegian Sea, 34/41/55m."
     LAUNCH_OPTIONS: ""
@@ -420,6 +443,7 @@ PROFILE:
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
+    PULL_TIMEOUT: 16.0
   Marine | 34/41/55m | strong pirking | Reef Albacore 40 DS:
     DESCRIPTION: "Norwegian Sea, 34/41/55m."
     LAUNCH_OPTIONS: ""
@@ -438,6 +462,7 @@ PROFILE:
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
+    PULL_TIMEOUT: 16.0
   Marine | 80/88m | movement | Reef Albacore 40 DS:
     DESCRIPTION: "Norwegian Sea, 80/88m."
     LAUNCH_OPTIONS: ""
@@ -456,6 +481,7 @@ PROFILE:
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
+    PULL_TIMEOUT: 16.0
   Marine | 80/88m | strong pirking | Reef Albacore 40 DS:
     DESCRIPTION: "Norwegian Sea, 80/88m."
     LAUNCH_OPTIONS: ""
@@ -474,6 +500,7 @@ PROFILE:
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
+    PULL_TIMEOUT: 16.0
   Marine | 120/144m | movement | Reef Albacore 40 DS:
     DESCRIPTION: "Norwegian Sea, 120/144m."
     LAUNCH_OPTIONS: ""
@@ -492,6 +519,7 @@ PROFILE:
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
+    PULL_TIMEOUT: 16.0
   Marine | 120/144m | strong pirking | Reef Albacore 40 DS:
     DESCRIPTION: "Norwegian Sea, 120/144m."
     LAUNCH_OPTIONS: ""
@@ -510,6 +538,7 @@ PROFILE:
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
+    PULL_TIMEOUT: 16.0
   Marine | 215m | strong pirking | Reef Albacore 40 DS:
     DESCRIPTION: "Norwegian Sea, 215m."
     LAUNCH_OPTIONS: ""
@@ -528,6 +557,7 @@ PROFILE:
     PIRK_RETRIEVAL: false
     HOOK_DELAY: 0.5
     POST_ACCELERATION: true
+    PULL_TIMEOUT: 16.0
   Match | still water | c10:
     DESCRIPTION: "Ladoga Lake, 73:55, depth 150cm."
     LAUNCH_OPTIONS: ""
@@ -540,7 +570,7 @@ PROFILE:
     DRIFT_TIMEOUT: 256.0
     CAMERA_SHAPE: "tall"
     POST_ACCELERATION: true
-
+    PULL_TIMEOUT: 16.0
   Telescopic | flow water:
     DESCRIPTION: "Winding Rivulet, 72:85, depth 18cm"
     LAUNCH_OPTIONS: ""
@@ -552,3 +582,4 @@ PROFILE:
     PULL_DELAY: 1.5
     DRIFT_TIMEOUT: 16.0
     CAMERA_SHAPE: "tall"
+    PULL_TIMEOUT: 16.0

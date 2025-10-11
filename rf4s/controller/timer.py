@@ -273,7 +273,7 @@ class Timer:
         return False
 
     def is_gear_ratio_changeable(self):
-        return time.time() - self.timeout_start_time > self.cfg.ARGS.GEAR_RATIO
+        return time.time() - self.timeout_start_time > self.cfg.BOT.GEAR_RATIO_DELAY
 
     def is_special_retrieval_finished(self):
         return time.time() - self.timeout_start_time > self.cfg.PROFILE.RETRIEVAL_TIMEOUT
@@ -294,7 +294,7 @@ class Timer:
 
     def is_pulling_finished(self):
         cur_time = time.time()
-        if cur_time - self.last_pulling_finished > self.cfg.PROFILE.ELEVATE_TIMEOUT:
+        if cur_time - self.last_pulling_finished > self.cfg.PROFILE.PULL_TIMEOUT:
             self.last_pulling_finished = cur_time
             return True
         return False

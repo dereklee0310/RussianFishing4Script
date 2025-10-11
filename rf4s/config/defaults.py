@@ -266,6 +266,8 @@ _C.PROFILE.SPIN.PRE_ACCELERATION = False
 # Hold down the Shift key during fish fight
 # (options: on, off, auto)
 _C.PROFILE.SPIN.POST_ACCELERATION = False
+# Timeout for pulling stage, the bot will put down the rod for a while and lift it again
+_C.PROFILE.SPIN.PULL_TIMEOUT = 16.0
 
 _C.PROFILE.SPIN_WITH_PAUSE = CN()
 _C.PROFILE.SPIN_WITH_PAUSE.DESCRIPTION = "Spin fishing, short pauses."
@@ -281,6 +283,7 @@ _C.PROFILE.SPIN_WITH_PAUSE.RETRIEVAL_TIMEOUT = 256.0
 _C.PROFILE.SPIN_WITH_PAUSE.RESET_ACCELERATION = False
 _C.PROFILE.SPIN_WITH_PAUSE.PRE_ACCELERATION = False
 _C.PROFILE.SPIN_WITH_PAUSE.POST_ACCELERATION = False
+_C.PROFILE.SPIN_WITH_PAUSE.PULL_TIMEOUT = 16.0
 
 
 _C.PROFILE.SPIN_WITH_LIFT = CN()
@@ -297,6 +300,7 @@ _C.PROFILE.SPIN_WITH_LIFT.RETRIEVAL_TIMEOUT = 256.0
 _C.PROFILE.SPIN_WITH_LIFT.RESET_ACCELERATION = False
 _C.PROFILE.SPIN_WITH_LIFT.PRE_ACCELERATION = False
 _C.PROFILE.SPIN_WITH_LIFT.POST_ACCELERATION = False
+_C.PROFILE.SPIN_WITH_LIFT.PULL_TIMEOUT = 16.0
 
 
 # ---------------------------------------------------------------------------- #
@@ -326,6 +330,8 @@ _C.PROFILE.BOTTOM.CHECK_MISS_LIMIT = 16
 _C.PROFILE.BOTTOM.PUT_DOWN_DELAY = 2.0
 # Whether to check the rods randomly or sequentially
 _C.PROFILE.BOTTOM.RANDOM_ROD_SELECTION = True
+# Timeout for pulling stage, the bot will put down the rod for a while and lift it again
+_C.PROFILE.BOTTOM.PULL_TIMEOUT = 16.0
 
 
 # ---------------------------------------------------------------------------- #
@@ -372,6 +378,8 @@ _C.PROFILE.PIRK.PIRK_RETRIEVAL = False
 _C.PROFILE.PIRK.HOOK_DELAY = 0.5
 # Hold down the Shift key during fish fight
 _C.PROFILE.PIRK.POST_ACCELERATION = True
+# Timeout for pulling stage, the bot will put down the rod for a while and lift it again
+_C.PROFILE.PIRK.PULL_TIMEOUT = 16.0
 
 _C.PROFILE.PIRK_WITH_RETRIEVAL = CN()
 _C.PROFILE.PIRK_WITH_RETRIEVAL.DESCRIPTION = (
@@ -393,6 +401,7 @@ _C.PROFILE.PIRK_WITH_RETRIEVAL.PIRK_TIMEOUT = 32.0
 _C.PROFILE.PIRK_WITH_RETRIEVAL.PIRK_RETRIEVAL = True
 _C.PROFILE.PIRK_WITH_RETRIEVAL.HOOK_DELAY = 0.5
 _C.PROFILE.PIRK_WITH_RETRIEVAL.POST_ACCELERATION = True
+_C.PROFILE.PIRK.PULL_TIMEOUT = 16.0
 
 _C.PROFILE.WACKY_RIG = CN()
 _C.PROFILE.WACKY_RIG.DESCRIPTION = "Wacky rig fishing, pirking at the bottom layer."
@@ -412,6 +421,7 @@ _C.PROFILE.WACKY_RIG.PIRK_TIMEOUT = 32.0
 _C.PROFILE.WACKY_RIG.PIRK_RETRIEVAL = False
 _C.PROFILE.WACKY_RIG.HOOK_DELAY = 0.5
 _C.PROFILE.WACKY_RIG.POST_ACCELERATION = True
+_C.PROFILE.WACKY_RIG.PULL_TIMEOUT = 16.0
 
 # ---------------------------------------------------------------------------- #
 #                            Marine Elevator Profile                           #
@@ -450,6 +460,8 @@ _C.PROFILE.ELEVATOR.HOOK_DELAY = 0.5
 # Hold down the Shift key during fish fight
 # (options: on, off, auto)
 _C.PROFILE.ELEVATOR.POST_ACCELERATION = True
+# Timeout for pulling stage, the bot will put down the rod for a while and lift it again
+_C.PROFILE.ELEVATOR.PULL_TIMEOUT = 16.0
 
 _C.PROFILE.ELEVATOR_WITH_DROP = CN()
 _C.PROFILE.ELEVATOR_WITH_DROP.DESCRIPTION = "Marine fishing, elevator pirking, lock/unlock the reel to drop the lure after timed out."
@@ -465,6 +477,7 @@ _C.PROFILE.ELEVATOR_WITH_DROP.ELEVATE_TIMEOUT = 40.0
 _C.PROFILE.ELEVATOR_WITH_DROP.DROP = True
 _C.PROFILE.ELEVATOR_WITH_DROP.HOOK_DELAY = 0.5
 _C.PROFILE.ELEVATOR_WITH_DROP.POST_ACCELERATION = True
+_C.PROFILE.ELEVATOR_WITH_DROP.PULL_TIMEOUT = 16.0
 
 # ---------------------------------------------------------------------------- #
 #                             Float fishing profile                            #
@@ -495,6 +508,8 @@ _C.PROFILE.TELESCOPIC.DRIFT_TIMEOUT = 256.0
 # Shape of the float camera, the script tracks the whole camrea window by default.
 # (options: square, wide, tall)
 _C.PROFILE.TELESCOPIC.CAMERA_SHAPE = "square"
+# Timeout for pulling stage, the bot will put down the rod for a while and lift it again
+_C.PROFILE.TELESCOPIC.PULL_TIMEOUT = 16.0
 
 
 _C.PROFILE.BOLOGNESE = CN()
@@ -527,6 +542,8 @@ _C.PROFILE.BOLOGNESE.CAMERA_SHAPE = "square"
 # Hold down the Shift key during fish fight
 # (options: on, off, auto)
 _C.PROFILE.BOLOGNESE.POST_ACCELERATION = True
+# Timeout for pulling stage, the bot will put down the rod for a while and lift it again
+_C.PROFILE.BOLOGNESE.PULL_TIMEOUT = 16.0
 
 
 _C.PROFILE.MATCH = CN()
@@ -557,6 +574,8 @@ _C.PROFILE.MATCH.CAMERA_SHAPE = "square"
 # Hold down the Shift key during fish fight
 # (options: on, off, auto)
 _C.PROFILE.MATCH.POST_ACCELERATION = True
+# Timeout for pulling stage, the bot will put down the rod for a while and lift it again
+_C.PROFILE.MATCH.PULL_TIMEOUT = 16.0
 
 
 def get_cfg_defaults():
