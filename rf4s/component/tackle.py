@@ -9,6 +9,7 @@ common tasks like clicklock and key releases.
 
 import random
 from time import sleep
+from enum import Enum, auto
 from typing import Literal
 
 import pyautogui as pag
@@ -22,23 +23,27 @@ from rf4s.controller import logger
 from rf4s.controller.detection import Detection
 from rf4s.controller.timer import Timer, add_jitter
 
-RESET_TIMEOUT = 16
 CAST_SCALE = 0.4  # 25% / 0.4s
 LOOP_DELAY = 1
 
 ANIMATION_DELAY = 0.5
 
-RETRIEVAL_TIMEOUT = 16
-PULL_TIMEOUT = 16
-RETRIEVAL_WITH_PAUSE_TIMEOUT = 128
 LIFT_DURATION = 3
-TELESCOPIC_PULL_TIMEOUT = 8
 LANDING_NET_DURATION = 6
 SINK_DELAY = 2
 
 
 OFFSET = 100
 NUM_OF_MOVEMENT = 4
+
+
+class StageId(Enum):
+    RESET = auto()
+    RETRIEVE_LINE = auto()
+    RETRIEVE_FISH = auto()
+    PIRK = auto()
+    ELEVATE = auto()
+    PULL = auto()
 
 
 class Tackle:
@@ -71,8 +76,9 @@ class Tackle:
         self.landing_net_out = False  # For telescopic pull
         self.available = True
         self.gear_ratio_changed = False
+        self.stage = None
 
-    def is_rare_event_occur(self) -> None:
+    def check_rare_events(self) -> None:
         """Check if the game disconnected or the boat ticket expired."""
         if self.detection.is_tackle_broken():
             raise exceptions.TackleBrokenError
@@ -86,7 +92,10 @@ class Tackle:
     def reset(self) -> None:
         """Reset the tackle until ready and detect unexpected events."""
         logger.info("Resetting tackle")
-        i = RESET_TIMEOUT
+
+        if self.stage != StageId.RESET:
+            self.stage = StageId.RESET
+            self.timer.set_timeout_start_time()
         while True:
             if self.detection.is_tackle_ready():
                 return
@@ -106,10 +115,9 @@ class Tackle:
                 raise exceptions.BaitNotChosenError
             if not self.detection.is_dry_mix_chosen():
                 raise exceptions.DryMixNotChosenError
-            i = utils.sleep_and_decrease(i, LOOP_DELAY)
-            if i <= 0:
-                self.is_rare_event_occur()
-                i = RESET_TIMEOUT
+            if self.timer.is_rare_event_checkable():
+                self.check_rare_events()
+            sleep(LOOP_DELAY)
 
     def cast(self, lock: bool) -> None:
         """Cast the rod, then wait for the lure/bait to fly and sink.
@@ -138,20 +146,19 @@ class Tackle:
     def sink(self) -> None:
         """Sink the lure until an event happens, designed for marine and wacky rig."""
         logger.info("Sinking lure")
-        i = self.cfg.PROFILE.SINK_TIMEOUT
-        self.timer.set_sink_start_time()
-        while i > 0:
-            i = utils.sleep_and_decrease(i, LOOP_DELAY)
+        self.timer.set_timeout_start_time()
+        while not self.timer.is_sinking_finished():
             if self.detection.is_moving_in_bottom_layer():
                 logger.info("Lure has reached bottom layer")
-                sleep(SINK_DELAY)
+                sleep(SINK_DELAY) # Drop to the bottom to make the depth consistent
+                self.timer.print_sink_duration()
+                self.hold_mouse_button(self.cfg.PROFILE.TIGHTEN_DURATION)
                 break
 
             if self.detection.is_fish_hooked_twice():
                 pag.click()  # Lock reel
-                return
-        self.timer.print_sink_duration()
-        self.hold_mouse_button(self.cfg.PROFILE.TIGHTEN_DURATION)
+                break
+            sleep(LOOP_DELAY)
 
     def retrieve_with_no_fish(self) -> None:
         """Retrieve the line until the end is reached and detect unexpected events.
@@ -161,7 +168,9 @@ class Tackle:
         :raises exceptions.LineSnaggedError: The line is snagged.
         """
         logger.info("Retrieving fishing line [stage 1]")
-        i = RETRIEVAL_TIMEOUT
+        if self.stage != StageId.RETRIEVE_LINE:
+            self.stage = StageId.RETRIEVE_LINE
+            self.timer.set_timeout_start_time()
         while True:
             if self.detection.is_fish_hooked():
                 return
@@ -174,10 +183,9 @@ class Tackle:
                 raise exceptions.LineAtEndError
             if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged():
                 raise exceptions.LineSnaggedError
-            i = utils.sleep_and_decrease(i, LOOP_DELAY)
-            if i <= 0:
-                self.is_rare_event_occur()
-                i = RETRIEVAL_TIMEOUT
+            if self.timer.is_rare_event_checkable():
+                self.check_rare_events()
+            sleep(LOOP_DELAY)
 
     def retrieve_with_fish(self) -> None:
         """Retrieve the line until the end is reached and detect unexpected events.
@@ -188,8 +196,10 @@ class Tackle:
         """
         logger.info("Retrieving fishing line [stage 2]")
 
-        i = RETRIEVAL_TIMEOUT
-        while i > 0:
+        if self.stage != StageId.RETRIEVE_FISH:
+            self.stage = StageId.RETRIEVE_FISH
+            self.timer.set_timeout_start_time()
+        while True:
             if self.detection.is_retrieval_finished():
                 return
 
@@ -202,10 +212,13 @@ class Tackle:
                 raise exceptions.LineAtEndError
             if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged():
                 raise exceptions.LineSnaggedError
-            i = utils.sleep_and_decrease(i, LOOP_DELAY)
-
-        self.is_rare_event_occur()
-        raise exceptions.RetrieveTimeoutError
+            if self.timer.is_rare_event_checkable():
+                self.check_rare_events()
+            sleep(LOOP_DELAY)
+            if self.timer.is_coffee_drinkable():
+                raise exceptions.CoffeeTimeoutError
+            if self.timer.is_gear_ratio_changeable():
+                raise exceptions.GearRatioTimeoutError
 
     def _special_retrieve(self, button: str) -> None:
         """Retrieve the line with special conditions (pause or lift).
@@ -213,11 +226,10 @@ class Tackle:
         :param button: The mouse button to use for retrieval.
         :type button: str
         """
-        i = RETRIEVAL_WITH_PAUSE_TIMEOUT
-        while i > 0:
+        self.timer.set_timeout_start_time()
+        while not self.timer.is_special_retrieval_finished():
             self.hold_mouse_button(self.cfg.PROFILE.RETRIEVAL_DURATION, button)
-            i -= self.cfg.PROFILE.RETRIEVAL_DURATION
-            i = utils.sleep_and_decrease(i, self.cfg.PROFILE.RETRIEVAL_DELAY)
+            sleep(self.cfg.PROFILE.RETRIEVAL_DELAY)
             if (
                 self.detection.is_fish_hooked()
                 or self.detection.is_retrieval_finished()
@@ -228,8 +240,10 @@ class Tackle:
         """Start pirking until a fish is hooked."""
         logger.info("Pirking")
 
-        i = self.cfg.PROFILE.PIRK_TIMEOUT
-        while i > 0:
+        if self.stage != StageId.PIRK:
+            self.stage = StageId.PIRK
+            self.timer.set_timeout_start_time()
+        while not self.timer.is_pirking_finished():
             if self.detection.is_tackle_ready():
                 return
 
@@ -247,20 +261,21 @@ class Tackle:
                     pag.keyUp("ctrl")
                 if self.cfg.PROFILE.SHIFT:
                     pag.keyUp("shift")
-                i -= self.cfg.PROFILE.PIRK_DURATION
-                i = utils.sleep_and_decrease(i, self.cfg.PROFILE.PIRK_DELAY)
+                sleep(self.cfg.PROFILE.PIRK_DELAY)
             else:
-                i = utils.sleep_and_decrease(i, LOOP_DELAY)
-
-        self.is_rare_event_occur()
+                sleep(LOOP_DELAY)
+            if self.timer.is_rare_event_checkable():
+                self.check_rare_events()
         raise exceptions.PirkTimeoutError
 
     def elevate(self) -> None:
         """Perform elevator tactic (drop/rise) until a fish is hooked."""
         locked = True  # Reel is locked after tackle.sink()
         dropped = False
-        i = self.cfg.PROFILE.ELEVATE_TIMEOUT
-        while True:
+        if self.stage != StageId.ELEVATE:
+            self.stage = StageId.ELEVATE
+            self.timer.set_timeout_start_time()
+        while not self.timer.is_elevating_finished():
             if self.detection.is_fish_hooked_twice():
                 pag.click()
                 return
@@ -271,38 +286,42 @@ class Tackle:
                     delay = self.cfg.PROFILE.ELEVATE_DELAY
                 else:
                     delay = self.cfg.PROFILE.ELEVATE_DURATION
-                i = utils.sleep_and_decrease(i, delay)
+                sleep(delay)
             else:
                 if locked:
-                    i = utils.sleep_and_decrease(i, self.cfg.PROFILE.ELEVATE_DELAY)
+                    sleep(self.cfg.PROFILE.ELEVATE_DELAY)
                 else:
                     self.hold_mouse_button(self.cfg.PROFILE.ELEVATE_DURATION)
-                    i -= self.cfg.PROFILE.ELEVATE_DURATION
             locked = not locked
 
-            if i <= 0:
-                self.is_rare_event_occur()
-                i = self.cfg.PROFILE.ELEVATE_TIMEOUT
+            if self.timer.is_rare_event_checkable():
+                self.check_rare_events()
                 dropped = not dropped
 
     def pull(self) -> None:
         """Pull the fish until it's captured."""
         logger.info("Pulling fish")
+        if self.stage != StageId.PULL:
+            self.stage = StageId.PULL
+            self.timer.set_timeout_start_time()
         if self.cfg.PROFILE.MODE == "telescopic":
             self._telescopic_pull()
         else:
             self._pull()
 
-    @utils.toggle_right_mouse_button
+    @utils.toggle_right_mouse_button #TODO: FIX THIS
     def _pull(self) -> None:
         """Pull the fish until it's captured."""
-        i = PULL_TIMEOUT
-        while i > 0:
-            i = utils.sleep_and_decrease(i, LOOP_DELAY)
+        while not self.timer.is_pulling_finished():
+            sleep(LOOP_DELAY)
             if self.detection.is_fish_captured():
                 return
             if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged():
                 raise exceptions.LineSnaggedError
+            if self.timer.is_rare_event_checkable():
+                self.check_rare_events()
+            if self.timer.is_coffee_drinkable():
+                raise exceptions.CoffeeTimeoutError
 
         if not self.detection.is_fish_hooked():
             return
@@ -313,8 +332,6 @@ class Tackle:
                 return
             pag.press("space")
             sleep(ANIMATION_DELAY)
-
-        self.is_rare_event_occur()
         raise exceptions.PullTimeoutError
 
     def _telescopic_pull(self) -> None:
@@ -327,15 +344,16 @@ class Tackle:
         if not self.landing_net_out:
             pag.press("space")
             self.landing_net_out = True
-        i = TELESCOPIC_PULL_TIMEOUT
-        while i > 0:
-            i = utils.sleep_and_decrease(i, LOOP_DELAY)
+        while not self.timer.is_pulling_finished():
+            sleep(LOOP_DELAY)
             if self.detection.is_fish_captured():
                 return
             if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged():
                 raise exceptions.LineSnaggedError
-
-        self.is_rare_event_occur()
+            if self.timer.is_rare_event_checkable():
+                self.check_rare_events()
+            if self.timer.is_coffee_drinkable():
+                raise exceptions.CoffeeTimeoutError
         raise exceptions.PullTimeoutError
 
     def change_gear_ratio_or_electro_mode(self) -> None:
@@ -450,26 +468,27 @@ class Tackle:
         logger.info("Monitoring float state")
         reference_img = pag.screenshot(region=self.detection.float_camera_rect)
         blurred = reference_img.filter(ImageFilter.GaussianBlur(radius=3))
-        i = self.cfg.PROFILE.DRIFT_TIMEOUT
-        while i > 0:
-            i = utils.sleep_and_decrease(i, self.cfg.PROFILE.CHECK_DELAY)
+        self.timer.set_timeout_start_time()
+        while not self.timer.is_drifting_finished():
+            sleep(self.cfg.PROFILE.CHECK_DELAY)
             if self.detection.is_float_state_changed(blurred):
                 logger.info("Float status changed")
                 return
-
-        self.is_rare_event_occur()
+            if self.timer.is_rare_event_checkable():
+                self.check_rare_events()
         raise exceptions.DriftTimeoutError
 
     def _monitor_clip_state(self) -> None:
         """Monitor the state of the bolognese clip."""
-        i = self.cfg.PROFILE.DRIFT_TIMEOUT
-        while i > 0:
-            i = utils.sleep_and_decrease(i, self.cfg.PROFILE.CHECK_DELAY)
+        logger.info("Monitoring clip state")
+        self.timer.set_timeout_start_time()
+        while not self.timer.is_drifting_finished():
+            sleep(self.cfg.PROFILE.CHECK_DELAY)
             if self.detection.is_clip_open():
                 logger.info("Clip status changed")
                 return
-
-        self.is_rare_event_occur()
+            if self.timer.is_rare_event_checkable():
+                self.check_rare_events()
         raise exceptions.DriftTimeoutError
 
     def hold_mouse_button(self, duration: float = 1, button: str = "left") -> None:

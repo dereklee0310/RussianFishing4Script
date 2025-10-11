@@ -5,6 +5,8 @@
 - Fix electro mode bottom layer bug
 - Add SPIN.RESET_ACCELERATION
 - Fix telesopic landing net bug
+- Add COFFEE_DRINK_DELAY
+- Add GEAR_RATIO_DELAY
 
 ## 0.7.6 (2025-09-26)
 

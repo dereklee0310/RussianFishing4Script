@@ -63,16 +63,20 @@ class QuitError(Exception):
     """User want to quit the app."""
 
 
-class RetrieveTimeoutError(Exception):
-    """Retrieve timed out."""
+class CoffeeTimeoutError(Exception):
+    """Coffee timeout is reached"""
+
+
+class GearRatioTimeoutError(Exception):
+    """Gear ratio timeout is reached"""
 
 
 class PirkTimeoutError(Exception):
-    """Pirking timed out."""
+    """Pirking times out."""
 
 
 class PullTimeoutError(Exception):
-    """Pulling timed out."""
+    """Pulling times out."""
 
 
 class BaitNotChosenError(Exception):
@@ -92,4 +96,4 @@ class DryMixNotFoundError(Exception):
 
 
 class DriftTimeoutError(Exception):
-    """Bait drifting timed out during float fishing"""
+    """Bait drifting times out during float fishing"""

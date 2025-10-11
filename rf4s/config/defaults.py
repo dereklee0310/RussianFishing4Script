@@ -57,8 +57,9 @@ _C.STAT.HUNGER_THRESHOLD = 0.5
 _C.STAT.COMFORT_THRESHOLD = 0.51
 # Delay between tea drinks
 _C.STAT.TEA_DRINK_DELAY = 300
-# Maximum coffee drinks per fish fight.
-# The script will stop and let the game stay idle after the limit is reached.
+# Delay between coffee drinks
+_C.STAT.COFFEE_DRINK_DELAY = 32
+# Maximum coffee drinks per fish fight, it will stop after the limit is reached.
 _C.STAT.COFFEE_LIMIT = 32
 # Amount of coffee to consume per drink
 _C.STAT.COFFEE_PER_DRINK = 1
@@ -95,6 +96,8 @@ _C.BOT.SPOD_ROD_RECAST_DELAY = 1800
 _C.BOT.LURE_CHANGE_DELAY = 1800
 # Time to wait before between pauses
 _C.BOT.PAUSE_DELAY = 1800
+# Time to wait before switching gear ratio or electro mode
+_C.BOT.GEAR_RATIO_DELAY = 64
 # Duration of a single pause
 _C.BOT.PAUSE_DURATION = 600
 # Whether the Windows ClickLock is enabled.

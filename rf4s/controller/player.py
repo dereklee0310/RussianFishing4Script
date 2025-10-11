@@ -446,17 +446,15 @@ class Player:
         """Reset the tackle until it is ready."""
         if self.detection.is_tackle_ready():
             return
-
         if self.detection.is_lure_broken():
             self._handle_broken_lure()
             return
-
         if not self.detection.is_dry_mix_chosen():
             self._refill_dry_mix()
             return
-
         if not self.detection.is_bait_chosen():
             self.handle_bait_not_chosen()
+            return
 
         if self.cfg.PROFILE.MODE == "spin":
             shift = self.cfg.PROFILE.RESET_ACCELERATION
@@ -474,11 +472,12 @@ class Player:
             yield
         except exceptions.TicketExpiredError:
             self._handle_expired_ticket()
-        except exceptions.RetrieveTimeoutError:
+        except exceptions.CoffeeTimeoutError:
+            self._drink_coffee()
+        except exceptions.GearRatioTimeoutError:
             # Enable when timed out, disable after pulling (in casting stage)
             if self.cfg.ARGS.GEAR_RATIO and not self.tackle.gear_ratio_changed:
                 self.tackle.change_gear_ratio_or_electro_mode()
-            self._drink_coffee()
         except exceptions.PirkTimeoutError:
             with self.hold_keys(mouse=False, shift=False, reset=True):
                 if self.cfg.PROFILE.DEPTH_ADJUST_DELAY > 0:
@@ -493,7 +492,6 @@ class Player:
         except exceptions.PullTimeoutError:
             with self.hold_keys(mouse=False, shift=False, reset=True):
                 sleep(LOWER_TACKLE_DELAY)
-                self._drink_coffee()
                 if self.cfg.PROFILE.MODE != "telescopic":
                     self._retrieve_fish(save=False)
         except exceptions.DryMixNotChosenError:

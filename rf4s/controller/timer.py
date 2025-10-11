@@ -26,6 +26,7 @@ if utils.is_compiled():
 else:
     OUTER_ROOT = Path(__file__).resolve().parents[2]
 
+RARE_EVENT_TIMEOUT = 16
 
 TIME_JITTER = 0.2
 random.seed(datetime.datetime.now().timestamp())
@@ -74,11 +75,17 @@ class Timer:
 
         self.last_tea_drink = 0
         self.last_alcohol_drink = 0
+        self.last_coffee_drink = 0
+        self.last_rare_event_check = 0
+        self.last_pirking_finished = 0
+        self.last_elevating_finished = 0
+        self.last_pulling_finished = 0
+        self.last_drifting_finished = 0
         self.last_lure_change = self.start_time
         self.last_spod_rod_recast = self.start_time
         self.last_pause = self.start_time
 
-        self.sink_start_time = 0
+        self.timeout_start_time = 0
 
     def get_running_time(self) -> float:
         """Calculate the execution time of the program.
@@ -238,8 +245,63 @@ class Timer:
         plt.savefig(str(output_dir / "chart.png"))
         logger.info("Chart has been saved under logs/")
 
-    def set_sink_start_time(self):
-        self.sink_start_time = time.time()
-
     def print_sink_duration(self):
-        logger.info("Sinking takes %s seconds", int(time.time() - self.sink_start_time))
+        logger.info("Sinking takes %s seconds", int(time.time() - self.timeout_start_time))
+
+    def set_timeout_start_time(self):
+        self.timeout_start_time = time.time()
+        self.last_coffee_drink = self.timeout_start_time
+        self.last_rare_event_check = self.timeout_start_time
+        self.last_pirking_finished = self.timeout_start_time
+        self.last_elevating_finished = self.timeout_start_time
+
+    def is_rare_event_checkable(self):
+        cur_time = time.time()
+        if cur_time - self.last_rare_event_check > RARE_EVENT_TIMEOUT:
+            self.last_rare_event_check = cur_time
+            return True
+        return False
+
+    def is_sinking_finished(self):
+        return time.time() - self.timeout_start_time > self.cfg.PROFILE.SINK_TIMEOUT
+
+    def is_coffee_drinkable(self):
+        cur_time = time.time()
+        if cur_time - self.last_coffee_drink > self.cfg.STAT.COFFEE_DRINK_DELAY:
+            self.last_coffee_drink = cur_time
+            return True
+        return False
+
+    def is_gear_ratio_changeable(self):
+        return time.time() - self.timeout_start_time > self.cfg.ARGS.GEAR_RATIO
+
+    def is_special_retrieval_finished(self):
+        return time.time() - self.timeout_start_time > self.cfg.PROFILE.RETRIEVAL_TIMEOUT
+
+    def is_pirking_finished(self):
+        cur_time = time.time()
+        if cur_time - self.last_pirking_finished > self.cfg.PROFILE.PIRK_TIMEOUT:
+            self.last_pirking_finished = cur_time
+            return True
+        return False
+
+    def is_elevating_finished(self):
+        cur_time = time.time()
+        if cur_time - self.last_elevating_finished > self.cfg.PROFILE.ELEVATE_TIMEOUT:
+            self.last_elevating_finished = cur_time
+            return True
+        return False
+
+    def is_pulling_finished(self):
+        cur_time = time.time()
+        if cur_time - self.last_pulling_finished > self.cfg.PROFILE.ELEVATE_TIMEOUT:
+            self.last_pulling_finished = cur_time
+            return True
+        return False
+
+    def is_drifting_finished(self):
+        cur_time = time.time()
+        if cur_time - self.last_drifting_finished > self.cfg.PROFILE.DRIFT_TIMEOUT:
+            self.last_drifting_finished = cur_time
+            return True
+        return False
