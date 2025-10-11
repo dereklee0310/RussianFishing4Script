@@ -8,8 +8,8 @@ common tasks like clicklock and key releases.
 """
 
 import random
-from time import sleep
 from enum import Enum, auto
+from time import sleep
 from typing import Literal
 
 import pyautogui as pag
@@ -150,7 +150,7 @@ class Tackle:
         while not self.timer.is_sink_stage_timeout():
             if self.detection.is_moving_in_bottom_layer():
                 logger.info("Lure has reached bottom layer")
-                sleep(SINK_DELAY) # Drop to the bottom to make the depth consistent
+                sleep(SINK_DELAY)  # Drop to the bottom to make the depth consistent
                 self.timer.print_sink_duration()
                 self.hold_mouse_button(self.cfg.PROFILE.TIGHTEN_DURATION)
                 break
@@ -309,7 +309,7 @@ class Tackle:
         else:
             self._lift()
 
-    @utils.toggle_right_mouse_button #TODO: FIX THIS
+    @utils.toggle_right_mouse_button  # TODO: FIX THIS
     def _lift(self) -> None:
         """Pull the fish until it's captured."""
         while not self.timer.is_lift_stage_timeout():
@@ -407,7 +407,9 @@ class Tackle:
         :type item: Literal["dry_mix", "groundbait"]
         """
         logger.info("Equiping new %s from inventory", item)
-        scrollbar_position = utils.get_box_center_integers(self.detection.get_scrollbar_position())
+        scrollbar_position = utils.get_box_center_integers(
+            self.detection.get_scrollbar_position()
+        )
         if scrollbar_position is None:
             pag.click(utils.get_box_center_integers(self.get_item_position(item)))
             self._equip_favorite_item(item)

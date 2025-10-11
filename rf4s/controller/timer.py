@@ -246,7 +246,9 @@ class Timer:
         logger.info("Chart has been saved under logs/")
 
     def print_sink_duration(self):
-        logger.info("Sinking takes %s seconds", int(time.time() - self.timeout_start_time))
+        logger.info(
+            "Sinking takes %s seconds", int(time.time() - self.timeout_start_time)
+        )
 
     def set_timeout_start_time(self):
         self.timeout_start_time = time.time()
@@ -277,7 +279,9 @@ class Timer:
         return time.time() - self.timeout_start_time > self.cfg.BOT.GEAR_RATIO_DELAY
 
     def is_special_retrieve_timeout(self):
-        return time.time() - self.timeout_start_time > self.cfg.PROFILE.RETRIEVAL_TIMEOUT
+        return (
+            time.time() - self.timeout_start_time > self.cfg.PROFILE.RETRIEVAL_TIMEOUT
+        )
 
     def is_pirk_stage_timeout(self):
         cur_time = time.time()
