@@ -87,7 +87,7 @@ _C.BOT.SPOOL_CONFIDENCE = 0.98
 # Time to wait before lifting the rod to pull the fish up when normal mode is used
 _C.BOT.SPOOL_RETRIEVAL_DELAY = 6.0
 # Time to wait before lifting the rod to pull the fish up when rainbow line mode is used
-_C.BOT.RAINBOW_RETRIEVAL_DELAY = 2.0
+_C.BOT.RAINBOW_RETRIEVAL_DELAY = 3.0
 # Random rod cast probability (0.0-1.0).
 _C.BOT.RANDOM_CAST_PROBABILITY = 0.25
 # Time to wait before recasting the spod rod
