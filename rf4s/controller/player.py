@@ -1070,7 +1070,7 @@ class Player:
                 self.general_quit("Favorite item not found")
 
             # Check if the lure for replacement is already broken
-            x, y = utils.get_box_center(favorite_item_position)
+            x, y = pag.center(favorite_item_position)
             if pag.pixel(x - 70, y + 190) != (178, 59, 30):  # Magic value ;)
                 logger.info("Lure replaced successfully")
                 pag.moveTo(x - 70, y + 190)
