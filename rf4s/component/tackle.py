@@ -407,9 +407,9 @@ class Tackle:
         :type item: Literal["dry_mix", "groundbait"]
         """
         logger.info("Equiping new %s from inventory", item)
-        scrollbar_position = self.detection.get_scrollbar_position()
+        scrollbar_position = utils.get_box_center_integers(self.detection.get_scrollbar_position())
         if scrollbar_position is None:
-            pag.click(pag.center(self.get_item_position(item)))
+            pag.click(utils.get_box_center_integers(self.get_item_position(item)))
             self._equip_favorite_item(item)
             return
 
@@ -419,7 +419,7 @@ class Tackle:
             pag.drag(xOffset=0, yOffset=125, duration=0.5, button="left")
             position = self.get_item_position(item)
             if position is not None:
-                pag.click(pag.center(position))
+                pag.click(utils.get_box_center_integers(position))
                 self._equip_favorite_item(item)
                 break
 
@@ -451,7 +451,7 @@ class Tackle:
             random.shuffle(favorite_item_positions)
 
         for favorite_item_position in favorite_item_positions:
-            x, y = pag.center(favorite_item_position)
+            x, y = utils.get_box_center_integers(favorite_item_position)
             if item == "lure" and pag.pixel(x - 70, y + 190) == (178, 59, 30):
                 continue
             pag.click(x - 70, y + 190, clicks=2, interval=0.1)

@@ -54,6 +54,19 @@ def ask_for_confirmation(msg: str = "Ready to start") -> None:
             sys.exit()
 
 
+def get_box_center_integers(box: Box) -> tuple[int, int]:
+    """Get the center coordinate (x, y) of the given box.
+
+    # (x, y, w, h) -> (x, y), np.int64 -> int
+
+    :param box: Box coordinates (x, y, w, h).
+    :type box: Box
+    :return: x and y coordinates of the center point.
+    :rtype: tuple[int, int]
+    """
+    return int(box.left + box.width // 2), int(box.top + box.height // 2)
+
+
 # ---------------------------------------------------------------------------- #
 #                                  decorators                                  #
 # ---------------------------------------------------------------------------- #

@@ -19,6 +19,7 @@ from PIL import Image, ImageFilter
 from pyscreeze import Box
 
 from rf4s.controller.window import Window
+from rf4s import utils
 
 CRITICAL_COLOR = (206, 56, 21)
 WARNING_COLOR = (227, 149, 23)
@@ -347,50 +348,37 @@ class Detection:
         return self._get_image_box("confirm", 0.8)
 
     # ------------------------------- Player stats ------------------------------- #
-    def _get_energy_icon_position(self):
-        box = self._get_image_box("energy", 0.8)
-        return box if box is None else pag.center(box)
-
-    def _get_food_icon_position(self):
-        box = self._get_image_box("food", 0.8)
-        return box if box is None else pag.center(box)
-
-    def _get_comfort_icon_position(self):
-        box = self._get_image_box("comfort", 0.8)
-        return box if box is None else pag.center(box)
-
     def get_food_position(self, food: str):
         return self._get_image_box(food, 0.9)
 
     def is_energy_high(self) -> bool:
-        pos = self._get_energy_icon_position()
-        if not pos:
+        box = self._get_image_box("energy", 0.8)
+        if not box:
             return False
-        x, y = int(pos.x), int(pos.y)
+        x, y = utils.get_box_center_integers(box)
         # default threshold: 0.74,  well done FishSoft
         last_point = int(19 + 152 * self.cfg.STAT.ENERGY_THRESHOLD) - 1
         return pag.pixel(x + 19, y) == pag.pixel(x + last_point, y)
 
     def is_hunger_low(self) -> bool:
-        pos = self._get_food_icon_position()
-        if not pos:
+        box = self._get_image_box("food", 0.8)
+        if not box:
             return False
-        x, y = int(pos.x), int(pos.y)
+        x, y = utils.get_box_center_integers(box)
         last_point = int(18 + 152 * self.cfg.STAT.HUNGER_THRESHOLD) - 1
         return not pag.pixel(x + 18, y) == pag.pixel(x + last_point, y)
 
     def is_comfort_low(self) -> bool:
-        pos = self._get_comfort_icon_position()
-        if not pos:
+        box = self._get_image_box("comfort", 0.8)
+        if not box:
             return False
-        x, y = int(pos.x), int(pos.y)
+        x, y = utils.get_box_center_integers(box)
         last_point = int(18 + 152 * self.cfg.STAT.COMFORT_THRESHOLD) - 1
         return not pag.pixel(x + 18, y) == pag.pixel(x + last_point, y)
 
     # ----------------------------- Item replacement ----------------------------- #
     def get_scrollbar_position(self):
-        box = self._get_image_box("scrollbar", 0.97)
-        return box if box is None else pag.center(box)
+        return self._get_image_box("scrollbar", 0.97)
 
     def get_100wear_position(self):
         return self._get_image_box("100wear", 0.98)

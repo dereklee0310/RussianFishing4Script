@@ -1018,8 +1018,8 @@ class Player:
         """Replace multiple broken lures."""
         logger.info("Replacing broken lures")
 
-        scrollbar_position = self.detection.get_scrollbar_position()
-        if scrollbar_position is None:
+        scrollbar_box = self.detection.get_scrollbar_position()
+        if scrollbar_box is None:
             logger.info("Scroll bar not found, changing lures for normal rig")
             while self._open_broken_lure_menu():
                 self._replace_item()
@@ -1027,8 +1027,8 @@ class Player:
             return
 
         logger.info("Scroll bar found, changing lures for dropshot rig")
-        pag.moveTo(scrollbar_position)
-        x, y = scrollbar_position.x, scrollbar_position.y
+        x, y = utils.get_box_center_integers(scrollbar_box)
+        pag.moveTo(x, y)
         for _ in range(5):
             sleep(ANIMATION_DELAY)
             pag.drag(xOffset=0, yOffset=125, duration=0.5, button="left")
@@ -1070,7 +1070,7 @@ class Player:
                 self.general_quit("Favorite item not found")
 
             # Check if the lure for replacement is already broken
-            x, y = pag.center(favorite_item_position)
+            x, y = utils.get_box_center_integers(favorite_item_position)
             if pag.pixel(x - 70, y + 190) != (178, 59, 30):  # Magic value ;)
                 logger.info("Lure replaced successfully")
                 pag.moveTo(x - 70, y + 190)
