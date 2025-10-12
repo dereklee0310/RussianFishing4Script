@@ -80,7 +80,6 @@ class Timer:
         self.last_pirk_timeout = 0
         self.last_elevate_timeout = 0
         self.last_lift_timeout = 0
-        self.last_drifting_finished = 0
         self.last_lure_change = self.start_time
         self.last_spod_rod_recast = self.start_time
         self.last_pause = self.start_time

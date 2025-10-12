@@ -27,20 +27,6 @@ ANIMATION_DELAY = 0.5
 # ---------------------------------------------------------------------------- #
 #                            common functionalities                            #
 # ---------------------------------------------------------------------------- #
-def sleep_and_decrease(num: int, delay: int) -> int:
-    """Self-decrement with a delay.
-
-    :param num: The variable to decrease.
-    :type num: int
-    :param delay: Sleep time.
-    :type delay: int
-    :return: Decreased num.
-    :rtype: int
-    """
-    sleep(delay)
-    return num - delay
-
-
 def ask_for_confirmation(msg: str = "Ready to start") -> None:
     """Ask for confirmation of user settings if it's enabled.
 

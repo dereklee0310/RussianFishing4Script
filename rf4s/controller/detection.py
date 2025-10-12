@@ -23,7 +23,6 @@ from rf4s.controller.window import Window
 
 CRITICAL_COLOR = (206, 56, 21)
 WARNING_COLOR = (227, 149, 23)
-WHITE = (255, 255, 255)
 
 MIN_GRAY_SCALE_LEVEL = 160
 YELLOW_FRICTION_BRAKE = (200, 214, 63)
