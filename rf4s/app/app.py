@@ -380,7 +380,7 @@ class BotApp(App):
     def validate_spool_detection(self):
         if self.cfg.ARGS.RAINBOW is None:
             logger.warning(
-                "Default spool detection mode detected, fully spool your reel"
+                "Default retrieval detection mode detected, fully spool your reel"
             )
 
     def _on_release(self, key: keyboard.KeyCode) -> None:

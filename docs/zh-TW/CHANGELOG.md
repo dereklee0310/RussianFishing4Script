@@ -1,3 +1,21 @@
+## 0.8.0 (2025-10-13)
+
+### 🐛 錯誤修正
+- 修正了機器人在嘗試更換物品時會當機的問題。  
+- 修正了在電動模式（Electro mode）下 `-gr` 參數異常運作的問題。  
+- 修正了電動模式無法正常運作的錯誤。  
+- 修正了伸縮竿模式（Telescopic mode）中，僅在第一條魚時會拉出抄網的問題。  
+- 修正了 `SPIN.RETRIEVAL_TIMEOUT` 設定無效的錯誤。
+
+### 🔧 功能改進
+- 新增 `BOT.SPOOL_RETRIEVAL_DELAY` 與 `BOT.RAINBOW_RETRIEVAL_DELAY`，讓使用者可設定在收線階段結束後、揚竿前的等待時間。  
+- 在所有釣魚模式中新增 `LIFT_TIMEOUT`，讓使用者可自訂揚竿階段的逾時時間。  
+- 新增 `SPIN.RESET_ACCELERATION`，用以控制重置裝備時是否按住 Shift 鍵。  
+- 新增 `BOT.COFFEE_DRINK_DELAY`，讓使用者可設定機器人在搏魚期間檢查體力條並飲用咖啡的頻率。
+
+### 🗃️ 淘汰項目
+- 將伸縮竿、波隆尼與競技模式中的 `PULL_DELAY` 重新命名為 `LIFT_DELAY`，以統一名稱。
+
 ## 0.7.6 (2025-09-26)
 
 ### 🐛 錯誤修正

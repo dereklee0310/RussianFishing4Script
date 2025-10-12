@@ -1,14 +1,20 @@
+## 0.8.0 (2025-10-13)
+
 ### 🐛 Bug Fixes
-- Fix item replace bug
-- Add retrieval delays
-- Fix electro mode -gr bug
-- Fix electro mode bottom layer bug
-- Add SPIN.RESET_ACCELERATION
-- Fix telesopic landing net bug
-- Add COFFEE_DRINK_DELAY
-- Add GEAR_RATIO_DELAY
-- Rename PULL_DELAY as LIFT_DELAY
-- Fix RETRIEVAL_TIMEOUT bug
+- Fixed a crash that occurred when the bot attempted to replace an item.  
+- Resolved an issue where the `-gr` flag behaved abnormally in Electro mode.  
+- Fixed a bug causing Electro mode to malfunction.  
+- Addressed an issue in Telescopic mode where the landing net was only deployed for the first fish.  
+- Fixed a bug where `SPIN.RETRIEVAL_TIMEOUT` had no effect.
+
+### 🔧 Improvements
+- Added `BOT.SPOOL_RETRIEVAL_DELAY` and `BOT.RAINBOW_RETRIEVAL_DELAY` to let users configure the delay before lifting the rod after the retrieval phase ends.  
+- Introduced `LIFT_TIMEOUT` across all fishing modes, allowing users to set a timeout for the rod-lifting stage.  
+- Added `SPIN.RESET_ACCELERATION` to control whether the Shift key is held during tackle reset.  
+- Added `BOT.COFFEE_DRINK_DELAY` to configure how frequently the bot checks the energy bar and drinks coffee during a fish fight.
+
+### 🗃️ Deprecations
+- Renamed `PULL_DELAY` to `LIFT_DELAY` in Telescopic, Bolognese, and Match modes for naming consistency.
 
 ## 0.7.6 (2025-09-26)
 
