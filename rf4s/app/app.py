@@ -144,9 +144,6 @@ class BotApp(App):
         print(settings)
         if self.cfg.PROFILE.DESCRIPTION:
             utils.print_description_box(self.cfg.PROFILE.DESCRIPTION)
-        utils.print_hint_box(
-            "The reel must be fully loaded, or consider using the -R option with rainbow line equipped."
-        )
         utils.print_usage_box(
             f"Press {self.cfg.KEY.PAUSE} to pause, {self.cfg.KEY.QUIT} to quit."
         )
@@ -378,6 +375,12 @@ class BotApp(App):
         if self.cfg.ARGS.SCREENSHOT and self.cfg.ARGS.MIAOTIXING:
             logger.warning(
                 "Miaotixing doesn't support image message, no screenshot will be sent"
+            )
+
+    def validate_spool_detection(self):
+        if self.cfg.ARGS.RAINBOW is None:
+            logger.warning(
+                "Default spool detection mode detected, fully spool your reel"
             )
 
     def _on_release(self, key: keyboard.KeyCode) -> None:

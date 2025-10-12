@@ -159,7 +159,7 @@ class Tackle:
         :raises exceptions.LineAtEndError: The line is at its end.
         :raises exceptions.LineSnaggedError: The line is snagged.
         """
-        logger.info("Retrieving fishing line [stage 1]")
+        logger.info("Retrieving fishing line")
         if self.stage != StageId.RETRIEVE:
             self.stage = StageId.RETRIEVE
             self.timer.set_timeout_start_time()
@@ -186,7 +186,7 @@ class Tackle:
         :raises exceptions.LineAtEndError: The line is at its end.
         :raises exceptions.LineSnaggedError: The line is snagged.
         """
-        logger.info("Retrieving fishing line [stage 2]")
+        logger.info("Pulling fish")
 
         if self.stage != StageId.PULL:
             self.stage = StageId.PULL
@@ -230,7 +230,7 @@ class Tackle:
 
     def pirk(self) -> None:
         """Start pirking until a fish is hooked."""
-        logger.info("Pirking")
+        logger.info("Performing pirking")
 
         if self.stage != StageId.PIRK:
             self.stage = StageId.PIRK
@@ -262,6 +262,7 @@ class Tackle:
 
     def elevate(self) -> None:
         """Perform elevator tactic (drop/rise) until a fish is hooked."""
+        logger.info("Performing elevating")
         locked = True  # Reel is locked after tackle.sink()
         dropped = False
         if self.stage != StageId.ELEVATE:
@@ -292,7 +293,7 @@ class Tackle:
 
     def lift(self) -> None:
         """Pull the fish until it's captured."""
-        logger.info("Lifting rod to pull the fish")
+        logger.info("Lifting rod")
         if self.stage != StageId.LIFT:
             self.stage = StageId.LIFT
             if self.cfg.PROFILE.MODE == "telescopic":

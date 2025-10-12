@@ -1045,7 +1045,7 @@ class Player:
         :return: True if the broken lure is found, False otherwise.
         :rtype: bool
         """
-        logger.info("Looking for broken lure")
+        logger.info("Looking for broken lures")
         broken_item_position = self.detection.get_100wear_position()
         if broken_item_position is None:
             logger.warning("Broken lure not found")
