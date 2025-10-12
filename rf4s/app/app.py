@@ -130,7 +130,6 @@ class BotApp(App):
         self.validate_discord()
         self.validate_telegram()
         self.validate_game_window()
-        self.validate_electro_mode()
         self.validate_favorite_icon()
         self.validate_screenshot_notification()
 
@@ -360,27 +359,6 @@ class BotApp(App):
         self.cfg.ARGS.FRICTION_BRAKE = False
         self.cfg.BOT.SNAG_DETECTION = False
         self.cfg.BOT.SPOOLING_DETECTION = False
-
-    def validate_electro_mode(self):
-        """Display helpful information about the current configuration.
-
-        Checks configuration compatibility and prints warnings for
-        potential issues.
-        """
-        if not self.cfg.ARGS.ELECTRO:
-            return
-
-        if self.cfg.PROFILE.MODE in ("pirk", "elevator"):
-            logger.info(
-                "Electric mode detected. Make sure BOT.CLICK_LOCK is set correctly"
-            )
-        else:
-            logger.error(
-                "Electric mode is not compatible with mode '%s'\n"
-                "Electric mode will be disabled",
-                self.cfg.PROFILE.MODE,
-            )
-            self.cfg.ARGS.ELECTRO = False
 
     def validate_favorite_icon(self):
         if (
