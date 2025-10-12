@@ -30,12 +30,10 @@
 
 ## Installation
 > [!WARNING] 
-> The download path cannot contain non-English characters.
+> 1. The download path cannot contain non-English characters.
+> 2. The executable file is more likely to be detected. Consider using Python to run it instead. see **[INSTALLATION][installation]**.
 ### Executable File (.exe)
-Download `rf4s.zip` from [Releases][releases]. 
-> [!WARNING] 
-> The executable file is more likely to be detected. Consider using Python to run it instead.  
-> If you're not sure how to run it using Python, see **[INSTALLATION][installation]**.
+Download `rf4s.zip` from [Releases][releases].
 ### pip
 ```
 git clone https://github.com/dereklee0310/RussianFishing4Script.git
@@ -53,19 +51,18 @@ uv sync
 ```
 
 ## Settings
-### Windows Mouse ClickLock
-If Windows Mouse ClickLock is enabled, set the time to long.  
-
-![click_lock]
-### Display
-Set both system and in-game interface scales to "1x", and use "window mode" or "borderless windowed" for game window mode.
-### Spool Detection
+### Retrieval Detection
 By default, the bot monitors the spool (red box) to detect retrieval progress.  
-Ensure the spool is fully loaded with fishing line for accurate detection of retrieval completion.  
-If using a rainbow line, enable the `-R` flag to switch detection to the meter (green box) for better precision.  
+Ensure the reel is fully spooled, otherwise, the bot won't lift the rod when the fish is nearby you.  
+If rainbow line is equiped, use `-R` in the launch options to detect the meter (green box) instead for better precision.  
 Please refer to **[CONFIGURATION][configuration]** to see how to use it.  
 
 ![status]
+### Windows Mouse ClickLock
+If Windows Mouse ClickLock is enabled, set the time to long.  
+![click_lock]
+### Display
+Set both system and in-game interface scales to "1x", and use "window mode" or "borderless windowed" for game window mode.
 
 ## Usage
 ### Bottom fishing
@@ -123,7 +120,7 @@ uv run main.py
 
 <!-- ------------------------------- divide -------------------------------- -->
 <details>
-<summary>Didn't lift the rod after the retrieval is finished?</summary>
+<summary>Didn't lift the rod when the fish is nearby?</summary>
 
 - Make sure your reel is fully loaded, or equip a rainbow line and use `-R` flag. 
 - Resize the game window.
