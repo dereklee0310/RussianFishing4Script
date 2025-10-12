@@ -51,13 +51,6 @@ class Tackle:
 
     This class handles actions related to the fishing tackle, such as casting,
     retrieving, and pulling fish. It also manages tackle resetting and gear ratio switching.
-
-    Attributes:
-        cfg (CfgNode): Configuration node for tackle settings.
-        timer (Timer): Timer instance for timing actions.
-        detection (Detection): Detection instance for in-game state checks.
-        landing_net_out (bool): Whether the landing net is deployed.
-        available (bool): Whether the tackle is available for use.
     """
 
     def __init__(self, cfg, timer: Timer, detection: Detection):
@@ -73,7 +66,6 @@ class Tackle:
         self.cfg = cfg
         self.timer = timer
         self.detection = detection
-        self.landing_net_out = False  # For telescopic pull
         self.available = True
         self.gear_ratio_changed = False
         self.stage = None
@@ -303,6 +295,8 @@ class Tackle:
         logger.info("Lifting rod to pull the fish")
         if self.stage != StageId.LIFT:
             self.stage = StageId.LIFT
+            if self.cfg.PROFILE.MODE == "telescopic":
+                pag.press("space")
             self.timer.set_timeout_start_time()
         if self.cfg.PROFILE.MODE == "telescopic":
             self._telescopic_lift()
@@ -340,10 +334,6 @@ class Tackle:
         if not self.detection.is_fish_hooked():
             return
 
-        # Toggle landing net when lift() is called for the first time
-        if not self.landing_net_out:
-            pag.press("space")
-            self.landing_net_out = True
         while not self.timer.is_lift_stage_timeout():
             sleep(LOOP_DELAY)
             if self.detection.is_fish_captured():

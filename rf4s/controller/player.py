@@ -528,7 +528,6 @@ class Player:
         # Reset changed states right before casting
         if self.cfg.ARGS.FRICTION_BRAKE:
             self.friction_brake.reset(self.cfg.BOT.FRICTION_BRAKE.INITIAL)
-        self.tackle.landing_net_out = False
 
         with self.hold_keys(mouse=False, shift=False):
             if (
