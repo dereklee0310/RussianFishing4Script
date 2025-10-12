@@ -3,7 +3,7 @@
 from yacs.config import CfgNode as CN
 
 _C = CN()
-_C.VERSION = "0.7.6"
+_C.VERSION = "0.8.0"
 # Game Language (options: en, ru, zh-TW, zh-CN)
 _C.LANGUAGE = "en"
 
