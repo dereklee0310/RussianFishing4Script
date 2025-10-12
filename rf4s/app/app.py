@@ -132,6 +132,7 @@ class BotApp(App):
         self.validate_game_window()
         self.validate_favorite_icon()
         self.validate_screenshot_notification()
+        self.validate_spool_detection()
 
     def display_info(self):
         settings = Table(
