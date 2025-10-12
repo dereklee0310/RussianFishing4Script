@@ -31,7 +31,7 @@ from rf4s.app import (
 )
 
 VERSION = "0.8.0"
-MINIMUM_COMPATIBLE_CONFIG_VERSION = "0.6.2"
+MINIMUM_COMPATIBLE_CONFIG_VERSION = "0.8.0"
 LOGO = """
 ██████╗ ███████╗██╗  ██╗███████╗
 ██╔══██╗██╔════╝██║  ██║██╔════╝
@@ -453,7 +453,11 @@ def setup_cfg():
 
     cfg = config.load_cfg()
     if cfg.VERSION < MINIMUM_COMPATIBLE_CONFIG_VERSION:
-        logger.critical("Incompatible config version, please delete it and try again")
+        logger.critical(
+            "Incompatible config version, some settings has been removed or deprecated\n"
+            "You can delete it to allow the bot to create a new one\n"
+            "Alternatively, see the CHANGELOG to modify config.yaml"
+        )
         utils.safe_exit()
     return cfg
 
