@@ -1,3 +1,8 @@
+## 0.8.1 (2025-10-17)
+
+### 🐛 Bug Fixes
+- Fixed a crash that occurred when the bot attempted to replace an item.  
+
 ## 0.8.0 (2025-10-13)
 
 ### 🐛 Bug Fixes

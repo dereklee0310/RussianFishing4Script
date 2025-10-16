@@ -398,15 +398,13 @@ class Tackle:
         :type item: Literal["dry_mix", "groundbait"]
         """
         logger.info("Equiping new %s from inventory", item)
-        scrollbar_position = utils.get_box_center_integers(
-            self.detection.get_scrollbar_position()
-        )
+        scrollbar_position = self.detection.get_scrollbar_position()
         if scrollbar_position is None:
             pag.click(utils.get_box_center_integers(self.get_item_position(item)))
             self._equip_favorite_item(item)
             return
 
-        pag.moveTo(scrollbar_position)
+        pag.moveTo(utils.get_box_center_integers(scrollbar_position))
         for _ in range(5):
             sleep(ANIMATION_DELAY)
             pag.drag(xOffset=0, yOffset=125, duration=0.5, button="left")
