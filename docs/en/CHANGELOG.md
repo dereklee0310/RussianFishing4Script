@@ -1,3 +1,9 @@
+## 0.8.1 (2025-10-18)
+
+### 🐛 Bug Fixes
+- Fixed a bug where the bot didn't reset the lift timeout correctly.
+- Fixed an issue where the bot didn't use the landing net correctly in Telescopic mode.
+
 ## 0.8.1 (2025-10-17)
 
 ### 🐛 Bug Fixes

@@ -39,6 +39,7 @@ NUM_OF_MOVEMENT = 4
 
 class StageId(Enum):
     RESET = auto()
+    CAST = auto()
     RETRIEVE = auto()
     PULL = auto()
     PIRK = auto()
@@ -95,6 +96,8 @@ class Tackle:
                 raise exceptions.FishHookedError
             if self.detection.is_fish_captured():
                 raise exceptions.FishCapturedError
+            if not self.detection.is_bait_chosen():
+                raise exceptions.BaitNotChosenError
             if self.cfg.BOT.SPOOLING_DETECTION and self.detection.is_line_at_end():
                 raise exceptions.LineAtEndError
             if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged():
@@ -103,8 +106,6 @@ class Tackle:
                 raise exceptions.LureBrokenError
             if self.detection.is_tackle_broken():
                 raise exceptions.TackleBrokenError
-            if not self.detection.is_bait_chosen():
-                raise exceptions.BaitNotChosenError
             if not self.detection.is_dry_mix_chosen():
                 raise exceptions.DryMixNotChosenError
             if self.timer.is_rare_event_checkable():
@@ -118,6 +119,7 @@ class Tackle:
         :type lock: bool
         """
         logger.info("Casting rod")
+        self.stage = StageId.CAST # Make sure telescopic mode can get different id
         if self.cfg.ARGS.MOUSE:
             self.move_mouse_randomly()
         match self.cfg.PROFILE.CAST_POWER_LEVEL:

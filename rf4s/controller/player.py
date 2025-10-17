@@ -588,6 +588,7 @@ class Player:
                     break
 
     def save_bite_screenshot(self):
+        # TODO: This is slow!
         if self.cfg.ARGS.BITE:
             self.detection.window.save_screenshot(
                 OUTER_ROOT / "screenshots" / f"{self.timer.get_cur_timestamp()}.png"
