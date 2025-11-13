@@ -252,15 +252,16 @@ class Player:
         check_miss_counts = [0] * self.num_tackle
 
         while True:
-            with self.loop_restart_handler():
-                self.enable_trolling()
-                if self.cfg.ARGS.SPOD_ROD and self.timer.is_spod_rod_castable():
-                    self.cast_spod_rod()
+            self.enable_trolling()
+            if self.cfg.ARGS.SPOD_ROD and self.timer.is_spod_rod_castable():
+                self.cast_spod_rod()
 
-                self.refill_stats()
-                logger.info("Checking rod %s", self.tackle_idx + 1)
-                pag.press(str(self.cfg.KEY.BOTTOM_RODS[self.tackle_idx]))
-                sleep(ANIMATION_DELAY)
+            self.refill_stats()
+            logger.info("Checking rod %s", self.tackle_idx + 1)
+            pag.press(str(self.cfg.KEY.BOTTOM_RODS[self.tackle_idx]))
+            sleep(ANIMATION_DELAY)
+
+            with self.loop_restart_handler():
                 if self.detection.is_fish_hooked():
                     check_miss_counts[self.tackle_idx] = 0
                     self.retrieve_and_recast()
@@ -271,7 +272,8 @@ class Player:
                         self.retrieve_and_recast()
                     else:
                         self._put_down_tackle(check_miss_counts)
-                self._update_tackle()
+            # Put it here because we still need to update tackle index before next loop
+            self._update_tackle()
 
     def retrieve_and_recast(self) -> None:
         self.retrieve_line()

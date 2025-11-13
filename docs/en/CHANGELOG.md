@@ -1,5 +1,6 @@
 - Fix tag color bug
 - Fix reel open bug
+- Fix bottom mode bot check bug 
 
 
 ## 0.8.1 (2025-10-18)
