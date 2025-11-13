@@ -199,17 +199,24 @@ class Detection:
         return [box[i] + self.coord_offsets[offset_key][i] for i in range(2)]
 
     # ----------------------------- Untagged release ----------------------------- #
+    # HSV values
+    # green: 40, 175, 200
+    # yellow: 25, 200, 228
+    # pink: 139, 160, 255
+    # blue: 104, 165, 251
+    # purple: 130, 126, 252
+
     def is_tag_exist(self, color: TagColor):
         match color:
             case TagColor.GREEN:
-                lower = np.array([30, 128, 128])
-                upper = np.array([36, 255, 255])
+                lower = np.array([37, 128, 128])
+                upper = np.array([43, 255, 255])
             case TagColor.YELLOW:
                 lower = np.array([22, 128, 128])
                 upper = np.array([28, 255, 255])
             case TagColor.PINK:
-                lower = np.array([142, 64, 128])
-                upper = np.array([148, 255, 255])
+                lower = np.array([136, 64, 128])
+                upper = np.array([142, 255, 255])
             case TagColor.BLUE:
                 lower = np.array([101, 64, 128])
                 upper = np.array([107, 255, 255])

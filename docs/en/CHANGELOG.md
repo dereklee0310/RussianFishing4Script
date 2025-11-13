@@ -1,3 +1,6 @@
+- Fix tag color bug
+
+
 ## 0.8.1 (2025-10-18)
 
 ### 🐛 Bug Fixes
