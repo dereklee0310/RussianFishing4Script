@@ -1,9 +1,10 @@
-- Fix tag color bug
-- Fix reel open bug
-- Fix bottom mode bot check bug 
+## 0.8.3 (2025-11-14)
+### 🐛 Bug Fixes
+- Fixed a bug where the `-t` flag was not functioning correctly after the latest game update.
+- Resolved an issue causing the bot to leave the reel open after the sinking stage timed out.
+- Corrected a problem where the bot failed to properly check the next rod in bottom fishing mode.
 
-
-## 0.8.1 (2025-10-18)
+## 0.8.2 (2025-10-18)
 
 ### 🐛 Bug Fixes
 - Fixed a bug where the bot didn't reset the lift timeout correctly.
