@@ -146,13 +146,13 @@ class Tackle:
                 logger.info("Lure has reached bottom layer")
                 sleep(SINK_DELAY)  # Drop to the bottom to make the depth consistent
                 self.timer.print_sink_duration()
-                self.hold_mouse_button(self.cfg.PROFILE.TIGHTEN_DURATION)
                 break
 
             if self.detection.is_fish_hooked_twice():
-                pag.click()  # Lock reel
-                break
+                pag.click()
+                return
             sleep(LOOP_DELAY)
+        self.hold_mouse_button(self.cfg.PROFILE.TIGHTEN_DURATION)
 
     def retrieve(self) -> None:
         """Retrieve the line until the end is reached and detect unexpected events.

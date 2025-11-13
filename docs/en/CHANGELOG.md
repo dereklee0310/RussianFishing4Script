@@ -1,4 +1,5 @@
 - Fix tag color bug
+- Fix reel open bug
 
 
 ## 0.8.1 (2025-10-18)
