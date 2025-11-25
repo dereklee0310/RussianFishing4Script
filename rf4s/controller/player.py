@@ -563,10 +563,10 @@ class Player:
                         break
                 if self.detection.is_fish_hooked():
                     self.pull_fish()
-                if self.cfg.ARGS.RAINBOW is None:
-                    sleep(self.cfg.BOT.SPOOL_RETRIEVAL_DELAY)
-                elif self.cfg.ARGS.RAINBOW == 5:
-                    sleep(self.cfg.BOT.RAINBOW_RETRIEVAL_DELAY)
+        if self.cfg.ARGS.RAINBOW is None:
+            sleep(self.cfg.BOT.SPOOL_RETRIEVAL_DELAY)
+        elif self.cfg.ARGS.RAINBOW == 5:
+            sleep(self.cfg.BOT.RAINBOW_RETRIEVAL_DELAY)
 
     def pull_fish(self, save: bool = True) -> None:
         if self.detection.is_retrieval_finished():
