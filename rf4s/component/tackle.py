@@ -242,7 +242,9 @@ class Tackle:
                 return
 
             if self.detection.is_fish_hooked_twice():
-                pag.click()
+                # If it's enabled, mouse was already pressed by hold_keys() outside
+                if not self.cfg.PROFILE.PIRK_RETRIEVAL:
+                    pag.click()
                 return
 
             if self.cfg.PROFILE.PIRK_DURATION > 0:
@@ -272,7 +274,9 @@ class Tackle:
             self.timer.set_timeout_start_time()
         while not self.timer.is_elevate_stage_timeout():
             if self.detection.is_fish_hooked_twice():
-                pag.click()
+                # If it's enabled, mouse was already pressed by hold_keys() outside
+                if not self.cfg.PROFILE.PIRK_RETRIEVAL:
+                    pag.click()
                 return
 
             if self.cfg.PROFILE.DROP and not dropped:
