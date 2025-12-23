@@ -207,29 +207,7 @@ class Detection:
     # purple: 130, 126, 252
 
     def is_tag_exist(self, color: TagColor):
-        match color:
-            case TagColor.GREEN:
-                lower = np.array([37, 128, 128])
-                upper = np.array([43, 255, 255])
-            case TagColor.YELLOW:
-                lower = np.array([22, 128, 128])
-                upper = np.array([28, 255, 255])
-            case TagColor.PINK:
-                lower = np.array([136, 64, 128])
-                upper = np.array([142, 255, 255])
-            case TagColor.BLUE:
-                lower = np.array([101, 64, 128])
-                upper = np.array([107, 255, 255])
-            case TagColor.PURPLE:
-                lower = np.array([127, 64, 128])
-                upper = np.array([133, 255, 255])
-            case _:
-                raise ValueError("Invalid tag color")
-        hsv_img = cv2.cvtColor(np.array(pag.screenshot()), cv2.COLOR_RGB2HSV)
-        mask = cv2.inRange(hsv_img, lower, upper)
-        haystack_img = Image.fromarray(mask)
-        needle_img = Image.open(self.image_dir / f"{color.value}.png")
-        return pag.locate(needle_img, haystack_img, grayscale=True, confidence=0.9)
+        return self._get_image_box(color.value, 0.9)
 
     def is_fish_species_matched(self, species: str):
         return self._get_image_box(species, 0.9)
