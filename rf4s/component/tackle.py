@@ -119,7 +119,7 @@ class Tackle:
         :type lock: bool
         """
         logger.info("Casting rod")
-        self.stage = StageId.CAST # Make sure telescopic mode can get different id
+        self.stage = StageId.CAST  # Make sure telescopic mode can get different id
         if self.cfg.ARGS.MOUSE:
             self.move_mouse_randomly()
         match self.cfg.PROFILE.CAST_POWER_LEVEL:

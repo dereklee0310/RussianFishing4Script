@@ -12,8 +12,6 @@ from functools import partial
 from pathlib import Path
 from typing import Generator
 
-import cv2
-import numpy as np
 import pyautogui as pag
 from PIL import Image, ImageFilter
 from pyscreeze import Box

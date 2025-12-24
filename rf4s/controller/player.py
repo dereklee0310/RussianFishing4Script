@@ -593,9 +593,7 @@ class Player:
     def save_bite_screenshot(self):
         # TODO: This is slow!
         if self.cfg.ARGS.BITE:
-            self.detection.window.save_screenshot(
-                self.timer.get_new_filepath()
-            )
+            self.detection.window.save_screenshot(self.timer.get_new_filepath())
 
     def do_pirking(self) -> None:
         """Perform pirking until a fish is hooked."""
@@ -847,7 +845,7 @@ class Player:
     def handle_fish(self) -> None:
         if not self.detection.is_fish_captured():
             return
-        sleep(add_jitter(LOOP_DELAY)) # it's a slow animation ;)
+        sleep(add_jitter(LOOP_DELAY))  # it's a slow animation ;)
         logger.info("Handling fish")
         with self.hold_keys(mouse=False, shift=False):
             self.handle_events()
@@ -937,7 +935,6 @@ class Player:
                 logger.warning("Unexpected event detected")
             pag.press("enter")
             sleep(add_jitter(LOOP_DELAY))
-
 
     def general_quit(self, msg: str) -> None:
         """Quit the game through the control panel.
