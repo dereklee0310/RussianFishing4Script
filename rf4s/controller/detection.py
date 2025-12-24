@@ -294,10 +294,13 @@ class Detection:
         return self._get_image_box("keepnet_is_full", 0.9)
 
     def is_gift_receieved(self):
-        return self._get_image_box("gift", 0.8)
+        return self._get_image_box("gift", 0.9)
 
     def is_card_receieved(self):
-        return self._get_image_box("card", 0.8)
+        return self._get_image_box("card", 0.9)
+
+    def is_event_triggered(self):
+        return self._get_image_box("event_ok", 0.95)
 
     # ------------------------------- Item crafting ------------------------------ #
     def is_operation_failed(self):
@@ -426,7 +429,7 @@ class Detection:
         return self._get_image_box(f"ticket_{duration}", 0.95)
 
     def is_harvest_success(self):
-        return self._get_image_box("harvest_confirm", 0.8)
+        return self._get_image_box("ok_black", 0.8)
 
     def is_stuck_at_casting(self):
         return self._get_image_box("cast", 0.7)

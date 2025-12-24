@@ -44,7 +44,7 @@ from rf4s.result import BotResult, CraftResult, HarvestResult, Result
 
 ANIMATION_DELAY = 0.5
 CRAFT_DELAY = 4.0
-LOOP_DELAY = 0.5
+LOOP_DELAY = 1.0
 BIAS = 1e-6
 
 FRICTION_BRAKE_ID = 2
@@ -661,7 +661,7 @@ class HarvestApp(App):
         settings.add_row("Hunger threshold", str(self.cfg.STAT.HUNGER_THRESHOLD))
         settings.add_row("Comfort threshold", str(self.cfg.STAT.COMFORT_THRESHOLD))
         print(settings)
-        utils.print_usage_box("Press {self.cfg.KEY.QUIT} to quit.")
+        utils.print_usage_box(f"Press {self.cfg.KEY.QUIT} to quit.")
 
         self.result = HarvestResult()
         self.timer = Timer(self.cfg)

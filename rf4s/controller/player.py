@@ -36,6 +36,7 @@ LOOP_DELAY = 1
 PRE_RETRIEVAL_DURATION = 0.5
 GET_DIGGING_TOOL_DELAY = 3
 ANIMATION_DELAY = 0.5
+ANIMATION_DELAY_2X = 1
 TICKET_EXPIRE_DELAY = 8
 DISCONNECTED_DELAY = 8
 WEAR_TEXT_UPDATE_DELAY = 2
@@ -593,7 +594,7 @@ class Player:
         # TODO: This is slow!
         if self.cfg.ARGS.BITE:
             self.detection.window.save_screenshot(
-                OUTER_ROOT / "screenshots" / f"{self.timer.get_cur_timestamp()}.png"
+                self.timer.get_new_filepath()
             )
 
     def do_pirking(self) -> None:
@@ -822,7 +823,7 @@ class Player:
         if send:
             send_result(self.cfg, result)
         if self.cfg.ARGS.DATA:
-            output_dir = OUTER_ROOT / "logs" / self.timer.get_cur_timestamp()
+            output_dir = self.timer.get_new_dir_path()
             output_dir.mkdir()
             self.timer.save_data(output_dir)
             with open(output_dir / "result.json", "w") as f:
@@ -846,32 +847,15 @@ class Player:
     def handle_fish(self) -> None:
         if not self.detection.is_fish_captured():
             return
-
+        sleep(add_jitter(LOOP_DELAY)) # it's a slow animation ;)
         logger.info("Handling fish")
         with self.hold_keys(mouse=False, shift=False):
+            self.handle_events()
             self._handle_fish()
-            sleep(add_jitter(ANIMATION_DELAY))
             # Avoid wrong cast hour
             if self.cfg.PROFILE.MODE in ["bottom", "pirk", "elevator"]:
                 self.timer.update_cast_time()
             self.timer.add_cast_time()
-
-            while self.detection.is_gift_receieved():
-                if (
-                    self.cfg.ARGS.SCREENSHOT
-                    and "gift" in self.cfg.BOT.KEEPNET.SCREENSHOT_EVENTS
-                ):
-                    filepath = (
-                        OUTER_ROOT
-                        / "screenshots"
-                        / f"{self.timer.get_cur_timestamp()}.png"
-                    )
-                    self.detection.window.save_screenshot(filepath)
-                    send_screenshot(self.cfg, filepath)
-                sleep(add_jitter(LOOP_DELAY))
-                pag.press("space")
-                self.result.gift += 1
-
             limit = self.cfg.BOT.KEEPNET.CAPACITY - self.cfg.ARGS.FISHES_IN_KEEPNET
             if self.result.kept == limit:
                 self.general_quit("Keepnet is full")
@@ -879,7 +863,7 @@ class Player:
     def _handle_fish(self) -> None:
         """Keep or release the fish and record the fish count."""
         self.result.total += 1
-        bypass = keep = screenshot = card = False
+        bypass = keep = fish_tagged = False
         tag_colors = []
         for tag in TagColor:
             if self.detection.is_tag_exist(tag):
@@ -890,27 +874,14 @@ class Player:
                 if tag_color in self.cfg.BOT.KEEPNET.KEEP_TAGS:
                     keep = True
                 if tag_color in self.cfg.BOT.KEEPNET.SCREENSHOT_TAGS:
-                    screenshot = True
+                    fish_tagged = True
 
-        if self.detection.is_card_receieved():
-            card = True
-            self.result.card += 1
-
-        fish_screenshot = (
+        if (
             self.cfg.ARGS.SCREENSHOT
-            and (not self.cfg.BOT.KEEPNET.SCREENSHOT_TAGS or screenshot)
+            and (not self.cfg.BOT.KEEPNET.SCREENSHOT_TAGS or fish_tagged)
             and "fish" in self.cfg.BOT.KEEPNET.SCREENSHOT_EVENTS
-        )
-        card_screenshot = (
-            self.cfg.ARGS.SCREENSHOT
-            and card
-            and "card" in self.cfg.BOT.KEEPNET.SCREENSHOT_EVENTS
-        )
-
-        if fish_screenshot or card_screenshot:
-            filepath = (
-                OUTER_ROOT / "screenshots" / f"{self.timer.get_cur_timestamp()}.png"
-            )
+        ):
+            filepath = self.timer.get_new_filepath()
             self.detection.window.save_screenshot(filepath)
             send_screenshot(self.cfg, filepath)
 
@@ -940,6 +911,33 @@ class Player:
 
         for tag_color in tag_colors:
             setattr(self.result, tag_color, getattr(self.result, tag_color) + 1)
+
+    def handle_events(self) -> None:
+        """Handle events like gift, card, challenge, etc."""
+        while self.detection.is_event_triggered():
+            if self.detection.is_gift_receieved():
+                if (
+                    self.cfg.ARGS.SCREENSHOT
+                    and "gift" in self.cfg.BOT.KEEPNET.SCREENSHOT_EVENTS
+                ):
+                    filepath = self.timer.get_new_filepath()
+                    self.detection.window.save_screenshot(filepath)
+                    send_screenshot(self.cfg, filepath)
+                self.result.gift += 1
+            elif self.detection.is_card_receieved():
+                if (
+                    self.cfg.ARGS.SCREENSHOT
+                    and "card" in self.cfg.BOT.KEEPNET.SCREENSHOT_EVENTS
+                ):
+                    filepath = self.timer.get_new_filepath()
+                    self.detection.window.save_screenshot(filepath)
+                    send_screenshot(self.cfg, filepath)
+                self.result.card += 1
+            else:
+                logger.warning("Unexpected event detected")
+            pag.press("enter")
+            sleep(add_jitter(LOOP_DELAY))
+
 
     def general_quit(self, msg: str) -> None:
         """Quit the game through the control panel.

@@ -105,12 +105,28 @@ class Timer:
         )  # truncate to seconds
 
     def get_cur_timestamp(self) -> str:
-        """Generate timestamp for images in screenshots/.
+        """Generate current timestamp.
 
         :return: Current timestamp.
         :rtype: str
         """
         return time.strftime("%Y-%m-%d--%H-%M-%S", time.localtime())
+
+    def get_new_filepath(self) -> Path:
+        """Generate new filepath for images in screenshots/.
+
+        :return: Filepath withe curreent timestamp.
+        :rtype: Path
+        """
+        return OUTER_ROOT / "screenshots" / f"{self.get_cur_timestamp()}.png"
+
+    def get_new_dir_path(self) -> Path:
+        """Generate new filepath for new log directory.
+
+        :return: Filepath withe curreent timestamp.
+        :rtype: Path
+        """
+        return OUTER_ROOT / "logs" / self.get_cur_timestamp()
 
     def get_start_datetime(self) -> str:
         """Generate a simplified timestamp for quit message.
@@ -220,7 +236,6 @@ class Timer:
         _, ax = plt.subplots(nrows=1, ncols=2)
         # _.canvas.manager.set_window_title('Record')
         ax[0].set_ylabel("Fish")
-
         last_rhour = cast_rhour_list[-1]  # Hour: 0, 1, 2, 3, 4, "5"
         fish_per_rhour = [0] * (last_rhour + 1)  # Idx: (0, 1, 2, 3, 4, 5) = 6
         for hour in cast_rhour_list:
