@@ -1,9 +1,15 @@
+## 0.8.5 (2025-12-24)
+### 🐛 Bug Fixes
+- Fixed the bugs introduced by the game update.
+
 ## 0.8.4 (2025-12-5)
+
 ### 🐛 Bug Fixes
 - Addressed an issue where the bot would stop reeling the fish in when `PIRK_RETRIEVAL` is set to true.
 - Fixed a bug that `BOT.SPOOL_RETRIEVAL_DELAY` and `BOT.RAINBOW_RETRIEVAL_DELAY` doesn't take effect.
 
 ## 0.8.3 (2025-11-14)
+
 ### 🐛 Bug Fixes
 - Fixed a bug where the `-t` flag was not functioning correctly after the latest game update.
 - Resolved an issue causing the bot to leave the reel open after the sinking stage timed out.

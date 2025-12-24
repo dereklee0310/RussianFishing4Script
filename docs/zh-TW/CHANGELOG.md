@@ -1,6 +1,12 @@
+## 0.8.5（2025-12-24）
+
+### 🐛 錯誤修正
+- 修復了因遊戲更新所引進的錯誤。
+
 ## 0.8.4 (2025-12-5)
 
 ### 🐛 錯誤修正
+
 - 修復了當啟用 `PIRK_RETRIEVAL` 時，機器人會停止收線釣魚的問題。
 - 修正了 `BOT.SPOOL_RETRIEVAL_DELAY` 與 `BOT.RAINBOW_RETRIEVAL_DELAY` 無法
 
