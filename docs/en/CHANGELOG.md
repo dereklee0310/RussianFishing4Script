@@ -1,4 +1,10 @@
+## 0.8.6 (2025-12-25)
+
+### 🐛 Bug Fixes
+- Fixed a bug that bot would get stuck at the results screen.
+ 
 ## 0.8.5 (2025-12-24)
+
 ### 🐛 Bug Fixes
 - Fixed the bugs introduced by the game update.
 
