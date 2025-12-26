@@ -1,3 +1,12 @@
+## 0.8.7 (2025-12-26)
+
+### 🐛 Bug Fixes
+- Fixed an issue where the bot occasionally misidentified fish tags.
+- Added a delay before keeping the fish so the bot can recognize the trophy tag correctly. 
+
+### 🔧 Improvements
+- The bot now displays clear error messages when invalid launch options are provided.
+
 ## 0.8.6 (2025-12-25)
 
 ### 🐛 Bug Fixes
