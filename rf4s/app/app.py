@@ -44,6 +44,7 @@ from rf4s.result import BotResult, CraftResult, HarvestResult, Result
 
 BIAS = 1e-6
 ANIMATION_DELAY = 0.5
+THREAD_CHECK_DELAY = 0.5
 LOOP_DELAY = 1
 CRAFT_DELAY = 4.0
 MAX_FRICTION_BRAKE = 30
@@ -395,18 +396,19 @@ class BotApp(App):
         key = str(key).lower()
         if key == str(keyboard.KeyCode.from_char(self.cfg.KEY.QUIT)):
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
-            sys.exit()
+            return False
         if key == str(keyboard.KeyCode.from_char(self.cfg.KEY.PAUSE)):
             logger.info("Pausing the bot")
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
             self.paused = True
             logger.info("Bot paused")  # Don't remove this! It messes with signal?
-            sys.exit()
+            return False
 
     def _pause_wait(self, key: keyboard.KeyCode) -> None:
         key = str(key).lower()
         if key == str(keyboard.KeyCode.from_char(self.cfg.KEY.PAUSE)):
-            sys.exit()
+            self.paused = False
+            return False
 
     def reload_cfg(self) -> None:
         profile_name = self.cfg.PROFILE.NAME
@@ -431,20 +433,23 @@ class BotApp(App):
             try:
                 self.player.start_fishing()
             except KeyboardInterrupt:
+                general_listener.stop()
                 if not self.paused:
                     break
+
                 utils.print_usage_box(
                     f"Press {self.cfg.KEY.PAUSE} to reload config and restart."
                 )
                 utils.print_hint_box(
                     "Any modifications made to LAUNCH_OPTIONS will be ignored."
                 )
-                general_listener.join()
-                with (
-                    self.player.hold_keys(mouse=False, shift=False, reset=True),
-                    keyboard.Listener(on_release=self._pause_wait) as listener,
-                ):
-                    listener.join()
+                with self.player.hold_keys(mouse=False, shift=False, reset=True):
+                    pause_listener = keyboard.Listener(on_release=self._pause_wait)
+                    pause_listener.start()
+
+                while pause_listener.is_alive():
+                    sleep(THREAD_CHECK_DELAY)
+
                 logger.info("Restarting bot without resetting records")
                 self.reload_cfg()
                 self.player = Player(
@@ -524,7 +529,7 @@ class CraftApp(App):
         """
         if str(key).lower() == str(keyboard.KeyCode.from_char(self.cfg.KEY.QUIT)):
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
-            sys.exit()
+            return False
 
     def start(self) -> None:
         """Main loop for crafting items.
@@ -607,11 +612,11 @@ class MoveApp(App):
         """
         key = str(key).lower()
         if key == str(keyboard.KeyCode.from_char(self.cfg.KEY.MOVE_QUIT)):
-            sys.exit()
+            return False
         if key == str(keyboard.KeyCode.from_char(self.cfg.KEY.MOVE_PAUSE)):
             if self.w_key_pressed:
                 self.w_key_pressed = False
-                return
+                return True
             pag.keyDown("w")
             self.w_key_pressed = True
 
@@ -624,7 +629,8 @@ class MoveApp(App):
         if self.cfg.ARGS.SHIFT:
             pag.keyDown("shift")
         pag.keyDown("w")
-        listener.join()  # Blocking listener loop
+        while listener.is_alive():
+            sleep(THREAD_CHECK_DELAY)
 
 
 class HarvestApp(App):
@@ -705,7 +711,7 @@ class HarvestApp(App):
         # CTRL-C to terminate the script.
         if str(key).lower() == str(keyboard.KeyCode.from_char(self.cfg.KEY.QUIT)):
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
-            sys.exit()
+            return False
 
     def _use_item(self, item: str) -> None:
         """Access an item by name using quick selection shortcut or menu.
@@ -1004,7 +1010,7 @@ class FrictionBrakeApp(App):
         key = str(key).lower()
         if key == str(keyboard.KeyCode.from_char(self.cfg.KEY.FRICTION_BRAKE_QUIT)):
             self.friction_brake.monitor_process.terminate()
-            sys.exit()
+            return False
         if key == str(keyboard.KeyCode.from_char(self.cfg.KEY.FRICTION_BRAKE_RESET)):
             self.friction_brake.reset(self.cfg.FRICTION_BRAKE.INITIAL)
 
@@ -1015,4 +1021,6 @@ class FrictionBrakeApp(App):
         self.window.activate_game_window()
         self.friction_brake.monitor_process.start()
         self.friction_brake.reset(self.cfg.FRICTION_BRAKE.INITIAL)
-        listener.join()
+
+        while listener.is_alive():
+            sleep(THREAD_CHECK_DELAY)
