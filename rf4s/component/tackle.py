@@ -24,17 +24,14 @@ from rf4s.controller.detection import Detection
 from rf4s.controller.timer import Timer, add_jitter
 
 CAST_SCALE = 0.4  # 25% / 0.4s
-LOOP_DELAY = 1
-
 ANIMATION_DELAY = 0.5
-
-LIFT_DURATION = 3
-LANDING_NET_DURATION = 6
+LOOP_DELAY = 1
 SINK_DELAY = 2
-
+LIFT_DURATION = 3
+NUM_OF_MOVEMENT = 4
+LANDING_NET_DURATION = 6
 
 OFFSET = 100
-NUM_OF_MOVEMENT = 4
 
 
 class StageId(Enum):

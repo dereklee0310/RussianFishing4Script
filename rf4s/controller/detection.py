@@ -205,7 +205,7 @@ class Detection:
     # purple: 130, 126, 252
 
     def is_tag_exist(self, color: TagColor):
-        return self._get_image_box(color.value, 0.9)
+        return self._get_image_box(color.value, 0.95)
 
     def is_fish_species_matched(self, species: str):
         return self._get_image_box(species, 0.9)

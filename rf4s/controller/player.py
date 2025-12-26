@@ -32,17 +32,18 @@ from rf4s.controller.notification import send_result, send_screenshot
 from rf4s.controller.timer import Timer, add_jitter
 from rf4s.result.result import BotResult
 
-LOOP_DELAY = 1
-PRE_RETRIEVAL_DURATION = 0.5
-GET_DIGGING_TOOL_DELAY = 3
+FISH_CHECK_DURATION = 0.5
 ANIMATION_DELAY = 0.5
-ANIMATION_DELAY_2X = 1
+LOOP_DELAY = 1
+USE_ITEM_DELAY = 1
+BAD_CAST_DELAY = 1
+WEAR_TEXT_UPDATE_DELAY = 2
+GET_DIGGING_TOOL_DELAY = 3
+CLICK_LOCK_DURATION = 2.2
+TAG_ANIMATION_DELAY = 3
+DROP_ROD_DELAY = 4
 TICKET_EXPIRE_DELAY = 8
 DISCONNECTED_DELAY = 8
-WEAR_TEXT_UPDATE_DELAY = 2
-LOWER_TACKLE_DELAY = 4
-BAD_CAST_DELAY = 1
-CLICK_LOCK_DURATION = 2.2
 
 TROLLING_KEY = "j"
 LEFT_KEY = "a"
@@ -345,7 +346,7 @@ class Player:
                 with self.error_handler():
                     monitor()
                 sleep(self.cfg.PROFILE.LIFT_DELAY)
-                hold_mouse_button(PRE_RETRIEVAL_DURATION)
+                hold_mouse_button(FISH_CHECK_DURATION)
                 if not telescopic:
                     self.pull_fish()
                 else:
@@ -364,7 +365,6 @@ class Player:
 
         with self.hold_keys(mouse=False, shift=False):
             self._use_item("digging_tool")
-            sleep(GET_DIGGING_TOOL_DELAY)
             pag.click()
 
             while not self.detection.is_harvest_success():
@@ -377,7 +377,6 @@ class Player:
 
             if pickup:
                 self._use_item("main_rod")
-                sleep(GET_DIGGING_TOOL_DELAY)
 
     def refill_stats(self) -> None:
         """Refill player stats using tea and carrot."""
@@ -443,7 +442,7 @@ class Player:
                 food_position = self.detection.get_food_position(item)
                 pag.moveTo(food_position)
                 pag.click()
-        sleep(add_jitter(ANIMATION_DELAY))  # Could be followed by another _use_item()
+        sleep(add_jitter(USE_ITEM_DELAY))  # Could be followed by another _use_item()
 
     def reset_tackle(self) -> None:
         """Reset the tackle until it is ready."""
@@ -496,7 +495,7 @@ class Player:
                     self.tackle.sink()
         except exceptions.LiftTimeoutError:
             with self.hold_keys(mouse=False, shift=False, reset=True):
-                sleep(LOWER_TACKLE_DELAY)
+                sleep(DROP_ROD_DELAY)
                 if self.cfg.PROFILE.MODE != "telescopic":
                     self.pull_fish(save=False)
         except exceptions.DryMixNotChosenError:
@@ -849,6 +848,7 @@ class Player:
         logger.info("Handling fish")
         with self.hold_keys(mouse=False, shift=False):
             self.handle_events()
+            sleep(TAG_ANIMATION_DELAY)
             self._handle_fish()
             # Avoid wrong cast hour
             if self.cfg.PROFILE.MODE in ["bottom", "pirk", "elevator"]:

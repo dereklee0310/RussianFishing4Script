@@ -42,12 +42,10 @@ from rf4s.controller.timer import Timer, add_jitter
 from rf4s.controller.window import Window
 from rf4s.result import BotResult, CraftResult, HarvestResult, Result
 
-ANIMATION_DELAY = 0.5
-CRAFT_DELAY = 4.0
-LOOP_DELAY = 1.0
 BIAS = 1e-6
-
-FRICTION_BRAKE_ID = 2
+ANIMATION_DELAY = 0.5
+LOOP_DELAY = 1
+CRAFT_DELAY = 4.0
 MAX_FRICTION_BRAKE = 30
 
 
