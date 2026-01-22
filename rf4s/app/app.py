@@ -317,7 +317,6 @@ class BotApp(App):
 
         self.cfg.PROFILE = user_profile  # Overwrite default profiles
         self.cfg.TOLERANCE.PROFILE = user_tolerance  # Overwrite default tolerance profiles
-        sleep(0.1)  # Allow time for logging output
 
     def merge_args_to_cfg(self) -> None:
         """Must be called after the profile is correctly configured."""
