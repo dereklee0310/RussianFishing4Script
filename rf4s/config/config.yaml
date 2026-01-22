@@ -85,16 +85,16 @@ PROFILE:
     LAUNCH_OPTIONS: ""
     MODE: "spin"
     TYPE: "normal"
-    CAST_POWER_LEVEL: 5.0
-    CAST_DELAY: 6.0
+    CAST_POWER_LEVEL: 5.0 +-2.0
+    CAST_DELAY: 6.0 +-0.5
     TIGHTEN_DURATION: 0.0
     RETRIEVAL_DURATION: 0.0
     RETRIEVAL_DELAY: 0.0
-    RETRIEVAL_TIMEOUT: 256.0
+    RETRIEVAL_TIMEOUT: 256.0 +-32.0
     RESET_ACCELERATION: false
     PRE_ACCELERATION: false
     POST_ACCELERATION: false
-    LIFT_TIMEOUT: 16.0
+    LIFT_TIMEOUT: 16.0 +-3.0
   SPIN_WITH_PAUSE:
     DESCRIPTION: "Spin fishing, short pauses."
     LAUNCH_OPTIONS: ""
@@ -127,16 +127,16 @@ PROFILE:
     LIFT_TIMEOUT: 16.0
   BOTTOM:
     DESCRIPTION: "Default bottom fishing."
-    LAUNCH_OPTIONS: ""
+    LAUNCH_OPTIONS: "-l"
     MODE: "bottom"
-    CAST_POWER_LEVEL: 5.0
-    CAST_DELAY: 4.0
+    CAST_POWER_LEVEL: 2.0
+    CAST_DELAY: 3.0 +-2.0
     POST_ACCELERATION: false
-    CHECK_DELAY: 16.0
-    CHECK_MISS_LIMIT: 16
-    PUT_DOWN_DELAY: 2.0
+    CHECK_DELAY: 16.0 +-3.0
+    CHECK_MISS_LIMIT: 16 +-3.0
+    PUT_DOWN_DELAY: 2.0 +-0.2
     RANDOM_ROD_SELECTION: true
-    LIFT_TIMEOUT: 16.0
+    LIFT_TIMEOUT: 16.0 +-3.02
   PIRK:
     DESCRIPTION: "Default marine fishing, strong pirking at the bottom layer."
     LAUNCH_OPTIONS: ""

@@ -298,10 +298,26 @@ class BotApp(App):
     def merge_default_to_profile(self, profile_name) -> None:
         self.validate_profile(profile_name)
         mode = self.cfg.PROFILE[profile_name].MODE.upper()
+        
         user_profile = CN({"NAME": profile_name}, new_allowed=True)
+        user_tolerance = CN({"NAME": "TOLERANCE." + profile_name}, new_allowed=True)
+
         user_profile.merge_from_other_cfg(self.cfg.PROFILE[mode])
         user_profile.merge_from_other_cfg(self.cfg.PROFILE[profile_name])
+
+        # Merge tolerance profiles if they exist. Config may not include
+        # tolerances for every profile/mode, so guard against missing keys.
+        if hasattr(self.cfg, "TOLERANCE"):
+            tol_root = getattr(self.cfg.TOLERANCE, "PROFILE", None)
+            if isinstance(tol_root, CN):
+                if mode in tol_root:
+                    user_tolerance.merge_from_other_cfg(tol_root[mode])
+                if profile_name in tol_root:
+                    user_tolerance.merge_from_other_cfg(tol_root[profile_name])
+
         self.cfg.PROFILE = user_profile  # Overwrite default profiles
+        self.cfg.TOLERANCE.PROFILE = user_tolerance  # Overwrite default tolerance profiles
+        sleep(0.1)  # Allow time for logging output
 
     def merge_args_to_cfg(self) -> None:
         """Must be called after the profile is correctly configured."""
@@ -455,7 +471,7 @@ class BotApp(App):
                     pause_listener.start()
 
                 while pause_listener.is_alive():
-                    sleep(THREAD_CHECK_DELAY)
+                    sleep(add_jitter(THREAD_CHECK_DELAY))
 
                 logger.info("Restarting bot without resetting records")
                 self.reload_cfg()
@@ -522,7 +538,7 @@ class CraftApp(App):
                 pag.press("space")
                 break
             sleep(add_jitter(LOOP_DELAY))
-        sleep(add_jitter(ANIMATION_DELAY))
+        sleep(ANIMATION_DELAY)
         discard_yes_position = self.detection.get_discard_yes_position()
         if discard_yes_position:
             pag.click(discard_yes_position)
@@ -736,7 +752,7 @@ class HarvestApp(App):
                 food_position = self.detection.get_food_position(item)
                 pag.moveTo(food_position)
                 pag.click()
-        sleep(add_jitter(ANIMATION_DELAY))
+    sleep(ANIMATION_DELAY)
 
     def start(self) -> None:
         """Wrapper method that handle window activation and result display."""
@@ -746,7 +762,7 @@ class HarvestApp(App):
         self.window.activate_game_window()
         try:
             pag.press(str(self.cfg.KEY.DIGGING_TOOL))
-            sleep(3)
+            sleep(add_jitter(3))
             while True:
                 self.refill_player_stats()
                 if self.detection.is_energy_high():
@@ -757,11 +773,11 @@ class HarvestApp(App):
 
                 if self.cfg.HARVEST.POWER_SAVING:
                     pag.press("esc")
-                    sleep(self.cfg.HARVEST.CHECK_DELAY)
+                    sleep(add_jitter(self.cfg.HARVEST.CHECK_DELAY, self.cfg, "HARVEST.CHECK_DELAY"))
                     pag.press("esc")
                     sleep(ANIMATION_DELAY)
                 else:
-                    sleep(self.cfg.HARVEST.CHECK_DELAY)
+                    sleep(add_jitter(self.cfg.HARVEST.CHECK_DELAY, self.cfg, "HARVEST.CHECK_DELAY"))
         except KeyboardInterrupt:
             pass
         self.display_result()

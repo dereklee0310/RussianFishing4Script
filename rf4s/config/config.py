@@ -11,6 +11,8 @@ from pathlib import Path
 from yacs.config import CfgNode as CN
 
 from rf4s import config, utils
+import re
+import yaml
 
 # Get the base path depending on runtime environment
 if utils.is_compiled():
@@ -112,5 +114,47 @@ def to_list(profile: dict) -> list:
 
 def load_cfg() -> CN:
     cfg = setup_cfg()
-    cfg.merge_from_file(OUTER_ROOT / "config.yaml")
+    # Load YAML ourselves so we can preprocess "value +- tol" annotations
+    config_path = OUTER_ROOT / "config.yaml"
+    with open(config_path, "r", encoding="utf-8") as fh:
+        raw = yaml.safe_load(fh)
+
+    # Collect tolerances in a parallel dict structure
+    tol_dict = {}
+
+    def _process_raw(node: dict, tol_node: dict):
+        for k, v in list(node.items()):
+            if isinstance(v, dict):
+                child_tol = {}
+                _process_raw(v, child_tol)
+                if child_tol:
+                    tol_node[k] = child_tol
+            elif isinstance(v, str):
+                #strings matching the "+-N" pattern (e.g., "6.0 +-5s" or "4.0 +-2.5%")
+                m = re.match(r"^\s*([0-9]+(?:\.[0-9]+)?)\s*\+\-\s*([0-9]+(?:\.[0-9]+)?)(%?)\s*$", v)
+                if m:
+                    base = float(m.group(1))
+                    tol_raw = float(m.group(2))
+                    is_percent = bool(m.group(3))
+                    node[k] = base
+                    # Store tolerance as a dict with TYPE and VALUE so consumers
+                    # can distinguish absolute vs percent tolerances.
+                    if is_percent:
+                        tol_node[k] = {"TYPE": "pct", "VALUE": tol_raw}
+                    else:
+                        # Default: absolute seconds
+                        tol_node[k] = {"TYPE": "abs", "VALUE": tol_raw}
+
+    if isinstance(raw, dict):
+        _process_raw(raw, tol_dict)
+
+    # Convert the processed raw dict to a CfgNode and merge
+    if isinstance(raw, dict):
+        loaded_cfg = dict_to_cfg(raw)
+        cfg.merge_from_other_cfg(loaded_cfg)
+
+    # Merge tolerances (as CN) into cfg.TOLERANCE
+    if tol_dict:
+        cfg.TOLERANCE = dict_to_cfg(tol_dict)
+
     return cfg

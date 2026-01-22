@@ -107,7 +107,7 @@ class Tackle:
                 raise exceptions.DryMixNotChosenError
             if self.timer.is_rare_event_checkable():
                 self.check_rare_events()
-            sleep(LOOP_DELAY)
+            sleep(add_jitter(LOOP_DELAY))
 
     def cast(self, lock: bool) -> None:
         """Cast the rod, then wait for the lure/bait to fly and sink.
@@ -130,7 +130,7 @@ class Tackle:
                 duration = CAST_SCALE * (self.cfg.PROFILE.CAST_POWER_LEVEL - 1)
                 self.hold_mouse_button(duration)
 
-        sleep(self.cfg.PROFILE.CAST_DELAY)
+        sleep(add_jitter(self.cfg.PROFILE.CAST_DELAY, self.cfg, "PROFILE.CAST_DELAY"))
         if lock:
             pag.click()
 
@@ -141,14 +141,14 @@ class Tackle:
         while not self.timer.is_sink_stage_timeout():
             if self.detection.is_moving_in_bottom_layer():
                 logger.info("Lure has reached bottom layer")
-                sleep(SINK_DELAY)  # Drop to the bottom to make the depth consistent
+                sleep(add_jitter(SINK_DELAY))  # Drop to the bottom to make the depth consistent
                 self.timer.print_sink_duration()
                 break
 
             if self.detection.is_fish_hooked_twice():
                 pag.click()
                 return
-            sleep(LOOP_DELAY)
+            sleep(add_jitter(LOOP_DELAY))
         self.hold_mouse_button(self.cfg.PROFILE.TIGHTEN_DURATION)
 
     def retrieve(self) -> None:
@@ -176,7 +176,7 @@ class Tackle:
                 raise exceptions.LineSnaggedError
             if self.timer.is_rare_event_checkable():
                 self.check_rare_events()
-            sleep(LOOP_DELAY)
+            sleep(add_jitter(LOOP_DELAY))
 
     def pull(self) -> None:
         """Retrieve the line until the end is reached and detect unexpected events.
@@ -205,7 +205,7 @@ class Tackle:
                 raise exceptions.LineSnaggedError
             if self.timer.is_rare_event_checkable():
                 self.check_rare_events()
-            sleep(LOOP_DELAY)
+            sleep(add_jitter(LOOP_DELAY))
             if self.timer.is_coffee_drinkable():
                 raise exceptions.CoffeeTimeoutError
             if self.timer.is_gear_ratio_changeable():
@@ -220,7 +220,7 @@ class Tackle:
         self.timer.set_timeout_start_time()
         while not self.timer.is_special_retrieve_timeout():
             self.hold_mouse_button(self.cfg.PROFILE.RETRIEVAL_DURATION, button)
-            sleep(self.cfg.PROFILE.RETRIEVAL_DELAY)
+            sleep(add_jitter(self.cfg.PROFILE.RETRIEVAL_DELAY, self.cfg, "PROFILE.RETRIEVAL_DELAY"))
             if (
                 self.detection.is_fish_hooked()
                 or self.detection.is_retrieval_finished()
@@ -254,9 +254,9 @@ class Tackle:
                     pag.keyUp("ctrl")
                 if self.cfg.PROFILE.SHIFT:
                     pag.keyUp("shift")
-                sleep(self.cfg.PROFILE.PIRK_DELAY)
+                sleep(add_jitter(self.cfg.PROFILE.PIRK_DELAY, self.cfg, "PROFILE.PIRK_DELAY"))
             else:
-                sleep(LOOP_DELAY)
+                sleep(add_jitter(LOOP_DELAY))
             if self.timer.is_rare_event_checkable():
                 self.check_rare_events()
         raise exceptions.PirkTimeoutError
@@ -282,10 +282,10 @@ class Tackle:
                     delay = self.cfg.PROFILE.ELEVATE_DELAY
                 else:
                     delay = self.cfg.PROFILE.ELEVATE_DURATION
-                sleep(delay)
+                sleep(add_jitter(delay, self.cfg, "PROFILE.ELEVATE_DELAY"))
             else:
                 if locked:
-                    sleep(self.cfg.PROFILE.ELEVATE_DELAY)
+                    sleep(add_jitter(self.cfg.PROFILE.ELEVATE_DELAY, self.cfg, "PROFILE.ELEVATE_DELAY"))
                 else:
                     self.hold_mouse_button(self.cfg.PROFILE.ELEVATE_DURATION)
             locked = not locked
@@ -311,7 +311,7 @@ class Tackle:
     def _lift(self) -> None:
         """Pull the fish until it's captured."""
         while not self.timer.is_lift_stage_timeout():
-            sleep(LOOP_DELAY)
+            sleep(add_jitter(LOOP_DELAY))
             if self.detection.is_fish_captured():
                 return
             if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged():
@@ -325,7 +325,7 @@ class Tackle:
             return
         if self.detection.is_retrieval_finished():
             pag.press("space")
-            sleep(LANDING_NET_DURATION)
+            sleep(add_jitter(LANDING_NET_DURATION))
             if self.detection.is_fish_captured():
                 return
             pag.press("space")
@@ -339,7 +339,7 @@ class Tackle:
             return
 
         while not self.timer.is_lift_stage_timeout():
-            sleep(LOOP_DELAY)
+            sleep(add_jitter(LOOP_DELAY))
             if self.detection.is_fish_captured():
                 return
             if self.cfg.BOT.SNAG_DETECTION and self.detection.is_line_snagged():
@@ -367,7 +367,7 @@ class Tackle:
         coords.append((-sum(x for x, _ in coords), -sum(y for _, y in coords)))
         for x, y in coords:
             win32api.mouse_event(win32con.MOUSEEVENTF_MOVE, x, y, 0, 0)
-            sleep(add_jitter(ANIMATION_DELAY))
+            sleep(ANIMATION_DELAY)
 
     def equip_item(self, item) -> None:
         """Equip an item from the menu or inventory.

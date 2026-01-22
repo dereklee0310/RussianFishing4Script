@@ -126,7 +126,7 @@ class Player:
     def hold_down_left_mouse_button(self):
         pag.mouseDown()
         if self.cfg.BOT.CLICK_LOCK:
-            sleep(CLICK_LOCK_DURATION)
+            sleep(add_jitter(self.cfg.CLICK_LOCK_DURATION, self.cfg, "CLICK_LOCK_DURATION"))
         self.mouse_pressed = True
 
     def release_left_mouse_button(self):
@@ -268,7 +268,7 @@ class Player:
                     check_miss_counts[self.tackle_idx] = 0
                     self.retrieve_and_recast()
                 else:
-                    sleep(self.cfg.PROFILE.PUT_DOWN_DELAY)
+                    sleep(add_jitter(self.cfg.PROFILE.PUT_DOWN_DELAY, self.cfg, "PROFILE.PUT_DOWN_DELAY"))
                     if self.detection.is_fish_hooked():
                         check_miss_counts[self.tackle_idx] = 0
                         self.retrieve_and_recast()
@@ -345,7 +345,7 @@ class Player:
 
                 with self.error_handler():
                     monitor()
-                sleep(self.cfg.PROFILE.LIFT_DELAY)
+                sleep(add_jitter(self.cfg.PROFILE.LIFT_DELAY, self.cfg, "PROFILE.LIFT_DELAY"))
                 hold_mouse_button(FISH_CHECK_DURATION)
                 if not telescopic:
                     self.pull_fish()
@@ -442,7 +442,7 @@ class Player:
                 food_position = self.detection.get_food_position(item)
                 pag.moveTo(food_position)
                 pag.click()
-        sleep(add_jitter(USE_ITEM_DELAY))  # Could be followed by another _use_item()
+                sleep(add_jitter(USE_ITEM_DELAY))  # Could be followed by another _use_item()
 
     def reset_tackle(self) -> None:
         """Reset the tackle until it is ready."""
@@ -485,7 +485,7 @@ class Player:
                 if self.cfg.PROFILE.DEPTH_ADJUST_DELAY > 0:
                     logger.info("Adjusting lure depth")
                     pag.press("enter")  # Open reel
-                    sleep(self.cfg.PROFILE.DEPTH_ADJUST_DELAY)
+                    sleep(add_jitter(self.cfg.PROFILE.DEPTH_ADJUST_DELAY, self.cfg, "PROFILE.DEPTH_ADJUST_DELAY"))
                     self.tackle.hold_mouse_button(
                         self.cfg.PROFILE.DEPTH_ADJUST_DURATION
                     )
@@ -495,7 +495,7 @@ class Player:
                     self.tackle.sink()
         except exceptions.LiftTimeoutError:
             with self.hold_keys(mouse=False, shift=False, reset=True):
-                sleep(DROP_ROD_DELAY)
+                sleep(add_jitter(self.cfg.DROP_ROD_DELAY, self.cfg, "DROP_ROD_DELAY"))
                 if self.cfg.PROFILE.MODE != "telescopic":
                     self.pull_fish(save=False)
         except exceptions.DryMixNotChosenError:
@@ -538,7 +538,7 @@ class Player:
             ):
                 logger.info("Casting rod redundantly")
                 pag.click()
-                sleep(BAD_CAST_DELAY)
+                sleep(add_jitter(self.cfg.BAD_CAST_DELAY, self.cfg, "BAD_CAST_DELAY"))
                 self.reset_tackle()
 
             self.tackle.cast(lock)
@@ -564,9 +564,9 @@ class Player:
                 if self.detection.is_fish_hooked():
                     self.pull_fish()
         if self.cfg.ARGS.RAINBOW is None:
-            sleep(self.cfg.BOT.SPOOL_RETRIEVAL_DELAY)
+            sleep(add_jitter(self.cfg.BOT.SPOOL_RETRIEVAL_DELAY, self.cfg, "BOT.SPOOL_RETRIEVAL_DELAY"))
         elif self.cfg.ARGS.RAINBOW == 5:
-            sleep(self.cfg.BOT.RAINBOW_RETRIEVAL_DELAY)
+            sleep(add_jitter(self.cfg.BOT.RAINBOW_RETRIEVAL_DELAY, self.cfg, "BOT.RAINBOW_RETRIEVAL_DELAY"))
 
     def pull_fish(self, save: bool = True) -> None:
         if self.detection.is_retrieval_finished():
@@ -650,7 +650,7 @@ class Player:
 
         pag.press("0")
         self.harvest_baits()
-        sleep(add_jitter(self.cfg.PROFILE.CHECK_DELAY))
+        sleep(add_jitter(self.cfg.PROFILE.CHECK_DELAY, self.cfg, "PROFILE.CHECK_DELAY"))
 
     def enable_trolling(self) -> None:
         """Start trolling and change moving direction based on the trolling setting."""
@@ -782,7 +782,7 @@ class Player:
         logger.info("Pausing script")
         with self.hold_keys(mouse=False, shift=False):
             pag.press("esc")
-            sleep(add_jitter(self.cfg.BOT.PAUSE_DURATION))
+            sleep(add_jitter(self.cfg.BOT.PAUSE_DURATION, self.cfg, "BOT.PAUSE_DURATION"))
             pag.press("esc")
             sleep(ANIMATION_DELAY)
 
@@ -848,7 +848,11 @@ class Player:
         logger.info("Handling fish")
         with self.hold_keys(mouse=False, shift=False):
             self.handle_events()
-            sleep(TAG_ANIMATION_DELAY)
+            # TAG_ANIMATION_DELAY is a module-level constant (see top of this file).
+            # It is not stored in the yacs CfgNode, so pass the constant directly
+            # to add_jitter instead of accessing it via self.cfg which raises
+            # AttributeError when looked up on the config object.
+            sleep(add_jitter(TAG_ANIMATION_DELAY))
             self._handle_fish()
             # Avoid wrong cast hour
             if self.cfg.PROFILE.MODE in ["bottom", "pirk", "elevator"]:
@@ -966,7 +970,7 @@ class Player:
         with self.hold_keys(mouse=False, shift=False):
             pag.press("space")
             # Sleep to bypass the black screen (experimental)
-            sleep(DISCONNECTED_DELAY)
+            sleep(add_jitter(self.cfg.DISCONNECTED_DELAY, self.cfg, "DISCONNECTED_DELAY"))
             pag.press("space")
             sleep(ANIMATION_DELAY)
             if not self.cfg.ARGS.SIGNOUT:
@@ -998,14 +1002,14 @@ class Player:
         with self.hold_keys(mouse=False, shift=False, reset=True):
             if self.cfg.ARGS.BOAT_TICKET == 0:
                 pag.press("esc")
-                sleep(TICKET_EXPIRE_DELAY)
+                sleep(add_jitter(self.cfg.TICKET_EXPIRE_DELAY, self.cfg, "TICKET_EXPIRE_DELAY"))
                 self.general_quit("Boat ticket expired")
 
             logger.info("Renewing boat ticket")
             ticket_loc = self.detection.get_ticket_position(self.cfg.ARGS.BOAT_TICKET)
             if ticket_loc is None:
                 pag.press("esc")  # Close ticket menu
-                sleep(TICKET_EXPIRE_DELAY)
+                sleep(add_jitter(self.cfg.TICKET_EXPIRE_DELAY, self.cfg, "TICKET_EXPIRE_DELAY"))
                 self.general_quit("New boat ticket not found")
             pag.moveTo(ticket_loc)
             pag.click(clicks=2, interval=0.1)  # pag.doubleClick() not implemented
