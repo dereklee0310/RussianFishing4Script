@@ -495,7 +495,7 @@ class Player:
                     self.tackle.sink()
         except exceptions.LiftTimeoutError:
             with self.hold_keys(mouse=False, shift=False, reset=True):
-                sleep(add_jitter(self.cfg.DROP_ROD_DELAY, self.cfg, "DROP_ROD_DELAY"))
+                sleep(DROP_ROD_DELAY)
                 if self.cfg.PROFILE.MODE != "telescopic":
                     self.pull_fish(save=False)
         except exceptions.DryMixNotChosenError:

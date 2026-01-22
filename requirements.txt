@@ -63,3 +63,4 @@ wcmatch==10.1
 wcwidth==0.2.13
 yacs==0.1.8
 zstandard==0.23.0
+noise==1.2.2

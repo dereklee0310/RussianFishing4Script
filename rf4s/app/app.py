@@ -21,10 +21,14 @@ from datetime import datetime
 from enum import Enum
 from multiprocessing import Lock
 from socket import gaierror
-from time import sleep
+import time
+import threading
 from typing import Optional
-
+import math
+import numpy as np
+from noise import pnoise1
 import pyautogui as pag
+import pydirectinput as pdi
 import requests
 from pynput import keyboard
 from rich import box, print
@@ -40,6 +44,7 @@ from rf4s.controller.detection import Detection
 from rf4s.controller.player import Player
 from rf4s.controller.timer import Timer, add_jitter
 from rf4s.controller.window import Window
+import win32gui
 from rf4s.result import BotResult, CraftResult, HarvestResult, Result
 
 BIAS = 1e-6
@@ -48,6 +53,197 @@ THREAD_CHECK_DELAY = 0.5
 LOOP_DELAY = 1
 CRAFT_DELAY = 4.0
 MAX_FRICTION_BRAKE = 30
+
+
+def timer_sleep(duration: float, interval: float = 0.05) -> None:
+    """Sleep by looping in small intervals.
+
+    This splits a longer blocking sleep into many short sleeps so the program
+    yields more frequently and other threads or user actions (e.g., moving the
+    mouse) remain responsive while waiting.
+
+    Args:
+        duration: Total time to wait in seconds.
+        interval: Small-sleep interval in seconds. Lower -> more responsive.
+    """
+    end = time.perf_counter() + float(duration)
+    while time.perf_counter() < end:
+        time.sleep(interval)
+
+
+class HumanMouse:
+    """Human-like mouse movement using numpy and Perlin noise.
+
+    This implementation assumes `numpy` and `noise.pnoise1` are available.
+    It generates a cubic Bezier trajectory with easing and adds Perlin noise
+    for small jitter.
+    """
+    def __init__(self):
+        self.noise_seed = random.randint(0, 100)
+
+    def _ease_out_quart(self, x: float) -> float:
+        return 1 - pow(1 - x, 4)
+
+    def _get_bezier_point(self, t: float, start: np.ndarray, control1: np.ndarray, control2: np.ndarray, end: np.ndarray) -> np.ndarray:
+        return (
+            (1 - t) ** 3 * start
+            + 3 * (1 - t) ** 2 * t * control1
+            + 3 * (1 - t) * t ** 2 * control2
+            + t ** 3 * end
+        )
+
+    def move_in_radius(
+        self,
+        radius: float = 100.0,
+        min_duration: float = 0.5,
+        max_duration: float = 1.5,
+        pivot: Optional[tuple] = None,
+        rotate: bool = False,
+    ) -> None:
+        start_pos = np.array(pag.position(), dtype=float)
+
+        # If rotate is requested and a pivot is provided, generate a circular
+        # If rotate is requested and a pivot is provided, produce a few short
+        # symmetric micro-movements around the pivot so the camera stays
+        # roughly pointed at one spot but occasionally shifts like a human hand.
+        if rotate and pivot is not None:
+            pivot_x, pivot_y = float(pivot[0]), float(pivot[1])
+            # number of small micro-movements per wiggle cycle
+            micro_moves = random.choice([1, 1, 2])
+            # keep each micro move short and tight
+            max_rad = max(1.0, radius * 0.35)
+            for _ in range(micro_moves):
+                # small random offset around pivot
+                ang = random.uniform(0, 2 * math.pi)
+                dist = random.uniform(max_rad * 0.25, max_rad)
+                offset = np.array([math.cos(ang) * dist, math.sin(ang) * dist])
+
+                # durations for out and return movements
+                dur_out = random.uniform(min_duration * 0.5, min(max_duration, min_duration * 1.2))
+                dur_back = dur_out * random.uniform(0.9, 1.2)
+
+                # control points for smooth bezier from pivot -> pivot+offset
+                start_pt = np.array([pivot_x, pivot_y])
+                end_pt = start_pt + offset
+                normal_vec = np.array([-offset[1], offset[0]])
+                curvature = random.uniform(-0.15, 0.15)
+                control1 = start_pt + (end_pt - start_pt) * 0.3 + normal_vec * curvature
+                control2 = start_pt + (end_pt - start_pt) * 0.7 + normal_vec * curvature
+
+                # perform outward movement
+                steps_out = max(1, int(dur_out * 80))
+                noise_offset_x = random.uniform(0, 100)
+                noise_offset_y = random.uniform(0, 100)
+                prev = np.array(pag.position(), dtype=float)
+                t0 = time.time()
+                for i in range(steps_out + 1):
+                    tt = i / steps_out
+                    te = self._ease_out_quart(tt)
+                    base = self._get_bezier_point(te, start_pt, control1, control2, end_pt)
+                    noise_scale = 4 * (1 - te)
+                    jx = pnoise1(tt * 18 + noise_offset_x) * noise_scale
+                    jy = pnoise1(tt * 18 + noise_offset_y) * noise_scale
+                    fx = base[0] + jx
+                    fy = base[1] + jy
+                    dx = int(round(fx - prev[0]))
+                    dy = int(round(fy - prev[1]))
+                    pdi.moveRel(dx, dy, relative=True)
+                    prev[0] += (fx - prev[0])
+                    prev[1] += (fy - prev[1])
+                    elapsed = time.time() - t0
+                    target = tt * dur_out
+                    if target > elapsed:
+                        timer_sleep(target - elapsed)
+
+                # perform return movement (end_pt -> start_pt)
+                steps_back = max(1, int(dur_back * 80))
+                noise_offset_x = random.uniform(0, 100)
+                noise_offset_y = random.uniform(0, 100)
+                t1 = time.time()
+                for i in range(steps_back + 1):
+                    tt = i / steps_back
+                    te = self._ease_out_quart(tt)
+                    base = self._get_bezier_point(te, end_pt, control2, control1, start_pt)
+                    noise_scale = 4 * (1 - te)
+                    jx = pnoise1(tt * 18 + noise_offset_x) * noise_scale
+                    jy = pnoise1(tt * 18 + noise_offset_y) * noise_scale
+                    fx = base[0] + jx
+                    fy = base[1] + jy
+                    dx = int(round(fx - prev[0]))
+                    dy = int(round(fy - prev[1]))
+                    pdi.moveRel(dx, dy, relative=True)
+                    prev[0] += (fx - prev[0])
+                    prev[1] += (fy - prev[1])
+                    elapsed = time.time() - t1
+                    target = tt * dur_back
+                    if target > elapsed:
+                        timer_sleep(target - elapsed)
+
+            # finished micro-moves; return without executing the non-rotate path
+            return
+        else:
+            angle = random.uniform(0, 2 * math.pi)
+            dist = random.uniform(radius * 0.3, radius)
+            offset = np.array([math.cos(angle) * dist, math.sin(angle) * dist])
+            target_pos = start_pos + offset
+
+            dist_vec = target_pos - start_pos
+            normal_vec = np.array([-dist_vec[1], dist_vec[0]])
+
+            curvature = random.uniform(-0.3, 0.3)
+
+            control1 = start_pos + dist_vec * 0.2 + normal_vec * curvature
+            control2 = start_pos + dist_vec * 0.8 + normal_vec * curvature
+            use_circle = False
+
+        duration = random.uniform(min_duration, max_duration)
+        # Use slightly higher internal step rate for smoother small motions
+        steps = max(1, int(duration * 80))
+
+        noise_offset_x = random.uniform(0, 100)
+        noise_offset_y = random.uniform(0, 100)
+        # Track previous position so we send relative deltas to moveRel().
+        prev_pos = start_pos.copy()
+        loop_start = time.time()
+        for step in range(steps + 1):
+            t = step / steps
+            t_eased = self._ease_out_quart(t)
+            # compute bezier point toward the target position
+            current_base = self._get_bezier_point(
+                t_eased, start_pos, control1, control2, target_pos
+            )
+
+            # Reduce jitter amplitude for more subtle, human-like movement.
+            noise_scale = 6 * (1 - t_eased)
+            # Slightly higher frequency gives smaller micro-movements
+            jitter_x = pnoise1(t * 18 + noise_offset_x) * noise_scale
+            jitter_y = pnoise1(t * 18 + noise_offset_y) * noise_scale
+
+            final_x = current_base[0] + jitter_x
+            final_y = current_base[1] + jitter_y
+
+            # Compute relative delta from the last sent position and move relatively.
+            delta_x = final_x - prev_pos[0]
+            delta_y = final_y - prev_pos[1]
+
+            # Use integer deltas for the move call; pyautogui/pydirectinput accept ints.
+            try:
+                dx = int(round(delta_x))
+                dy = int(round(delta_y))
+            except Exception:
+                dx = int(delta_x)
+                dy = int(delta_y)
+
+            pdi.moveRel(dx, dy, relative=True)
+
+            # Update previous position to the new final position
+            prev_pos[0] += delta_x
+            prev_pos[1] += delta_y
+
+            elapsed = time.time() - loop_start
+            target_time = t * duration
+            if target_time > elapsed:
+                timer_sleep(target_time - elapsed)
 
 
 class App(ABC):
@@ -66,6 +262,9 @@ class App(ABC):
         self.args = args
         self.parser = parser
         self.result = None  # Dummy result
+        # Background thread management
+        self._bg_threads = []
+        self._stop_event = threading.Event()
 
     @abstractmethod
     def _on_release(self, key: keyboard.KeyCode) -> None:
@@ -85,6 +284,39 @@ class App(ABC):
         for name, value in self.result.as_dict().items():
             result.add_row(name, str(value))
         print(result)
+
+    def start_background_task(self, name: str, target, *args, daemon: bool = True) -> threading.Thread:
+        """Start and track a background thread task.
+
+        The thread will be recorded in self._bg_threads and can be stopped by
+        setting self._stop_event (useful when shutting down).
+        """
+        t = threading.Thread(target=target, args=args, name=name, daemon=daemon)
+        self._bg_threads.append(t)
+        t.start()
+        return t
+
+    def stop_background_tasks(self, timeout: Optional[float] = None) -> None:
+        """Signal background tasks to stop and join them.
+
+        Background tasks should check self._stop_event.is_set() periodically and exit.
+        """
+        # Signal all background threads to stop and wait for them to finish.
+        self._stop_event.set()
+        for t in self._bg_threads:
+            try:
+                t.join(timeout)
+            except Exception:
+                # ignore join errors
+                pass
+        # Clear tracked threads and reset stop event so tasks can be restarted later.
+        self._bg_threads = []
+        try:
+            # allow reuse: clear the stop flag for next run
+            self._stop_event.clear()
+        except Exception:
+            # If clearing fails, create a new Event to avoid leaving it set
+            self._stop_event = threading.Event()
 
 
 class BotApp(App):
@@ -432,6 +664,73 @@ class BotApp(App):
             self.paused = False
             return False
 
+    def _mouse_wiggle(self) -> None:
+        """Background task: perform human-like small movements periodically.
+
+        Uses the HumanMouse helper. The task checks self._stop_event to exit.
+        """
+        mover = HumanMouse()
+        # Read settings from config BOT.MOUSE_WIGGLE (fallbacks provided)
+        cfg_mw = getattr(self.cfg.BOT, "MOUSE_WIGGLE", None)
+        if cfg_mw is not None:
+            try:
+                radius = float(getattr(cfg_mw, "RADIUS", 80))
+            except Exception:
+                radius = 80
+            try:
+                min_dur = float(getattr(cfg_mw, "MIN_DURATION", 0.3))
+                max_dur = float(getattr(cfg_mw, "MAX_DURATION", 1.0))
+            except Exception:
+                min_dur, max_dur = 0.3, 1.0
+            try:
+                interval = float(getattr(cfg_mw, "INTERVAL", 5.0))
+            except Exception:
+                interval = 5.0
+        else:
+            radius = 80
+            min_dur, max_dur = 0.3, 1.0
+            interval = 5.0
+
+        while not self._stop_event.is_set():
+            # Do not wiggle while the bot is paused
+            if getattr(self, "paused", False):
+                logger.debug("mouse_wiggle: skipped (paused)")
+                timer_sleep(THREAD_CHECK_DELAY)
+                continue
+
+            # Ensure the game window is the foreground window. If not, skip wiggle
+            try:
+                game_hwnd = win32gui.FindWindow(None, self.window.game_title)
+                fg = win32gui.GetForegroundWindow()
+                if game_hwnd == 0 or fg != game_hwnd:
+                    # game window not found or not focused — wait and retry
+                    logger.debug("mouse_wiggle: skipped (game not foreground or not found)")
+                    timer_sleep(interval)
+                    continue
+            except Exception:
+                # If any window API fails, skip movement this cycle
+                logger.debug("mouse_wiggle: win32 check failed, skipping this cycle")
+                timer_sleep(interval)
+                continue
+
+            try:
+                logger.debug("mouse_wiggle: performing move radius=%s min=%s max=%s", radius, min_dur, max_dur)
+                # Compute pivot as center of the game window so motion becomes
+                # a rotation-like movement around that center.
+                try:
+                    base_x, base_y, w, h = self.window.get_box()
+                    pivot = (base_x + w / 2, base_y + h / 2)
+                except Exception:
+                    pivot = None
+                mover.move_in_radius(
+                    radius=radius, min_duration=min_dur, max_duration=max_dur, pivot=pivot, rotate=True
+                )
+            except Exception:
+                # Ignore movement errors
+                pass
+            # allow a short pause between human-like moves
+            timer_sleep(interval)
+
     def reload_cfg(self) -> None:
         profile_name = self.cfg.PROFILE.NAME
         self.cfg = load_cfg()
@@ -452,10 +751,30 @@ class BotApp(App):
             general_listener = keyboard.Listener(on_release=self._on_release)
             general_listener.start()
             self.window.activate_game_window()
+            # Optional background mouse wiggle: enable by setting ARGS.MOUSE_WIGGLE to True
+            try:
+                # CLI flag overrides config; fall back to BOT.MOUSE_WIGGLE.ENABLED
+                mw_enabled = getattr(self.cfg.ARGS, "MOUSE_WIGGLE", None)
+                if mw_enabled is None:
+                    cfg_mw = getattr(self.cfg.BOT, "MOUSE_WIGGLE", None)
+                    mw_enabled = bool(getattr(cfg_mw, "ENABLED", False)) if cfg_mw is not None else False
+                else:
+                    mw_enabled = bool(mw_enabled)
+            except Exception:
+                mw_enabled = False
+            if mw_enabled:
+                # start a background thread that slightly moves the mouse periodically
+                self.start_background_task("mouse_wiggle", self._mouse_wiggle)
             try:
                 self.player.start_fishing()
             except KeyboardInterrupt:
                 general_listener.stop()
+                # If paused, stop background tasks to avoid duplicate threads and unwanted movement
+                if self.paused:
+                    try:
+                        self.stop_background_tasks()
+                    except Exception:
+                        logger.debug("Failed to stop background tasks during pause")
                 if not self.paused:
                     break
 
@@ -470,7 +789,7 @@ class BotApp(App):
                     pause_listener.start()
 
                 while pause_listener.is_alive():
-                    sleep(add_jitter(THREAD_CHECK_DELAY))
+                    timer_sleep(add_jitter(THREAD_CHECK_DELAY))
 
                 logger.info("Restarting bot without resetting records")
                 self.reload_cfg()
@@ -482,6 +801,8 @@ class BotApp(App):
                 )
                 self.paused = False
 
+        # stop any background threads we started
+        self.stop_background_tasks()
         self.player.handle_termination("Terminated by user", shutdown=False, send=False)
 
 
@@ -522,7 +843,7 @@ class CraftApp(App):
         """
         logger.info("Crafting item")
         pag.click()
-        sleep(add_jitter(CRAFT_DELAY))
+        timer_sleep(add_jitter(CRAFT_DELAY))
         self.result.material += 1
         while True:
             if self.detection.is_operation_success():
@@ -536,12 +857,12 @@ class CraftApp(App):
                 self.result.fail += 1
                 pag.press("space")
                 break
-            sleep(add_jitter(LOOP_DELAY))
-        sleep(ANIMATION_DELAY)
+            timer_sleep(add_jitter(LOOP_DELAY))
+        timer_sleep(ANIMATION_DELAY)
         discard_yes_position = self.detection.get_discard_yes_position()
         if discard_yes_position:
             pag.click(discard_yes_position)
-        sleep(add_jitter(LOOP_DELAY))
+        timer_sleep(add_jitter(LOOP_DELAY))
 
     def _on_release(self, key: keyboard.KeyCode) -> None:
         """Handle keyboard release events for script control.
@@ -652,7 +973,7 @@ class MoveApp(App):
             pag.keyDown("shift")
         pag.keyDown("w")
         while listener.is_alive():
-            sleep(THREAD_CHECK_DELAY)
+            timer_sleep(THREAD_CHECK_DELAY)
 
 
 class HarvestApp(App):
@@ -703,10 +1024,10 @@ class HarvestApp(App):
         logger.info("Harvesting baits")
         pag.click()
         while not self.detection.is_harvest_success():
-            sleep(add_jitter(LOOP_DELAY))
+            timer_sleep(add_jitter(LOOP_DELAY))
         pag.press("space")
         logger.info("Baits harvested succussfully")
-        sleep(ANIMATION_DELAY)
+        timer_sleep(ANIMATION_DELAY)
 
     def refill_player_stats(self) -> None:
         """Refill player stats using tea and carrot."""
@@ -747,11 +1068,10 @@ class HarvestApp(App):
             pag.press(key)
         else:  # Open food menu
             with pag.hold("t"):
-                sleep(ANIMATION_DELAY)
+                timer_sleep(ANIMATION_DELAY)
                 food_position = self.detection.get_food_position(item)
                 pag.moveTo(food_position)
                 pag.click()
-    sleep(ANIMATION_DELAY)
 
     def start(self) -> None:
         """Wrapper method that handle window activation and result display."""
@@ -761,7 +1081,7 @@ class HarvestApp(App):
         self.window.activate_game_window()
         try:
             pag.press(str(self.cfg.KEY.DIGGING_TOOL))
-            sleep(add_jitter(3))
+            timer_sleep(add_jitter(3))
             while True:
                 self.refill_player_stats()
                 if self.detection.is_energy_high():
@@ -772,11 +1092,11 @@ class HarvestApp(App):
 
                 if self.cfg.HARVEST.POWER_SAVING:
                     pag.press("esc")
-                    sleep(add_jitter(self.cfg.HARVEST.CHECK_DELAY, self.cfg, "HARVEST.CHECK_DELAY"))
+                    timer_sleep(add_jitter(self.cfg.HARVEST.CHECK_DELAY, self.cfg, "HARVEST.CHECK_DELAY"))
                     pag.press("esc")
-                    sleep(ANIMATION_DELAY)
+                    timer_sleep(ANIMATION_DELAY)
                 else:
-                    sleep(add_jitter(self.cfg.HARVEST.CHECK_DELAY, self.cfg, "HARVEST.CHECK_DELAY"))
+                    timer_sleep(add_jitter(self.cfg.HARVEST.CHECK_DELAY, self.cfg, "HARVEST.CHECK_DELAY"))
         except KeyboardInterrupt:
             pass
         self.display_result()
@@ -1045,4 +1365,4 @@ class FrictionBrakeApp(App):
         self.friction_brake.reset(self.cfg.FRICTION_BRAKE.INITIAL)
 
         while listener.is_alive():
-            sleep(THREAD_CHECK_DELAY)
+            timer_sleep(THREAD_CHECK_DELAY)

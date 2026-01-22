@@ -178,6 +178,15 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         help_message = argument[2]
         bot_parser.add_argument(flag1, flag2, action="store_true", help=help_message)
 
+    # Human-like background mouse movement enable/disable flag (settings are in config.yaml)
+    bot_parser.add_argument(
+        "-w",
+        "--mouse-wiggle",
+        dest="mouse_wiggle",
+        action="store_true",
+        help="enable background human-like mouse movement while the bot runs",
+    )
+
     profile_strategy = bot_parser.add_mutually_exclusive_group()
 
     def pid(_pid: str) -> int:
@@ -471,7 +480,7 @@ def main() -> None:
     # If user run the program without specifying a command or by double-clicking,
     # prompt user to input the feature and launch options. This handle both Python
     # interpreter and Nuitka executable use cases.
-    # If a command is parsed, we assume that the user has already typed the
+    # If a command is parsed, we assume that the user has already typed the0
     # launch options and don't prompt them to type it.
     if args.feature is None:
         display_features()
