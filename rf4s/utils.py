@@ -17,6 +17,7 @@ from pyscreeze import Box
 from rich import box, print
 from rich.panel import Panel
 
+
 from rf4s.controller.console import console
 
 LOOP_DELAY = 1
@@ -74,12 +75,15 @@ def press_before_and_after(key):
     def func_wrapper(func):
         def args_wrapper(*args, **kwargs):
             pag.press(key)
-            sleep(ANIMATION_DELAY)
+            # import here so decorator application at import-time doesn't trigger
+            from rf4s.controller.timer import add_jitter
+
+            sleep(add_jitter(ANIMATION_DELAY))
             try:
                 func(*args, **kwargs)
             finally:
                 pag.press(key)
-                sleep(ANIMATION_DELAY)
+                sleep(add_jitter(ANIMATION_DELAY))
 
         return args_wrapper
 

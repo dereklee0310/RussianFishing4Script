@@ -13,6 +13,7 @@ import pyautogui as pag
 
 from rf4s.controller import logger
 from rf4s.controller.detection import Detection
+from rf4s.controller.timer import add_jitter
 
 MAX_FRICTION_BRAKE = 30
 MIN_FRICTION_BRAKE = 0
@@ -65,13 +66,15 @@ class FrictionBrake:
         """
         logger.info("Resetting friction brake")
         with self.lock:
-            sleep(FRICTION_BRAKE_CHANGE_DELAY)  # might be called after change()
+            sleep(
+                add_jitter(FRICTION_BRAKE_CHANGE_DELAY)
+            )  # might be called after change()
             for _ in range(MAX_FRICTION_BRAKE):
                 pag.scroll(UP, _pause=False)
-                sleep(FRICTION_BRAKE_CHANGE_DELAY)
+                sleep(add_jitter(FRICTION_BRAKE_CHANGE_DELAY))
             for _ in range(abs(MAX_FRICTION_BRAKE - target)):
                 pag.scroll(DOWN, _pause=False)
-                sleep(FRICTION_BRAKE_CHANGE_DELAY)
+                sleep(add_jitter(FRICTION_BRAKE_CHANGE_DELAY))
             self.cur.value = target
 
     def change(self, increase: bool) -> None:
@@ -105,11 +108,16 @@ def monitor_friction_brake(friction_brake: FrictionBrake) -> None:
     try:
         while True:
             if not friction_brake.detection.is_fish_hooked_pixel():
-                sleep(FRICTION_BRAKE_MONITOR_DELAY)
+                sleep(add_jitter(FRICTION_BRAKE_MONITOR_DELAY))
                 fish_hooked = False
                 continue
             if not fish_hooked:
-                sleep(friction_brake.fb_cfg.START_DELAY)
+                sleep(
+                    add_jitter(
+                        friction_brake.fb_cfg.START_DELAY,
+                        friction_brake.cfg.BOT.JITTER_SCALE,
+                    )
+                )
                 fish_hooked = True
 
             with friction_brake.lock:
@@ -118,7 +126,12 @@ def monitor_friction_brake(friction_brake: FrictionBrake) -> None:
                     or friction_brake.detection.is_reel_burning()
                 ):
                     friction_brake.change(increase=False)
-                    sleep(friction_brake.fb_cfg.DECREASE_DELAY)
+                    sleep(
+                        add_jitter(
+                            friction_brake.fb_cfg.DECREASE_DELAY,
+                            friction_brake.cfg.BOT.JITTER_SCALE,
+                        )
+                    )
                 else:
                     cur_time = time()
                     if cur_time - pre_time >= friction_brake.fb_cfg.INCREASE_DELAY:

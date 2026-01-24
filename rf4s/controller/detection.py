@@ -17,6 +17,7 @@ from PIL import Image, ImageFilter
 from pyscreeze import Box
 
 from rf4s import utils
+from rf4s.controller.timer import add_jitter
 from rf4s.controller.window import Window
 
 CRITICAL_COLOR = (206, 56, 21)
@@ -221,8 +222,7 @@ class Detection:
         if not self.is_fish_hooked():
             return False
 
-        # check if the fish got away after a short delay
-        time.sleep(self.cfg.PROFILE.HOOK_DELAY)
+        time.sleep(add_jitter(self.cfg.PROFILE.HOOK_DELAY, self.cfg.BOT.JITTER_SCALE))
         if self.is_fish_hooked():
             return True
         return False

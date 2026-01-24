@@ -457,7 +457,7 @@ class BotApp(App):
                     pause_listener.start()
 
                 while pause_listener.is_alive():
-                    sleep(THREAD_CHECK_DELAY)
+                    sleep(add_jitter(THREAD_CHECK_DELAY))
 
                 logger.info("Restarting bot without resetting records")
                 self.reload_cfg()
@@ -639,7 +639,7 @@ class MoveApp(App):
             pag.keyDown("shift")
         pag.keyDown("w")
         while listener.is_alive():
-            sleep(THREAD_CHECK_DELAY)
+            sleep(add_jitter(THREAD_CHECK_DELAY))
 
 
 class HarvestApp(App):
@@ -693,7 +693,7 @@ class HarvestApp(App):
             sleep(add_jitter(LOOP_DELAY))
         pag.press("space")
         logger.info("Baits harvested succussfully")
-        sleep(ANIMATION_DELAY)
+        sleep(add_jitter(ANIMATION_DELAY))
 
     def refill_player_stats(self) -> None:
         """Refill player stats using tea and carrot."""
@@ -734,7 +734,7 @@ class HarvestApp(App):
             pag.press(key)
         else:  # Open food menu
             with pag.hold("t"):
-                sleep(ANIMATION_DELAY)
+                sleep(add_jitter(ANIMATION_DELAY))
                 food_position = self.detection.get_food_position(item)
                 pag.moveTo(food_position)
                 pag.click()
