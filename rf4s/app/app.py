@@ -306,9 +306,11 @@ class BotApp(App):
     def merge_args_to_cfg(self) -> None:
         """Must be called after the profile is correctly configured."""
         if len(self.args.opts) % 2:
-            logger.error("Invalid launch options: '%s'\n"
+            logger.error(
+                "Invalid launch options: '%s'\n"
                 "These arguments are used for config override: '%s'\n",
-                " ".join(sys.argv[1:]), " ".join(self.args.opts)
+                " ".join(sys.argv[1:]),
+                " ".join(self.args.opts),
             )
             sys.exit()
 
