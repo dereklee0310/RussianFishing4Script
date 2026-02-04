@@ -1,0 +1,23 @@
+name: Ruff
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Ruff
+        uses: astral-sh/ruff-action@v3
+        with:
+          src: >-
+            ./rf4s
+            ./tools
+          github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+          args: "--version"
+      - run: ruff check
+      - run: ruff format --check --diff
