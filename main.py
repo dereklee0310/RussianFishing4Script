@@ -80,6 +80,11 @@ BOT_BOOLEAN_ARGUMENTS = (
     ("DM", "dry-mix", "enable dry mix refill, mode: bottom"),
     ("GB", "groundbait", "enable groundbait refill, mode: bottom"),
     ("PVA", "pva", "enable pva refill, mode: bottom"),
+    (
+        "NA",
+        "no-animation",
+        "disable waiting for animations like trophy, gift\nchange 'Catch screen style' to 'Simple' in game settings to use this flag",
+    ),
 )
 
 EPILOG = """

@@ -40,7 +40,7 @@ BOT:
   GEAR_RATIO_DELAY: 64
   PAUSE_DURATION: 600
   CLICK_LOCK: false
-  JITTER: true
+  JITTER_SCALE: 0.2
   KEEPNET:
     CAPACITY: 100
     SCREENSHOT_EVENTS: ["fish", "card", "gift"]

@@ -844,11 +844,13 @@ class Player:
     def handle_fish(self) -> None:
         if not self.detection.is_fish_captured():
             return
-        sleep(add_jitter(LOOP_DELAY))  # it's a slow animation ;)
+        if not self.cfg.ARGS.NO_ANIMATION:
+            sleep(add_jitter(LOOP_DELAY))  # it's a slow animation ;)
         logger.info("Handling fish")
         with self.hold_keys(mouse=False, shift=False):
             self.handle_events()
-            sleep(TAG_ANIMATION_DELAY)
+            if not self.cfg.ARGS.NO_ANIMATION:
+                sleep(TAG_ANIMATION_DELAY)
             self._handle_fish()
             # Avoid wrong cast hour
             if self.cfg.PROFILE.MODE in ["bottom", "pirk", "elevator"]:

@@ -33,7 +33,7 @@ random.seed(datetime.datetime.now().timestamp())
 
 
 def add_jitter(time: float, jitter_scale: float = JITTER_SCALE) -> float:
-    return random.uniform((time - jitter_scale) * time, time + (jitter_scale * time))
+    return random.uniform(time - jitter_scale * time, time + jitter_scale * time)
 
 
 class Timer:

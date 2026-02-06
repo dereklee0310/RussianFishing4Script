@@ -25,7 +25,7 @@ from rf4s.controller.timer import Timer
 
 CAST_SCALE = 0.4  # 25% / 0.4s
 ANIMATION_DELAY = 0.6
-LOOP_DELAY = 1
+LOOP_DELAY = 0.5
 SINK_DELAY = 2
 LIFT_DURATION = 3
 NUM_OF_MOVEMENT = 4
@@ -133,6 +133,7 @@ class Tackle:
                 duration = CAST_SCALE * (self.cfg.PROFILE.CAST_POWER_LEVEL - 1)
                 self.hold_mouse_button(duration)
 
+        print(add_jitter(self.cfg.PROFILE.CAST_DELAY, self.cfg.BOT.JITTER_SCALE))
         sleep(add_jitter(self.cfg.PROFILE.CAST_DELAY, self.cfg.BOT.JITTER_SCALE))
         if lock:
             pag.click()
