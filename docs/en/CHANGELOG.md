@@ -1,3 +1,13 @@
+## 0.9.0 (2025-02-06)
+
+### 🔧 Improvements
+- Added `BOT.JITTER_SCALE` to allow configuration of a global time scale for delay jitter.
+- Added more random delay.
+- Introduced the `-NA/--no-animation` flag to bypass wait times for trophy and gift animations.
+
+### 🐛 Bug Fixes
+- Increased the default `CAST_DELAY` for float fishing modes to ensure monitoring begins only after the float lands.
+
 ## 0.8.7 (2025-12-26)
 
 ### 🐛 Bug Fixes

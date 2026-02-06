@@ -83,7 +83,7 @@ BOT_BOOLEAN_ARGUMENTS = (
     (
         "NA",
         "no-animation",
-        "disable waiting for animations like trophy, gift\nchange 'Catch screen style' to 'Simple' in game settings to use this flag",
+        "disable waiting for trophy and gift animations, gift\nchange 'Catch screen style' to 'Simple' in game settings to use this flag",
     ),
 )
 
