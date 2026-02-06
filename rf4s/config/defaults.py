@@ -498,7 +498,7 @@ _C.PROFILE.TELESCOPIC.MODE = "telescopic"
 # For instance, 2.5 cast_power_level equals to 37.5% casting power.
 _C.PROFILE.TELESCOPIC.CAST_POWER_LEVEL = 5.0
 # Time to wait before the lure touches the water and sinks after the rod is cast
-_C.PROFILE.TELESCOPIC.CAST_DELAY = 4.0
+_C.PROFILE.TELESCOPIC.CAST_DELAY = 6.0
 # Sensitivity of float detection
 _C.PROFILE.TELESCOPIC.FLOAT_SENSITIVITY = 0.68
 # Delay between fish bite checks
@@ -528,7 +528,7 @@ _C.PROFILE.BOLOGNESE.MODE = "bolognese"
 # For instance, 2.5 cast_power_level equals to 37.5% casting power.
 _C.PROFILE.BOLOGNESE.CAST_POWER_LEVEL = 5.0
 # Time to wait before the lure touches the water and sinks after the rod is cast
-_C.PROFILE.BOLOGNESE.CAST_DELAY = 4.0
+_C.PROFILE.BOLOGNESE.CAST_DELAY = 6.0
 # Sensitivity of float detection
 _C.PROFILE.BOLOGNESE.FLOAT_SENSITIVITY = 0.68
 # Delay between fish bite checks
@@ -560,7 +560,7 @@ _C.PROFILE.MATCH.MODE = "bolognese"
 # For instance, 2.5 cast_power_level equals to 37.5% casting power.
 _C.PROFILE.MATCH.CAST_POWER_LEVEL = 5.0
 # Time to wait before the lure touches the water and sinks after the rod is cast
-_C.PROFILE.MATCH.CAST_DELAY = 4.0
+_C.PROFILE.MATCH.CAST_DELAY = 6.0
 # Sensitivity of float detection
 _C.PROFILE.MATCH.FLOAT_SENSITIVITY = 0.68
 # Delay between fish bite checks
