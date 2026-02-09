@@ -1,5 +1,10 @@
 ## 0.9.1 (2026-02-09)
 
+### 🆕 New Features
+- **Interface Localization**: Added full Russian language support for the entire script interface — menus, logs, results, notifications, and argument help. The language is determined by the `LANGUAGE` parameter in `config.yaml` (`"en"` or `"ru"`). Translation files are stored in `rf4s/i18n/locales/`.
+
+## 0.9.0 (2026-02-06)
+
 ### 🔧 Improvements
 - Added `BOT.JITTER_SCALE` to allow configuration of a global time scale for delay jitter.
 - Added more random delay.
