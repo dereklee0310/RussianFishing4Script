@@ -1,4 +1,4 @@
-## 0.9.0 (2026-02-06)
+## 0.9.1 (2026-02-09)
 
 ### 🔧 Improvements
 - Added `BOT.JITTER_SCALE` to allow configuration of a global time scale for delay jitter.

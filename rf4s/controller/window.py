@@ -16,6 +16,7 @@ import win32gui
 
 from rf4s import utils
 from rf4s.controller import logger
+from rf4s.i18n import t
 
 ANIMATION_DELAY = 0.5
 
@@ -52,10 +53,7 @@ class Window:
         """
         hwnd = win32gui.FindWindow(None, self.game_title)  # class name: UnityWndClass
         if hwnd == 0:
-            # logger.critical("Failed to locate the game window: %s", self.game_title)
-            logger.critical(
-                "Failed to locate the game window, please open the game and try again"
-            )
+            logger.critical(t("window.failed_to_locate"))
             utils.safe_exit()
         return hwnd
 

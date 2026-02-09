@@ -21,6 +21,7 @@ from rich.table import Table
 from yacs.config import CfgNode as CN
 
 from rf4s import config, utils
+from rf4s.i18n import init_locale, t
 from rf4s.app import (
     BotApp,
     CalculateApp,
@@ -30,7 +31,7 @@ from rf4s.app import (
     MoveApp,
 )
 
-VERSION = "0.9.0"
+VERSION = "0.9.1"
 MINIMUM_COMPATIBLE_CONFIG_VERSION = "0.8.0"
 LOGO = """
 ██████╗ ███████╗██╗  ██╗███████╗
@@ -43,48 +44,44 @@ LOGO = """
 # https://patorjk.com/software/taag/#p=testall&f=3D-ASCII&t=RF4S%0A, ANSI Shadow
 
 FEATURES = (
-    {"name": "Fishing Bot", "command": "bot"},
-    {"name": "Craft Items", "command": "craft"},
-    {"name": "Move Forward", "command": "move"},
-    {"name": "Harvest Baits", "command": "harvest"},
-    {"name": "Auto Friction Brake", "command": "frictionbrake"},
-    {"name": "Calculate Tackle's Stats", "command": "calculate"},
+    {"name_key": "main.feature.fishing_bot", "command": "bot"},
+    {"name_key": "main.feature.craft_items", "command": "craft"},
+    {"name_key": "main.feature.move_forward", "command": "move"},
+    {"name_key": "main.feature.harvest_baits", "command": "harvest"},
+    {"name_key": "main.feature.auto_friction_brake", "command": "frictionbrake"},
+    {"name_key": "main.feature.calculate_tackle_stats", "command": "calculate"},
 )
 
 BOT_BOOLEAN_ARGUMENTS = (
-    ("t", "tag", "keep only tagged fishes"),
-    ("c", "coffee", "drink coffee if stamina is low during fish fight"),
-    ("a", "alcohol", "drink alcohol before keeping the fish"),
-    ("r", "refill", "consume tea and carrot if hunger or comfort is low"),
-    ("H", "harvest", "harvest baits before casting the rod"),
-    ("L", "lure", "change current lure with a random favorite one, mode: spin"),
-    ("m", "mouse", "move mouse randomly before casting the rod"),
-    ("P", "pause", "pause the script before casting the rod occasionally"),
-    ("RC", "random-cast", "do a redundant rod cast randomly"),
-    ("SC", "skip-cast", "skip the first rod cast"),
-    ("l", "lift", "lift the tackle constantly during a fish fight"),
-    ("e", "electro", "enable electric mode for Electro Raptor series reel"),
-    ("FB", "friction-brake", "adjust friction brake automatically"),
-    ("GR", "gear-ratio", "switch the gear ratio or mode after the retrieval timed out"),
-    ("b", "bite", "save a screenshot in screenshots/ when a fish bite"),
-    ("s", "screenshot", "save a screenshot in screenshots/ after you caught a fish"),
-    ("d", "data", "save fishing data in /logs"),
-    ("E", "email", "send email noticication after the script stop"),
-    ("M", "miaotixing", "send miaotixing notification after the script stop"),
-    ("D", "discord", "send Discord notification after the script stop"),
-    ("TG", "telegram", "send Telegram notification after the script stop"),
-    ("S", "shutdown", "shutdown computer after the script stop"),
-    ("SO", "signout", "sign out instead of closing the game"),
-    ("BL", "broken-lure", "replace broken lures with favorite ones"),
-    ("SR", "spod-rod", "recast spod rod"),
-    ("DM", "dry-mix", "enable dry mix refill, mode: bottom"),
-    ("GB", "groundbait", "enable groundbait refill, mode: bottom"),
-    ("PVA", "pva", "enable pva refill, mode: bottom"),
-    (
-        "NA",
-        "no-animation",
-        "disable waiting for trophy and gift animations, gift\nchange 'Catch screen style' to 'Simple' in game settings to use this flag",
-    ),
+    ("t", "tag", "main.bot_arg.tag"),
+    ("c", "coffee", "main.bot_arg.coffee"),
+    ("a", "alcohol", "main.bot_arg.alcohol"),
+    ("r", "refill", "main.bot_arg.refill"),
+    ("H", "harvest", "main.bot_arg.harvest"),
+    ("L", "lure", "main.bot_arg.lure"),
+    ("m", "mouse", "main.bot_arg.mouse"),
+    ("P", "pause", "main.bot_arg.pause"),
+    ("RC", "random-cast", "main.bot_arg.random_cast"),
+    ("SC", "skip-cast", "main.bot_arg.skip_cast"),
+    ("l", "lift", "main.bot_arg.lift"),
+    ("e", "electro", "main.bot_arg.electro"),
+    ("FB", "friction-brake", "main.bot_arg.friction_brake"),
+    ("GR", "gear-ratio", "main.bot_arg.gear_ratio"),
+    ("b", "bite", "main.bot_arg.bite"),
+    ("s", "screenshot", "main.bot_arg.screenshot"),
+    ("d", "data", "main.bot_arg.data"),
+    ("E", "email", "main.bot_arg.email"),
+    ("M", "miaotixing", "main.bot_arg.miaotixing"),
+    ("D", "discord", "main.bot_arg.discord"),
+    ("TG", "telegram", "main.bot_arg.telegram"),
+    ("S", "shutdown", "main.bot_arg.shutdown"),
+    ("SO", "signout", "main.bot_arg.signout"),
+    ("BL", "broken-lure", "main.bot_arg.broken_lure"),
+    ("SR", "spod-rod", "main.bot_arg.spod_rod"),
+    ("DM", "dry-mix", "main.bot_arg.dry_mix"),
+    ("GB", "groundbait", "main.bot_arg.groundbait"),
+    ("PVA", "pva", "main.bot_arg.pva"),
+    ("NA", "no-animation", "main.bot_arg.no_animation"),
 )
 
 EPILOG = """
@@ -169,7 +166,7 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
 
     bot_parser = feature_parsers.add_parser(
         "bot",
-        help="start fishing bot",
+        help=t("main.help.bot"),
         parents=[parent_parser],
         formatter_class=Formatter,
     )
@@ -180,7 +177,7 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
     for argument in BOT_BOOLEAN_ARGUMENTS:
         flag1 = f"-{argument[0]}"
         flag2 = f"--{argument[1]}"
-        help_message = argument[2]
+        help_message = t(argument[2])
         bot_parser.add_argument(flag1, flag2, action="store_true", help=help_message)
 
     profile_strategy = bot_parser.add_mutually_exclusive_group()
@@ -193,7 +190,7 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         "--pid",
         type=pid,
         choices=range(len(cfg.PROFILE)),
-        help="specify the id of the profile to use",
+        help=t("main.help.pid"),
         metavar=f"{{0-{len(cfg.PROFILE) - 1}}}",
     )
 
@@ -206,7 +203,7 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         "-N",
         "--pname",
         type=pname,
-        help="specify the name of the profile to use",
+        help=t("main.help.pname"),
         metavar="{profile name}",
     )
 
@@ -220,7 +217,7 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         # const=0, # Flag is used but no argument given
         type=num_fish,
         choices=range(cfg.BOT.KEEPNET.CAPACITY),
-        help="specify the number of fishes in your keepnet, (default: %(default)s)",
+        help=t("main.help.fishes_in_keepnet"),
         metavar=f"{{0-{cfg.BOT.KEEPNET.CAPACITY - 1}}}",
     )
     bot_parser.add_argument(
@@ -231,10 +228,7 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         default=None,
         type=str,
         choices=["forward", "left", "right"],
-        help=(
-            "enable trolling mode and specify the direction\n"
-            "(default: %(default)s, no argument: %(const)s)"
-        ),
+        help=t("main.help.trolling"),
     )
     bot_parser.add_argument(
         "-R",
@@ -244,10 +238,7 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         default=None,
         type=int,
         choices=[0, 5],
-        help=(
-            "enable rainbow line mode and specify the meter to lift the rod\n"
-            "(default: %(default)s, no argument: %(const)s)"
-        ),
+        help=t("main.help.rainbow"),
     )
 
     bot_parser.add_argument(
@@ -258,14 +249,11 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         default=0,
         type=int,
         choices=[0, 1, 2, 3, 5],
-        help=(
-            "enable boat ticket renewal and specify the duration\n"
-            "(default: %(default)s, no argument: %(const)s)"
-        ),
+        help=t("main.help.boat_ticket"),
     )
 
     craft_parser = feature_parsers.add_parser(
-        "craft", help="craft items", parents=[parent_parser], formatter_class=Formatter
+        "craft", help=t("main.help.craft"), parents=[parent_parser], formatter_class=Formatter
     )
     craft_parser.add_argument(
         "-V", "--version", action="version", version=f"RF4S-craft {VERSION}"
@@ -274,26 +262,26 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         "-d",
         "--discard",
         action="store_true",
-        help="discard all the crafted items (for groundbaits)",
+        help=t("main.help.discard"),
     )
     craft_parser.add_argument(
         "-i",
         "--ignore",
         action="store_true",
-        help="ignore unselected material slots",
+        help=t("main.help.ignore"),
     )
     craft_parser.add_argument(
         "-n",
         "--craft-limit",
         type=int,
         default=-1,
-        help="specify the number of items to craft, (default: %(default)s)",
+        help=t("main.help.craft_limit"),
         metavar="{number of items}",
     )
 
     move_parser = feature_parsers.add_parser(
         "move",
-        help="toggle moving forward",
+        help=t("main.help.move"),
         parents=[parent_parser],
         formatter_class=Formatter,
     )
@@ -304,12 +292,12 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         "-s",
         "--shift",
         action="store_true",
-        help="Hold down the Shift key while moving",
+        help=t("main.help.shift"),
     )
 
     harvest_parser = feature_parsers.add_parser(
         "harvest",
-        help="harvest baits",
+        help=t("main.help.harvest"),
         parents=[parent_parser],
         formatter_class=Formatter,
     )
@@ -320,12 +308,12 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         "-r",
         "--refill",
         action="store_true",
-        help="refill hunger and comfort by consuming tea and carrot",
+        help=t("main.help.refill"),
     )
 
     friction_brake_parser = feature_parsers.add_parser(
         "frictionbrake",
-        help="automate friction brake",
+        help=t("main.help.frictionbrake"),
         aliases=["fb"],
         parents=[parent_parser],
         formatter_class=Formatter,
@@ -336,7 +324,7 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
 
     calculate_paser = feature_parsers.add_parser(
         "calculate",
-        help="calculate tackle's stats",
+        help=t("main.help.calculate"),
         aliases=["cal"],
         parents=[parent_parser],
         formatter_class=Formatter,
@@ -361,15 +349,15 @@ def display_features() -> None:
     Shows a formatted table with feature IDs and names.
     """
     table = Table(
-        "Features",
-        title="Select a feature to start 🚀",
+        t("main.features_column"),
+        title=t("main.select_feature"),
         show_header=False,
         box=box.HEAVY,
         min_width=36,
     )
 
     for i, feature in enumerate(FEATURES):
-        table.add_row(f"{i:>2}. {feature['name']}")
+        table.add_row(f"{i:>2}. {t(feature['name_key'])}")
     print(table)
 
 
@@ -379,30 +367,28 @@ def get_fid(parser: argparse.ArgumentParser) -> int:
     Continuously prompts until a valid feature ID is entered or the
     user chooses to quit.
     """
-    utils.print_usage_box("Enter feature id to use, h to see help message, q to quit.")
+    utils.print_usage_box(t("main.prompt.enter_fid"))
 
     while True:
         user_input = input(">>> ")
         if user_input.isdigit() and 0 <= int(user_input) < len(FEATURES):
             break
         if user_input == "q":
-            print("Bye.")
+            print(t("main.bye"))
             sys.exit()
         if user_input == "h":
             parser.print_help()
             continue
-        utils.print_error("Invalid input, please try again.")
+        utils.print_error(t("main.error.invalid_input"))
     return int(user_input)
 
 
 def get_launch_options(parser: argparse.ArgumentParser) -> str:
-    utils.print_usage_box(
-        "Enter launch options, Enter to skip, h to see help message, q to quit."
-    )
+    utils.print_usage_box(t("main.prompt.enter_launch_options"))
     while True:
         user_input = input(">>> ")
         if user_input == "q":
-            print("Bye.")
+            print(t("main.bye"))
             sys.exit()
         if user_input == "h":
             parser.print_help()
@@ -445,7 +431,7 @@ def setup_cfg():
         language = get_language()
         click_lock = get_click_lock()
 
-        with open(Path(INNER_ROOT / "rf4s/config/config.yaml"), "r") as file:
+        with open(Path(INNER_ROOT / "rf4s/config/config.yaml"), "r", encoding="utf-8") as file:
             lines = file.readlines()
             for i, line in enumerate(lines):
                 if line.startswith("LANGUAGE:"):
@@ -453,16 +439,13 @@ def setup_cfg():
                 if line.startswith("  CLICK_LOCK"):
                     lines[i] = f"  CLICK_LOCK: {click_lock}\n"
 
-        with open(config_path, "w") as file:  # shutil.copy
+        with open(config_path, "w", encoding="utf-8") as file:  # shutil.copy
             file.writelines(lines)
 
     cfg = config.load_cfg()
+    init_locale(cfg.LANGUAGE)
     if cfg.VERSION < MINIMUM_COMPATIBLE_CONFIG_VERSION:
-        logger.critical(
-            "Incompatible config version, some settings has been removed or deprecated\n"
-            "You can delete it to allow the bot to create a new one\n"
-            "Alternatively, see the CHANGELOG to modify config.yaml"
-        )
+        logger.critical(t("main.incompatible_config"))
         utils.safe_exit()
     return cfg
 
@@ -506,13 +489,16 @@ def main() -> None:
         case "calculate" | "cal":
             App = CalculateApp
         case _:
-            raise NotImplementedError("You should not reach here.")
+            raise NotImplementedError(t("main.not_implemented"))
     App(cfg, parser.parse_args(), parser).start()
 
 
 if __name__ == "__main__":
     try:
         main()
+    except KeyboardInterrupt:
+        print()
+        utils.safe_exit()
     except Exception as e:
         logger.critical(e, exc_info=True)
         utils.safe_exit()  # TODO

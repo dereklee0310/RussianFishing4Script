@@ -19,21 +19,58 @@ from rich.panel import Panel
 
 
 from rf4s.controller.console import console
+from rf4s.i18n import t
 
 LOOP_DELAY = 1
 
 ANIMATION_DELAY = 0.5
 
+_us_layout = None
+
+
+def _get_us_layout():
+    """Get handle to US English keyboard layout for VK code lookups."""
+    global _us_layout
+    if _us_layout is None:
+        _us_layout = ctypes.windll.user32.LoadKeyboardLayoutW("00000409", 0)
+    return _us_layout
+
+
+def key_matches(pressed_key, target_char: str) -> bool:
+    """Check if a pynput key matches a target character, independent of keyboard layout.
+
+    Compares virtual key codes via the US English layout so that keys like
+    ``[`` and ``]`` work even when a non-Latin layout (e.g. Russian) is active.
+    Falls back to string comparison when VK lookup is unavailable or when
+    *target_char* is a multi-character string (e.g. ``"CTRL-C"``).
+    """
+    from pynput import keyboard
+
+    if len(target_char) == 1:
+        vk = getattr(pressed_key, "vk", None)
+        if vk is not None:
+            layout = _get_us_layout()
+            result = ctypes.windll.user32.VkKeyScanExW(ord(target_char), layout)
+            if result not in (-1, 0xFFFF):
+                target_vk = result & 0xFF
+                return vk == target_vk
+
+    return str(pressed_key).lower() == str(
+        keyboard.KeyCode.from_char(target_char)
+    ).lower()
+
 
 # ---------------------------------------------------------------------------- #
 #                            common functionalities                            #
 # ---------------------------------------------------------------------------- #
-def ask_for_confirmation(msg: str = "Ready to start") -> None:
+def ask_for_confirmation(msg: str = None) -> None:
     """Ask for confirmation of user settings if it's enabled.
 
-    :param msg: Confirmation message, defaults to "Ready to start".
+    :param msg: Confirmation message, defaults to t("utils.ready_to_start").
     :type msg: str
     """
+    if msg is None:
+        msg = t("utils.ready_to_start")
     while True:
         ans = input(f"{msg}? [Y/n] ").strip().lower()
         if ans in ("y", ""):
@@ -117,11 +154,11 @@ def print_usage_box(msg: str) -> None:
 
 
 def print_description_box(msg: str) -> None:
-    print(Panel.fit(f"You're now using: {msg}"))
+    print(Panel.fit(t("utils.you_are_using", description=msg)))
 
 
 def print_hint_box(msg: str) -> None:
-    print(Panel.fit(f"Hint: {msg}", style="green"))
+    print(Panel.fit(t("utils.hint", msg=msg), style="green"))
 
 
 def print_error(msg: str) -> None:
@@ -130,7 +167,7 @@ def print_error(msg: str) -> None:
 
 def safe_exit():
     if is_run_by_clicking():
-        print_usage_box("Press any key to quit.")
+        print_usage_box(t("utils.press_any_key"))
         # KeyboardInterrupt will mess with stdin, input will crash silently
         # Use msvcrt.getch() because it doesn't depends on stdin
         msvcrt.getch()

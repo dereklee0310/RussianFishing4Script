@@ -34,6 +34,7 @@ from yacs.config import CfgNode as CN
 
 from rf4s import config, exceptions, utils
 from rf4s.app.core import logger
+from rf4s.i18n import t
 from rf4s.component.friction_brake import FrictionBrake
 from rf4s.config import load_cfg
 from rf4s.controller.detection import Detection
@@ -81,7 +82,7 @@ class App(ABC):
         if not result_dict:
             return
 
-        result = Table(title="Running Result", box=box.HEAVY, show_header=False)
+        result = Table(title=t("app.running_result"), box=box.HEAVY, show_header=False)
         for name, value in self.result.as_dict().items():
             result.add_row(name, str(value))
         print(result)
@@ -135,9 +136,9 @@ class BotApp(App):
 
     def display_info(self):
         settings = Table(
-            title="Settings", show_header=False, box=box.HEAVY, min_width=36
+            title=t("app.settings"), show_header=False, box=box.HEAVY, min_width=36
         )
-        settings.add_row("LAUNCH OPTIONS (FINAL)", " ".join(sys.argv[1:]))
+        settings.add_row(t("app.launch_options_final"), " ".join(sys.argv[1:]))
         for k, v in self.cfg.PROFILE.items():
             if k != "DESCRIPTION":
                 settings.add_row(k, str(v))
@@ -145,7 +146,8 @@ class BotApp(App):
         if self.cfg.PROFILE.DESCRIPTION:
             utils.print_description_box(self.cfg.PROFILE.DESCRIPTION)
         utils.print_usage_box(
-            f"Press {self.cfg.KEY.PAUSE} to pause, {self.cfg.KEY.QUIT} to quit."
+            t("app.press_to_pause_quit",
+              pause_key=self.cfg.KEY.PAUSE, quit_key=self.cfg.KEY.QUIT)
         )
 
     def validate_smtp(self) -> None:
@@ -156,7 +158,7 @@ class BotApp(App):
         """
         if not self.cfg.ARGS.EMAIL or not self.cfg.BOT.SMTP_VERIFICATION:
             return
-        logger.info("Verifying SMTP connection")
+        logger.info(t("app.verifying_smtp"))
 
         try:
             with smtplib.SMTP_SSL(self.cfg.BOT.NOTIFICATION.SMTP_SERVER, 465) as server:
@@ -164,34 +166,22 @@ class BotApp(App):
                     self.cfg.BOT.NOTIFICATION.EMAIL, self.cfg.BOT.NOTIFICATION.PASSWORD
                 )
         except smtplib.SMTPAuthenticationError:
-            logger.critical(
-                "Invalid email address or app password\n"
-                "Check BOT.NOTIFICATION.EMAIL\n"
-                "Check BOT.NOTIFICATION.PASSWORD\n"
-                "For Gmail users, please refer to: "
-                "https://support.google.com/accounts/answer/185833\n"
-            )
+            logger.critical(t("app.error.smtp_auth"))
             utils.safe_exit()
         except (TimeoutError, gaierror):
-            logger.critical(
-                "Invalid BOT.NOTIFICATION.SMTP_SERVER or connection timed out"
-            )
+            logger.critical(t("app.error.smtp_timeout"))
             utils.safe_exit()
 
     def validate_discord(self) -> None:
         if not self.cfg.ARGS.DISCORD or self.cfg.BOT.NOTIFICATION.DISCORD_WEBHOOK_URL:
             return
-        logger.critical(
-            "BOT.NOTIFICATION.DISCORD_WEBHOOK_URL is not set\n"
-            "To make a webhook, please refer to "
-            "https://support.discord.com/hc/en-us/articles/228383668-Intro-to-Webhooks"
-        )
+        logger.critical(t("app.error.discord_webhook"))
         utils.safe_exit()
 
     def validate_miaotixing(self) -> None:
         if not self.cfg.ARGS.MIAOTIXING or self.cfg.BOT.NOTIFICATION.MIAO_CODE:
             return
-        logger.critical("BOT.NOTIFICATION.MIAO_CODE is not set.")
+        logger.critical(t("app.error.miao_code"))
         utils.safe_exit()
 
     def validate_telegram(self):
@@ -207,16 +197,13 @@ class BotApp(App):
 
         valid = True
         if not _is_telegram_bot_valid():
-            logger.critical("Invalid BOT.NOTIFICATION.TELEGRAM_BOT_TOKEN")
+            logger.critical(t("app.error.telegram_token"))
             valid = False
         if self.cfg.BOT.NOTIFICATION.TELEGRAM_CHAT_ID == -1:
-            logger.critical("BOT.NOTIFICATION.TELEGRAM_CHAT_ID is not set")
+            logger.critical(t("app.error.telegram_chat_id"))
             valid = False
         if not valid:
-            logger.critical(
-                "Please refer to: "
-                "https://gist.github.com/nafiesl/4ad622f344cd1dc3bb1ecbe468ff9f8a",
-            )
+            logger.critical(t("app.error.telegram_refer"))
             utils.safe_exit()
 
     def validate_profile(self, profile_name: str) -> None:
@@ -226,12 +213,12 @@ class BotApp(App):
         :type profile_name: str
         """
         if profile_name not in self.cfg.PROFILE:
-            logger.critical("Invalid profile name: '%s'", profile_name)
+            logger.critical(t("app.error.invalid_profile", name=profile_name))
             utils.safe_exit()
 
         mode = self.cfg.PROFILE[profile_name].MODE
         if mode.upper() not in self.cfg.PROFILE:
-            logger.critical("Invalid mode: '%s'", mode)
+            logger.critical(t("app.error.invalid_mode", mode=mode))
             utils.safe_exit()
 
         expected_keys = set(self.cfg.PROFILE[mode.upper()])
@@ -242,9 +229,9 @@ class BotApp(App):
 
         if invalid_keys or missing_keys:
             for key in invalid_keys:
-                logger.warning("Invalid setting: 'PROFILE.%s.%s'", profile_name, key)
+                logger.warning(t("app.warning.invalid_setting", profile=profile_name, key=key))
             for key in missing_keys:
-                logger.warning("Missing setting: 'PROFILE.%s.%s'", profile_name, key)
+                logger.warning(t("app.warning.missing_setting", profile=profile_name, key=key))
 
     def display_profiles(self) -> None:
         """Display a table of available profiles for user selection.
@@ -252,7 +239,7 @@ class BotApp(App):
         Shows a formatted table with profile IDs and names.
         """
         profiles = Table(
-            title="Select a profile to start ⚙️",
+            title=t("app.select_profile"),
             box=box.HEAVY,
             show_header=False,
             min_width=36,
@@ -267,16 +254,16 @@ class BotApp(App):
         Continuously prompts until a valid profile ID is entered or the
         user chooses to quit.
         """
-        utils.print_usage_box("Enter profile id to use, q to quit.")
+        utils.print_usage_box(t("app.prompt.enter_pid"))
 
         while True:
             user_input = input(">>> ")
             if user_input.isdigit() and 0 <= int(user_input) < len(self.cfg.PROFILE):
                 break
             if user_input == "q":
-                print("Bye.")
+                print(t("main.bye"))
                 sys.exit()
-            utils.print_error("Invalid profile id, please try again.")
+            utils.print_error(t("app.error.invalid_pid"))
 
         self.args.pid = int(user_input)
 
@@ -307,10 +294,9 @@ class BotApp(App):
         """Must be called after the profile is correctly configured."""
         if len(self.args.opts) % 2:
             logger.error(
-                "Invalid launch options: '%s'\n"
-                "These arguments are used for config override: '%s'\n",
-                " ".join(sys.argv[1:]),
-                " ".join(self.args.opts),
+                t("app.error.invalid_launch_options",
+                  options=" ".join(sys.argv[1:]),
+                  opts=" ".join(self.args.opts))
             )
             sys.exit()
 
@@ -332,35 +318,29 @@ class BotApp(App):
         and disables incompatible features if needed.
         """
         if self.window.is_title_bar_exist():
-            logger.info("Window mode detected. Don't move the game window")
+            logger.info(t("app.window_mode_detected"))
         if self.window.is_size_supported():
-            logger.info("Supported window size. Don't change the game window size")
+            logger.info(t("app.supported_window_size"))
             return
 
         window_resolution = self.window.get_resolution_str()
         if window_resolution == "0x0":
-            logger.critical("'Fullscreen mode' is not supported")
+            logger.critical(t("app.error.fullscreen_not_supported"))
             utils.safe_exit()
 
         if self.cfg.PROFILE.MODE in ("telescopic", "bolognese"):
             logger.critical(
-                "Fishing mode '%s' doesn't support window size '%s'",
-                self.cfg.PROFILE.MODE,
-                self.window.get_resolution_str(),
+                t("app.error.mode_unsupported_size",
+                  mode=self.cfg.PROFILE.MODE,
+                  size=self.window.get_resolution_str())
             )
             utils.safe_exit()
 
         logger.warning(
-            "Unsupported window size '%s'\n"
-            "Supported window size: '2560x1440', '1920x1080' or '1600x900'\n"
-            "Will search the image on the screen instead of the game window",
-            self.window.get_resolution_str(),
+            t("app.warning.unsupported_window_size",
+              size=self.window.get_resolution_str())
         )
-        logger.error(
-            "Snag detection will be disabled\n"
-            "Spooling detection will be disabled\n"
-            "Auto friction brake will be disabled\n"
-        )
+        logger.error(t("app.error.features_disabled"))
 
         self.cfg.ARGS.FRICTION_BRAKE = False
         self.cfg.BOT.SNAG_DETECTION = False
@@ -375,22 +355,15 @@ class BotApp(App):
             or self.cfg.ARGS.GROUNDBAIT
             or self.cfg.ARGS.PVA
         ):
-            logger.info(
-                "Some features require you to add the item to your favorites, "
-                "make sure you have done so"
-            )
+            logger.info(t("app.info.favorites_reminder"))
 
     def validate_screenshot_notification(self):
         if self.cfg.ARGS.SCREENSHOT and self.cfg.ARGS.MIAOTIXING:
-            logger.warning(
-                "Miaotixing doesn't support image message, no screenshot will be sent"
-            )
+            logger.warning(t("app.warning.miaotixing_no_image"))
 
     def validate_spool_detection(self):
         if self.cfg.ARGS.RAINBOW is None:
-            logger.warning(
-                "Default retrieval detection mode detected, fully spool your reel"
-            )
+            logger.warning(t("app.warning.default_retrieval"))
 
     def _on_release(self, key: keyboard.KeyCode) -> None:
         """Monitor user's keystrokes and convert a key press to a CTRL_C_EVENT.
@@ -402,20 +375,18 @@ class BotApp(App):
         """
         # Trigger CTRL_C_EVENT, which will be caught in start() to simulate pressing
         # CTRL-C to terminate the script.
-        key = str(key).lower()
-        if key == str(keyboard.KeyCode.from_char(self.cfg.KEY.QUIT)):
+        if utils.key_matches(key, self.cfg.KEY.QUIT):
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
             return False
-        if key == str(keyboard.KeyCode.from_char(self.cfg.KEY.PAUSE)):
-            logger.info("Pausing the bot")
+        if utils.key_matches(key, self.cfg.KEY.PAUSE):
+            logger.info(t("app.pausing_bot"))
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
             self.paused = True
-            logger.info("Bot paused")  # Don't remove this! It messes with signal?
+            logger.info(t("app.bot_paused"))  # Don't remove this! It messes with signal?
             return False
 
     def _pause_wait(self, key: keyboard.KeyCode) -> None:
-        key = str(key).lower()
-        if key == str(keyboard.KeyCode.from_char(self.cfg.KEY.PAUSE)):
+        if utils.key_matches(key, self.cfg.KEY.PAUSE):
             self.paused = False
             return False
 
@@ -447,10 +418,10 @@ class BotApp(App):
                     break
 
                 utils.print_usage_box(
-                    f"Press {self.cfg.KEY.PAUSE} to reload config and restart."
+                    t("app.press_to_reload", pause_key=self.cfg.KEY.PAUSE)
                 )
                 utils.print_hint_box(
-                    "Any modifications made to LAUNCH_OPTIONS will be ignored."
+                    t("app.hint.launch_options_ignored")
                 )
                 with self.player.hold_keys(mouse=False, shift=False, reset=True):
                     pause_listener = keyboard.Listener(on_release=self._pause_wait)
@@ -459,7 +430,7 @@ class BotApp(App):
                 while pause_listener.is_alive():
                     sleep(add_jitter(THREAD_CHECK_DELAY))
 
-                logger.info("Restarting bot without resetting records")
+                logger.info(t("app.restarting_bot"))
                 self.reload_cfg()
                 self.player = Player(
                     self.cfg,
@@ -469,7 +440,7 @@ class BotApp(App):
                 )
                 self.paused = False
 
-        self.player.handle_termination("Terminated by user", shutdown=False, send=False)
+        self.player.handle_termination(t("player.terminated_by_user"), shutdown=False, send=False)
 
 
 class CraftApp(App):
@@ -488,9 +459,9 @@ class CraftApp(App):
         self.cfg.freeze()
 
         settings = Table(
-            title="Settings", show_header=False, box=box.HEAVY, min_width=36
+            title=t("app.settings"), show_header=False, box=box.HEAVY, min_width=36
         )
-        settings.add_row("LAUNCH OPTIONS (FINAL)", " ".join(sys.argv[1:]))
+        settings.add_row(t("app.launch_options_final"), " ".join(sys.argv[1:]))
         print(settings)
 
         self.result = CraftResult()
@@ -507,19 +478,19 @@ class CraftApp(App):
         :param accept_key: Key to press after accepting the crafted item.
         :type accept_key: str
         """
-        logger.info("Crafting item")
+        logger.info(t("app.craft.crafting_item"))
         pag.click()
         sleep(add_jitter(CRAFT_DELAY))
         self.result.material += 1
         while True:
             if self.detection.is_operation_success():
-                logger.info("Crafting successed")
+                logger.info(t("app.craft.success"))
                 self.result.success += 1
                 pag.press(accept_key)
                 break
 
             if self.detection.is_operation_failed():
-                logger.warning("Crafting failed")
+                logger.warning(t("app.craft.failed"))
                 self.result.fail += 1
                 pag.press("space")
                 break
@@ -536,7 +507,7 @@ class CraftApp(App):
         :param key: Key released by the user.
         :type key: keyboard.KeyCode
         """
-        if str(key).lower() == str(keyboard.KeyCode.from_char(self.cfg.KEY.QUIT)):
+        if utils.key_matches(key, self.cfg.KEY.QUIT):
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
             return False
 
@@ -550,18 +521,15 @@ class CraftApp(App):
         listener.start()
 
         try:
-            utils.print_usage_box(f"Press {self.cfg.KEY.QUIT} to quit.")
-            logger.warning("This might get you banned, use at your own risk")
-            logger.warning("Use Razor or Logitech macros instead")
+            utils.print_usage_box(t("app.press_to_quit", quit_key=self.cfg.KEY.QUIT))
+            logger.warning(t("app.craft.warning_ban"))
+            logger.warning(t("app.craft.warning_macros"))
             random.seed(datetime.now().timestamp())
             accept_key = "backspace" if self.cfg.ARGS.DISCARD else "space"
             self.window.activate_game_window()
             make_button_position = self.detection.get_make_button_position()
             if make_button_position is None:
-                logger.critical(
-                    "Make button not found, please set the interface scale to "
-                    "1x or move your mouse around"
-                )
+                logger.critical(t("app.craft.make_not_found"))
                 self.window.activate_script_window()
                 sys.exit()
             pag.moveTo(make_button_position)
@@ -570,10 +538,10 @@ class CraftApp(App):
                     not self.cfg.ARGS.IGNORE
                     and not self.detection.is_material_complete()
                 ):
-                    logger.critical("Running out of materials")
+                    logger.critical(t("app.craft.out_of_materials"))
                     break
                 if self.result.material == self.cfg.ARGS.CRAFT_LIMIT:
-                    logger.info("Crafting limit reached")
+                    logger.info(t("app.craft.limit_reached"))
                     break
                 self.craft_item(accept_key)
                 pag.moveTo(make_button_position)
@@ -605,8 +573,8 @@ class MoveApp(App):
         self.cfg.freeze()
 
         utils.print_usage_box(
-            f"Press {self.cfg.KEY.MOVE_PAUSE} to pause, "
-            f"{self.cfg.KEY.MOVE_QUIT} to quit.",
+            t("app.move.press_to_pause_quit",
+              pause_key=self.cfg.KEY.MOVE_PAUSE, quit_key=self.cfg.KEY.MOVE_QUIT)
         )
 
         self.result = Result()
@@ -619,10 +587,9 @@ class MoveApp(App):
         :param key: Key released by the user.
         :type key: keyboard.KeyCode
         """
-        key = str(key).lower()
-        if key == str(keyboard.KeyCode.from_char(self.cfg.KEY.MOVE_QUIT)):
+        if utils.key_matches(key, self.cfg.KEY.MOVE_QUIT):
             return False
-        if key == str(keyboard.KeyCode.from_char(self.cfg.KEY.MOVE_PAUSE)):
+        if utils.key_matches(key, self.cfg.KEY.MOVE_PAUSE):
             if self.w_key_pressed:
                 self.w_key_pressed = False
                 return True
@@ -665,16 +632,16 @@ class HarvestApp(App):
         self.cfg.freeze()
 
         settings = Table(
-            title="Settings", show_header=False, box=box.HEAVY, min_width=36
+            title=t("app.settings"), show_header=False, box=box.HEAVY, min_width=36
         )
-        settings.add_row("LAUNCH OPTIONS (FINAL)", " ".join(sys.argv[1:]))
-        settings.add_row("Power saving", str(self.cfg.HARVEST.POWER_SAVING))
-        settings.add_row("Check delay", str(self.cfg.HARVEST.CHECK_DELAY))
-        settings.add_row("Energy threshold", str(self.cfg.STAT.ENERGY_THRESHOLD))
-        settings.add_row("Hunger threshold", str(self.cfg.STAT.HUNGER_THRESHOLD))
-        settings.add_row("Comfort threshold", str(self.cfg.STAT.COMFORT_THRESHOLD))
+        settings.add_row(t("app.launch_options_final"), " ".join(sys.argv[1:]))
+        settings.add_row(t("app.harvest.power_saving"), str(self.cfg.HARVEST.POWER_SAVING))
+        settings.add_row(t("app.harvest.check_delay"), str(self.cfg.HARVEST.CHECK_DELAY))
+        settings.add_row(t("app.harvest.energy_threshold"), str(self.cfg.STAT.ENERGY_THRESHOLD))
+        settings.add_row(t("app.harvest.hunger_threshold"), str(self.cfg.STAT.HUNGER_THRESHOLD))
+        settings.add_row(t("app.harvest.comfort_threshold"), str(self.cfg.STAT.COMFORT_THRESHOLD))
         print(settings)
-        utils.print_usage_box(f"Press {self.cfg.KEY.QUIT} to quit.")
+        utils.print_usage_box(t("app.press_to_quit", quit_key=self.cfg.KEY.QUIT))
 
         self.result = HarvestResult()
         self.timer = Timer(self.cfg)
@@ -687,12 +654,12 @@ class HarvestApp(App):
         The digging tool should be pulled out before calling this method. Waits for
         harvest success and presses the spacebar to complete the process.
         """
-        logger.info("Harvesting baits")
+        logger.info(t("app.harvest.harvesting"))
         pag.click()
         while not self.detection.is_harvest_success():
             sleep(add_jitter(LOOP_DELAY))
         pag.press("space")
-        logger.info("Baits harvested succussfully")
+        logger.info(t("app.harvest.success"))
         sleep(add_jitter(ANIMATION_DELAY))
 
     def refill_player_stats(self) -> None:
@@ -700,7 +667,7 @@ class HarvestApp(App):
         if not self.cfg.ARGS.REFILL:
             return
 
-        logger.info("Refilling player stats")
+        logger.info(t("app.harvest.refilling"))
         # Comfort is affected by weather, add a check to avoid over drink
         if self.detection.is_comfort_low() and self.timer.is_tea_drinkable():
             self._use_item("tea")
@@ -718,7 +685,7 @@ class HarvestApp(App):
         """
         # Trigger CTRL_C_EVENT, which will be caught in start() to simulate pressing
         # CTRL-C to terminate the script.
-        if str(key).lower() == str(keyboard.KeyCode.from_char(self.cfg.KEY.QUIT)):
+        if utils.key_matches(key, self.cfg.KEY.QUIT):
             os.kill(os.getpid(), signal.CTRL_C_EVENT)
             return False
 
@@ -728,7 +695,7 @@ class HarvestApp(App):
         :param item: The name of the item to access.
         :type item: str
         """
-        logger.info("Using item: %s", item)
+        logger.info(t("app.harvest.using_item", item=item))
         key = str(self.cfg.KEY[item.upper()])
         if key != "-1":  # Use shortcut
             pag.press(key)
@@ -755,7 +722,7 @@ class HarvestApp(App):
                     self.harvest_baits()
                     self.result.bait += 1
                 else:
-                    logger.info("Energy is not high enough")
+                    logger.info(t("app.harvest.energy_low"))
 
                 if self.cfg.HARVEST.POWER_SAVING:
                     pag.press("esc")
@@ -801,15 +768,15 @@ class CalculateApp:
         _ = cfg, args, parser
         self.result = None
         self.parts = [
-            Part(name="Rod", prompt="Load capacity (kg)", color="orange1", base=0.3),
-            Part(name="Reel mechanism", prompt="Mech (kg)", color="plum1", base=0.3),
-            Part(name="Reel friction brake", prompt="Drag (kg)", color="gold1"),
-            Part(name="Fishing line", prompt="Load capacity (kg)", color="salmon1"),
-            Part(name="Leader", prompt="Load capacity (kg)", color="pale_green1"),
-            Part(name="Hook", prompt="Load capacity (kg)", color="sky_blue1"),
+            Part(name=t("app.calculate.rod"), prompt=t("app.calculate.load_capacity"), color="orange1", base=0.3),
+            Part(name=t("app.calculate.reel_mechanism"), prompt=t("app.calculate.mech"), color="plum1", base=0.3),
+            Part(name=t("app.calculate.reel_friction_brake"), prompt=t("app.calculate.drag"), color="gold1"),
+            Part(name=t("app.calculate.fishing_line"), prompt=t("app.calculate.load_capacity"), color="salmon1"),
+            Part(name=t("app.calculate.leader"), prompt=t("app.calculate.load_capacity"), color="pale_green1"),
+            Part(name=t("app.calculate.hook"), prompt=t("app.calculate.load_capacity"), color="sky_blue1"),
         ]
         self.friction_brake = next(
-            part for part in self.parts if part.name == "Reel friction brake"
+            part for part in self.parts if part.name == t("app.calculate.reel_friction_brake")
         )
 
     def calculate_tackle_stats(self):
@@ -820,9 +787,9 @@ class CalculateApp:
                     if part.pre_real_load_capacity is not None:
                         raise exceptions.PreviousError
                     else:
-                        utils.print_error(f"{part.name}'s value not found.")
+                        utils.print_error(t("app.calculate.error.value_not_found", name=part.name))
                 part.load_capacity = self.get_validated_input(part, part.prompt)
-                part.wear = self.get_validated_input(part, "Wear (%)")
+                part.wear = self.get_validated_input(part, t("app.calculate.wear"))
             except exceptions.SkipError:
                 if part.real_load_capacity is not None:
                     part.real_load_capacity = None
@@ -846,12 +813,12 @@ class CalculateApp:
                     raise exceptions.RestartError
                 case CalculateCommand.PREVIOUS.value:
                     if part.pre_real_load_capacity is None:
-                        utils.print_error(f"{part.name}'s value not found.")
+                        utils.print_error(t("app.calculate.error.value_not_found", name=part.name))
                         continue
                     raise exceptions.PreviousError
                 case CalculateCommand.PREVIOUS_REMAINING.value:
                     if part.pre_real_load_capacity is None:
-                        utils.print_error(f"{part.name}'s value not found.")
+                        utils.print_error(t("app.calculate.error.value_not_found", name=part.name))
                         continue
                     raise exceptions.PreviousRemainingError
                 case CalculateCommand.SKIP.value:
@@ -863,24 +830,24 @@ class CalculateApp:
 
             try:
                 number = float(user_input)
-                if prompt.startswith("Wear"):
+                if prompt == t("app.calculate.wear"):
                     if not (0 <= number <= 100):
-                        utils.print_error("Wear must be between 0 and 100.")
+                        utils.print_error(t("app.calculate.error.wear_range"))
                         continue
                 elif number < 0:
-                    utils.print_error("Value must be non-negative.")
+                    utils.print_error(t("app.calculate.error.non_negative"))
                     continue
                 return number
             except ValueError:
-                utils.print_error("Invalid input. Please try again.")
+                utils.print_error(t("app.calculate.error.invalid_input"))
 
     def reset_stats(self) -> None:
         for part in self.parts:
             part.pre_real_load_capacity = part.real_load_capacity
             part.real_load_capacity = None
         self.result = Table(
-            "Results",
-            title="Tackle's Stats",
+            t("app.calculate.results"),
+            title=t("app.calculate.tackle_stats"),
             show_header=False,
             box=box.HEAVY,
             min_width=36,
@@ -891,7 +858,7 @@ class CalculateApp:
         if not valid_parts:
             return
         weakest_part = min(valid_parts, key=lambda x: x.real_load_capacity)
-        self.result.add_row("Weakest part", weakest_part.name)
+        self.result.add_row(t("app.calculate.weakest_part"), weakest_part.name)
 
         if self.friction_brake.real_load_capacity is None:
             return
@@ -906,7 +873,7 @@ class CalculateApp:
                 ),
             )
             self.result.add_row(
-                "Recommend friction brake",
+                t("app.calculate.recommend_fb"),
                 f"{int(recommend_friction_brake):2d}",
             )
         except ZeroDivisionError:
@@ -917,16 +884,8 @@ class CalculateApp:
 
         Prompts the user for input, calculates the result, and displays them in a table.
         """
-        utils.print_usage_box(
-            "Commands:\n"
-            "r: Restart\n"
-            "s: Skip a part\n"
-            "S: Skip the remaining parts\n"
-            "p: Use previous value for a part\n"
-            "P: Use previous value for the remaing parts\n"
-            "q: Quit"
-        )
-        utils.print_hint_box("Press V and click the gear icon to view the parts.")
+        utils.print_usage_box(t("app.calculate.commands"))
+        utils.print_hint_box(t("app.calculate.hint"))
 
         while True:
             self.reset_stats()
@@ -937,7 +896,7 @@ class CalculateApp:
             except exceptions.RestartError:
                 continue
             except exceptions.QuitError:
-                print("Bye.")
+                print(t("main.bye"))
                 break
             if self.result.rows:
                 self.update_result()
@@ -970,19 +929,20 @@ class FrictionBrakeApp(App):
         self.cfg.freeze()
 
         settings = Table(
-            title="Settings", show_header=False, box=box.HEAVY, min_width=36
+            title=t("app.settings"), show_header=False, box=box.HEAVY, min_width=36
         )
-        settings.add_row("LAUNCH OPTIONS (FINAL)", " ".join(sys.argv[1:]))
-        settings.add_row("Initial friction brake", str(self.cfg.FRICTION_BRAKE.INITIAL))
-        settings.add_row("Max friction brake", str(self.cfg.FRICTION_BRAKE.MAX))
-        settings.add_row("Start delay", str(self.cfg.FRICTION_BRAKE.START_DELAY))
-        settings.add_row("Increase delay", str(self.cfg.FRICTION_BRAKE.INCREASE_DELAY))
-        settings.add_row("Sensitivity", self.cfg.FRICTION_BRAKE.SENSITIVITY)
+        settings.add_row(t("app.launch_options_final"), " ".join(sys.argv[1:]))
+        settings.add_row(t("app.fb.initial"), str(self.cfg.FRICTION_BRAKE.INITIAL))
+        settings.add_row(t("app.fb.max"), str(self.cfg.FRICTION_BRAKE.MAX))
+        settings.add_row(t("app.fb.start_delay"), str(self.cfg.FRICTION_BRAKE.START_DELAY))
+        settings.add_row(t("app.fb.increase_delay"), str(self.cfg.FRICTION_BRAKE.INCREASE_DELAY))
+        settings.add_row(t("app.fb.sensitivity"), self.cfg.FRICTION_BRAKE.SENSITIVITY)
         print(settings)
 
         utils.print_usage_box(
-            f"Press {self.cfg.KEY.FRICTION_BRAKE_RESET} to reset friction brake, "
-            f"{self.cfg.KEY.FRICTION_BRAKE_QUIT} to quit."
+            t("app.fb.press_to_reset_quit",
+              reset_key=self.cfg.KEY.FRICTION_BRAKE_RESET,
+              quit_key=self.cfg.KEY.FRICTION_BRAKE_QUIT)
         )
 
         self.window = Window()
@@ -999,14 +959,13 @@ class FrictionBrakeApp(App):
         :rtype: bool
         """
         if self.window.is_title_bar_exist():
-            logger.info("Window mode detected. don't move the game window")
+            logger.info(t("app.fb.window_mode_detected"))
         if self.window.is_size_supported():
-            logger.info("Supported window size. Don't change the game window size")
+            logger.info(t("app.fb.supported_window_size"))
             return True
-        logger.critical('Window mode must be "Borderless windowed" or "Window mode"')
+        logger.critical(t("app.fb.error.window_mode"))
         logger.critical(
-            "Unsupported window size '%s', use '2560x1440', '1920x1080' or '1600x900'",
-            self.window.get_resolution_str(),
+            t("app.fb.error.unsupported_size", size=self.window.get_resolution_str())
         )
         return False
 
@@ -1016,11 +975,10 @@ class FrictionBrakeApp(App):
         :param key: The key that was released.
         :type key: keyboard.KeyCode
         """
-        key = str(key).lower()
-        if key == str(keyboard.KeyCode.from_char(self.cfg.KEY.FRICTION_BRAKE_QUIT)):
+        if utils.key_matches(key, self.cfg.KEY.FRICTION_BRAKE_QUIT):
             self.friction_brake.monitor_process.terminate()
             return False
-        if key == str(keyboard.KeyCode.from_char(self.cfg.KEY.FRICTION_BRAKE_RESET)):
+        if utils.key_matches(key, self.cfg.KEY.FRICTION_BRAKE_RESET):
             self.friction_brake.reset(self.cfg.FRICTION_BRAKE.INITIAL)
 
     def start(self):

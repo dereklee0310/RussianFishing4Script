@@ -14,6 +14,7 @@ import pyautogui as pag
 from rf4s.controller import logger
 from rf4s.controller.detection import Detection
 from rf4s.controller.timer import add_jitter
+from rf4s.i18n import t
 
 MAX_FRICTION_BRAKE = 30
 MIN_FRICTION_BRAKE = 0
@@ -64,7 +65,7 @@ class FrictionBrake:
         :param target: Target friction brake value.
         :type target: int
         """
-        logger.info("Resetting friction brake")
+        logger.info(t("friction_brake.resetting"))
         with self.lock:
             sleep(
                 add_jitter(FRICTION_BRAKE_CHANGE_DELAY)
@@ -102,7 +103,11 @@ def monitor_friction_brake(friction_brake: FrictionBrake) -> None:
     :param friction_brake: Friction brake controller.
     :type friction_brake: FrictionBrake
     """
-    logger.info("Monitoring friction brake")
+    # Re-init locale in child process (Windows spawns a fresh interpreter)
+    from rf4s.i18n import init_locale
+    init_locale(friction_brake.cfg.LANGUAGE)
+
+    logger.info(t("friction_brake.monitoring"))
     pre_time = time()
     fish_hooked = False
     try:

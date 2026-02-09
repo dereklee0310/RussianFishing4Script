@@ -16,6 +16,7 @@ from rich.table import Table
 from yacs.config import CfgNode as CN
 
 from rf4s.controller import logger
+from rf4s.i18n import t
 
 ICON_URL = "https://i.ibb.co/RpLYcdkm/icon.png"
 
@@ -95,14 +96,14 @@ class DiscordNotification:
     def _send_webhook(self, webhook: DiscordWebhook) -> None:
         response = webhook.execute()
         if response.status_code == 200:
-            logger.info("Message sent successfully")
+            logger.info(t("notification.sent_success"))
         else:
-            logger.error(f"Failed to send the message: {response.text}")
+            logger.error(t("notification.send_failed", error=response.text))
 
     def send_result(self, result: dict):
-        logger.info("Sending running result to Discord")
+        logger.info(t("notification.discord.sending_result"))
         webhook = self._get_webhook()
-        embed = self._get_embed("Running Result")
+        embed = self._get_embed(t("notification.discord.running_result"))
 
         # Wrap it with a code block
         embed.description = f"```\n{self._get_raw_result_table(result)}\n```"
@@ -110,9 +111,9 @@ class DiscordNotification:
         self._send_webhook(webhook)
 
     def send_screenshot(self, filepath: Path):
-        logger.info("Sending catch notification to Discord")
+        logger.info(t("notification.discord.sending_screenshot"))
         webhook = self._get_webhook()
-        embed = self._get_embed("Catch Notification")
+        embed = self._get_embed(t("notification.discord.catch"))
         with open(filepath, "rb") as f:
             webhook.add_file(file=f.read(), filename=filepath.name)
         embed.set_image(url=f"attachment://{filepath.name}")
@@ -144,14 +145,14 @@ class EmailNotification:
                     [self.cfg.BOT.NOTIFICATION.EMAIL],
                     msg.as_string(),
                 )
-            logger.info("Message sent successfully")
+            logger.info(t("notification.sent_success"))
         except Exception as e:
-            logger.error(f"Failed to send the message: {e}")
+            logger.error(t("notification.send_failed", error=str(e)))
 
     def send_result(self, result: dict) -> None:
         """Send a notification email to the user's email address."""
-        logger.info("Sending running result to email")
-        msg = self._get_msg("RF4S: Running Result")
+        logger.info(t("notification.email.sending_result"))
+        msg = self._get_msg(t("notification.email.subject_result"))
         text = ""
         for k, v in result.items():
             text += f"{k}: {v}\n"
@@ -160,8 +161,8 @@ class EmailNotification:
 
     def send_screenshot(self, filepath: Path) -> None:
         """Send a notification email to the user's email address."""
-        logger.info("Sending email notification")
-        msg = self._get_msg("RF4S: Catch Notification")
+        logger.info(t("notification.email.sending_screenshot"))
+        msg = self._get_msg(t("notification.email.subject_catch"))
 
         with open(filepath, "rb") as f:
             img = MIMEImage(f.read(), name=filepath.name)
@@ -180,7 +181,7 @@ class MiaotixingNotification:
         :param result: running result
         :type result: dict
         """
-        logger.info("Sending running result to Miaotixing")
+        logger.info(t("notification.miaotixing.sending_result"))
 
         text = ""
         for k, v in result.items():
@@ -194,16 +195,16 @@ class MiaotixingNotification:
             result = page.read()
             json_object = json.loads(result)
             if json_object["code"] == 0:
-                logger.info("Miaotixing notification sent successfully")
+                logger.info(t("notification.miaotixing.sent_success"))
             else:
                 logger.error(
-                    "Miaotixing notification with error code: %s\nDescription: %s",
-                    str(json_object["code"]),
-                    json_object["msg"],
+                    t("notification.miaotixing.error",
+                      code=str(json_object["code"]),
+                      msg=json_object["msg"])
                 )
 
     def send_screenshot(self, _: Path) -> None:
-        logger.error("Miaotixing doesn't support image message")
+        logger.error(t("notification.miaotixing.no_image"))
 
 
 class TelegramNotification:
@@ -212,14 +213,14 @@ class TelegramNotification:
 
     def _check_response_status(self, response: requests.Response) -> None:
         if response.status_code == 200:
-            logger.info("Message sent successfully")
+            logger.info(t("notification.sent_success"))
         else:
-            logger.error(f"Failed to send the message: {response.text}")
+            logger.error(t("notification.send_failed", error=response.text))
 
     def send_result(self, result: dict) -> None:
-        logger.info("Sending running result to Telegram")
+        logger.info(t("notification.telegram.sending_result"))
         # Send a simple message, no need for fancy python-telegram-bot
-        text = "*Running Result*\n```\n"
+        text = f"*{t('notification.telegram.running_result')}*\n```\n"
         for k, v in result.items():
             text += f"{k}: {v}\n"
         text += "```"
@@ -236,7 +237,7 @@ class TelegramNotification:
         self._check_response_status(response)
 
     def send_screenshot(self, filepath: Path) -> None:
-        logger.info("Sending catch notification to Telegram")
+        logger.info(t("notification.telegram.sending_screenshot"))
         with open(filepath, "rb") as img:
             files = {"photo": img}
             payload = {

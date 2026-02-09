@@ -8,6 +8,7 @@ configuration nodes using the YACS library.
 import sys
 from pathlib import Path
 
+import yaml
 from yacs.config import CfgNode as CN
 
 from rf4s import config, utils
@@ -112,5 +113,9 @@ def to_list(profile: dict) -> list:
 
 def load_cfg() -> CN:
     cfg = setup_cfg()
-    cfg.merge_from_file(OUTER_ROOT / "config.yaml")
+    with open(OUTER_ROOT / "config.yaml", "r", encoding="utf-8") as f:
+        raw_cfg = yaml.safe_load(f)
+    if raw_cfg is not None:
+        loaded_cfg = CN(raw_cfg, new_allowed=True)
+        cfg.merge_from_other_cfg(loaded_cfg)
     return cfg

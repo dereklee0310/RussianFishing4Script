@@ -30,6 +30,7 @@ from rf4s.controller import logger
 from rf4s.controller.detection import Detection, TagColor
 from rf4s.controller.notification import send_result, send_screenshot
 from rf4s.controller.timer import Timer, add_jitter
+from rf4s.i18n import t
 from rf4s.result.result import BotResult
 
 FISH_CHECK_DURATION = 0.5
@@ -112,15 +113,15 @@ class Player:
             self.friction_brake = FrictionBrake(
                 self.cfg, self.friction_brake_lock, self.detection
             )
-            logger.info("Spawing new process, do not quit the script")
+            logger.info(t("player.spawning_process"))
             self.friction_brake.monitor_process.start()
 
         if self.detection.get_quit_position():
-            logger.warning("Control panel detected, back to the game automatically")
+            logger.warning(t("player.control_panel_detected"))
             pag.press("esc")
             sleep(ANIMATION_DELAY)
 
-        logger.info("Starting fishing mode: '%s'", self.cfg.PROFILE.MODE)
+        logger.info(t("player.starting_mode", mode=self.cfg.PROFILE.MODE))
         getattr(self, f"start_{self.cfg.PROFILE.MODE}_mode")()
 
     def hold_down_left_mouse_button(self):
@@ -201,13 +202,13 @@ class Player:
             if self.cfg.ARGS.FRICTION_BRAKE:
                 with self.friction_brake.lock:
                     self.friction_brake.change(increase=False)
-            self.general_quit("Fishing line is at its end")
+            self.general_quit(t("player.line_at_end"))
         except exceptions.LineSnaggedError:
             self._handle_snagged_line()
         except exceptions.DisconnectedError:
             self.disconnected_quit()
         except exceptions.TackleBrokenError:
-            self.general_quit("Tackle is broken")
+            self.general_quit(t("player.tackle_broken"))
         except exceptions.BaitNotChosenError:
             self.handle_bait_not_chosen()
         except exceptions.DryMixNotFoundError:
@@ -239,13 +240,13 @@ class Player:
 
     def retrieve_with_pause(self) -> None:
         """Retrieve the line, pausing periodically."""
-        logger.info("Retrieving fishing line with pause")
+        logger.info(t("player.retrieving_with_pause"))
         with self.hold_keys(mouse=False, shift=self.cfg.PROFILE.PRE_ACCELERATION):
             self.tackle.special_retrieve(button="left")
 
     def retrieve_with_lift(self) -> None:
         """Retrieve the line, lifting periodically."""
-        logger.info("Retrieving fishing line with lift")
+        logger.info(t("player.retrieving_with_lift"))
         with self.hold_keys(mouse=True, shift=self.cfg.PROFILE.PRE_ACCELERATION):
             self.tackle.special_retrieve(button="right")
 
@@ -259,7 +260,7 @@ class Player:
                 self.cast_spod_rod()
 
             self.refill_stats()
-            logger.info("Checking rod %s", self.tackle_idx + 1)
+            logger.info(t("player.checking_rod", rod=self.tackle_idx + 1))
             pag.press(str(self.cfg.KEY.BOTTOM_RODS[self.tackle_idx]))
             sleep(ANIMATION_DELAY)
 
@@ -361,7 +362,7 @@ class Player:
         """
         if not self.cfg.ARGS.HARVEST or not self.detection.is_energy_high():
             return
-        logger.info("Harvesting baits")
+        logger.info(t("player.harvesting"))
 
         with self.hold_keys(mouse=False, shift=False):
             self._use_item("digging_tool")
@@ -383,7 +384,7 @@ class Player:
         if not self.cfg.ARGS.REFILL:
             return
 
-        logger.info("Refilling player stats")
+        logger.info(t("player.refilling_stats"))
         item1, item2 = ("tea", "carrot") if random.random() < 0.5 else ("tea", "carrot")
 
         with self.hold_keys(mouse=False, shift=False):
@@ -401,7 +402,7 @@ class Player:
         if not self.cfg.ARGS.ALCOHOL or not self.timer.is_alcohol_drinkable():
             return
 
-        logger.info("Drinking alcohol")
+        logger.info(t("player.drinking_alcohol"))
         with self.hold_keys(mouse=False, shift=False):
             for _ in range(self.cfg.STAT.ALCOHOL_PER_DRINK):
                 self._use_item("alcohol")
@@ -418,9 +419,9 @@ class Player:
         mouse = True if self.mouse_pressed and self.cfg.KEY["COFFEE"] != -1 else False
         with self.hold_keys(mouse=mouse, shift=False, reset=True):
             if self.cur_coffee > self.cfg.STAT.COFFEE_LIMIT:
-                self.general_quit("Coffee limit reached")
+                self.general_quit(t("player.coffee_limit"))
 
-            logger.info("Drinking coffee")
+            logger.info(t("player.drinking_coffee"))
             for _ in range(self.cfg.STAT.COFFEE_PER_DRINK):
                 self._use_item("coffee")
             self.cur_coffee += self.cfg.STAT.COFFEE_PER_DRINK
@@ -432,7 +433,7 @@ class Player:
         :param item: The name of the item to access.
         :type item: str
         """
-        logger.info("Using %s", item)
+        logger.info(t("player.using_item", item=item))
         key = str(self.cfg.KEY[item.upper()])
         if key != "-1":  # Use shortcut
             pag.press(key)
@@ -483,7 +484,7 @@ class Player:
         except exceptions.PirkTimeoutError:
             with self.hold_keys(mouse=False, shift=False, reset=True):
                 if self.cfg.PROFILE.DEPTH_ADJUST_DELAY > 0:
-                    logger.info("Adjusting lure depth")
+                    logger.info(t("player.adjusting_depth"))
                     pag.press("enter")  # Open reel
                     sleep(self.cfg.PROFILE.DEPTH_ADJUST_DELAY)
                     self.tackle.hold_mouse_button(
@@ -503,7 +504,7 @@ class Player:
 
     def handle_bait_not_chosen(self) -> None:
         if len(self.tackles) == 1:
-            self.general_quit("Run out of bait")
+            self.general_quit(t("player.run_out_of_bait"))
         self.tackle.available = False
 
     def cast_spod_rod(self) -> None:
@@ -536,7 +537,7 @@ class Player:
                 self.cfg.ARGS.RANDOM_CAST
                 and random.random() <= self.cfg.BOT.RANDOM_CAST_PROBABILITY
             ):
-                logger.info("Casting rod redundantly")
+                logger.info(t("player.casting_redundantly"))
                 pag.click()
                 sleep(BAD_CAST_DELAY)
                 self.reset_tackle()
@@ -657,7 +658,7 @@ class Player:
         if self.cfg.ARGS.TROLLING is None:
             return
         if not self.trolling_started:
-            logger.info("Start trolling")
+            logger.info(t("player.start_trolling"))
             pag.press(TROLLING_KEY)
         if self.cfg.ARGS.TROLLING not in ("left", "right"):  # Forward
             return
@@ -670,7 +671,7 @@ class Player:
         """Update the current tackle (rod) being used."""
         candidates = self._get_available_rods()
         if not candidates:
-            self.general_quit("All rods are unavailable")
+            self.general_quit(t("player.all_rods_unavailable"))
         if self.cfg.PROFILE.RANDOM_ROD_SELECTION:
             self.tackle_idx = random.choice(candidates)
         else:
@@ -705,11 +706,11 @@ class Player:
 
         with self.hold_keys(mouse=False, shift=False):
             if self.timer.is_lure_changeable():
-                logger.info("Changing lure randomly")
+                logger.info(t("player.changing_lure"))
                 try:
                     self.tackle.equip_item("lure")
                 except exceptions.ItemNotFoundError:
-                    logger.error("New lure not found")
+                    logger.error(t("player.error.lure_not_found"))
                     self.have_new_lure = False
 
     def _refill_pva(self) -> None:
@@ -722,7 +723,7 @@ class Player:
                 try:
                     self.tackle.equip_item("pva")
                 except exceptions.ItemNotFoundError:
-                    logger.error("New pva not found")
+                    logger.error(t("player.error.pva_not_found"))
                     self.have_new_pva = False
 
     def _refill_dry_mix(self) -> None:
@@ -734,7 +735,7 @@ class Player:
             try:
                 self.tackle.equip_item("dry_mix")
             except exceptions.ItemNotFoundError:
-                logger.error("New dry mix not found")
+                logger.error(t("player.error.dry_mix_not_found"))
                 if not self.using_spod_rod:
                     self.tackle.available = False
                 self.have_new_dry_mix = False
@@ -746,13 +747,13 @@ class Player:
             return
 
         if self.detection.is_groundbait_chosen():
-            logger.info("Groundbait is not used up yet")
+            logger.info(t("player.groundbait_not_used"))
         else:
             with self.hold_keys(mouse=False, shift=False):
                 try:
                     self.tackle.equip_item("groundbait")
                 except exceptions.ItemNotFoundError:
-                    logger.error("New groundbait not found")
+                    logger.error(t("player.error.groundbait_not_found"))
                     self.have_new_groundbait = False
 
     # TBD: Menu, Plotter, Result, Handler
@@ -769,7 +770,7 @@ class Player:
             monitor = self.tackle._monitor_float_state
         else:
             if self.detection.is_clip_open():
-                logger.warning("Clip is not set, fall back to camera mode")
+                logger.warning(t("player.clip_not_set"))
                 monitor = self.tackle._monitor_float_state
             else:
                 monitor = self.tackle._monitor_clip_state
@@ -779,7 +780,7 @@ class Player:
 
     def _pause_script(self) -> None:
         """Pause the script for a specified duration."""
-        logger.info("Pausing script")
+        logger.info(t("player.pausing_script"))
         with self.hold_keys(mouse=False, shift=False):
             pag.press("esc")
             sleep(add_jitter(self.cfg.BOT.PAUSE_DURATION))
@@ -789,7 +790,7 @@ class Player:
     def _handle_timeout(self) -> None:
         """Handle common timeout events."""
         if self.detection.is_tackle_broken():
-            self.general_quit("Tackle is broken")
+            self.general_quit(t("player.tackle_broken"))
 
         if self.detection.is_disconnected():
             self.disconnected_quit()
@@ -803,7 +804,7 @@ class Player:
             with self.hold_keys(mouse=False, shift=False):
                 self._replace_broken_lures()
         else:
-            self.general_quit("Lure is broken")
+            self.general_quit(t("player.lure_broken"))
 
     def handle_termination(self, msg: str, shutdown: bool, send: bool) -> None:
         """Handle script termination.
@@ -825,7 +826,7 @@ class Player:
             self.timer.save_data(output_dir)
             with open(output_dir / "result.json", "w") as f:
                 json.dump(result, f, indent=4)
-            with open(output_dir / "config.yaml", "w") as f:
+            with open(output_dir / "config.yaml", "w", encoding="utf-8") as f:
                 f.write(config.dump_cfg(self.cfg))
         if self.cfg.ARGS.SHUTDOWN and shutdown:
             os.system("shutdown /s /t 5")
@@ -838,7 +839,7 @@ class Player:
     def _handle_snagged_line(self) -> None:
         """Handle a snagged line event."""
         if len(self.tackles) == 1:
-            self.general_quit("Line is snagged")
+            self.general_quit(t("player.line_snagged"))
         self.tackle.available = False
 
     def handle_fish(self) -> None:
@@ -846,7 +847,7 @@ class Player:
             return
         if not self.cfg.ARGS.NO_ANIMATION:
             sleep(add_jitter(LOOP_DELAY))  # it's a slow animation ;)
-        logger.info("Handling fish")
+        logger.info(t("player.handling_fish"))
         with self.hold_keys(mouse=False, shift=False):
             self.handle_events()
             if not self.cfg.ARGS.NO_ANIMATION:
@@ -858,7 +859,7 @@ class Player:
             self.timer.add_cast_time()
             limit = self.cfg.BOT.KEEPNET.CAPACITY - self.cfg.ARGS.FISHES_IN_KEEPNET
             if self.result.kept == limit:
-                self.general_quit("Keepnet is full")
+                self.general_quit(t("player.keepnet_full"))
 
     def _handle_fish(self) -> None:
         """Keep or release the fish and record the fish count."""
@@ -934,7 +935,7 @@ class Player:
                     send_screenshot(self.cfg, filepath)
                 self.result.card += 1
             else:
-                logger.warning("Unexpected event detected")
+                logger.warning(t("player.unexpected_event"))
             pag.press("enter")
             sleep(add_jitter(LOOP_DELAY))
 
@@ -964,7 +965,7 @@ class Player:
 
     def disconnected_quit(self) -> None:
         """Quit the game through the main menu."""
-        logger.critical("Game disconnected")
+        logger.critical(t("player.game_disconnected"))
         with self.hold_keys(mouse=False, shift=False):
             pag.press("space")
             # Sleep to bypass the black screen (experimental)
@@ -978,7 +979,7 @@ class Player:
                 pag.moveTo(self.detection.get_confirm_button_position())
                 pag.click()
 
-            self.handle_termination("Game disconnected", shutdown=True, send=True)
+            self.handle_termination(t("player.game_disconnected"), shutdown=True, send=True)
 
     def get_result_dict(self, msg: str):
         return self.result.as_dict(msg, self.timer)
@@ -989,7 +990,7 @@ class Player:
         :return: formatted running result table
         :rtype: Table
         """
-        table = Table(title="Running Result", box=box.HEAVY, show_header=False)
+        table = Table(title=t("app.running_result"), box=box.HEAVY, show_header=False)
 
         for k, v in result.items():
             table.add_row(k, str(v))
@@ -1001,14 +1002,14 @@ class Player:
             if self.cfg.ARGS.BOAT_TICKET == 0:
                 pag.press("esc")
                 sleep(TICKET_EXPIRE_DELAY)
-                self.general_quit("Boat ticket expired")
+                self.general_quit(t("player.ticket_expired"))
 
-            logger.info("Renewing boat ticket")
+            logger.info(t("player.renewing_ticket"))
             ticket_loc = self.detection.get_ticket_position(self.cfg.ARGS.BOAT_TICKET)
             if ticket_loc is None:
                 pag.press("esc")  # Close ticket menu
                 sleep(TICKET_EXPIRE_DELAY)
-                self.general_quit("New boat ticket not found")
+                self.general_quit(t("player.ticket_not_found"))
             pag.moveTo(ticket_loc)
             pag.click(clicks=2, interval=0.1)  # pag.doubleClick() not implemented
             self.result.ticket += 1
@@ -1017,17 +1018,17 @@ class Player:
     @utils.press_before_and_after("v")
     def _replace_broken_lures(self) -> None:
         """Replace multiple broken lures."""
-        logger.info("Replacing broken lures")
+        logger.info(t("player.replacing_lures"))
 
         scrollbar_box = self.detection.get_scrollbar_position()
         if scrollbar_box is None:
-            logger.info("Scroll bar not found, changing lures for normal rig")
+            logger.info(t("player.scrollbar_not_found"))
             while self._open_broken_lure_menu():
                 self._replace_item()
             pag.press("v")
             return
 
-        logger.info("Scroll bar found, changing lures for dropshot rig")
+        logger.info(t("player.scrollbar_found"))
         x, y = utils.get_box_center_integers(scrollbar_box)
         pag.moveTo(x, y)
         for _ in range(5):
@@ -1045,10 +1046,10 @@ class Player:
         :return: True if the broken lure is found, False otherwise.
         :rtype: bool
         """
-        logger.info("Looking for broken lures")
+        logger.info(t("player.looking_for_broken"))
         broken_item_position = self.detection.get_100wear_position()
         if broken_item_position is None:
-            logger.warning("Broken lure not found")
+            logger.warning(t("player.broken_not_found"))
             return False
 
         # click item to open selection menu
@@ -1060,7 +1061,7 @@ class Player:
 
     def _replace_item(self) -> None:
         """Replace a broken item with a favorite item."""
-        logger.info("Looking for favorite items")
+        logger.info(t("player.looking_for_favorites"))
         favorite_item_positions = self.detection.get_favorite_item_positions()
         while True:
             favorite_item_position = next(favorite_item_positions, None)
@@ -1068,12 +1069,12 @@ class Player:
                 pag.press("esc")
                 sleep(ANIMATION_DELAY)
                 pag.press("esc")
-                self.general_quit("Favorite item not found")
+                self.general_quit(t("player.favorite_not_found"))
 
             # Check if the lure for replacement is already broken
             x, y = utils.get_box_center_integers(favorite_item_position)
             if pag.pixel(x - 70, y + 190) != (178, 59, 30):  # Magic value ;)
-                logger.info("Lure replaced successfully")
+                logger.info(t("player.lure_replaced"))
                 pag.moveTo(x - 70, y + 190)
                 pag.click(clicks=2, interval=0.1)
                 sleep(WEAR_TEXT_UPDATE_DELAY)
