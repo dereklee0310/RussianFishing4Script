@@ -1,0 +1,19 @@
+{
+    "sent_success": "Сообщение успешно отправлено",
+    "send_failed": "Не удалось отправить сообщение: %{error}",
+    "discord.sending_result": "Отправка результата в Discord",
+    "discord.sending_screenshot": "Отправка уведомления о поимке в Discord",
+    "discord.running_result": "Результат",
+    "discord.catch": "Уведомление о поимке",
+    "email.sending_result": "Отправка результата на email",
+    "email.sending_screenshot": "Отправка уведомления по email",
+    "email.subject_result": "RF4S: Результат",
+    "email.subject_catch": "RF4S: Уведомление о поимке",
+    "miaotixing.sending_result": "Отправка результата в Miaotixing",
+    "miaotixing.sent_success": "Уведомление Miaotixing успешно отправлено",
+    "miaotixing.error": "Ошибка уведомления Miaotixing, код: %{code}\nОписание: %{msg}",
+    "miaotixing.no_image": "Miaotixing не поддерживает изображения",
+    "telegram.sending_result": "Отправка результата в Telegram",
+    "telegram.sending_screenshot": "Отправка уведомления о поимке в Telegram",
+    "telegram.running_result": "Результат"
+}

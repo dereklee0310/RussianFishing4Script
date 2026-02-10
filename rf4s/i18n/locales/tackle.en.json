@@ -1,0 +1,21 @@
+{
+    "resetting": "Resetting tackle",
+    "casting": "Casting rod",
+    "sinking": "Sinking lure",
+    "bottom_reached": "Lure has reached bottom layer",
+    "retrieving": "Retrieving fishing line",
+    "pulling": "Pulling fish",
+    "pirking": "Performing pirking",
+    "elevating": "Performing elevating",
+    "lifting": "Lifting rod",
+    "changing_gear": "Changing gear ratio / electro assist mode",
+    "moving_mouse": "Moving mouse randomly",
+    "equip_from_menu": "Equiping new %{item} from menu",
+    "equip_from_inventory": "Equiping new %{item} from inventory",
+    "looking_for_favorites": "Looking for favorite items",
+    "item_equipped": "New %{item} equiped successfully",
+    "monitoring_float": "Monitoring float state",
+    "float_changed": "Float status changed",
+    "monitoring_clip": "Monitoring clip state",
+    "clip_changed": "Clip status changed"
+}

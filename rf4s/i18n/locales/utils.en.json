@@ -1,0 +1,6 @@
+{
+    "ready_to_start": "Ready to start",
+    "press_any_key": "Press any key to quit.",
+    "you_are_using": "You're now using: %{description}",
+    "hint": "Hint: %{msg}"
+}

@@ -229,9 +229,9 @@ class BotApp(App):
 
         if invalid_keys or missing_keys:
             for key in invalid_keys:
-                logger.warning(t("app.warning.invalid_setting", profile=profile_name, key=key))
+                logger.warning(t("app.warning.invalid_setting", profile=profile_name, setting=key))
             for key in missing_keys:
-                logger.warning(t("app.warning.missing_setting", profile=profile_name, key=key))
+                logger.warning(t("app.warning.missing_setting", profile=profile_name, setting=key))
 
     def display_profiles(self) -> None:
         """Display a table of available profiles for user selection.

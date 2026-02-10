@@ -1,0 +1,19 @@
+{
+    "sent_success": "Message sent successfully",
+    "send_failed": "Failed to send the message: %{error}",
+    "discord.sending_result": "Sending running result to Discord",
+    "discord.sending_screenshot": "Sending catch notification to Discord",
+    "discord.running_result": "Running Result",
+    "discord.catch": "Catch Notification",
+    "email.sending_result": "Sending running result to email",
+    "email.sending_screenshot": "Sending email notification",
+    "email.subject_result": "RF4S: Running Result",
+    "email.subject_catch": "RF4S: Catch Notification",
+    "miaotixing.sending_result": "Sending running result to Miaotixing",
+    "miaotixing.sent_success": "Miaotixing notification sent successfully",
+    "miaotixing.error": "Miaotixing notification with error code: %{code}\nDescription: %{msg}",
+    "miaotixing.no_image": "Miaotixing doesn't support image message",
+    "telegram.sending_result": "Sending running result to Telegram",
+    "telegram.sending_screenshot": "Sending catch notification to Telegram",
+    "telegram.running_result": "Running Result"
+}
