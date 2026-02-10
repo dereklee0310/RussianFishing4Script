@@ -17,8 +17,8 @@ from PIL import Image, ImageFilter
 from pyscreeze import Box
 
 from rf4s import utils
-from rf4s.controller.timer import add_jitter
 from rf4s.controller.window import Window
+from rf4s.utils import add_jitter
 
 CRITICAL_COLOR = (206, 56, 21)
 WARNING_COLOR = (227, 149, 23)

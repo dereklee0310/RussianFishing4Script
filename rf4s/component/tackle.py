@@ -20,8 +20,9 @@ from pyscreeze import Box
 
 from rf4s import exceptions, utils
 from rf4s.controller import logger
-from rf4s.controller.detection import Detection
 from rf4s.controller.timer import Timer
+from rf4s.controller.detection import Detection
+from rf4s.utils import add_jitter
 
 CAST_SCALE = 0.4  # 25% / 0.4s
 ANIMATION_DELAY = 0.6
@@ -86,7 +87,6 @@ class Tackle:
         if self.stage != StageId.RESET:
             self.stage = StageId.RESET
             self.timer.set_timeout_start_time()
-            from rf4s.controller.timer import add_jitter
         while True:
             if self.detection.is_tackle_ready():
                 return
@@ -111,8 +111,6 @@ class Tackle:
             sleep(add_jitter(LOOP_DELAY))
 
     def cast(self, lock: bool) -> None:
-        from rf4s.controller.timer import add_jitter
-
         """Cast the rod, then wait for the lure/bait to fly and sink.
 
         :param lock: Whether to lock the reel after casting.
@@ -133,14 +131,11 @@ class Tackle:
                 duration = CAST_SCALE * (self.cfg.PROFILE.CAST_POWER_LEVEL - 1)
                 self.hold_mouse_button(duration)
 
-        print(add_jitter(self.cfg.PROFILE.CAST_DELAY, self.cfg.BOT.JITTER_SCALE))
         sleep(add_jitter(self.cfg.PROFILE.CAST_DELAY, self.cfg.BOT.JITTER_SCALE))
         if lock:
             pag.click()
 
     def sink(self) -> None:
-        from rf4s.controller.timer import add_jitter
-
         """Sink the lure until an event happens, designed for marine and wacky rig."""
         logger.info("Sinking lure")
         self.timer.set_timeout_start_time()
@@ -160,8 +155,6 @@ class Tackle:
         self.hold_mouse_button(self.cfg.PROFILE.TIGHTEN_DURATION)
 
     def retrieve(self) -> None:
-        from rf4s.controller.timer import add_jitter
-
         """Retrieve the line until the end is reached and detect unexpected events.
 
         :raises exceptions.FishCapturedError: A fish is captured.
@@ -189,8 +182,6 @@ class Tackle:
             sleep(add_jitter(LOOP_DELAY))
 
     def pull(self) -> None:
-        from rf4s.controller.timer import add_jitter
-
         """Retrieve the line until the end is reached and detect unexpected events.
 
         :raises exceptions.FishCapturedError: A fish is captured.
@@ -224,8 +215,6 @@ class Tackle:
                 raise exceptions.GearRatioTimeoutError
 
     def special_retrieve(self, button: str) -> None:
-        from rf4s.controller.timer import add_jitter
-
         """Retrieve the line with special conditions (pause or lift).
 
         :param button: The mouse button to use for retrieval.
@@ -244,8 +233,6 @@ class Tackle:
                 return
 
     def pirk(self) -> None:
-        from rf4s.controller.timer import add_jitter
-
         """Start pirking until a fish is hooked."""
         logger.info("Performing pirking")
 
@@ -282,8 +269,6 @@ class Tackle:
         raise exceptions.PirkTimeoutError
 
     def elevate(self) -> None:
-        from rf4s.controller.timer import add_jitter
-
         """Perform elevator tactic (drop/rise) until a fish is hooked."""
         logger.info("Performing elevating")
         locked = True  # Reel is locked after tackle.sink()
@@ -331,8 +316,6 @@ class Tackle:
 
     @utils.toggle_right_mouse_button  # TODO: FIX THIS
     def _lift(self) -> None:
-        from rf4s.controller.timer import add_jitter
-
         """Pull the fish until it's captured."""
         while not self.timer.is_lift_stage_timeout():
             sleep(add_jitter(LOOP_DELAY))
@@ -357,8 +340,6 @@ class Tackle:
         raise exceptions.LiftTimeoutError
 
     def _telescopic_lift(self) -> None:
-        from rf4s.controller.timer import add_jitter
-
         """Pull the fish until it's captured, designed for telescopic rod."""
         # Check false postive first because it happens often
         if not self.detection.is_fish_hooked():
@@ -384,8 +365,6 @@ class Tackle:
         self.gear_ratio_changed = not self.gear_ratio_changed
 
     def move_mouse_randomly(self) -> None:
-        from rf4s.controller.timer import add_jitter
-
         """Randomly move the mouse for four times."""
         logger.info("Moving mouse randomly")
         coords = []
@@ -409,8 +388,6 @@ class Tackle:
             self._equip_item_from_inventory(item)  # groundbait, dry_mix, pva
 
     def _equip_item_from_menu(self, item: str) -> None:
-        from rf4s.controller.timer import add_jitter
-
         """Equip an item from the menu.
 
         :param item: The item to equip (e.g., lure).
@@ -425,8 +402,6 @@ class Tackle:
     def _equip_item_from_inventory(
         self, item: Literal["dry_mix", "groundbait"]
     ) -> None:
-        from rf4s.controller.timer import add_jitter
-
         """Equip an item from the inventory.
 
         :param item: The item to equip (e.g., dry_mix, groundbait).
@@ -464,8 +439,6 @@ class Tackle:
             return self.detection.get_pva_position()
 
     def _equip_favorite_item(self, item: bool):
-        from rf4s.controller.timer import add_jitter
-
         """Select a favorite item for replacement and replace the broken one.
 
         :param item: The item to equip (e.g., lure, pva, dry_mix, groundbait).
@@ -492,8 +465,6 @@ class Tackle:
         raise exceptions.ItemNotFoundError
 
     def _monitor_float_state(self) -> None:
-        from rf4s.controller.timer import add_jitter
-
         """Monitor the state of the float."""
         logger.info("Monitoring float state")
         reference_img = pag.screenshot(region=self.detection.float_camera_rect)
@@ -509,8 +480,6 @@ class Tackle:
         raise exceptions.DriftTimeoutError
 
     def _monitor_clip_state(self) -> None:
-        from rf4s.controller.timer import add_jitter
-
         """Monitor the state of the bolognese clip."""
         logger.info("Monitoring clip state")
         self.timer.set_timeout_start_time()
@@ -524,8 +493,6 @@ class Tackle:
         raise exceptions.DriftTimeoutError
 
     def hold_mouse_button(self, duration: float = 1, button: str = "left") -> None:
-        from rf4s.controller.timer import add_jitter
-
         """Hold left or right mouse button.
 
         :param duration: Hold time, defaults to 1.
@@ -544,8 +511,6 @@ class Tackle:
             pag.click()
 
     def hold_mouse_buttons(self, duration: float = 1) -> None:
-        from rf4s.controller.timer import add_jitter
-
         """Hold left and right mouse buttons simultaneously.
 
         :param duration: Hold time, defaults to 1.

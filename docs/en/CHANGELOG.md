@@ -1,3 +1,8 @@
+## 0.9.1 (2026-02-11)
+
+### 🐛 Bug Fixes
+- Fixed an issue that there's a small chance the bot would crash while resetting the tackle.
+
 ## 0.9.0 (2026-02-06)
 
 ### 🔧 Improvements

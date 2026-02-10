@@ -7,7 +7,6 @@ for logging and automation purposes in Russian Fishing 4.
 """
 
 import datetime
-import random
 import sys
 import time
 from pathlib import Path
@@ -27,13 +26,6 @@ else:
     OUTER_ROOT = Path(__file__).resolve().parents[2]
 
 RARE_EVENT_TIMEOUT = 16
-JITTER_SCALE = 0.05
-
-random.seed(datetime.datetime.now().timestamp())
-
-
-def add_jitter(time: float, jitter_scale: float = JITTER_SCALE) -> float:
-    return random.uniform(time - jitter_scale * time, time + jitter_scale * time)
 
 
 class Timer:

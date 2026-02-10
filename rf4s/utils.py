@@ -8,7 +8,9 @@ key and mouse states during automation.
 """
 
 import ctypes
+import datetime
 import msvcrt
+import random
 import sys
 from time import sleep
 
@@ -17,12 +19,20 @@ from pyscreeze import Box
 from rich import box, print
 from rich.panel import Panel
 
-
 from rf4s.controller.console import console
 
 LOOP_DELAY = 1
 
 ANIMATION_DELAY = 0.5
+
+
+JITTER_SCALE = 0.05
+
+random.seed(datetime.datetime.now().timestamp())
+
+
+def add_jitter(time: float, jitter_scale: float = JITTER_SCALE) -> float:
+    return random.uniform(time - jitter_scale * time, time + jitter_scale * time)
 
 
 # ---------------------------------------------------------------------------- #
@@ -75,8 +85,6 @@ def press_before_and_after(key):
     def func_wrapper(func):
         def args_wrapper(*args, **kwargs):
             pag.press(key)
-            # import here so decorator application at import-time doesn't trigger
-            from rf4s.controller.timer import add_jitter
 
             sleep(add_jitter(ANIMATION_DELAY))
             try:

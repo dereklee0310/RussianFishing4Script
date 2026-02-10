@@ -38,9 +38,10 @@ from rf4s.component.friction_brake import FrictionBrake
 from rf4s.config import load_cfg
 from rf4s.controller.detection import Detection
 from rf4s.controller.player import Player
-from rf4s.controller.timer import Timer, add_jitter
+from rf4s.controller.timer import Timer
 from rf4s.controller.window import Window
 from rf4s.result import BotResult, CraftResult, HarvestResult, Result
+from rf4s.utils import add_jitter
 
 BIAS = 1e-6
 ANIMATION_DELAY = 0.5

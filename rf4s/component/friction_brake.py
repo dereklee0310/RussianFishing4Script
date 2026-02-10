@@ -13,7 +13,7 @@ import pyautogui as pag
 
 from rf4s.controller import logger
 from rf4s.controller.detection import Detection
-from rf4s.controller.timer import add_jitter
+from rf4s.utils import add_jitter
 
 MAX_FRICTION_BRAKE = 30
 MIN_FRICTION_BRAKE = 0

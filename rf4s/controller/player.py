@@ -29,8 +29,9 @@ from rf4s.component.tackle import Tackle
 from rf4s.controller import logger
 from rf4s.controller.detection import Detection, TagColor
 from rf4s.controller.notification import send_result, send_screenshot
-from rf4s.controller.timer import Timer, add_jitter
+from rf4s.controller.timer import Timer
 from rf4s.result.result import BotResult
+from rf4s.utils import add_jitter
 
 FISH_CHECK_DURATION = 0.5
 ANIMATION_DELAY = 0.5
