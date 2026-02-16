@@ -1,36 +1,73 @@
-## Install Python
-### Step 1: [Download][download] Python 3.12.10 installer
+# Installing RF4S
 
-### Step 2: Install Python 3.12.10
-Select "Use admin privileges when installing py.exe" and "Add python.exe to PATH", then click "Install Now".
+Step-by-step guide for installation and first launch.
+
+---
+
+## Step 1. Install Python 3.12
+
+Download the installer: **[Python 3.12.10 (64-bit)][download]**
+
+During installation, make sure to check:
+- **Use admin privileges when installing py.exe**
+- **Add python.exe to PATH**
+
+Then click **Install Now**.
 
 ![setup][setup]
 
-### Step 3: [Download][github] Source code 
+> [!IMPORTANT]
+> Python 3.13+ is not supported. Use versions **3.10**, **3.11**, or **3.12**.
 
-### Step 4: Unzip `RussianFishing4Script-main.zip`
+---
+
+## Step 2. Download the source code
+
+Download the archive: **[RussianFishing4Script-main.zip][github]**
+
+---
+
+## Step 3. Extract the archive
+
+Extract `RussianFishing4Script-main.zip` to a convenient folder.
+
+> [!WARNING]
+> The folder path **must not** contain Cyrillic or other non-English characters.
 
 ![unzip][unzip]
 
-### Step 5: Copy the full path to the extracted folder
+---
+
+## Step 4. Copy the folder path
+
+Open the extracted folder and copy the full path from the Explorer address bar.
 
 ![path][path]
 
-### Step 6: Open Command Prompt
-Type `Win + R` and enter cmd to open it.
+---
+
+## Step 5. Open Command Prompt
+
+Press `Win + R`, type `cmd`, and press Enter.
 
 ![cmd][cmd]
 
-### Step 7: Navigate to the project folder
-Type `cd <the path from step 5>` in cmd. For example:
+---
+
+## Step 6. Navigate to the project folder
+
+Type `cd` followed by the copied path:
 ```
 cd C:\Users\derek\tmp\RussianFishing4Script-main
 ```
 
 ![cd][cd]
 
-### Step 8: Install dependencies
-Type the following command — you only need to do this once: 
+---
+
+## Step 7. Install dependencies
+
+Run this command once:
 ```
 pip install -r requirements.txt
 ```
@@ -38,25 +75,49 @@ pip install -r requirements.txt
 ![pip][pip]
 
 > [!TIP]
-> We strongly recommend creating a virtual environment before installing dependencies. We skip that part because it's a tutorial for dummies. (ha!)
+> Using a virtual environment (`venv`) is recommended, but this step is skipped for simplicity.
 
-### Step 9: Launch the bot!
-Run the bot with this command:
+---
+
+## Step 8. Launch the bot
+
 ```
 python main.py
+```
+
+On first launch, the script will ask two questions:
+1. **Game language** — choose `1` (English) or `2` (Russian)
+2. **ClickLock** — whether Windows mouse ClickLock is enabled
+
+Your answers will be saved to `config.yaml`. You can later change the language by editing the `LANGUAGE` parameter in this file:
+```yaml
+LANGUAGE: "ru"   # Russian interface
+LANGUAGE: "en"   # English interface
 ```
 
 ![run][run]
 
 > [!IMPORTANT]
-> Every time you reopen Command Prompt, remember to navigate to the project folder first! For example: 
+> Every time you reopen Command Prompt, remember to navigate to the project folder first:
 > ```
 > cd C:\Users\derek\tmp\RussianFishing4Script-main
 > python main.py
 > ```
 
+---
+
+## Alternative: Installation via uv
+
+[uv](https://docs.astral.sh/uv/) — a faster alternative to pip.
+
+```
+git clone https://github.com/dereklee0310/RussianFishing4Script.git
+cd RussianFishing4Script
+uv sync
+uv run main.py
+```
+
 [download]: https://www.python.org/ftp/python/3.12.10/python-3.12.10-amd64.exe
-[installer]: /static/readme/installer.png
 [setup]: /static/readme/setup.png
 [unzip]: /static/readme/unzip.png
 [path]: /static/readme/path.png
