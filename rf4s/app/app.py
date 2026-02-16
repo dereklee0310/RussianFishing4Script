@@ -33,6 +33,7 @@ from rich.table import Table
 from yacs.config import CfgNode as CN
 
 from rf4s import config, exceptions, utils
+from rf4s.mouse import human_click, human_move_to
 from rf4s.app.core import logger
 from rf4s.component.friction_brake import FrictionBrake
 from rf4s.config import load_cfg
@@ -509,7 +510,7 @@ class CraftApp(App):
         :type accept_key: str
         """
         logger.info("Crafting item")
-        pag.click()
+        human_click()
         sleep(add_jitter(CRAFT_DELAY))
         self.result.material += 1
         while True:
@@ -528,7 +529,7 @@ class CraftApp(App):
         sleep(add_jitter(ANIMATION_DELAY))
         discard_yes_position = self.detection.get_discard_yes_position()
         if discard_yes_position:
-            pag.click(discard_yes_position)
+            human_click(discard_yes_position)
         sleep(add_jitter(LOOP_DELAY))
 
     def _on_release(self, key: keyboard.KeyCode) -> None:
@@ -565,7 +566,7 @@ class CraftApp(App):
                 )
                 self.window.activate_script_window()
                 sys.exit()
-            pag.moveTo(make_button_position)
+            human_move_to(make_button_position)
             while True:
                 if (
                     not self.cfg.ARGS.IGNORE
@@ -577,7 +578,7 @@ class CraftApp(App):
                     logger.info("Crafting limit reached")
                     break
                 self.craft_item(accept_key)
-                pag.moveTo(make_button_position)
+                human_move_to(make_button_position)
         except KeyboardInterrupt:
             pass
         self.display_result()
