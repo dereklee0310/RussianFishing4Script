@@ -30,6 +30,7 @@ from rf4s.controller import logger
 from rf4s.controller.detection import Detection, TagColor
 from rf4s.controller.notification import send_result, send_screenshot
 from rf4s.controller.timer import Timer
+from rf4s.i18n import t
 from rf4s.result.result import BotResult
 from rf4s.utils import add_jitter
 
@@ -990,7 +991,7 @@ class Player:
         :return: formatted running result table
         :rtype: Table
         """
-        table = Table(title="Running Result", box=box.HEAVY, show_header=False)
+        table = Table(title=t("running_result"), box=box.HEAVY, show_header=False)
 
         for k, v in result.items():
             table.add_row(k, str(v))
