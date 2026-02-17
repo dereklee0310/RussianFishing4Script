@@ -8,17 +8,11 @@ argument parsing, window management, and fishing automation.
 """
 
 import argparse
-import io
 import logging
 import logging.config
 import shlex
 import sys
 from pathlib import Path
-
-# Force UTF-8 for stdout/stderr on Windows to support all i18n languages (zh-TW, ru, etc.)
-if sys.platform == "win32":
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 import rich.logging  # noqa: F401
 import rich_argparse
@@ -50,44 +44,44 @@ LOGO = """
 # https://patorjk.com/software/taag/#p=testall&f=3D-ASCII&t=RF4S%0A, ANSI Shadow
 
 FEATURES = (
-    {"name_key": "feature_bot", "command": "bot"},
-    {"name_key": "feature_craft", "command": "craft"},
-    {"name_key": "feature_move", "command": "move"},
-    {"name_key": "feature_harvest", "command": "harvest"},
-    {"name_key": "feature_frictionbrake", "command": "frictionbrake"},
-    {"name_key": "feature_calculate", "command": "calculate"},
+    {"name_key": "feature.bot", "command": "bot"},
+    {"name_key": "feature.craft", "command": "craft"},
+    {"name_key": "feature.move", "command": "move"},
+    {"name_key": "feature.harvest", "command": "harvest"},
+    {"name_key": "feature.frictionbrake", "command": "frictionbrake"},
+    {"name_key": "feature.calculate", "command": "calculate"},
 )
 
 BOT_BOOLEAN_ARGUMENTS = (
-    ("t", "tag", "help_tag"),
-    ("c", "coffee", "help_coffee"),
-    ("a", "alcohol", "help_alcohol"),
-    ("r", "refill", "help_refill"),
-    ("H", "harvest", "help_harvest_arg"),
-    ("L", "lure", "help_lure"),
-    ("m", "mouse", "help_mouse"),
-    ("P", "pause", "help_pause"),
-    ("RC", "random-cast", "help_random_cast"),
-    ("SC", "skip-cast", "help_skip_cast"),
-    ("l", "lift", "help_lift"),
-    ("e", "electro", "help_electro"),
-    ("FB", "friction-brake", "help_friction_brake"),
-    ("GR", "gear-ratio", "help_gear_ratio"),
-    ("b", "bite", "help_bite"),
-    ("s", "screenshot", "help_screenshot"),
-    ("d", "data", "help_data"),
-    ("E", "email", "help_email"),
-    ("M", "miaotixing", "help_miaotixing"),
-    ("D", "discord", "help_discord"),
-    ("TG", "telegram", "help_telegram"),
-    ("S", "shutdown", "help_shutdown"),
-    ("SO", "signout", "help_signout"),
-    ("BL", "broken-lure", "help_broken_lure"),
-    ("SR", "spod-rod", "help_spod_rod"),
-    ("DM", "dry-mix", "help_dry_mix"),
-    ("GB", "groundbait", "help_groundbait"),
-    ("PVA", "pva", "help_pva"),
-    ("NA", "no-animation", "help_no_animation"),
+    ("t", "tag", "help.tag"),
+    ("c", "coffee", "help.coffee"),
+    ("a", "alcohol", "help.alcohol"),
+    ("r", "refill", "help.refill"),
+    ("H", "harvest", "help.harvest_arg"),
+    ("L", "lure", "help.lure"),
+    ("m", "mouse", "help.mouse"),
+    ("P", "pause", "help.pause"),
+    ("RC", "random-cast", "help.random_cast"),
+    ("SC", "skip-cast", "help.skip_cast"),
+    ("l", "lift", "help.lift"),
+    ("e", "electro", "help.electro"),
+    ("FB", "friction-brake", "help.friction_brake"),
+    ("GR", "gear-ratio", "help.gear_ratio"),
+    ("b", "bite", "help.bite"),
+    ("s", "screenshot", "help.screenshot"),
+    ("d", "data", "help.data"),
+    ("E", "email", "help.email"),
+    ("M", "miaotixing", "help.miaotixing"),
+    ("D", "discord", "help.discord"),
+    ("TG", "telegram", "help.telegram"),
+    ("S", "shutdown", "help.shutdown"),
+    ("SO", "signout", "help.signout"),
+    ("BL", "broken-lure", "help.broken_lure"),
+    ("SR", "spod-rod", "help.spod_rod"),
+    ("DM", "dry-mix", "help.dry_mix"),
+    ("GB", "groundbait", "help.groundbait"),
+    ("PVA", "pva", "help.pva"),
+    ("NA", "no-animation", "help.no_animation"),
 )
 
 EPILOG = """
@@ -161,18 +155,18 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
     :rtype: ArgumentParser
     """
     parent_parser = argparse.ArgumentParser(add_help=False)
-    parent_parser.add_argument("opts", nargs="*", help=t("help_opts"))
+    parent_parser.add_argument("opts", nargs="*", help=t("help.opts"))
 
     main_parser = argparse.ArgumentParser(epilog=EPILOG, formatter_class=Formatter)
     main_parser.add_argument(
         "-V", "--version", action="version", version=f"RF4S {VERSION}"
     )
 
-    feature_parsers = main_parser.add_subparsers(title=t("features"), dest="feature")
+    feature_parsers = main_parser.add_subparsers(title=t("main.features"), dest="feature")
 
     bot_parser = feature_parsers.add_parser(
         "bot",
-        help=t("help_bot"),
+        help=t("help.bot"),
         parents=[parent_parser],
         formatter_class=Formatter,
     )
@@ -196,7 +190,7 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         "--pid",
         type=pid,
         choices=range(len(cfg.PROFILE)),
-        help=t("help_pid"),
+        help=t("help.pid"),
         metavar=f"{{0-{len(cfg.PROFILE) - 1}}}",
     )
 
@@ -209,7 +203,7 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         "-N",
         "--pname",
         type=pname,
-        help=t("help_pname"),
+        help=t("help.pname"),
         metavar="{profile name}",
     )
 
@@ -223,7 +217,7 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         # const=0, # Flag is used but no argument given
         type=num_fish,
         choices=range(cfg.BOT.KEEPNET.CAPACITY),
-        help=t("help_fishes_in_keepnet"),
+        help=t("help.fishes_in_keepnet"),
         metavar=f"{{0-{cfg.BOT.KEEPNET.CAPACITY - 1}}}",
     )
     bot_parser.add_argument(
@@ -234,7 +228,7 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         default=None,
         type=str,
         choices=["forward", "left", "right"],
-        help=t("help_trolling"),
+        help=t("help.trolling"),
     )
     bot_parser.add_argument(
         "-R",
@@ -244,7 +238,7 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         default=None,
         type=int,
         choices=[0, 5],
-        help=t("help_rainbow"),
+        help=t("help.rainbow"),
     )
 
     bot_parser.add_argument(
@@ -255,11 +249,11 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         default=0,
         type=int,
         choices=[0, 1, 2, 3, 5],
-        help=t("help_boat_ticket"),
+        help=t("help.boat_ticket"),
     )
 
     craft_parser = feature_parsers.add_parser(
-        "craft", help=t("help_craft"), parents=[parent_parser], formatter_class=Formatter
+        "craft", help=t("help.craft"), parents=[parent_parser], formatter_class=Formatter
     )
     craft_parser.add_argument(
         "-V", "--version", action="version", version=f"RF4S-craft {VERSION}"
@@ -268,26 +262,26 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         "-d",
         "--discard",
         action="store_true",
-        help=t("help_discard"),
+        help=t("help.discard"),
     )
     craft_parser.add_argument(
         "-i",
         "--ignore",
         action="store_true",
-        help=t("help_ignore"),
+        help=t("help.ignore"),
     )
     craft_parser.add_argument(
         "-n",
         "--craft-limit",
         type=int,
         default=-1,
-        help=t("help_craft_limit"),
+        help=t("help.craft_limit"),
         metavar="{number of items}",
     )
 
     move_parser = feature_parsers.add_parser(
         "move",
-        help=t("help_move"),
+        help=t("help.move"),
         parents=[parent_parser],
         formatter_class=Formatter,
     )
@@ -298,12 +292,12 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         "-s",
         "--shift",
         action="store_true",
-        help=t("help_shift"),
+        help=t("help.shift"),
     )
 
     harvest_parser = feature_parsers.add_parser(
         "harvest",
-        help=t("help_harvest"),
+        help=t("help.harvest"),
         parents=[parent_parser],
         formatter_class=Formatter,
     )
@@ -314,12 +308,12 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         "-r",
         "--refill",
         action="store_true",
-        help=t("help_refill_harvest"),
+        help=t("help.refill_harvest"),
     )
 
     friction_brake_parser = feature_parsers.add_parser(
         "frictionbrake",
-        help=t("help_frictionbrake"),
+        help=t("help.frictionbrake"),
         aliases=["fb"],
         parents=[parent_parser],
         formatter_class=Formatter,
@@ -330,7 +324,7 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
 
     calculate_paser = feature_parsers.add_parser(
         "calculate",
-        help=t("help_calculate"),
+        help=t("help.calculate"),
         aliases=["cal"],
         parents=[parent_parser],
         formatter_class=Formatter,
@@ -355,8 +349,8 @@ def display_features() -> None:
     Shows a formatted table with feature IDs and names.
     """
     table = Table(
-        t("features"),
-        title=t("select_feature"),
+        t("main.features"),
+        title=t("main.select_feature"),
         show_header=False,
         box=box.HEAVY,
         min_width=36,
@@ -373,28 +367,28 @@ def get_fid(parser: argparse.ArgumentParser) -> int:
     Continuously prompts until a valid feature ID is entered or the
     user chooses to quit.
     """
-    utils.print_usage_box(t("enter_fid"))
+    utils.print_usage_box(t("main.enter_fid"))
 
     while True:
         user_input = input(">>> ")
         if user_input.isdigit() and 0 <= int(user_input) < len(FEATURES):
             break
         if user_input == "q":
-            print(t("bye"))
+            print(t("common.bye"))
             sys.exit()
         if user_input == "h":
             parser.print_help()
             continue
-        utils.print_error(t("invalid_input"))
+        utils.print_error(t("common.invalid_input"))
     return int(user_input)
 
 
 def get_launch_options(parser: argparse.ArgumentParser) -> str:
-    utils.print_usage_box(t("enter_launch_options"))
+    utils.print_usage_box(t("main.enter_launch_options"))
     while True:
         user_input = input(">>> ")
         if user_input == "q":
-            print(t("bye"))
+            print(t("common.bye"))
             sys.exit()
         if user_input == "h":
             parser.print_help()
@@ -404,28 +398,28 @@ def get_launch_options(parser: argparse.ArgumentParser) -> str:
 
 
 def get_language():
-    utils.print_usage_box(t("game_language_prompt"))
+    utils.print_usage_box(t("main.game_language_prompt"))
     while True:
         user_input = input(">>> ")
         if user_input.isdigit() and user_input in ("1", "2"):
             break
         if user_input == "q":
-            print(t("bye"))
+            print(t("common.bye"))
             sys.exit()
-        utils.print_error(t("invalid_input"))
+        utils.print_error(t("common.invalid_input"))
     return '"en"' if user_input == "1" else '"ru"'
 
 
 def get_click_lock():
-    utils.print_usage_box(t("click_lock_prompt"))
+    utils.print_usage_box(t("main.click_lock_prompt"))
     while True:
         user_input = input(">>> ")
         if user_input.isdigit() and user_input in ("1", "2"):
             break
         if user_input == "q":
-            print(t("bye"))
+            print(t("common.bye"))
             sys.exit()
-        utils.print_error(t("invalid_input"))
+        utils.print_error(t("common.invalid_input"))
     return "true" if user_input == "1" else "false"
 
 
