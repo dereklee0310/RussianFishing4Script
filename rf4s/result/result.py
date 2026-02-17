@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 
 from rf4s.controller.timer import Timer
+from rf4s.i18n import t
 
 
 @dataclass
@@ -38,28 +39,30 @@ class BotResult:
             kept_ratio = "0%"
             bite_rate = "0/hr"
 
+        stop_reason = t(msg)
+
         return {
-            "Stop reason": msg,
-            "Start time": timer.get_start_datetime(),
-            "End time": timer.get_cur_datetime(),
-            "Running time": timer.get_running_time_str(),
-            "Bite rate": bite_rate,
-            "Total fish": self.total,
-            "Kept fish": self.kept,
-            "Kept ratio": kept_ratio,
-            "Green tag fish": self.green,
-            "Yellow tag fish": self.yellow,
-            "Blue tag fish": self.blue,
-            "Purple tag fish": self.purple,
-            "Pink tag fish": self.pink,
-            "Card": self.card,
-            "Gift": self.gift,
-            "Tea consumed": self.tea,
-            "Carrot consumed": self.carrot,
-            "Alcohol consumed": self.alcohol,
-            "Coffee consumed": self.coffee,
-            "Bait harvested": self.bait,
-            "Ticket used": self.ticket,
+            t("result.stop_reason"): stop_reason,
+            t("result.start_time"): timer.get_start_datetime(),
+            t("result.end_time"): timer.get_cur_datetime(),
+            t("result.running_time"): timer.get_running_time_str(),
+            t("result.bite_rate"): bite_rate,
+            t("result.total_fish"): self.total,
+            t("result.kept_fish"): self.kept,
+            t("result.kept_ratio"): kept_ratio,
+            t("result.green_tag"): self.green,
+            t("result.yellow_tag"): self.yellow,
+            t("result.blue_tag"): self.blue,
+            t("result.purple_tag"): self.purple,
+            t("result.pink_tag"): self.pink,
+            t("result.card"): self.card,
+            t("result.gift"): self.gift,
+            t("result.tea"): self.tea,
+            t("result.carrot"): self.carrot,
+            t("result.alcohol"): self.alcohol,
+            t("result.coffee"): self.coffee,
+            t("result.bait"): self.bait,
+            t("result.ticket"): self.ticket,
         }
 
 
@@ -71,9 +74,9 @@ class CraftResult:
 
     def as_dict(self) -> dict:
         return {
-            "Successful crafts": self.success,
-            "Failed crafts": self.fail,
-            "Materials used": self.material,
+            t("result.success_crafts"): self.success,
+            t("result.fail_crafts"): self.fail,
+            t("result.materials"): self.material,
         }
 
 
@@ -85,7 +88,7 @@ class HarvestResult:
 
     def as_dict(self) -> dict:
         return {
-            "Tea consumed": self.tea,
-            "Carrot consumed": self.carrot,
-            "Bait harvested": self.bait,
+            t("result.tea"): self.tea,
+            t("result.carrot"): self.carrot,
+            t("result.bait"): self.bait,
         }

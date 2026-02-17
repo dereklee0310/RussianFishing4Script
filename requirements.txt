@@ -45,6 +45,7 @@ pyscreenshot==3.1
 pyscreeze==0.1.29
 python-dateutil==2.9.0.post0
 python-dotenv==1.1.1
+python-i18n[YAML]==0.3.9
 pytweening==1.2.0
 pywin32==306
 pyyaml==6.0.2

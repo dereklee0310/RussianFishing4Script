@@ -21,6 +21,7 @@ from rich.table import Table
 from yacs.config import CfgNode as CN
 
 from rf4s import config, utils
+from rf4s.i18n import setup as setup_i18n, t
 from rf4s.app import (
     BotApp,
     CalculateApp,
@@ -43,48 +44,44 @@ LOGO = """
 # https://patorjk.com/software/taag/#p=testall&f=3D-ASCII&t=RF4S%0A, ANSI Shadow
 
 FEATURES = (
-    {"name": "Fishing Bot", "command": "bot"},
-    {"name": "Craft Items", "command": "craft"},
-    {"name": "Move Forward", "command": "move"},
-    {"name": "Harvest Baits", "command": "harvest"},
-    {"name": "Auto Friction Brake", "command": "frictionbrake"},
-    {"name": "Calculate Tackle's Stats", "command": "calculate"},
+    {"name_key": "feature.bot", "command": "bot"},
+    {"name_key": "feature.craft", "command": "craft"},
+    {"name_key": "feature.move", "command": "move"},
+    {"name_key": "feature.harvest", "command": "harvest"},
+    {"name_key": "feature.frictionbrake", "command": "frictionbrake"},
+    {"name_key": "feature.calculate", "command": "calculate"},
 )
 
 BOT_BOOLEAN_ARGUMENTS = (
-    ("t", "tag", "keep only tagged fishes"),
-    ("c", "coffee", "drink coffee if stamina is low during fish fight"),
-    ("a", "alcohol", "drink alcohol before keeping the fish"),
-    ("r", "refill", "consume tea and carrot if hunger or comfort is low"),
-    ("H", "harvest", "harvest baits before casting the rod"),
-    ("L", "lure", "change current lure with a random favorite one, mode: spin"),
-    ("m", "mouse", "move mouse randomly before casting the rod"),
-    ("P", "pause", "pause the script before casting the rod occasionally"),
-    ("RC", "random-cast", "do a redundant rod cast randomly"),
-    ("SC", "skip-cast", "skip the first rod cast"),
-    ("l", "lift", "lift the tackle constantly during a fish fight"),
-    ("e", "electro", "enable electric mode for Electro Raptor series reel"),
-    ("FB", "friction-brake", "adjust friction brake automatically"),
-    ("GR", "gear-ratio", "switch the gear ratio or mode after the retrieval timed out"),
-    ("b", "bite", "save a screenshot in screenshots/ when a fish bite"),
-    ("s", "screenshot", "save a screenshot in screenshots/ after you caught a fish"),
-    ("d", "data", "save fishing data in /logs"),
-    ("E", "email", "send email noticication after the script stop"),
-    ("M", "miaotixing", "send miaotixing notification after the script stop"),
-    ("D", "discord", "send Discord notification after the script stop"),
-    ("TG", "telegram", "send Telegram notification after the script stop"),
-    ("S", "shutdown", "shutdown computer after the script stop"),
-    ("SO", "signout", "sign out instead of closing the game"),
-    ("BL", "broken-lure", "replace broken lures with favorite ones"),
-    ("SR", "spod-rod", "recast spod rod"),
-    ("DM", "dry-mix", "enable dry mix refill, mode: bottom"),
-    ("GB", "groundbait", "enable groundbait refill, mode: bottom"),
-    ("PVA", "pva", "enable pva refill, mode: bottom"),
-    (
-        "NA",
-        "no-animation",
-        "disable waiting for trophy and gift animations, gift\nchange 'Catch screen style' to 'Simple' in game settings to use this flag",
-    ),
+    ("t", "tag", "help.tag"),
+    ("c", "coffee", "help.coffee"),
+    ("a", "alcohol", "help.alcohol"),
+    ("r", "refill", "help.refill"),
+    ("H", "harvest", "help.harvest_arg"),
+    ("L", "lure", "help.lure"),
+    ("m", "mouse", "help.mouse"),
+    ("P", "pause", "help.pause"),
+    ("RC", "random-cast", "help.random_cast"),
+    ("SC", "skip-cast", "help.skip_cast"),
+    ("l", "lift", "help.lift"),
+    ("e", "electro", "help.electro"),
+    ("FB", "friction-brake", "help.friction_brake"),
+    ("GR", "gear-ratio", "help.gear_ratio"),
+    ("b", "bite", "help.bite"),
+    ("s", "screenshot", "help.screenshot"),
+    ("d", "data", "help.data"),
+    ("E", "email", "help.email"),
+    ("M", "miaotixing", "help.miaotixing"),
+    ("D", "discord", "help.discord"),
+    ("TG", "telegram", "help.telegram"),
+    ("S", "shutdown", "help.shutdown"),
+    ("SO", "signout", "help.signout"),
+    ("BL", "broken-lure", "help.broken_lure"),
+    ("SR", "spod-rod", "help.spod_rod"),
+    ("DM", "dry-mix", "help.dry_mix"),
+    ("GB", "groundbait", "help.groundbait"),
+    ("PVA", "pva", "help.pva"),
+    ("NA", "no-animation", "help.no_animation"),
 )
 
 EPILOG = """
@@ -158,18 +155,20 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
     :rtype: ArgumentParser
     """
     parent_parser = argparse.ArgumentParser(add_help=False)
-    parent_parser.add_argument("opts", nargs="*", help="overwrite configuration")
+    parent_parser.add_argument("opts", nargs="*", help=t("help.opts"))
 
     main_parser = argparse.ArgumentParser(epilog=EPILOG, formatter_class=Formatter)
     main_parser.add_argument(
         "-V", "--version", action="version", version=f"RF4S {VERSION}"
     )
 
-    feature_parsers = main_parser.add_subparsers(title="features", dest="feature")
+    feature_parsers = main_parser.add_subparsers(
+        title=t("main.features"), dest="feature"
+    )
 
     bot_parser = feature_parsers.add_parser(
         "bot",
-        help="start fishing bot",
+        help=t("help.bot"),
         parents=[parent_parser],
         formatter_class=Formatter,
     )
@@ -180,7 +179,7 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
     for argument in BOT_BOOLEAN_ARGUMENTS:
         flag1 = f"-{argument[0]}"
         flag2 = f"--{argument[1]}"
-        help_message = argument[2]
+        help_message = t(argument[2])
         bot_parser.add_argument(flag1, flag2, action="store_true", help=help_message)
 
     profile_strategy = bot_parser.add_mutually_exclusive_group()
@@ -193,7 +192,7 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         "--pid",
         type=pid,
         choices=range(len(cfg.PROFILE)),
-        help="specify the id of the profile to use",
+        help=t("help.pid"),
         metavar=f"{{0-{len(cfg.PROFILE) - 1}}}",
     )
 
@@ -206,7 +205,7 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         "-N",
         "--pname",
         type=pname,
-        help="specify the name of the profile to use",
+        help=t("help.pname"),
         metavar="{profile name}",
     )
 
@@ -220,7 +219,7 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         # const=0, # Flag is used but no argument given
         type=num_fish,
         choices=range(cfg.BOT.KEEPNET.CAPACITY),
-        help="specify the number of fishes in your keepnet, (default: %(default)s)",
+        help=t("help.fishes_in_keepnet"),
         metavar=f"{{0-{cfg.BOT.KEEPNET.CAPACITY - 1}}}",
     )
     bot_parser.add_argument(
@@ -231,10 +230,7 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         default=None,
         type=str,
         choices=["forward", "left", "right"],
-        help=(
-            "enable trolling mode and specify the direction\n"
-            "(default: %(default)s, no argument: %(const)s)"
-        ),
+        help=t("help.trolling"),
     )
     bot_parser.add_argument(
         "-R",
@@ -244,10 +240,7 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         default=None,
         type=int,
         choices=[0, 5],
-        help=(
-            "enable rainbow line mode and specify the meter to lift the rod\n"
-            "(default: %(default)s, no argument: %(const)s)"
-        ),
+        help=t("help.rainbow"),
     )
 
     bot_parser.add_argument(
@@ -258,14 +251,14 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         default=0,
         type=int,
         choices=[0, 1, 2, 3, 5],
-        help=(
-            "enable boat ticket renewal and specify the duration\n"
-            "(default: %(default)s, no argument: %(const)s)"
-        ),
+        help=t("help.boat_ticket"),
     )
 
     craft_parser = feature_parsers.add_parser(
-        "craft", help="craft items", parents=[parent_parser], formatter_class=Formatter
+        "craft",
+        help=t("help.craft"),
+        parents=[parent_parser],
+        formatter_class=Formatter,
     )
     craft_parser.add_argument(
         "-V", "--version", action="version", version=f"RF4S-craft {VERSION}"
@@ -274,26 +267,26 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         "-d",
         "--discard",
         action="store_true",
-        help="discard all the crafted items (for groundbaits)",
+        help=t("help.discard"),
     )
     craft_parser.add_argument(
         "-i",
         "--ignore",
         action="store_true",
-        help="ignore unselected material slots",
+        help=t("help.ignore"),
     )
     craft_parser.add_argument(
         "-n",
         "--craft-limit",
         type=int,
         default=-1,
-        help="specify the number of items to craft, (default: %(default)s)",
+        help=t("help.craft_limit"),
         metavar="{number of items}",
     )
 
     move_parser = feature_parsers.add_parser(
         "move",
-        help="toggle moving forward",
+        help=t("help.move"),
         parents=[parent_parser],
         formatter_class=Formatter,
     )
@@ -304,12 +297,12 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         "-s",
         "--shift",
         action="store_true",
-        help="Hold down the Shift key while moving",
+        help=t("help.shift"),
     )
 
     harvest_parser = feature_parsers.add_parser(
         "harvest",
-        help="harvest baits",
+        help=t("help.harvest"),
         parents=[parent_parser],
         formatter_class=Formatter,
     )
@@ -320,12 +313,12 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         "-r",
         "--refill",
         action="store_true",
-        help="refill hunger and comfort by consuming tea and carrot",
+        help=t("help.refill_harvest"),
     )
 
     friction_brake_parser = feature_parsers.add_parser(
         "frictionbrake",
-        help="automate friction brake",
+        help=t("help.frictionbrake"),
         aliases=["fb"],
         parents=[parent_parser],
         formatter_class=Formatter,
@@ -336,7 +329,7 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
 
     calculate_paser = feature_parsers.add_parser(
         "calculate",
-        help="calculate tackle's stats",
+        help=t("help.calculate"),
         aliases=["cal"],
         parents=[parent_parser],
         formatter_class=Formatter,
@@ -361,15 +354,15 @@ def display_features() -> None:
     Shows a formatted table with feature IDs and names.
     """
     table = Table(
-        "Features",
-        title="Select a feature to start 🚀",
+        t("main.features"),
+        title=t("main.select_feature"),
         show_header=False,
         box=box.HEAVY,
         min_width=36,
     )
 
     for i, feature in enumerate(FEATURES):
-        table.add_row(f"{i:>2}. {feature['name']}")
+        table.add_row(f"{i:>2}. {t(feature['name_key'])}")
     print(table)
 
 
@@ -379,30 +372,28 @@ def get_fid(parser: argparse.ArgumentParser) -> int:
     Continuously prompts until a valid feature ID is entered or the
     user chooses to quit.
     """
-    utils.print_usage_box("Enter feature id to use, h to see help message, q to quit.")
+    utils.print_usage_box(t("main.enter_fid"))
 
     while True:
         user_input = input(">>> ")
         if user_input.isdigit() and 0 <= int(user_input) < len(FEATURES):
             break
         if user_input == "q":
-            print("Bye.")
+            print(t("common.bye"))
             sys.exit()
         if user_input == "h":
             parser.print_help()
             continue
-        utils.print_error("Invalid input, please try again.")
+        utils.print_error(t("common.invalid_input"))
     return int(user_input)
 
 
 def get_launch_options(parser: argparse.ArgumentParser) -> str:
-    utils.print_usage_box(
-        "Enter launch options, Enter to skip, h to see help message, q to quit."
-    )
+    utils.print_usage_box(t("main.enter_launch_options"))
     while True:
         user_input = input(">>> ")
         if user_input == "q":
-            print("Bye.")
+            print(t("common.bye"))
             sys.exit()
         if user_input == "h":
             parser.print_help()
@@ -412,30 +403,28 @@ def get_launch_options(parser: argparse.ArgumentParser) -> str:
 
 
 def get_language():
-    utils.print_usage_box("What's your game language? [(1) en (2) ru (3) q (quit)]")
+    utils.print_usage_box(t("main.game_language_prompt"))
     while True:
         user_input = input(">>> ")
         if user_input.isdigit() and user_input in ("1", "2"):
             break
         if user_input == "q":
-            print("Bye.")
+            print(t("common.bye"))
             sys.exit()
-        utils.print_error("Invalid input, please try again.")
+        utils.print_error(t("common.invalid_input"))
     return '"en"' if user_input == "1" else '"ru"'
 
 
 def get_click_lock():
-    utils.print_usage_box(
-        "Is Windows Mouse ClickLock enabled? [(1) yes (2) no (3) q (quit)]"
-    )
+    utils.print_usage_box(t("main.click_lock_prompt"))
     while True:
         user_input = input(">>> ")
         if user_input.isdigit() and user_input in ("1", "2"):
             break
         if user_input == "q":
-            print("Bye.")
+            print(t("common.bye"))
             sys.exit()
-        utils.print_error("Invalid input, please try again.")
+        utils.print_error(t("common.invalid_input"))
     return "true" if user_input == "1" else "false"
 
 
@@ -468,7 +457,9 @@ def setup_cfg():
 
 
 def main() -> None:
+    setup_i18n("en")
     cfg = setup_cfg()
+    setup_i18n(cfg.LANGUAGE)
     parser, subparsers = setup_parser(cfg)
     args = parser.parse_args()  # First parse to get {command} {flags}
     utils.print_logo_box(LOGO)  # Print logo here so the help message will not show it
