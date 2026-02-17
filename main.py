@@ -162,7 +162,9 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
         "-V", "--version", action="version", version=f"RF4S {VERSION}"
     )
 
-    feature_parsers = main_parser.add_subparsers(title=t("main.features"), dest="feature")
+    feature_parsers = main_parser.add_subparsers(
+        title=t("main.features"), dest="feature"
+    )
 
     bot_parser = feature_parsers.add_parser(
         "bot",
@@ -253,7 +255,10 @@ def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
     )
 
     craft_parser = feature_parsers.add_parser(
-        "craft", help=t("help.craft"), parents=[parent_parser], formatter_class=Formatter
+        "craft",
+        help=t("help.craft"),
+        parents=[parent_parser],
+        formatter_class=Formatter,
     )
     craft_parser.add_argument(
         "-V", "--version", action="version", version=f"RF4S-craft {VERSION}"

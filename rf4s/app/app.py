@@ -448,9 +448,7 @@ class BotApp(App):
                 if not self.paused:
                     break
 
-                utils.print_usage_box(
-                    t("ui.press_restart", pause=self.cfg.KEY.PAUSE)
-                )
+                utils.print_usage_box(t("ui.press_restart", pause=self.cfg.KEY.PAUSE))
                 utils.print_hint_box(t("ui.hint_launch_ignored"))
                 with self.player.hold_keys(mouse=False, shift=False, reset=True):
                     pause_listener = keyboard.Listener(on_release=self._pause_wait)
@@ -605,7 +603,11 @@ class MoveApp(App):
         self.cfg.freeze()
 
         utils.print_usage_box(
-            t("ui.press_move", pause=self.cfg.KEY.MOVE_PAUSE, quit=self.cfg.KEY.MOVE_QUIT)
+            t(
+                "ui.press_move",
+                pause=self.cfg.KEY.MOVE_PAUSE,
+                quit=self.cfg.KEY.MOVE_QUIT,
+            )
         )
 
         self.result = Result()
@@ -669,9 +671,15 @@ class HarvestApp(App):
         settings.add_row(t("ui.launch_options_final"), " ".join(sys.argv[1:]))
         settings.add_row(t("harvest.power_saving"), str(self.cfg.HARVEST.POWER_SAVING))
         settings.add_row(t("harvest.check_delay"), str(self.cfg.HARVEST.CHECK_DELAY))
-        settings.add_row(t("harvest.energy_threshold"), str(self.cfg.STAT.ENERGY_THRESHOLD))
-        settings.add_row(t("harvest.hunger_threshold"), str(self.cfg.STAT.HUNGER_THRESHOLD))
-        settings.add_row(t("harvest.comfort_threshold"), str(self.cfg.STAT.COMFORT_THRESHOLD))
+        settings.add_row(
+            t("harvest.energy_threshold"), str(self.cfg.STAT.ENERGY_THRESHOLD)
+        )
+        settings.add_row(
+            t("harvest.hunger_threshold"), str(self.cfg.STAT.HUNGER_THRESHOLD)
+        )
+        settings.add_row(
+            t("harvest.comfort_threshold"), str(self.cfg.STAT.COMFORT_THRESHOLD)
+        )
         print(settings)
         utils.print_usage_box(t("ui.press_quit", quit=self.cfg.KEY.QUIT))
 
@@ -809,12 +817,44 @@ class CalculateApp:
         _ = cfg, args, parser
         self.result = None
         self.parts = [
-            Part(key="rod", name_key="part.rod", prompt_key="prompt.load_capacity", color="orange1", base=0.3),
-            Part(key="reel_mechanism", name_key="part.reel_mechanism", prompt_key="prompt.mech", color="plum1", base=0.3),
-            Part(key="reel_friction_brake", name_key="part.reel_fb", prompt_key="prompt.drag", color="gold1"),
-            Part(key="fishing_line", name_key="part.fishing_line", prompt_key="prompt.load_capacity", color="salmon1"),
-            Part(key="leader", name_key="part.leader", prompt_key="prompt.load_capacity", color="pale_green1"),
-            Part(key="hook", name_key="part.hook", prompt_key="prompt.load_capacity", color="sky_blue1"),
+            Part(
+                key="rod",
+                name_key="part.rod",
+                prompt_key="prompt.load_capacity",
+                color="orange1",
+                base=0.3,
+            ),
+            Part(
+                key="reel_mechanism",
+                name_key="part.reel_mechanism",
+                prompt_key="prompt.mech",
+                color="plum1",
+                base=0.3,
+            ),
+            Part(
+                key="reel_friction_brake",
+                name_key="part.reel_fb",
+                prompt_key="prompt.drag",
+                color="gold1",
+            ),
+            Part(
+                key="fishing_line",
+                name_key="part.fishing_line",
+                prompt_key="prompt.load_capacity",
+                color="salmon1",
+            ),
+            Part(
+                key="leader",
+                name_key="part.leader",
+                prompt_key="prompt.load_capacity",
+                color="pale_green1",
+            ),
+            Part(
+                key="hook",
+                name_key="part.hook",
+                prompt_key="prompt.load_capacity",
+                color="sky_blue1",
+            ),
         ]
         self.friction_brake = next(
             part for part in self.parts if part.key == "reel_friction_brake"
@@ -828,9 +868,13 @@ class CalculateApp:
                     if part.pre_real_load_capacity is not None:
                         raise exceptions.PreviousError
                     else:
-                        utils.print_error(t("calculate.value_not_found", name=part.name))
+                        utils.print_error(
+                            t("calculate.value_not_found", name=part.name)
+                        )
                 part.load_capacity = self.get_validated_input(part, part.prompt)
-                part.wear = self.get_validated_input(part, t("prompt.wear"), is_wear=True)
+                part.wear = self.get_validated_input(
+                    part, t("prompt.wear"), is_wear=True
+                )
             except exceptions.SkipError:
                 if part.real_load_capacity is not None:
                     part.real_load_capacity = None
@@ -844,7 +888,9 @@ class CalculateApp:
                 part.calculate_real_load_capacity()
             self.result.add_row(part.name, f"{part.real_load_capacity:.2f} kg")
 
-    def get_validated_input(self, part: Part, prompt: str, is_wear: bool = False) -> float:
+    def get_validated_input(
+        self, part: Part, prompt: str, is_wear: bool = False
+    ) -> float:
         while True:
             user_input = Prompt.ask(
                 f"[{part.color}][{part.name}][/{part.color}] {prompt}"
@@ -854,12 +900,16 @@ class CalculateApp:
                     raise exceptions.RestartError
                 case CalculateCommand.PREVIOUS.value:
                     if part.pre_real_load_capacity is None:
-                        utils.print_error(t("calculate.value_not_found", name=part.name))
+                        utils.print_error(
+                            t("calculate.value_not_found", name=part.name)
+                        )
                         continue
                     raise exceptions.PreviousError
                 case CalculateCommand.PREVIOUS_REMAINING.value:
                     if part.pre_real_load_capacity is None:
-                        utils.print_error(t("calculate.value_not_found", name=part.name))
+                        utils.print_error(
+                            t("calculate.value_not_found", name=part.name)
+                        )
                         continue
                     raise exceptions.PreviousRemainingError
                 case CalculateCommand.SKIP.value:
@@ -973,15 +1023,28 @@ class FrictionBrakeApp(App):
             title=t("ui.settings"), show_header=False, box=box.HEAVY, min_width=36
         )
         settings.add_row(t("ui.launch_options_final"), " ".join(sys.argv[1:]))
-        settings.add_row(t("friction_brake.initial_fb"), str(self.cfg.FRICTION_BRAKE.INITIAL))
+        settings.add_row(
+            t("friction_brake.initial_fb"), str(self.cfg.FRICTION_BRAKE.INITIAL)
+        )
         settings.add_row(t("friction_brake.max_fb"), str(self.cfg.FRICTION_BRAKE.MAX))
-        settings.add_row(t("friction_brake.start_delay"), str(self.cfg.FRICTION_BRAKE.START_DELAY))
-        settings.add_row(t("friction_brake.increase_delay"), str(self.cfg.FRICTION_BRAKE.INCREASE_DELAY))
-        settings.add_row(t("friction_brake.sensitivity"), self.cfg.FRICTION_BRAKE.SENSITIVITY)
+        settings.add_row(
+            t("friction_brake.start_delay"), str(self.cfg.FRICTION_BRAKE.START_DELAY)
+        )
+        settings.add_row(
+            t("friction_brake.increase_delay"),
+            str(self.cfg.FRICTION_BRAKE.INCREASE_DELAY),
+        )
+        settings.add_row(
+            t("friction_brake.sensitivity"), self.cfg.FRICTION_BRAKE.SENSITIVITY
+        )
         print(settings)
 
         utils.print_usage_box(
-            t("ui.press_fb", reset=self.cfg.KEY.FRICTION_BRAKE_RESET, quit=self.cfg.KEY.FRICTION_BRAKE_QUIT)
+            t(
+                "ui.press_fb",
+                reset=self.cfg.KEY.FRICTION_BRAKE_RESET,
+                quit=self.cfg.KEY.FRICTION_BRAKE_QUIT,
+            )
         )
 
         self.window = Window()
