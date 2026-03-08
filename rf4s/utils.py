@@ -99,6 +99,21 @@ def press_before_and_after(key):
     return func_wrapper
 
 
+def press(key: str) -> None:
+    """Custom wrapper to replace pyautogui.press().
+
+    pyautogui.press() calls keyDown() and keyUp() without delay in between.
+    This caused a weird bug that the game processes pyautogui.press() two times, which
+    cause the player to put away the rod after releasing a fish by pressing backspace.
+    Here we use internal _pause (0.1s) to avoid that.
+
+    :param key: Key to press
+    :type key: str
+    """
+    pag.keyDown(key)
+    pag.keyUp(key)
+
+
 def is_compiled():
     return "__compiled__" in globals()  # Nuitka style
 

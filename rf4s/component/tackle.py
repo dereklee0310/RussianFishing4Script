@@ -22,7 +22,7 @@ from rf4s import exceptions, utils
 from rf4s.controller import logger
 from rf4s.controller.timer import Timer
 from rf4s.controller.detection import Detection
-from rf4s.utils import add_jitter
+from rf4s.utils import add_jitter, press
 
 CAST_SCALE = 0.4  # 25% / 0.4s
 ANIMATION_DELAY = 0.6
@@ -284,7 +284,7 @@ class Tackle:
                 return
 
             if self.cfg.PROFILE.DROP and not dropped:
-                pag.press("enter")
+                press("enter")
                 if locked:
                     delay = self.cfg.PROFILE.ELEVATE_DELAY
                 else:
@@ -307,7 +307,7 @@ class Tackle:
         if self.stage != StageId.LIFT:
             self.stage = StageId.LIFT
             if self.cfg.PROFILE.MODE == "telescopic":
-                pag.press("space")
+                press("space")
             self.timer.set_timeout_start_time()
         if self.cfg.PROFILE.MODE == "telescopic":
             self._telescopic_lift()
@@ -331,11 +331,11 @@ class Tackle:
         if not self.detection.is_fish_hooked():
             return
         if self.detection.is_retrieval_finished():
-            pag.press("space")
+            press("space")
             sleep(add_jitter(LANDING_NET_DURATION))
             if self.detection.is_fish_captured():
                 return
-            pag.press("space")
+            press("space")
             sleep(add_jitter(ANIMATION_DELAY))
         raise exceptions.LiftTimeoutError
 
@@ -361,7 +361,7 @@ class Tackle:
         """Switch the gear ratio or electro assist mode."""
         logger.info("Changing gear ratio / electro assist mode")
         with pag.hold("ctrl"):
-            pag.press("space")
+            press("space")
         self.gear_ratio_changed = not self.gear_ratio_changed
 
     def move_mouse_randomly(self) -> None:
@@ -461,7 +461,7 @@ class Tackle:
 
         # Close selection window when equiping from inventory
         if item in ("dry_mix", "groundbait"):
-            pag.press("esc")
+            press("esc")
         raise exceptions.ItemNotFoundError
 
     def _monitor_float_state(self) -> None:

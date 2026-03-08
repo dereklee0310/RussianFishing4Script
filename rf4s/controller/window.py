@@ -16,6 +16,7 @@ import win32gui
 
 from rf4s import utils
 from rf4s.controller import logger
+from rf4s.utils import press
 
 ANIMATION_DELAY = 0.5
 
@@ -102,13 +103,13 @@ class Window:
 
     def activate_script_window(self) -> None:
         """Focus the terminal where user run the script."""
-        pag.press("alt")
+        press("alt")
         win32gui.SetForegroundWindow(self.terminal_hwnd)
         sleep(ANIMATION_DELAY)
 
     def activate_game_window(self) -> None:
         """Focus game window."""
-        pag.press("alt")
+        press("alt")
         win32gui.SetForegroundWindow(self._get_game_hwnd())
         sleep(ANIMATION_DELAY)
 

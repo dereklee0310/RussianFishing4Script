@@ -42,7 +42,7 @@ from rf4s.controller.player import Player
 from rf4s.controller.timer import Timer
 from rf4s.controller.window import Window
 from rf4s.result import BotResult, CraftResult, HarvestResult, Result
-from rf4s.utils import add_jitter
+from rf4s.utils import add_jitter, press
 
 BIAS = 1e-6
 ANIMATION_DELAY = 0.5
@@ -513,13 +513,13 @@ class CraftApp(App):
             if self.detection.is_operation_success():
                 logger.info("Crafting successed")
                 self.result.success += 1
-                pag.press(accept_key)
+                press(accept_key)
                 break
 
             if self.detection.is_operation_failed():
                 logger.warning("Crafting failed")
                 self.result.fail += 1
-                pag.press("space")
+                press("space")
                 break
             sleep(add_jitter(LOOP_DELAY))
         sleep(add_jitter(ANIMATION_DELAY))
@@ -698,7 +698,7 @@ class HarvestApp(App):
         pag.click()
         while not self.detection.is_harvest_success():
             sleep(add_jitter(LOOP_DELAY))
-        pag.press("space")
+        press("space")
         logger.info("Baits harvested succussfully")
         sleep(add_jitter(ANIMATION_DELAY))
 
@@ -738,7 +738,7 @@ class HarvestApp(App):
         logger.info("Using item: %s", item)
         key = str(self.cfg.KEY[item.upper()])
         if key != "-1":  # Use shortcut
-            pag.press(key)
+            press(key)
         else:  # Open food menu
             with pag.hold("t"):
                 sleep(add_jitter(ANIMATION_DELAY))
@@ -754,7 +754,7 @@ class HarvestApp(App):
 
         self.window.activate_game_window()
         try:
-            pag.press(str(self.cfg.KEY.DIGGING_TOOL))
+            press(str(self.cfg.KEY.DIGGING_TOOL))
             sleep(3)
             while True:
                 self.refill_player_stats()
@@ -765,9 +765,9 @@ class HarvestApp(App):
                     logger.info("Energy is not high enough")
 
                 if self.cfg.HARVEST.POWER_SAVING:
-                    pag.press("esc")
+                    press("esc")
                     sleep(self.cfg.HARVEST.CHECK_DELAY)
-                    pag.press("esc")
+                    press("esc")
                     sleep(ANIMATION_DELAY)
                 else:
                     sleep(self.cfg.HARVEST.CHECK_DELAY)

@@ -32,7 +32,7 @@ from rf4s.controller.notification import send_result, send_screenshot
 from rf4s.controller.timer import Timer
 from rf4s.i18n import t
 from rf4s.result.result import BotResult
-from rf4s.utils import add_jitter
+from rf4s.utils import add_jitter, press
 
 FISH_CHECK_DURATION = 0.5
 ANIMATION_DELAY = 0.5
@@ -119,7 +119,7 @@ class Player:
 
         if self.detection.get_quit_position():
             logger.warning("Control panel detected, back to the game automatically")
-            pag.press("esc")
+            press("esc")
             sleep(ANIMATION_DELAY)
 
         logger.info("Starting fishing mode: '%s'", self.cfg.PROFILE.MODE)
@@ -262,7 +262,7 @@ class Player:
 
             self.refill_stats()
             logger.info("Checking rod %s", self.tackle_idx + 1)
-            pag.press(str(self.cfg.KEY.BOTTOM_RODS[self.tackle_idx]))
+            press(str(self.cfg.KEY.BOTTOM_RODS[self.tackle_idx]))
             sleep(ANIMATION_DELAY)
 
             with self.loop_restart_handler():
@@ -372,8 +372,8 @@ class Player:
             while not self.detection.is_harvest_success():
                 pag.click()
                 sleep(add_jitter(LOOP_DELAY))
-            pag.press("space")
-            pag.press("backspace")
+            press("space")
+            press("backspace")
             sleep(ANIMATION_DELAY)
             self.result.bait += 1
 
@@ -437,7 +437,7 @@ class Player:
         logger.info("Using %s", item)
         key = str(self.cfg.KEY[item.upper()])
         if key != "-1":  # Use shortcut
-            pag.press(key)
+            press(key)
         else:  # Open food menu
             with pag.hold("t"):
                 sleep(ANIMATION_DELAY)
@@ -486,7 +486,7 @@ class Player:
             with self.hold_keys(mouse=False, shift=False, reset=True):
                 if self.cfg.PROFILE.DEPTH_ADJUST_DELAY > 0:
                     logger.info("Adjusting lure depth")
-                    pag.press("enter")  # Open reel
+                    press("enter")  # Open reel
                     sleep(self.cfg.PROFILE.DEPTH_ADJUST_DELAY)
                     self.tackle.hold_mouse_button(
                         self.cfg.PROFILE.DEPTH_ADJUST_DURATION
@@ -514,7 +514,7 @@ class Player:
         self._use_item("spod_rod")
         self.reset_tackle()
         self.cast_tackle(lock=True, update=False)
-        pag.press("0")
+        press("0")
         sleep(ANIMATION_DELAY)
         self.using_spod_rod = False
 
@@ -650,7 +650,7 @@ class Player:
             self._refill_pva()
             self.cast_tackle(lock=True)
 
-        pag.press("0")
+        press("0")
         self.harvest_baits()
         sleep(add_jitter(self.cfg.PROFILE.CHECK_DELAY))
 
@@ -660,7 +660,7 @@ class Player:
             return
         if not self.trolling_started:
             logger.info("Start trolling")
-            pag.press(TROLLING_KEY)
+            press(TROLLING_KEY)
         if self.cfg.ARGS.TROLLING not in ("left", "right"):  # Forward
             return
         key = LEFT_KEY if self.cfg.ARGS.TROLLING == "left" else RIGHT_KEY
@@ -783,9 +783,9 @@ class Player:
         """Pause the script for a specified duration."""
         logger.info("Pausing script")
         with self.hold_keys(mouse=False, shift=False):
-            pag.press("esc")
+            press("esc")
             sleep(add_jitter(self.cfg.BOT.PAUSE_DURATION))
-            pag.press("esc")
+            press("esc")
             sleep(ANIMATION_DELAY)
 
     def _handle_timeout(self) -> None:
@@ -888,26 +888,26 @@ class Player:
             send_screenshot(self.cfg, filepath)
 
         if bypass:
-            pag.press("space")
+            press("space")
             self.result.kept += 1
         elif self.detection.is_fish_in_list(self.cfg.BOT.KEEPNET.BLACKLIST):
-            pag.press("backspace")
+            press("backspace")
         elif (
             self.cfg.ARGS.TAG
             and not keep
             and not self.detection.is_fish_in_list(self.cfg.BOT.KEEPNET.WHITELIST)
         ):
-            pag.press("backspace")
+            press("backspace")
         else:
-            pag.press("space")
+            press("space")
             self.result.kept += 1
 
         # Safe check
         sleep(ANIMATION_DELAY)
         if self.detection.is_keepnet_full():
             self.result.kept -= 1
-            pag.press("esc")
-            pag.press("backspace")
+            press("esc")
+            press("backspace")
             sleep(ANIMATION_DELAY)
             self.general_quit("stop.keepnet_full")
 
@@ -937,7 +937,7 @@ class Player:
                 self.result.card += 1
             else:
                 logger.warning("Unexpected event detected")
-            pag.press("enter")
+            press("enter")
             sleep(add_jitter(LOOP_DELAY))
 
     def general_quit(self, msg: str) -> None:
@@ -951,7 +951,7 @@ class Player:
             self.friction_brake.reset(self.cfg.BOT.FRICTION_BRAKE.INITIAL)
         with self.hold_keys(mouse=False, shift=False):
             sleep(ANIMATION_DELAY)
-            pag.press("esc")
+            press("esc")
             sleep(ANIMATION_DELAY)
             if self.cfg.ARGS.SIGNOUT:
                 pag.keyDown("shift")
@@ -968,10 +968,10 @@ class Player:
         """Quit the game through the main menu."""
         logger.critical("Game disconnected")
         with self.hold_keys(mouse=False, shift=False):
-            pag.press("space")
+            press("space")
             # Sleep to bypass the black screen (experimental)
             sleep(DISCONNECTED_DELAY)
-            pag.press("space")
+            press("space")
             sleep(ANIMATION_DELAY)
             if not self.cfg.ARGS.SIGNOUT:
                 pag.moveTo(self.detection.get_exit_icon_position())
@@ -1001,14 +1001,14 @@ class Player:
         """Handle an expired boat ticket event."""
         with self.hold_keys(mouse=False, shift=False, reset=True):
             if self.cfg.ARGS.BOAT_TICKET == 0:
-                pag.press("esc")
+                press("esc")
                 sleep(TICKET_EXPIRE_DELAY)
                 self.general_quit("stop.ticket_expired")
 
             logger.info("Renewing boat ticket")
             ticket_loc = self.detection.get_ticket_position(self.cfg.ARGS.BOAT_TICKET)
             if ticket_loc is None:
-                pag.press("esc")  # Close ticket menu
+                press("esc")  # Close ticket menu
                 sleep(TICKET_EXPIRE_DELAY)
                 self.general_quit("stop.no_ticket")
             pag.moveTo(ticket_loc)
@@ -1026,7 +1026,7 @@ class Player:
             logger.info("Scroll bar not found, changing lures for normal rig")
             while self._open_broken_lure_menu():
                 self._replace_item()
-            pag.press("v")
+            press("v")
             return
 
         logger.info("Scroll bar found, changing lures for dropshot rig")
@@ -1067,9 +1067,9 @@ class Player:
         while True:
             favorite_item_position = next(favorite_item_positions, None)
             if favorite_item_position is None:
-                pag.press("esc")
+                press("esc")
                 sleep(ANIMATION_DELAY)
-                pag.press("esc")
+                press("esc")
                 self.general_quit("stop.no_favorite")
 
             # Check if the lure for replacement is already broken
