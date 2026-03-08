@@ -1,3 +1,11 @@
+## 0.10.0 (2026-03-08)
+
+### 🆕 New Features
+- Added Russian localization for the user interface.
+
+### 🐛 Bug Fixes
+- Fixed a bug where the bot would put away the rod after releasing a fish.
+
 ## 0.9.1 (2026-02-11)
 
 ### 🐛 Bug Fixes
