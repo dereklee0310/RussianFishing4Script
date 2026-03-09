@@ -9,7 +9,7 @@
 ![GitHub License](https://img.shields.io/github/license/dereklee0310/RussianFishing4Script)
 [![Discord](https://img.shields.io/badge/discord-join-rf44.svg?labelColor=191937&color=6F6FF7&logo=discord)](https://discord.gg/BZQWQnAMbY)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat)](http://makeapullrequest.com)
-[![Python: 3.10 | 3.11 | 3.12](https://img.shields.io/badge/python-3.10_%7C_3.11_%7C_3.12-blue)](https://www.python.org/downloads/)
+[![Python: 3.11 | 3.12](https://img.shields.io/badge/python-3.11_%7C_3.12-blue)](https://www.python.org/downloads/)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 
 <!-- <a target="_blank" href="https://github.com/pylint-dev/pylint" style="background:none">
@@ -41,7 +41,7 @@ cd RussianFishing4Script
 pip install -r requirements.txt
 ```
 > [!IMPORTANT] 
-> Python 3.13+ is not supported, required versions: >=3.10,<=3.12.
+> Python 3.13+ is not supported, required versions: >=3.11,<=3.12.
 
 ### uv
 ```
