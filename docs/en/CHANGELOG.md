@@ -1,3 +1,8 @@
+## 0.10.1 (2026-03-10)
+
+### 🐛 Bug Fixes
+- Fixed a bug that the bot incorrectly compare the minimum compatible config version.
+
 ## 0.10.0 (2026-03-08)
 
 ### 🆕 New Features
