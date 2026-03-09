@@ -15,7 +15,7 @@ from rich.console import Console
 from rich.table import Table
 from yacs.config import CfgNode as CN
 
-from rf4s.controller import logger
+from rf4s.controller.logger import logger
 
 ICON_URL = "https://i.ibb.co/RpLYcdkm/icon.png"
 

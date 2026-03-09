@@ -1,10 +1,4 @@
-"""Module for pyautogui.locateOnScreen and pag.pixel wrappers.
-
-This module provides functionality for detecting in-game elements using image recognition
-and pixel color analysis. It is used for automating tasks in Russian Fishing 4.
-
-.. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
-"""
+"""Helper functions for image detection."""
 
 import time
 from enum import Enum

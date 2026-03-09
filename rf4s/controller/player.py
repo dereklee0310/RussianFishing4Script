@@ -1,11 +1,4 @@
-"""Module for Player class.
-
-This module provides the main interface for automating fishing activities in a game.
-It includes functionality for managing fishing loops, handling player stats, and
-automating various fishing techniques.
-
-.. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
-"""
+"""Monolithic module for the bot logic."""
 
 import json
 import os
@@ -26,7 +19,7 @@ from rich.table import Table
 from rf4s import config, exceptions, utils
 from rf4s.component.friction_brake import FrictionBrake
 from rf4s.component.tackle import Tackle
-from rf4s.controller import logger
+from rf4s.controller.logger import logger
 from rf4s.controller.detection import Detection, TagColor
 from rf4s.controller.notification import send_result, send_screenshot
 from rf4s.controller.timer import Timer

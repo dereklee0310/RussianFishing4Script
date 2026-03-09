@@ -11,6 +11,7 @@ dependencies = [
     "matplotlib==3.8.0",
     "nuitka>=2.7.12",
     "opencv-python==4.8.0.76",
+    "packaging>=25.0",
     "pillow==10.1.0",
     "pyautogui==0.9.54",
     "pynput==1.7.6",

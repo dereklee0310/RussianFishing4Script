@@ -1,3 +1,5 @@
+"""Class to store the running results."""
+
 from dataclasses import dataclass
 
 from rf4s.controller.timer import Timer

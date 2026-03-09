@@ -1,17 +1,11 @@
-"""Module for friction brake related methods.
-
-This module provides functionality for managing the friction brake in Russian Fishing 4,
-including resetting, adjusting, and monitoring the friction brake.
-
-.. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
-"""
+"""Reel friction brake controller."""
 
 from multiprocessing import Process, Value
 from time import sleep, time
 
 import pyautogui as pag
 
-from rf4s.controller import logger
+from rf4s.component.logger import logger
 from rf4s.controller.detection import Detection
 from rf4s.utils import add_jitter
 

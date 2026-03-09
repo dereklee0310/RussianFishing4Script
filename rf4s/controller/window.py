@@ -1,10 +1,4 @@
-"""Module for window controller.
-
-This module provides functionality for managing and interacting with the game window
-and terminal window in Russian Fishing 4.
-
-.. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
-"""
+"""Class to get info and control the game window."""
 
 from pathlib import Path
 from time import sleep
@@ -15,7 +9,7 @@ import win32con
 import win32gui
 
 from rf4s import utils
-from rf4s.controller import logger
+from rf4s.controller.logger import logger
 from rf4s.utils import press
 
 ANIMATION_DELAY = 0.5

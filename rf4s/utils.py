@@ -1,20 +1,16 @@
-"""Helper functions for automation scripts.
-
-This module provides utility functions for common tasks such as mouse control,
-keyboard input, and result display. It also includes decorators for managing
-key and mouse states during automation.
-
-.. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
-"""
+"""Commonly used helper functions goes here."""
 
 import ctypes
 import datetime
 import msvcrt
 import random
 import sys
+import logging
+import logging.config
 from time import sleep
 
 import pyautogui as pag
+import rich.logging  # noqa: F401
 from pyscreeze import Box
 from rich import box, print
 from rich.panel import Panel
@@ -30,6 +26,44 @@ ANIMATION_DELAY = 0.5
 JITTER_SCALE = 0.05
 
 random.seed(datetime.datetime.now().timestamp())
+
+
+def setup_logging() -> logging.Logger:
+    logging_config = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        # "filters": {}
+        "formatters": {
+            # RichHandler do the job for us, so we don't need to incldue time & level
+            "iso-8601-simple": {
+                "format": "%(message)s",
+                "datefmt": "%Y-%m-%dT%H:%M:%S%z",
+            },
+            "iso-8601-detailed": {
+                "format": "%(asctime)s [%(levelname)s] %(message)s",
+                "datefmt": "%Y-%m-%dT%H:%M:%S%z",
+            },
+        },
+        "handlers": {
+            "stdout": {
+                "level": "INFO",
+                "formatter": "iso-8601-simple",
+                "()": "rich.logging.RichHandler",
+                "rich_tracebacks": True,
+            },
+            "file": {
+                "class": "logging.handlers.RotatingFileHandler",
+                "level": "INFO",
+                "formatter": "iso-8601-detailed",
+                "filename": "logs/.log",
+                "maxBytes": 10000,
+                "backupCount": 0,
+            },
+        },
+        "loggers": {"root": {"level": "INFO", "handlers": ["stdout", "file"]}},
+    }
+    logging.config.dictConfig(config=logging_config)
+    return logging.getLogger(__name__)
 
 
 def add_jitter(time: float, jitter_scale: float = JITTER_SCALE) -> float:

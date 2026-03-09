@@ -1,10 +1,4 @@
-"""Module for Timer class.
-
-This module provides functionality for managing timers and generating timestamps
-for logging and automation purposes in Russian Fishing 4.
-
-.. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
-"""
+"""Class to store the bot's timers."""
 
 import datetime
 import sys
@@ -15,7 +9,7 @@ from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
 from rf4s import utils
-from rf4s.controller import logger
+from rf4s.controller.logger import logger
 
 # When running as an executable, use sys.executable to find the path to save file.
 # This file is not included during compilation and could not be resolved automatically

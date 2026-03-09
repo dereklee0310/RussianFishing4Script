@@ -1,11 +1,4 @@
-"""Module for Tackle class and some decorators.
-
-This module provides functionality for managing tackle-related actions in Russian Fishing 4,
-such as casting, retrieving, and pulling fish. It also includes decorators for handling
-common tasks like clicklock and key releases.
-
-.. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
-"""
+"""Basic tackle actions like pulling, pirking, etc."""
 
 import random
 from enum import Enum, auto
@@ -19,7 +12,7 @@ from PIL import ImageFilter
 from pyscreeze import Box
 
 from rf4s import exceptions, utils
-from rf4s.controller import logger
+from rf4s.component.logger import logger
 from rf4s.controller.timer import Timer
 from rf4s.controller.detection import Detection
 from rf4s.utils import add_jitter, press

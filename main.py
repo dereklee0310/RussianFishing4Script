@@ -1,20 +1,14 @@
-"""Main CLI for Russian Fishing 4 Script.
+"""Entry point for Russian Fishing 4 Script.
 
-This module provides the command-line interface and main execution logic
-for automating fishing in Russian Fishing 4. It handles configuration,
-argument parsing, window management, and fishing automation.
-
-.. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
+Parse command line arguments and config and start running the bot.
 """
 
 import argparse
-import logging
-import logging.config
 import shlex
 import sys
 from pathlib import Path
+from packaging.version import Version
 
-import rich.logging  # noqa: F401
 import rich_argparse
 from rich import box, print
 from rich.table import Table
@@ -105,47 +99,9 @@ class Formatter(
     pass
 
 
-def setup_logging() -> logging.Logger:
-    logging_config = {
-        "version": 1,
-        "disable_existing_loggers": False,
-        # "filters": {}
-        "formatters": {
-            # RichHandler do the job for us, so we don't need to incldue time & level
-            "iso-8601-simple": {
-                "format": "%(message)s",
-                "datefmt": "%Y-%m-%dT%H:%M:%S%z",
-            },
-            "iso-8601-detailed": {
-                "format": "%(asctime)s [%(levelname)s] %(message)s",
-                "datefmt": "%Y-%m-%dT%H:%M:%S%z",
-            },
-        },
-        "handlers": {
-            "stdout": {
-                "level": "INFO",
-                "formatter": "iso-8601-simple",
-                "()": "rich.logging.RichHandler",
-                "rich_tracebacks": True,
-            },
-            "file": {
-                "class": "logging.handlers.RotatingFileHandler",
-                "level": "INFO",
-                "formatter": "iso-8601-detailed",
-                "filename": "logs/.log",
-                "maxBytes": 10000,
-                "backupCount": 0,
-            },
-        },
-        "loggers": {"root": {"level": "INFO", "handlers": ["stdout", "file"]}},
-    }
-    logging.config.dictConfig(config=logging_config)
-    return logging.getLogger(__name__)
-
-
 (OUTER_ROOT / "screenshots").mkdir(parents=True, exist_ok=True)
 (OUTER_ROOT / "logs").mkdir(parents=True, exist_ok=True)
-logger = setup_logging()
+logger = utils.setup_logging()
 
 
 def setup_parser(cfg: CN) -> tuple[argparse.ArgumentParser, tuple]:
@@ -446,7 +402,7 @@ def setup_cfg():
             file.writelines(lines)
 
     cfg = config.load_cfg()
-    if cfg.VERSION < MINIMUM_COMPATIBLE_CONFIG_VERSION:
+    if Version(cfg.VERSION) < Version(MINIMUM_COMPATIBLE_CONFIG_VERSION):
         logger.critical(
             "Incompatible config version, some settings has been removed or deprecated\n"
             "You can delete it to allow the bot to create a new one\n"

@@ -1,12 +1,4 @@
-"""Base application class for other tools.
-
-Provides core functionality for:
-- Configuration management
-- Window control
-- Result display
-
-.. moduleauthor:: Derek Lee <dereklee0310@gmail.com>
-"""
+"""Base application class for other tools."""
 
 import argparse
 import os
@@ -33,7 +25,7 @@ from rich.table import Table
 from yacs.config import CfgNode as CN
 
 from rf4s import config, exceptions, utils
-from rf4s.app.core import logger
+from rf4s.app.logger import logger
 from rf4s.i18n import t
 from rf4s.component.friction_brake import FrictionBrake
 from rf4s.config import load_cfg
