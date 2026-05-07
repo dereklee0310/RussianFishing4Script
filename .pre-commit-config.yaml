@@ -4,6 +4,6 @@ repos:
     hooks:
       - id: ruff-check
         args: [--fix]
-        files: ^(rf4s|tools)/.*\.py$
+        files: ^(rf4s/.*\.py|main\.py)$
       - id: ruff-format
-        files: ^(rf4s|tools)/.*\.py$
+        files: ^(rf4s/.*\.py|main\.py)$
