@@ -3773,7 +3773,7 @@ wheels = [
 
 [[package]]
 name = "russianfishing4script"
-version = "0.10.1"
+version = "0.10.2"
 source = { virtual = "." }
 dependencies = [
     { name = "annotated-types" },

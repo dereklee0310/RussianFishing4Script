@@ -24,7 +24,7 @@ from rf4s.app import (
     MoveApp,
 )
 
-VERSION = "0.10.1"
+VERSION = "0.10.2"
 MINIMUM_COMPATIBLE_CONFIG_VERSION = "0.8.0"
 LOGO = """
 ██████╗ ███████╗██╗  ██╗███████╗
