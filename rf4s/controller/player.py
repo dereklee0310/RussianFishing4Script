@@ -23,7 +23,6 @@ from rf4s.controller.logger import logger
 from rf4s.controller.detection import Detection, TagColor
 from rf4s.controller.notification import send_result, send_screenshot
 from rf4s.controller.timer import Timer
-from rf4s.i18n import t
 from rf4s.result.result import BotResult
 from rf4s.utils import add_jitter, press
 
@@ -196,13 +195,13 @@ class Player:
             if self.cfg.ARGS.FRICTION_BRAKE:
                 with self.friction_brake.lock:
                     self.friction_brake.change(increase=False)
-            self.general_quit("stop.line_at_end")
+            self.general_quit("Fishing line is at its end")
         except exceptions.LineSnaggedError:
             self._handle_snagged_line()
         except exceptions.DisconnectedError:
             self.disconnected_quit()
         except exceptions.TackleBrokenError:
-            self.general_quit("stop.tackle_broken")
+            self.general_quit("Tackle is broken")
         except exceptions.BaitNotChosenError:
             self.handle_bait_not_chosen()
         except exceptions.DryMixNotFoundError:
@@ -413,7 +412,7 @@ class Player:
         mouse = True if self.mouse_pressed and self.cfg.KEY["COFFEE"] != -1 else False
         with self.hold_keys(mouse=mouse, shift=False, reset=True):
             if self.cur_coffee > self.cfg.STAT.COFFEE_LIMIT:
-                self.general_quit("stop.coffee_limit")
+                self.general_quit("Coffee limit reached")
 
             logger.info("Drinking coffee")
             for _ in range(self.cfg.STAT.COFFEE_PER_DRINK):
@@ -498,7 +497,7 @@ class Player:
 
     def handle_bait_not_chosen(self) -> None:
         if len(self.tackles) == 1:
-            self.general_quit("stop.no_bait")
+            self.general_quit("Run out of bait")
         self.tackle.available = False
 
     def cast_spod_rod(self) -> None:
@@ -665,7 +664,7 @@ class Player:
         """Update the current tackle (rod) being used."""
         candidates = self._get_available_rods()
         if not candidates:
-            self.general_quit("stop.no_rods")
+            self.general_quit("All rods are unavailable")
         if self.cfg.PROFILE.RANDOM_ROD_SELECTION:
             self.tackle_idx = random.choice(candidates)
         else:
@@ -784,7 +783,7 @@ class Player:
     def _handle_timeout(self) -> None:
         """Handle common timeout events."""
         if self.detection.is_tackle_broken():
-            self.general_quit("stop.tackle_broken")
+            self.general_quit("Tackle is broken")
 
         if self.detection.is_disconnected():
             self.disconnected_quit()
@@ -798,7 +797,7 @@ class Player:
             with self.hold_keys(mouse=False, shift=False):
                 self._replace_broken_lures()
         else:
-            self.general_quit("stop.lure_broken")
+            self.general_quit("Lure is broken")
 
     def handle_termination(self, msg: str, shutdown: bool, send: bool) -> None:
         """Handle script termination.
@@ -833,7 +832,7 @@ class Player:
     def _handle_snagged_line(self) -> None:
         """Handle a snagged line event."""
         if len(self.tackles) == 1:
-            self.general_quit("stop.line_snagged")
+            self.general_quit("Line is snagged")
         self.tackle.available = False
 
     def handle_fish(self) -> None:
@@ -853,7 +852,7 @@ class Player:
             self.timer.add_cast_time()
             limit = self.cfg.BOT.KEEPNET.CAPACITY - self.cfg.ARGS.FISHES_IN_KEEPNET
             if self.result.kept == limit:
-                self.general_quit("stop.keepnet_full")
+                self.general_quit("Keepnet is full")
 
     def _handle_fish(self) -> None:
         """Keep or release the fish and record the fish count."""
@@ -902,7 +901,7 @@ class Player:
             press("esc")
             press("backspace")
             sleep(ANIMATION_DELAY)
-            self.general_quit("stop.keepnet_full")
+            self.general_quit("Keepnet is full")
 
         for tag_color in tag_colors:
             setattr(self.result, tag_color, getattr(self.result, tag_color) + 1)
@@ -973,7 +972,7 @@ class Player:
                 pag.moveTo(self.detection.get_confirm_button_position())
                 pag.click()
 
-            self.handle_termination("stop.disconnected", shutdown=True, send=True)
+            self.handle_termination("Game disconnected", shutdown=True, send=True)
 
     def get_result_dict(self, msg: str):
         return self.result.as_dict(msg, self.timer)
@@ -984,7 +983,7 @@ class Player:
         :return: formatted running result table
         :rtype: Table
         """
-        table = Table(title=t("ui.running_result"), box=box.HEAVY, show_header=False)
+        table = Table(title="Running Result", box=box.HEAVY, show_header=False)
 
         for k, v in result.items():
             table.add_row(k, str(v))
@@ -996,14 +995,14 @@ class Player:
             if self.cfg.ARGS.BOAT_TICKET == 0:
                 press("esc")
                 sleep(TICKET_EXPIRE_DELAY)
-                self.general_quit("stop.ticket_expired")
+                self.general_quit("Boat ticket expired")
 
             logger.info("Renewing boat ticket")
             ticket_loc = self.detection.get_ticket_position(self.cfg.ARGS.BOAT_TICKET)
             if ticket_loc is None:
                 press("esc")  # Close ticket menu
                 sleep(TICKET_EXPIRE_DELAY)
-                self.general_quit("stop.no_ticket")
+                self.general_quit("New boat ticket not found")
             pag.moveTo(ticket_loc)
             pag.click(clicks=2, interval=0.1)  # pag.doubleClick() not implemented
             self.result.ticket += 1

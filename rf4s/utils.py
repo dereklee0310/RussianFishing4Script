@@ -16,7 +16,6 @@ from rich import box, print
 from rich.panel import Panel
 
 from rf4s.controller.console import console
-from rf4s.i18n import t
 
 LOOP_DELAY = 1
 
@@ -175,11 +174,11 @@ def print_usage_box(msg: str) -> None:
 
 
 def print_description_box(msg: str) -> None:
-    print(Panel.fit(t("common.using", msg=msg)))
+    print(Panel.fit(f"You're now using: {msg}"))
 
 
 def print_hint_box(msg: str) -> None:
-    print(Panel.fit(t("common.hint", msg=msg), style="green"))
+    print(Panel.fit(f"Hint: {msg}", style="green"))
 
 
 def print_error(msg: str) -> None:
@@ -188,7 +187,7 @@ def print_error(msg: str) -> None:
 
 def safe_exit():
     if is_run_by_clicking():
-        print_usage_box(t("common.press_any_key"))
+        print_usage_box("Press any key to quit.")
         # KeyboardInterrupt will mess with stdin, input will crash silently
         # Use msvcrt.getch() because it doesn't depends on stdin
         msvcrt.getch()
