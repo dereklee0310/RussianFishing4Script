@@ -1,3 +1,9 @@
+## 0.10.2 (2026-05-08)
+
+### 🐛 Bug Fixes
+- Fixed the broken .exe version.
+- Fixed an issue where the bot might randomly omit a fish with tags.
+
 ## 0.10.1 (2026-03-10)
 
 ### 🐛 Bug Fixes
