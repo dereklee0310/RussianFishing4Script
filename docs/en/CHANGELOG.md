@@ -1,3 +1,16 @@
+## 0.11.0 (2026-05-21)
+### 🆕 New Features
+- Introduced new setting `BOT.CATCH_SCREEN_STYLE` to decide whether to wait for a possible tropy/rare trophy animation.
+
+### 🔧 Improvements
+- Improved UI/UX
+
+### 🐛 Bug Fixes
+- Fixed a bug that the bot will discard rare trophy fish when `-t` is enabled.
+
+### 🗃️ Deprecations
+- Deprecated `-NA` flag.
+
 ## 0.10.2 (2026-05-08)
 
 ### 🐛 Bug Fixes
