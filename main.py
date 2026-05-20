@@ -8,9 +8,11 @@ import shlex
 import sys
 from pathlib import Path
 from packaging.version import Version
+import re
 
 import rich_argparse
 from rich import box, print
+from rich.prompt import Prompt
 from rich.table import Table
 from yacs.config import CfgNode as CN
 
@@ -74,11 +76,6 @@ BOT_BOOLEAN_ARGUMENTS = (
     ("DM", "dry-mix", "enable dry mix refill, mode: bottom"),
     ("GB", "groundbait", "enable groundbait refill, mode: bottom"),
     ("PVA", "pva", "enable pva refill, mode: bottom"),
-    (
-        "NA",
-        "no-animation",
-        "disable waiting for trophy and gift animations, gift\nchange 'Catch screen style' to 'Simple' in game settings to use this flag",
-    ),
 )
 
 EPILOG = """
@@ -318,7 +315,7 @@ def display_features() -> None:
     """
     table = Table(
         "Features",
-        title="Select a feature to start 🚀",
+        title="List of Available Features",
         show_header=False,
         box=box.HEAVY,
         min_width=36,
@@ -330,104 +327,135 @@ def display_features() -> None:
 
 
 def get_fid(parser: argparse.ArgumentParser) -> int:
-    """Prompt the user to enter a feature ID and validate the input.
-
-    Continuously prompts until a valid feature ID is entered or the
-    user chooses to quit.
-    """
-    utils.print_usage_box("Enter feature id to use, h to see help message, q to quit.")
-
+    """Prompt the user to enter a feature ID and validate the input."""
     while True:
-        user_input = input(">>> ")
-        if user_input.isdigit() and 0 <= int(user_input) < len(FEATURES):
-            break
-        if user_input == "q":
-            print("Bye.")
-            sys.exit()
-        if user_input == "h":
+        user_input = Prompt.ask(
+            "Enter the Feature ID you want to use (q to quit, h for help)",
+            show_default=False,
+        )
+
+        utils.check_quit(user_input)
+
+        if user_input.lower() == "h":
             parser.print_help()
             continue
-        utils.print_error("Invalid input, please try again.")
-    return int(user_input)
+
+        if user_input.isdigit() and 0 <= int(user_input) < len(FEATURES):
+            return int(user_input)
+        utils.print_error(
+            f"Invalid input. Please enter a number between 0 and {len(FEATURES) - 1}."
+        )
 
 
 def get_launch_options(parser: argparse.ArgumentParser) -> str:
-    utils.print_usage_box(
-        "Enter launch options, Enter to skip, h to see help message, q to quit."
-    )
+    """Prompt the user for optional launch arguments."""
     while True:
-        user_input = input(">>> ")
-        if user_input == "q":
-            print("Bye.")
-            sys.exit()
-        if user_input == "h":
+        user_input = Prompt.ask(
+            "Enter launch options (Enter to skip, h for help, q to quit)",
+            default="",
+            show_default=False,
+        )
+
+        utils.check_quit(user_input)
+
+        if user_input.lower() == "h":
             parser.print_help()
             continue
-        break
-    return user_input
+
+        return user_input
 
 
-def get_language():
-    utils.print_usage_box("What's your game language? [(1) en (2) ru (3) q (quit)]")
-    while True:
-        user_input = input(">>> ")
-        if user_input.isdigit() and user_input in ("1", "2"):
-            break
-        if user_input == "q":
-            print("Bye.")
-            sys.exit()
-        utils.print_error("Invalid input, please try again.")
-    return '"en"' if user_input == "1" else '"ru"'
-
-
-def get_click_lock():
-    utils.print_usage_box(
-        "Is Windows Mouse ClickLock enabled? [(1) yes (2) no (3) q (quit)]"
+def get_language() -> str:
+    """Prompt the user to select their game language."""
+    user_input = Prompt.ask(
+        "Select game language: (1) English, (2) Russian (q to quit)",
+        choices=["1", "2", "q"],
+        show_choices=False,
     )
-    while True:
-        user_input = input(">>> ")
-        if user_input.isdigit() and user_input in ("1", "2"):
-            break
-        if user_input == "q":
-            print("Bye.")
-            sys.exit()
-        utils.print_error("Invalid input, please try again.")
+    utils.check_quit(user_input)
+    return "en" if user_input == "1" else "ru"
+
+
+def get_click_lock() -> str:
+    """Prompt the user to confirm Windows Mouse ClickLock status."""
+    user_input = Prompt.ask(
+        "Is Windows Mouse ClickLock enabled? (1) Yes, (2) No (q to quit)",
+        choices=["1", "2", "q"],
+        show_choices=False,
+    )
+    utils.check_quit(user_input)
     return "true" if user_input == "1" else "false"
+
+
+def get_catch_screen_style() -> str:
+    """Prompt the user to select their in-game catch screen style."""
+    utils.print_hint_box(
+        "We recommend 'Simple' to reduce the waiting time for the trophy animation."
+    )
+
+    user_input = Prompt.ask(
+        "Select in-game catch screen style: (1) Animated, (2) Simple (q to quit)",
+        choices=["1", "2", "q"],
+        show_choices=False,
+    )
+    utils.check_quit(user_input)
+    return "animated" if user_input == "1" else "simple"
 
 
 def setup_cfg():
     config_path = OUTER_ROOT / "config.yaml"
+
     if not config_path.exists():
+        utils.print_header_box(
+            "Welcome to the RF4S Configuration Wizard. "
+            "It will ask a few questions to generate your configuration file."
+        )
+
         language = get_language()
         click_lock = get_click_lock()
+        catch_screen_style = get_catch_screen_style()
 
-        with open(Path(INNER_ROOT / "rf4s/config/config.yaml"), "r") as file:
-            lines = file.readlines()
-            for i, line in enumerate(lines):
-                if line.startswith("LANGUAGE:"):
-                    lines[i] = f"LANGUAGE: {language}\n"
-                if line.startswith("  CLICK_LOCK"):
-                    lines[i] = f"  CLICK_LOCK: {click_lock}\n"
+        with open(
+            INNER_ROOT / "rf4s/config/config.yaml", "r", encoding="utf-8"
+        ) as file:
+            content = file.read()
 
-        with open(config_path, "w") as file:  # shutil.copy
-            file.writelines(lines)
+        # Use fucking regex because I don't want to use ruamel.yaml
+        content = re.sub(
+            r"^(LANGUAGE:\s*).*$", rf'\1"{language}"', content, flags=re.MULTILINE
+        )
+        content = re.sub(
+            r"^(  CLICK_LOCK:\s*).*$", rf"\1{click_lock}", content, flags=re.MULTILINE
+        )
+        content = re.sub(
+            r"^(  CATCH_SCREEN_STYLE:\s*).*$",
+            rf'\1"{catch_screen_style}"',
+            content,
+            flags=re.MULTILINE,
+        )
+
+        with open(config_path, "w", encoding="utf-8") as file:
+            file.write(content)
+        print("Configuration file generated successfully.")
 
     cfg = config.load_cfg()
+
     if Version(cfg.VERSION) < Version(MINIMUM_COMPATIBLE_CONFIG_VERSION):
-        logger.critical(
-            "Incompatible config version, some settings has been removed or deprecated\n"
-            "You can delete it to allow the bot to create a new one\n"
-            "Alternatively, see the CHANGELOG to modify config.yaml"
+        utils.print_error(
+            f"Config version {cfg.VERSION} is incompatible with RF4S {VERSION}.\n"
+            f"Minimum required config version: {MINIMUM_COMPATIBLE_CONFIG_VERSION}\n"
+            "Please update your config.yaml manually, or delete it to run this wizard again."
         )
-        utils.safe_exit()
+        sys.exit()
+
     return cfg
 
 
 def main() -> None:
+    utils.print_logo_box(LOGO)
     cfg = setup_cfg()
     parser, subparsers = setup_parser(cfg)
     args = parser.parse_args()  # First parse to get {command} {flags}
-    utils.print_logo_box(LOGO)  # Print logo here so the help message will not show it
 
     # If user run the program without specifying a command or by double-clicking,
     # prompt user to input the feature and launch options. This handle both Python

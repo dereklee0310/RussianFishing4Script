@@ -103,6 +103,11 @@ _C.BOT.PAUSE_DURATION = 600
 # Whether the Windows ClickLock is enabled.
 # The time you need to hold down the mouse button must be set to "long".
 _C.BOT.CLICK_LOCK = False
+# The in-game catch screen style, the bot will wait 10s in case there's an animation
+# after catching a fish if set to "animated".
+# (options: animated, simple)
+_C.BOT.CATCH_SCREEN_STYLE = "animated"
+
 # Global jitter time scale for delays (delay = delay +- delay * jitter)
 _C.BOT.JITTER_SCALE = 0.2
 

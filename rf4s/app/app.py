@@ -245,7 +245,7 @@ class BotApp(App):
         Shows a formatted table with profile IDs and names.
         """
         profiles = Table(
-            title="Select a profile to start ⚙️",
+            title="List of Available Profiles",
             box=box.HEAVY,
             show_header=False,
             min_width=36,
@@ -255,21 +255,20 @@ class BotApp(App):
         print(profiles)
 
     def get_pid(self) -> None:
-        """Prompt the user to enter a profile ID and validate the input.
-
-        Continuously prompts until a valid profile ID is entered or the
-        user chooses to quit.
-        """
-        utils.print_usage_box("Enter profile id to use, q to quit.")
-
+        """Prompt the user to enter a profile ID and validate the input."""
         while True:
-            user_input = input(">>> ")
+            user_input = Prompt.ask(
+                "Enter the Profile ID you want to use (q to quit)", show_default=False
+            )
+
+            utils.check_quit(user_input)
+
             if user_input.isdigit() and 0 <= int(user_input) < len(self.cfg.PROFILE):
                 break
-            if user_input == "q":
-                print("Bye.")
-                sys.exit()
-            utils.print_error("Invalid profile id, please try again.")
+
+            utils.print_error(
+                f"Invalid Profile ID. Please enter a number between 0 and {len(self.cfg.PROFILE) - 1}."
+            )
 
         self.args.pid = int(user_input)
 

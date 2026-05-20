@@ -169,6 +169,10 @@ def print_logo_box(logo: str) -> None:
     print(Panel.fit(logo, box=box.HEAVY, style="bright_white"))
 
 
+def print_header_box(logo: str) -> None:
+    print(Panel.fit(logo, style="bright_white"))
+
+
 def print_usage_box(msg: str) -> None:
     print(Panel.fit(msg, style="steel_blue1"))
 
@@ -183,6 +187,16 @@ def print_hint_box(msg: str) -> None:
 
 def print_error(msg: str) -> None:
     console.print(msg, style="red")
+
+
+def check_quit(s: str) -> None:
+    if s.lower() == "q":
+        goodbye()
+
+
+def goodbye():
+    print("Bye.")
+    exit()
 
 
 def safe_exit():
